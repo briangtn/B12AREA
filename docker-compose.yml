@@ -12,6 +12,8 @@ services:
       - API_PORT=${API_PORT}
     volumes:
       - apk-vol:/data/apk
+    ports:
+    - "${APP_PORT}:${APP_PORT}"
     depends_on:
       - client_mobile
       - server
