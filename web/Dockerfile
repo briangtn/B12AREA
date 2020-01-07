@@ -9,6 +9,4 @@ FROM node:alpine
 WORKDIR /web
 COPY --from=build-stage /web/build .
 RUN yarn global add serve
-CMD serve -s build
-
-EXPOSE 3000
+CMD serve -s build -p $APP_PORT
