@@ -28,6 +28,7 @@ services:
 
   server:
     build: ./server
+    command: npm run dev
     restart: unless-stopped
     environment:
       - API_PORT=${API_PORT}

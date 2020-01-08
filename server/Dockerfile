@@ -1,6 +1,7 @@
 # Check out https://hub.docker.com/_/node to select a new base image
 FROM node:10-slim
 
+RUN npm i -g typescript tsc-watch
 USER node
 RUN mkdir -p /home/node/app
 WORKDIR /home/node/app
