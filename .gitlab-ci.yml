@@ -1,0 +1,92 @@
+image: docker:19.03.0
+
+services:
+  - docker:19.03.0-dind
+
+stages:
+  - test
+  - build
+
+variables:
+  # MANDATORY
+  DOCKER_HOST: tcp://localhost:2375
+  # MANDATORY
+  DOCKER_TLS_CERTDIR: ""
+
+tests:
+  stage: test
+  script:
+    - echo "nothing to do"
+
+build-production-api:
+  stage: build
+  only:
+    refs:
+      - master
+  script:
+    - docker login -u ${DOCKER_USER} -p ${DOCKER_PASSWORD}
+    - docker build -t ${DOCKER_REGISTRY_IMAGE_NAME_AREA_API}:${CI_COMMIT_SHORT_SHA} ./server
+    - docker tag ${DOCKER_REGISTRY_IMAGE_NAME_AREA_API}:${CI_COMMIT_SHORT_SHA} ${DOCKER_REGISTRY_IMAGE_NAME_AREA_API}:latest
+    - docker push ${DOCKER_REGISTRY_IMAGE_NAME_AREA_API}:${CI_COMMIT_SHORT_SHA}
+    - docker push ${DOCKER_REGISTRY_IMAGE_NAME_AREA_API}:latest
+
+build-production-web-client:
+  stage: build
+  only:
+    refs:
+      - master
+  script:
+    - docker login -u ${DOCKER_USER} -p ${DOCKER_PASSWORD}
+    - docker build -t ${DOCKER_REGISTRY_IMAGE_NAME_AREA_WEB_CLIENT}:${CI_COMMIT_SHORT_SHA} ./web
+    - docker tag ${DOCKER_REGISTRY_IMAGE_NAME_AREA_WEB_CLIENT}:${CI_COMMIT_SHORT_SHA} ${DOCKER_REGISTRY_IMAGE_NAME_AREA_WEB_CLIENT}:latest
+    - docker push ${DOCKER_REGISTRY_IMAGE_NAME_AREA_WEB_CLIENT}:${CI_COMMIT_SHORT_SHA}
+    - docker push ${DOCKER_REGISTRY_IMAGE_NAME_AREA_WEB_CLIENT}:latest
+
+
+build-production-apk-builder:
+  stage: build
+  only:
+    refs:
+      - master
+  script:
+    - docker login -u ${DOCKER_USER} -p ${DOCKER_PASSWORD}
+    - docker build -t ${DOCKER_REGISTRY_IMAGE_NAME_AREA_APK_BUILDER}:${CI_COMMIT_SHORT_SHA} ./mobile
+    - docker tag ${DOCKER_REGISTRY_IMAGE_NAME_AREA_APK_BUILDER}:${CI_COMMIT_SHORT_SHA} ${DOCKER_REGISTRY_IMAGE_NAME_AREA_APK_BUILDER}:latest
+    - docker push ${DOCKER_REGISTRY_IMAGE_NAME_AREA_APK_BUILDER}:${CI_COMMIT_SHORT_SHA}
+    - docker push ${DOCKER_REGISTRY_IMAGE_NAME_AREA_APK_BUILDER}:latest
+
+build-development-api:
+  stage: build
+  only:
+    refs:
+      - develop
+  script:
+    - docker login -u ${DOCKER_USER} -p ${DOCKER_PASSWORD}
+    - docker build -t ${DEV_DOCKER_REGISTRY_IMAGE_NAME_AREA_API}:${CI_COMMIT_SHORT_SHA} ./server
+    - docker tag ${DEV_DOCKER_REGISTRY_IMAGE_NAME_AREA_API}:${CI_COMMIT_SHORT_SHA} ${DEV_DOCKER_REGISTRY_IMAGE_NAME_AREA_API}:latest
+    - docker push ${DEV_DOCKER_REGISTRY_IMAGE_NAME_AREA_API}:${CI_COMMIT_SHORT_SHA}
+    - docker push ${DEV_DOCKER_REGISTRY_IMAGE_NAME_AREA_API}:latest
+
+build-development-web-client:
+  stage: build
+  only:
+    refs:
+      - develop
+  script:
+    - docker login -u ${DOCKER_USER} -p ${DOCKER_PASSWORD}
+    - docker build -t ${DEV_DOCKER_REGISTRY_IMAGE_NAME_AREA_WEB_CLIENT}:${CI_COMMIT_SHORT_SHA} ./web
+    - docker tag ${DEV_DOCKER_REGISTRY_IMAGE_NAME_AREA_WEB_CLIENT}:${CI_COMMIT_SHORT_SHA} ${DEV_DOCKER_REGISTRY_IMAGE_NAME_AREA_WEB_CLIENT}:latest
+    - docker push ${DEV_DOCKER_REGISTRY_IMAGE_NAME_AREA_WEB_CLIENT}:${CI_COMMIT_SHORT_SHA}
+    - docker push ${DEV_DOCKER_REGISTRY_IMAGE_NAME_AREA_WEB_CLIENT}:latest
+
+build-development-apk-builder:
+  stage: build
+  only:
+    refs:
+      - develop
+  script:
+    - docker login -u ${DOCKER_USER} -p ${DOCKER_PASSWORD}
+    - docker build -t ${DEV_DOCKER_REGISTRY_IMAGE_NAME_AREA_APK_BUILDER}:${CI_COMMIT_SHORT_SHA} ./mobile
+    - docker tag ${DEV_DOCKER_REGISTRY_IMAGE_NAME_AREA_APK_BUILDER}:${CI_COMMIT_SHORT_SHA} ${DEV_DOCKER_REGISTRY_IMAGE_NAME_AREA_APK_BUILDER}:latest
+    - docker push ${DEV_DOCKER_REGISTRY_IMAGE_NAME_AREA_APK_BUILDER}:${CI_COMMIT_SHORT_SHA}
+    - docker push ${DEV_DOCKER_REGISTRY_IMAGE_NAME_AREA_APK_BUILDER}:latest
