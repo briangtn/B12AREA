@@ -14,6 +14,7 @@ export class AreaApplication extends BootMixin(
   ServiceMixin(RepositoryMixin(RestApplication)),
 ) {
   constructor(options: ApplicationConfig = {}) {
+    options.rest.port = process.env.API_PORT;
     super(options);
 
     // Set up the custom sequence

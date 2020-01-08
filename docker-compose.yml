@@ -28,7 +28,6 @@ services:
     environment:
       - API_PORT=${API_PORT}
       - DB_HOST=db
-      - DB_PORT=${DB_PORT}
     networks:
       - "db-tier"
     build: ./server
