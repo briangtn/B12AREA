@@ -11,7 +11,7 @@
     "node": ">=8.9"
   },
   "scripts": {
-    "dev": "tsc-watch --onSuccess \"node .\"",
+    "dev": "tsc-watch --onSuccess \"nodemon\"",
     "build": "lb-tsc",
     "build:watch": "lb-tsc --watch",
     "clean": "lb-clean dist *.tsbuildinfo",
