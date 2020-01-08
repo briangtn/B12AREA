@@ -2,6 +2,22 @@
 
 This is the repository of the area project.
 
+# How to use
+
+## Run
+
+**dev mode:**
+
+```bash
+npm run dev
+```
+
+**prod mode:**
+
+```bash
+npm start
+```
+
 # Authors
 
 [Brian Guitteny](https://github.com/briangtn)
