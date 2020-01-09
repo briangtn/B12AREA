@@ -317,7 +317,7 @@ deploy-development-apk:
     - mkdir ~/.ssh
     - echo -ne ${SSH_KEY} | base64 -d >> ~/.ssh/id_rsa
     - chmod 400 ~/.ssh/id_rsa
-    - cat ~/.ssh/id_rsa
+    - ssh-keyscan -H 62.210.152.215 >> ~/.ssh/known_hosts
     - scp -i ~/.ssh/id_rsa apk/area.apk root@62.210.152.215:/home/develop/kubernetes/area/volumes/developmentAPKData/area.apk
   artifacts:
     paths:
