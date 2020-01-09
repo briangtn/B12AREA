@@ -186,18 +186,16 @@ deploy-production-apk:
     refs:
       - master
   script:
-    - apk update && apk add --no-cache openssh sshpass wget openjdk8
-    - export ANDROID_HOME=/opt/android-sdk-linux
-    - mkdir -p ${ANDROID_HOME} && cd ${ANDROID_HOME} && wget -q https://dl.google.com/android/repository/sdk-tools-linux-3859397.zip -O android_tools.zip && unzip android_tools.zip && rm android_tools.zip
-    - PATH ${PATH}:${ANDROID_HOME}/tools:${ANDROID_HOME}/tools/bin:${ANDROID_HOME}/platform-tools
-    - echo yes | sdkmanager --licenses
-    - cd mobile
-    - ./gradlew build
-    - sshpass -f ${ROOT_SSH_PASSWD} scp app/build/outputs/apk/release/app-release-unsigned.apk root@62.210.152.215:/home/develop/kubernetes/area/volumes/productionAPKData/area.apk
-    - cd ..
-  artifacts:
-    paths:
-      - mobile/app/build/outputs/apk/release/app-release-unsigned.apk
+    - apk update && apk add --no-cache openssh
+    - docker login -u ${DOCKER_USER} -p ${DOCKER_PASSWORD}
+    - docker pull ${DOCKER_REGISTRY_IMAGE_NAME_AREA_APK_BUILDER}:${CI_COMMIT_SHORT_SHA}
+    - mkdir apk
+    - docker run --name apkbuilder -v $(pwd)/apk/:/data/apk ${DOCKER_REGISTRY_IMAGE_NAME_AREA_APK_BUILDER}:${CI_COMMIT_SHORT_SHA}
+    - mkdir ~/.ssh
+    - echo -ne ${SSH_KEY} | base64 -d >> ~/.ssh/id_rsa
+    - chmod 400 ~/.ssh/id_rsa
+    - ssh-keyscan -H 62.210.152.215 >> ~/.ssh/known_hosts
+    - scp -i ~/.ssh/id_rsa apk/area.apk root@62.210.152.215:/home/develop/kubernetes/area/volumes/productionAPKData/area.apk
 
 deploy-production-web:
   stage: deploy-5
@@ -307,21 +305,17 @@ deploy-development-apk:
   only:
     refs:
       - develop
-      - 31-continuous-deployment
   script:
-    - apk update && apk add --no-cache openssh sshpass
+    - apk update && apk add --no-cache openssh
     - docker login -u ${DOCKER_USER} -p ${DOCKER_PASSWORD}
-    - docker pull ${DEV_DOCKER_REGISTRY_IMAGE_NAME_AREA_APK_BUILDER}:latest
+    - docker pull ${DEV_DOCKER_REGISTRY_IMAGE_NAME_AREA_APK_BUILDER}:${CI_COMMIT_SHORT_SHA}
     - mkdir apk
-    - docker run --name apkbuilder -v $(pwd)/apk/:/data/apk ${DEV_DOCKER_REGISTRY_IMAGE_NAME_AREA_APK_BUILDER}:latest
+    - docker run --name apkbuilder -v $(pwd)/apk/:/data/apk ${DEV_DOCKER_REGISTRY_IMAGE_NAME_AREA_APK_BUILDER}:${CI_COMMIT_SHORT_SHA}
     - mkdir ~/.ssh
     - echo -ne ${SSH_KEY} | base64 -d >> ~/.ssh/id_rsa
     - chmod 400 ~/.ssh/id_rsa
     - ssh-keyscan -H 62.210.152.215 >> ~/.ssh/known_hosts
     - scp -i ~/.ssh/id_rsa apk/area.apk root@62.210.152.215:/home/develop/kubernetes/area/volumes/developmentAPKData/area.apk
-  artifacts:
-    paths:
-      - apk/area.apk
 
 deploy-development-web:
   stage: deploy-5
