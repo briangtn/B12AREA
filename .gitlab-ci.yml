@@ -307,6 +307,7 @@ deploy-development-apk:
   only:
     refs:
       - develop
+      - 31-continuous-deployment
   script:
     - apk update && apk add --no-cache openssh sshpass wget
     - export ANDROID_HOME=/opt/android-sdk-linux
