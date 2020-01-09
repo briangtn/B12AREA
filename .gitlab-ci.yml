@@ -6,6 +6,10 @@ services:
 stages:
   - test
   - build
+  - deploy-1
+  - deploy-2
+  - deploy-3
+  - deploy-4
 
 variables:
   # MANDATORY
@@ -13,11 +17,16 @@ variables:
   # MANDATORY
   DOCKER_TLS_CERTDIR: ""
 
+# ------------------------------------------------------TESTS----------------------------------------------------------
+
 tests:
   stage: test
   script:
     - echo "nothing to do"
 
+# ------------------------------------------------------BUILD----------------------------------------------------------
+
+# PROD
 build-production-api:
   stage: build
   only:
@@ -55,6 +64,8 @@ build-production-apk-builder:
     - docker push ${DOCKER_REGISTRY_IMAGE_NAME_AREA_APK_BUILDER}:${CI_COMMIT_SHORT_SHA}
     - docker push ${DOCKER_REGISTRY_IMAGE_NAME_AREA_APK_BUILDER}:latest
 
+# DEV
+
 build-development-api:
   stage: build
   only:
@@ -90,3 +101,87 @@ build-development-apk-builder:
     - docker tag ${DEV_DOCKER_REGISTRY_IMAGE_NAME_AREA_APK_BUILDER}:${CI_COMMIT_SHORT_SHA} ${DEV_DOCKER_REGISTRY_IMAGE_NAME_AREA_APK_BUILDER}:latest
     - docker push ${DEV_DOCKER_REGISTRY_IMAGE_NAME_AREA_APK_BUILDER}:${CI_COMMIT_SHORT_SHA}
     - docker push ${DEV_DOCKER_REGISTRY_IMAGE_NAME_AREA_APK_BUILDER}:latest
+
+# ------------------------------------------------------DEPLOY---------------------------------------------------------
+
+# PROD
+
+deploy-production-namespace:
+  stage: deploy-1
+  only:
+    refs:
+      - master
+  variables:
+    DEPLOYMENT_ENV: "production"
+  script:
+    - apk update  && apk add --no-cache curl
+    - curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
+    - chmod +x ./kubectl && mv ./kubectl /usr/local/bin/kubectl
+    - mkdir -p $HOME/.kube
+    - echo -n ${KUBE_CONFIG} | base64 -d > $HOME/.kube/config
+    - kubectl config view
+    - cd k8s
+    - sed -i "s/__ENVIRONMENT_SLUG__/${DEPLOYMENT_ENV}/" area.namespace.yaml
+    - kubectl apply -f area.namespace.yaml
+
+deploy-production-database:
+  stage: deploy-2
+  only:
+    refs:
+      - master
+  variables:
+    DEPLOYMENT_ENV: "production"
+  script:
+    - apk update  && apk add --no-cache curl
+    - curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
+    - chmod +x ./kubectl && mv ./kubectl /usr/local/bin/kubectl
+    - mkdir -p $HOME/.kube
+    - echo -n ${KUBE_CONFIG} | base64 -d > $HOME/.kube/config
+    - kubectl config view
+    - cd k8s/db
+    - sed -i "s/__ENVIRONMENT_SLUG__/${DEPLOYMENT_ENV}/" area.db.configmap.yaml area.db.volume.yaml area.db.deployment.yaml area.db.service.yaml
+    - kubectl apply -f area.db.configmap.yaml
+    - kubectl apply -f area.db.volume.yaml
+    - kubectl apply -f area.db.deployment.yaml
+    - kubectl apply -f area.db.service.yaml
+
+# DEV
+
+deploy-development-namespace:
+  stage: deploy-1
+  only:
+    refs:
+      - develop
+  variables:
+    DEPLOYMENT_ENV: "development"
+  script:
+    - apk update  && apk add --no-cache curl
+    - curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
+    - chmod +x ./kubectl && mv ./kubectl /usr/local/bin/kubectl
+    - mkdir -p $HOME/.kube
+    - echo -n ${KUBE_CONFIG} | base64 -d > $HOME/.kube/config
+    - kubectl config view
+    - cd k8s
+    - sed -i "s/__ENVIRONMENT_SLUG__/${DEPLOYMENT_ENV}/" area.namespace.yaml
+    - kubectl apply -f area.namespace.yaml
+
+deploy-development-database:
+  stage: deploy-2
+  only:
+    refs:
+      - master
+  variables:
+    DEPLOYMENT_ENV: "development"
+  script:
+    - apk update  && apk add --no-cache curl
+    - curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
+    - chmod +x ./kubectl && mv ./kubectl /usr/local/bin/kubectl
+    - mkdir -p $HOME/.kube
+    - echo -n ${KUBE_CONFIG} | base64 -d > $HOME/.kube/config
+    - kubectl config view
+    - cd k8s/db
+    - sed -i "s/__ENVIRONMENT_SLUG__/${DEPLOYMENT_ENV}/" area.db.configmap.yaml area.db.volume.yaml area.db.deployment.yaml area.db.service.yaml
+    - kubectl apply -f area.db.configmap.yaml
+    - kubectl apply -f area.db.volume.yaml
+    - kubectl apply -f area.db.deployment.yaml
+    - kubectl apply -f area.db.service.yaml

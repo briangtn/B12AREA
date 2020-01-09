@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: __ENVIRONMENT_SLUG__-area
+  name: __ENVIRONMENT_SLUG__-area-db
+  labels:
+    app: __ENVIRONMENT_SLUG__-area-db
+    ref: __ENVIRONMENT_SLUG__
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 0
+      maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: __ENVIRONMENT_SLUG__-area-db
+  template:
+    metadata:
+      labels:
+        app: __ENVIRONMENT_SLUG__-area-db
+    spec:
+      containers:
+        - name: mongo
+          image: mongo:4.0.14
+          imagePullPolicy: "IfNotPresent"
+          ports:
+            - containerPort: 27017
+          envFrom:
+            - configMapRef:
+                name: __ENVIRONMENT_SLUG__-area-db
+          volumeMounts:
+            - mountPath: /data/db
+              name: dbdata
+      volumes:
+        - name: dbdata
+          persistentVolumeClaim:
+            claimName: __ENVIRONMENT_SLUG__-area-db-pv-claim
