@@ -3,11 +3,11 @@ WORKDIR /web
 COPY . /web
 RUN npm install
 ENV PATH /root/.yarn/bin:$PATH
-CMD yarn build
+RUN yarn build
 
 FROM node:alpine
 WORKDIR /web
-COPY --from=build-stage /web/build .
+COPY --from=build-stage /web .
 RUN yarn global add serve
 CMD serve -s build -p 80
 

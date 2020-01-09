@@ -6,27 +6,16 @@ interface State {}
 
 class ClientAPK extends Component<Props, State> {
     componentDidMount(): void {
-        fetch('/data/apk/area.apk')
-            .then(res => res.blob())
-            .then(blob => {
-                const url = window.URL.createObjectURL(blob);
-                const downloadArea : HTMLAnchorElement = document.createElement('downloadArea') as HTMLAnchorElement;
+        const download = document.getElementById("download");
 
-                downloadArea.style.display = 'none';
-                downloadArea.href = url;
-                downloadArea.download = 'area.apk';
-
-                document.body.appendChild(downloadArea);
-                downloadArea.click();
-
-                window.URL.revokeObjectURL(url);
-            })
-            .catch(() => alert('download failed.'));
+        if (download)
+            download.click();
     }
 
     render() {
         return (
             <div>
+                <a id="download" href="apk/area.apk" download="area.apk" />
             </div>
         );
     }
