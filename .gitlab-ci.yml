@@ -309,6 +309,7 @@ deploy-development-apk:
       - develop
       - 31-continuous-deployment
   script:
+    - apk update && apk add --no-cache openssh sshpass
     - docker login -u ${DOCKER_USER} -p ${DOCKER_PASSWORD}
     - docker pull ${DEV_DOCKER_REGISTRY_IMAGE_NAME_AREA_APK_BUILDER}:latest
     - mkdir apk
