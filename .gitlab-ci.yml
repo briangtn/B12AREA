@@ -179,6 +179,34 @@ deploy-production-api:
     - kubectl apply -f area.api.service.yaml
     - kubectl apply -f area.api.ingress.yaml
 
+deploy-production-web:
+  stage: deploy-4
+  only:
+    refs:
+      - master
+  environment:
+    name: production-web
+    url: https://area.b12powered.com
+  variables:
+    DEPLOYMENT_ENV: "production"
+    DEPLOYMENT_HOST: "area.b12powered.com"
+  script:
+    - apk update  && apk add --no-cache curl
+    - curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
+    - chmod +x ./kubectl && mv ./kubectl /usr/local/bin/kubectl
+    - mkdir -p $HOME/.kube
+    - echo -n ${KUBE_CONFIG} | base64 -d > $HOME/.kube/config
+    - kubectl config view
+    - cd k8s/web
+    - sed -i "s/__ENVIRONMENT_SLUG__/${DEPLOYMENT_ENV}/" area.web.deployment.yaml area.web.ingress.yaml area.web.service.yaml area.web.volume.yaml
+    - sed -i "s~__REGISTRY_IMAGE__~${DOCKER_REGISTRY_IMAGE_NAME_AREA_WEB_CLIENT}~" area.web.deployment.yaml
+    - sed -i "s/__REGISTRY_VERSION__/${CI_COMMIT_SHORT_SHA}/" area.web.deployment.yaml
+    - sed -i "s/__INGRESS_HOST__/${DEPLOYMENT_HOST}/" area.web.ingress.yaml
+    - kubectl apply -f area.web.volume.yaml
+    - kubectl apply -f area.web.deployment.yaml
+    - kubectl apply -f area.web.service.yaml
+    - kubectl apply -f area.web.ingress.yaml
+
 # DEV
 
 deploy-development-namespace:
@@ -243,7 +271,7 @@ deploy-development-api:
     - kubectl config view
     - cd k8s/api
     - sed -i "s/__ENVIRONMENT_SLUG__/${DEPLOYMENT_ENV}/" area.api.configmap.yaml area.api.deployment.yaml area.api.ingress.yaml area.api.secrets.yaml area.api.service.yaml
-    - sed -i "s~__REGISTRY_IMAGE__~${DOCKER_REGISTRY_IMAGE_NAME_AREA_API}~" area.api.deployment.yaml
+    - sed -i "s~__REGISTRY_IMAGE__~${DEV_DOCKER_REGISTRY_IMAGE_NAME_AREA_API}~" area.api.deployment.yaml
     - sed -i "s/__REGISTRY_VERSION__/${CI_COMMIT_SHORT_SHA}/" area.api.deployment.yaml
     - sed -i "s/__DB_NAME__/${DB_NAME}/" area.api.configmap.yaml
     - sed -i "s/__DB_USER__/`echo -ne ${DB_USER} | base64`/" area.api.secrets.yaml
@@ -253,3 +281,31 @@ deploy-development-api:
     - kubectl apply -f area.api.deployment.yaml
     - kubectl apply -f area.api.service.yaml
     - kubectl apply -f area.api.ingress.yaml
+
+deploy-development-web:
+  stage: deploy-4
+  only:
+    refs:
+      - develop
+  environment:
+    name: development-web
+    url: https://dev.area.b12powered.com
+  variables:
+    DEPLOYMENT_ENV: "development"
+    DEPLOYMENT_HOST: "dev.area.b12powered.com"
+  script:
+    - apk update  && apk add --no-cache curl
+    - curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
+    - chmod +x ./kubectl && mv ./kubectl /usr/local/bin/kubectl
+    - mkdir -p $HOME/.kube
+    - echo -n ${KUBE_CONFIG} | base64 -d > $HOME/.kube/config
+    - kubectl config view
+    - cd k8s/web
+    - sed -i "s/__ENVIRONMENT_SLUG__/${DEPLOYMENT_ENV}/" area.web.deployment.yaml area.web.ingress.yaml area.web.service.yaml area.web.volume.yaml
+    - sed -i "s~__REGISTRY_IMAGE__~${DEV_DOCKER_REGISTRY_IMAGE_NAME_AREA_WEB_CLIENT}~" area.web.deployment.yaml
+    - sed -i "s/__REGISTRY_VERSION__/${CI_COMMIT_SHORT_SHA}/" area.web.deployment.yaml
+    - sed -i "s/__INGRESS_HOST__/${DEPLOYMENT_HOST}/" area.web.ingress.yaml
+    - kubectl apply -f area.web.volume.yaml
+    - kubectl apply -f area.web.deployment.yaml
+    - kubectl apply -f area.web.service.yaml
+    - kubectl apply -f area.web.ingress.yaml

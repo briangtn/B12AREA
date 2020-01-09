@@ -1,0 +1,22 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: __ENVIRONMENT_SLUG__-area-web
+  namespace: __ENVIRONMENT_SLUG__-area
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    cert-manager.io/cluster-issuer: "letsencrypt-staging" #todo: prod
+    cert-manager.io/acme-challenge-type: http01
+spec:
+  tls:
+    - hosts:
+        - __INGRESS_HOST__
+      secretName: __ENVIRONMENT_SLUG__-web-area-b12powered-tls-staging #todo: prod
+  rules:
+    - host: __INGRESS_HOST__
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: __ENVIRONMENT_SLUG__-area-web
+              servicePort: 80

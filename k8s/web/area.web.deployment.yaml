@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: __ENVIRONMENT_SLUG__-area
+  name: __ENVIRONMENT_SLUG__-area-web
+  labels:
+    app: __ENVIRONMENT_SLUG__-area-web
+    ref: __ENVIRONMENT_SLUG__
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: __ENVIRONMENT_SLUG__-area-web
+      ref: __ENVIRONMENT_SLUG__
+  template:
+    metadata:
+      labels:
+        app: __ENVIRONMENT_SLUG__-area-web
+        ref: __ENVIRONMENT_SLUG__
+    spec:
+      containers:
+        - name: area-web
+          image: __REGISTRY_IMAGE__:__REGISTRY_VERSION__
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 80
+          readinessProbe:
+            httpGet:
+              path: /readinessProbe
+              port: 80
+              initialDelaySeconds: 5
+              periodSeconds: 5
+              successThreshold: 1
+              failureThreshold: 12
+          volumeMounts:
+            - mountPath: /data/apk
+              name: apkdata
+      volumes:
+        - name: apkdata
+          persistentVolumeClaim:
+            claimName: __ENVIRONMENT_SLUG__-area-apk-pv-claim
