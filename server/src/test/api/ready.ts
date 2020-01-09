@@ -2,7 +2,7 @@ import {Client} from '@loopback/testlab';
 import {AreaApplication} from '../..';
 import {setupApplication} from '../acceptance/test-helper';
 
-describe('HomePage', () => {
+describe('Ready', () => {
     let app: AreaApplication;
     let client: Client;
 
