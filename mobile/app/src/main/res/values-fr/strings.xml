@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">AREA</string>
+    <string name="email">Email</string>
+    <string name="password">Mot de passe</string>
+    <string name="confirm_password">Confirmer le mot de passe</string>
+    <string name="register">S\'inscrire</string>
+    <string name="or">ou</string>
+    <string name="already_registered">Déjà inscrit ?</string>
+    <string name="click">Cliquez</string>
+    <string name="here">ici</string>
+    <string name="google_registration">Commencer avec Google</string>
+    <string name="facebook_registration">Commencer avec Facebook</string>
+</resources>
