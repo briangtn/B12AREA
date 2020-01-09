@@ -9,6 +9,7 @@ This is the repository of the area project.
 **dev mode:**
 
 ```bash
+cp .env.example .env
 npm run dev
 ```
 
