@@ -2,17 +2,19 @@ import React, { Component } from 'react';
 
 import './App.css';
 
-import Button from '@material-ui/core/Button';
+import NavigationBar from "./components/NavigationBar";
 
-class App extends Component {
+interface Props {}
+
+interface State {}
+
+class App extends Component<Props, State> {
   render() {
-    return (
-        <div className="App">
-            Bienvenue les noobs
-            <br />
-            <Button variant="contained">Default</Button>
-        </div>
-    );
+        return (
+            <div className="App">
+                <NavigationBar />
+            </div>
+        );
   }
 }
 
