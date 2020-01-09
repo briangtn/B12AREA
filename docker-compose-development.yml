@@ -12,7 +12,7 @@ services:
       - ./web:/web
       - apk-vol:/data/apk
     ports:
-      - "8080:3000"
+      - "${API_PORT}:3000"
     depends_on:
       - client_mobile
       - server
@@ -35,14 +35,14 @@ services:
     depends_on:
       - db
     ports:
-      - "4242:80"
+      - "${APP_PORT}:80"
 
   db:
     image: "mongo"
     command: mongod
     restart: unless-stopped
     ports:
-      - '27017:27017'
+      - '${DB_PORT}:27017'
     networks:
       - "db-tier"
     volumes:
