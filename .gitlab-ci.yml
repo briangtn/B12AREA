@@ -310,7 +310,7 @@ deploy-development-apk:
       - 31-continuous-deployment
   script:
     - export PROJECT_PWD=$(pwd)
-    - apk update && apk add --no-cache openssh sshpass wget openjdk8 gradle yes
+    - apk update && apk add --no-cache openssh sshpass wget openjdk8 gradle
     - export ANDROID_HOME=/opt/android-sdk-linux
     - mkdir -p ${ANDROID_HOME} && cd ${ANDROID_HOME} && wget -q https://dl.google.com/android/repository/sdk-tools-linux-3859397.zip -O android_tools.zip && unzip android_tools.zip && rm android_tools.zip && cd $PROJECT_PWD
     - export PATH=${PATH}:${ANDROID_HOME}/tools:${ANDROID_HOME}/tools/bin:${ANDROID_HOME}/platform-tools
