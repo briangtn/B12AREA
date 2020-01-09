@@ -9,6 +9,10 @@ import './index.css';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
 
+// Routes
+
+import ReadinessProbe from "./routes/ReadinessProbe";
+
 interface Props {}
 
 interface State {
@@ -36,6 +40,7 @@ class RouterComponent extends React.Component<Props, State> {
             <MuiThemeProvider theme={ this.state.theme }>
                 <Router>
                     <Route exact path='/' component={App} />
+                    <Route path='/readinessProbe' component={ReadinessProbe} />
                 </Router>
             </MuiThemeProvider>
         );
