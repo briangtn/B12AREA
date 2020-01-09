@@ -1,0 +1,56 @@
+version: '3'
+
+services:
+  client_web:
+    build: ./web
+    command: npm start
+    restart: unless-stopped
+    environment:
+      - DB_HOST=db
+      - API_HOST=server
+    volumes:
+      - ./web:/web
+      - apk-vol:/data/apk
+    ports:
+      - "${APP_PORT}:3000"
+    depends_on:
+      - client_mobile
+      - server
+
+  client_mobile:
+    build: ./mobile
+    volumes:
+      - apk-vol:/data/apk
+
+  server:
+    build: ./server
+    command: npm run dev
+    restart: unless-stopped
+    environment:
+      - DB_HOST=db
+    volumes:
+    - ./server:/home/node/app
+    networks:
+      - "db-tier"
+    depends_on:
+      - db
+    ports:
+      - "${API_PORT}:80"
+
+  db:
+    image: "mongo"
+    command: mongod
+    restart: unless-stopped
+    ports:
+      - '${DB_PORT}:27017'
+    networks:
+      - "db-tier"
+    volumes:
+      - db-vol:/data/db
+
+networks:
+  db-tier:
+
+volumes:
+  apk-vol:
+  db-vol:

@@ -1,0 +1,51 @@
+version: '3'
+
+services:
+  client_web:
+    build: ./web
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - API_HOST=server
+    volumes:
+      - apk-vol:/data/apk
+    ports:
+    - "8081:80"
+    depends_on:
+      - client_mobile
+      - server
+
+  client_mobile:
+    build: ./mobile
+    volumes:
+      - apk-vol:/data/apk
+
+  server:
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - DB_HOST=db
+    networks:
+      - "db-tier"
+    build: ./server
+    depends_on:
+      - db
+    ports:
+      - "8080:80"
+
+  db:
+    image: "mongo"
+    restart: unless-stopped
+    ports:
+      - '27017:27017'
+    networks:
+      - "db-tier"
+    volumes:
+      - db-vol:/data/db
+
+networks:
+  db-tier:
+
+volumes:
+  apk-vol:
+  db-vol:

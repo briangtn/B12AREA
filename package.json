@@ -1,0 +1,16 @@
+{
+  "name": "area",
+  "version": "1.0.0",
+  "description": "This is the repository of the area project.",
+  "main": " ",
+  "scripts": {
+    "start": "docker-compose up --build",
+    "dev": "docker-compose -f docker-compose-development.yml up --build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "[git@ssh-git.b12powered.com:30500]:Eldriann/area.git"
+  },
+  "author": "",
+  "license": "ISC"
+}
