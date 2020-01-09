@@ -18,7 +18,6 @@ class ClientAPK extends Component<Props, State> {
 
                 document.body.appendChild(downloadArea);
                 downloadArea.click();
-                console.log('issou')
 
                 window.URL.revokeObjectURL(url);
             })
