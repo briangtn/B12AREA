@@ -5,15 +5,12 @@ services:
     build: ./web
     restart: unless-stopped
     environment:
-      - APP_PORT=${APP_PORT}
-      - DB_HOST=db
-      - DB_PORT=${DB_PORT}
+      - NODE_ENV=production
       - API_HOST=server
-      - API_PORT=${API_PORT}
     volumes:
       - apk-vol:/data/apk
     ports:
-    - "${APP_PORT}:${APP_PORT}"
+    - "8081:80"
     depends_on:
       - client_mobile
       - server
@@ -26,7 +23,7 @@ services:
   server:
     restart: unless-stopped
     environment:
-      - API_PORT=${API_PORT}
+      - NODE_ENV=production
       - DB_HOST=db
     networks:
       - "db-tier"
@@ -34,14 +31,13 @@ services:
     depends_on:
       - db
     ports:
-      - "${API_PORT}:${API_PORT}"
+      - "8080:80"
 
   db:
     image: "mongo"
-    command: mongod --port ${DB_PORT}
     restart: unless-stopped
     ports:
-      - '${DB_PORT}:${DB_PORT}'
+      - '27017:27017'
     networks:
       - "db-tier"
     volumes:
