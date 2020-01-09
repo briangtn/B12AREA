@@ -96,6 +96,7 @@ build-development-apk-builder:
   only:
     refs:
       - develop
+      - 31-continuous-deployment
   script:
     - docker login -u ${DOCKER_USER} -p ${DOCKER_PASSWORD}
     - docker build -t ${DEV_DOCKER_REGISTRY_IMAGE_NAME_AREA_APK_BUILDER}:${CI_COMMIT_SHORT_SHA} ./mobile
