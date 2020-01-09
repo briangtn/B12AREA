@@ -10,6 +10,7 @@ stages:
   - deploy-2
   - deploy-3
   - deploy-4
+  - deploy-5
 
 variables:
   # MANDATORY
@@ -114,7 +115,7 @@ deploy-production-namespace:
   variables:
     DEPLOYMENT_ENV: "production"
   script:
-    - apk update  && apk add --no-cache curl
+    - apk update && apk add --no-cache curl
     - curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
     - chmod +x ./kubectl && mv ./kubectl /usr/local/bin/kubectl
     - mkdir -p $HOME/.kube
@@ -132,7 +133,7 @@ deploy-production-database:
   variables:
     DEPLOYMENT_ENV: "production"
   script:
-    - apk update  && apk add --no-cache curl
+    - apk update && apk add --no-cache curl
     - curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
     - chmod +x ./kubectl && mv ./kubectl /usr/local/bin/kubectl
     - mkdir -p $HOME/.kube
@@ -160,7 +161,7 @@ deploy-production-api:
     DEPLOYMENT_ENV: "production"
     DEPLOYMENT_HOST: "api.area.b12powered.com"
   script:
-    - apk update  && apk add --no-cache curl
+    - apk update && apk add --no-cache curl
     - curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
     - chmod +x ./kubectl && mv ./kubectl /usr/local/bin/kubectl
     - mkdir -p $HOME/.kube
@@ -179,8 +180,27 @@ deploy-production-api:
     - kubectl apply -f area.api.service.yaml
     - kubectl apply -f area.api.ingress.yaml
 
-deploy-production-web:
+deploy-production-apk:
   stage: deploy-4
+  only:
+    refs:
+      - master
+  script:
+    - apk update && apk add --no-cache openssh sshpass wget
+    - export ANDROID_HOME=/opt/android-sdk-linux
+    - mkdir -p ${ANDROID_HOME} && cd ${ANDROID_HOME} && wget -q https://dl.google.com/android/repository/sdk-tools-linux-3859397.zip -O android_tools.zip && unzip android_tools.zip && rm android_tools.zip
+    - PATH ${PATH}:${ANDROID_HOME}/tools:${ANDROID_HOME}/tools/bin:${ANDROID_HOME}/platform-tools
+    - yes | sdkmanager --licenses
+    - cd mobile
+    - ./gradlew build
+    - sshpass -f ${ROOT_SSH_PASSWD} scp app/build/outputs/apk/release/app-release-unsigned.apk root@62.210.152.215:/home/develop/kubernetes/area/volumes/productionAPKData/area.apk
+    - cd ..
+  artifacts:
+    paths:
+      - mobile/app/build/outputs/apk/release/app-release-unsigned.apk
+
+deploy-production-web:
+  stage: deploy-5
   only:
     refs:
       - master
@@ -191,7 +211,7 @@ deploy-production-web:
     DEPLOYMENT_ENV: "production"
     DEPLOYMENT_HOST: "area.b12powered.com"
   script:
-    - apk update  && apk add --no-cache curl
+    - apk update && apk add --no-cache curl
     - curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
     - chmod +x ./kubectl && mv ./kubectl /usr/local/bin/kubectl
     - mkdir -p $HOME/.kube
@@ -217,7 +237,7 @@ deploy-development-namespace:
   variables:
     DEPLOYMENT_ENV: "development"
   script:
-    - apk update  && apk add --no-cache curl
+    - apk update && apk add --no-cache curl
     - curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
     - chmod +x ./kubectl && mv ./kubectl /usr/local/bin/kubectl
     - mkdir -p $HOME/.kube
@@ -235,7 +255,7 @@ deploy-development-database:
   variables:
     DEPLOYMENT_ENV: "development"
   script:
-    - apk update  && apk add --no-cache curl
+    - apk update && apk add --no-cache curl
     - curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
     - chmod +x ./kubectl && mv ./kubectl /usr/local/bin/kubectl
     - mkdir -p $HOME/.kube
@@ -263,7 +283,7 @@ deploy-development-api:
     DEPLOYMENT_ENV: "development"
     DEPLOYMENT_HOST: "dev.api.area.b12powered.com"
   script:
-    - apk update  && apk add --no-cache curl
+    - apk update && apk add --no-cache curl
     - curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
     - chmod +x ./kubectl && mv ./kubectl /usr/local/bin/kubectl
     - mkdir -p $HOME/.kube
@@ -282,8 +302,27 @@ deploy-development-api:
     - kubectl apply -f area.api.service.yaml
     - kubectl apply -f area.api.ingress.yaml
 
-deploy-development-web:
+deploy-development-apk:
   stage: deploy-4
+  only:
+    refs:
+      - develop
+  script:
+    - apk update && apk add --no-cache openssh sshpass wget
+    - export ANDROID_HOME=/opt/android-sdk-linux
+    - mkdir -p ${ANDROID_HOME} && cd ${ANDROID_HOME} && wget -q https://dl.google.com/android/repository/sdk-tools-linux-3859397.zip -O android_tools.zip && unzip android_tools.zip && rm android_tools.zip
+    - export PATH=${PATH}:${ANDROID_HOME}/tools:${ANDROID_HOME}/tools/bin:${ANDROID_HOME}/platform-tools
+    - yes | sdkmanager --licenses
+    - cd mobile
+    - ./gradlew build
+    - sshpass -f ${ROOT_SSH_PASSWD} scp app/build/outputs/apk/release/app-release-unsigned.apk root@62.210.152.215:/home/develop/kubernetes/area/volumes/developmentAPKData/area.apk
+    - cd ..
+  artifacts:
+    paths:
+      - mobile/app/build/outputs/apk/release/app-release-unsigned.apk
+
+deploy-development-web:
+  stage: deploy-5
   only:
     refs:
       - develop
@@ -294,7 +333,7 @@ deploy-development-web:
     DEPLOYMENT_ENV: "development"
     DEPLOYMENT_HOST: "dev.area.b12powered.com"
   script:
-    - apk update  && apk add --no-cache curl
+    - apk update && apk add --no-cache curl
     - curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
     - chmod +x ./kubectl && mv ./kubectl /usr/local/bin/kubectl
     - mkdir -p $HOME/.kube

@@ -38,7 +38,7 @@ spec:
               successThreshold: 1
               failureThreshold: 12
           volumeMounts:
-            - mountPath: /data/apk
+            - mountPath: /web/public/apk
               name: apkdata
       volumes:
         - name: apkdata
