@@ -9,6 +9,7 @@ FROM node:alpine
 WORKDIR /web
 COPY --from=build-stage /web .
 RUN yarn global add serve
+RUN yarn global add react-scripts
 CMD serve -s build -p 80
 
 EXPOSE 80
