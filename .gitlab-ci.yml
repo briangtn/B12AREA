@@ -147,7 +147,7 @@ deploy-production-database:
     - sed -i "s/__DB_NAME__/${DB_NAME}/" area.db.configmap.yaml
     - sed -i "s/__DB_USER__/`echo -ne ${DB_USER} | base64`/" area.db.secrets.yaml
     - sed -i "s/__DB_PASSWORD__/`echo -ne ${DB_PASSWORD} | base64`/" area.db.secrets.yaml
-    - kubectl apply -f area.db.configmap.yaml area.db.secrets.yaml
+    - kubectl apply -f area.db.configmap.yaml -f area.db.secrets.yaml
     - kubectl apply -f area.db.volume.yaml
     - kubectl apply -f area.db.deployment.yaml
     - kubectl apply -f area.db.service.yaml
@@ -178,7 +178,7 @@ deploy-production-api:
     - sed -i "s/__DB_USER__/`echo -ne ${DB_USER} | base64`/" area.api.secrets.yaml
     - sed -i "s/__DB_PASSWORD__/`echo -ne ${DB_PASSWORD} | base64`/" area.api.secrets.yaml
     - sed -i "s/__INGRESS_HOST__/${DEPLOYMENT_HOST}/" area.api.ingress.yaml
-    - kubectl apply -f area.api.configmap.yaml area.api.secrets.yaml
+    - kubectl apply -f area.api.configmap.yaml -f area.api.secrets.yaml
     - kubectl apply -f area.api.deployment.yaml
     - kubectl apply -f area.api.service.yaml
     - kubectl apply -f area.api.ingress.yaml
@@ -269,7 +269,7 @@ deploy-development-database:
     - sed -i "s/__DB_NAME__/${DB_NAME}/" area.db.configmap.yaml
     - sed -i "s/__DB_USER__/`echo -ne ${DB_USER} | base64`/" area.db.secrets.yaml
     - sed -i "s/__DB_PASSWORD__/`echo -ne ${DB_PASSWORD} | base64`/" area.db.secrets.yaml
-    - kubectl apply -f area.db.configmap.yaml area.db.secrets.yaml
+    - kubectl apply -f area.db.configmap.yaml -f area.db.secrets.yaml
     - kubectl apply -f area.db.volume.yaml
     - kubectl apply -f area.db.deployment.yaml
     - kubectl apply -f area.db.service.yaml
@@ -301,7 +301,7 @@ deploy-development-api:
     - sed -i "s/__DB_USER__/`echo -ne ${DB_USER} | base64`/" area.api.secrets.yaml
     - sed -i "s/__DB_PASSWORD__/`echo -ne ${DB_PASSWORD} | base64`/" area.api.secrets.yaml
     - sed -i "s/__INGRESS_HOST__/${DEPLOYMENT_HOST}/" area.api.ingress.yaml
-    - kubectl apply -f area.api.configmap.yaml area.api.secrets.yaml
+    - kubectl apply -f area.api.configmap.yaml -f area.api.secrets.yaml
     - kubectl apply -f area.api.deployment.yaml
     - kubectl apply -f area.api.service.yaml
     - kubectl apply -f area.api.ingress.yaml
