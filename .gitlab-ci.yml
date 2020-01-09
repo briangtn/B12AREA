@@ -313,12 +313,12 @@ deploy-development-apk:
     - export ANDROID_HOME=/opt/android-sdk-linux
     - mkdir -p ${ANDROID_HOME} && cd ${ANDROID_HOME} && wget -q https://dl.google.com/android/repository/sdk-tools-linux-3859397.zip -O android_tools.zip && unzip android_tools.zip && rm android_tools.zip
     - export PATH=${PATH}:${ANDROID_HOME}/tools:${ANDROID_HOME}/tools/bin:${ANDROID_HOME}/platform-tools
-    - echo yes | sdkmanager --licenses
-    - cd mobile
     - ls
-    - ./gradlew build
-    - sshpass -f ${ROOT_SSH_PASSWD} scp app/build/outputs/apk/release/app-release-unsigned.apk root@62.210.152.215:/home/develop/kubernetes/area/volumes/developmentAPKData/area.apk
-    - cd ..
+    - echo yes | sdkmanager --licenses
+    - ls
+    - cd mobile && gradlew build && cd ..
+    - ls
+    - sshpass -f ${ROOT_SSH_PASSWD} scp mobile/app/build/outputs/apk/release/app-release-unsigned.apk root@62.210.152.215:/home/develop/kubernetes/area/volumes/developmentAPKData/area.apk
   artifacts:
     paths:
       - mobile/app/build/outputs/apk/release/app-release-unsigned.apk
