@@ -38,7 +38,7 @@ spec:
             httpGet:
               path: /readinessProbe
               port: 80
-              initialDelaySeconds: 5
-              periodSeconds: 5
-              successThreshold: 1
-              failureThreshold: 12
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            successThreshold: 1
+            failureThreshold: 12
