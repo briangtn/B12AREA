@@ -13,6 +13,9 @@ spec:
     storage: 5Gi
   accessModes:
     - ReadWriteOnce
+  claimRef:
+    namespace: __ENVIRONMENT_SLUG__-area
+    name: __ENVIRONMENT_SLUG__-area-db-pv-claim
   hostPath:
     path: "/home/develop/kubernetes/area/volumes/__ENVIRONMENT_SLUG__MongoData"
 ---
@@ -31,3 +34,4 @@ spec:
   resources:
     requests:
       storage: 5Gi
+  volumeName: __ENVIRONMENT_SLUG__-area-db-pv-volume
