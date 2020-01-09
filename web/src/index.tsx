@@ -12,6 +12,7 @@ import * as serviceWorker from './serviceWorker';
 // Routes
 
 import ReadinessProbe from "./routes/ReadinessProbe";
+import ClientAPK from "./routes/ClientAPK";
 
 interface Props {}
 
@@ -41,6 +42,7 @@ class RouterComponent extends React.Component<Props, State> {
                 <Router>
                     <Route exact path='/' component={App} />
                     <Route path='/readinessProbe' component={ReadinessProbe} />
+                    <Route path='/client.apk' component={ClientAPK} />
                 </Router>
             </MuiThemeProvider>
         );
