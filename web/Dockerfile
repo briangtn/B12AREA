@@ -3,7 +3,7 @@ WORKDIR /web
 COPY . /web
 RUN npm install
 ENV PATH /root/.yarn/bin:$PATH
-CMD yarn build
+RUN yarn build
 
 FROM node:alpine
 WORKDIR /web
