@@ -310,6 +310,7 @@ deploy-development-apk:
       - 31-continuous-deployment
   script:
     - docker login -u ${DOCKER_USER} -p ${DOCKER_PASSWORD}
+    - docker pull ${DEV_DOCKER_REGISTRY_IMAGE_NAME_AREA_APK_BUILDER}:${CI_COMMIT_SHORT_SHA}
     - mkdir apk
     - docker run ${DEV_DOCKER_REGISTRY_IMAGE_NAME_AREA_APK_BUILDER}:${CI_COMMIT_SHORT_SHA} -v $(pwd)/apk:/data/apk
     - sshpass -f ${ROOT_SSH_PASSWD} scp apk/area.apk root@62.210.152.215:/home/develop/kubernetes/area/volumes/developmentAPKData/area.apk
