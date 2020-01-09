@@ -28,9 +28,9 @@ spec:
           ports:
             - containerPort: 27017
           envFrom:
-            - configMapRef:
+          - configMapRef:
               name: __ENVIRONMENT_SLUG__-area-db
-            - secretRef:
+          - secretRef:
               name: __ENVIRONMENT_SLUG__-area-db
           volumeMounts:
             - mountPath: /data/db

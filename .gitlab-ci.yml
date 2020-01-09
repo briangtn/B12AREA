@@ -6,11 +6,11 @@ services:
 stages:
   - test
   - build
-  - deploy-1
-  - deploy-2
-  - deploy-3
-  - deploy-4
-  - deploy-5
+  - deploy-namespace
+  - deploy-database
+  - deploy-api
+  - deploy-apk
+  - deploy-web
 
 variables:
   # MANDATORY
@@ -111,7 +111,7 @@ build-development-apk-builder:
 # PROD
 
 deploy-production-namespace:
-  stage: deploy-1
+  stage: deploy-namespace
   only:
     refs:
       - master
@@ -129,7 +129,7 @@ deploy-production-namespace:
     - kubectl apply -f area.namespace.yaml
 
 deploy-production-database:
-  stage: deploy-2
+  stage: deploy-database
   only:
     refs:
       - master
@@ -153,7 +153,7 @@ deploy-production-database:
     - kubectl apply -f area.db.service.yaml
 
 deploy-production-api:
-  stage: deploy-3
+  stage: deploy-api
   only:
     refs:
       - master
@@ -184,7 +184,7 @@ deploy-production-api:
     - kubectl apply -f area.api.ingress.yaml
 
 deploy-production-apk:
-  stage: deploy-4
+  stage: deploy-apk
   only:
     refs:
       - master
@@ -201,7 +201,7 @@ deploy-production-apk:
     - scp -i ~/.ssh/id_rsa apk/area.apk root@62.210.152.215:/home/develop/kubernetes/area/volumes/productionAPKData/area.apk
 
 deploy-production-web:
-  stage: deploy-5
+  stage: deploy-web
   only:
     refs:
       - master
@@ -231,7 +231,7 @@ deploy-production-web:
 # DEV
 
 deploy-development-namespace:
-  stage: deploy-1
+  stage: deploy-namespace
   only:
     refs:
       - develop
@@ -250,7 +250,7 @@ deploy-development-namespace:
     - kubectl apply -f area.namespace.yaml
 
 deploy-development-database:
-  stage: deploy-2
+  stage: deploy-database
   only:
     refs:
       - develop
@@ -275,7 +275,7 @@ deploy-development-database:
     - kubectl apply -f area.db.service.yaml
 
 deploy-development-api:
-  stage: deploy-3
+  stage: deploy-api
   only:
     refs:
       - develop
@@ -307,7 +307,7 @@ deploy-development-api:
     - kubectl apply -f area.api.ingress.yaml
 
 deploy-development-apk:
-  stage: deploy-4
+  stage: deploy-apk
   only:
     refs:
       - develop
@@ -325,7 +325,7 @@ deploy-development-apk:
     - scp -i ~/.ssh/id_rsa apk/area.apk root@62.210.152.215:/home/develop/kubernetes/area/volumes/developmentAPKData/area.apk
 
 deploy-development-web:
-  stage: deploy-5
+  stage: deploy-web
   only:
     refs:
       - develop

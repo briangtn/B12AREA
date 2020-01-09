@@ -31,9 +31,9 @@ spec:
             - containerPort: 80
           envFrom:
             - configMapRef:
-              name: __ENVIRONMENT_SLUG__-area-api
+                name: __ENVIRONMENT_SLUG__-area-api
             - secretRef:
-              name: __ENVIRONMENT_SLUG__-area-api
+                name: __ENVIRONMENT_SLUG__-area-api
           readinessProbe:
             httpGet:
               path: /readinessProbe
