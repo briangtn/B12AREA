@@ -10,4 +10,8 @@
     <string name="here">here</string>
     <string name="google_registration">Start with Google</string>
     <string name="facebook_registration">Start with Facebook</string>
+    <string name="different_password">Those passwords didn\'t match. Try again.</string>
+    <string name="no_confirm_password">Confirm your password.</string>
+    <string name="no_email">Enter your email address.</string>
+    <string name="no_password">Enter a password.</string>
 </resources>

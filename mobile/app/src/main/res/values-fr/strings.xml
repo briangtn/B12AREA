@@ -11,4 +11,8 @@
     <string name="here">ici</string>
     <string name="google_registration">Commencer avec Google</string>
     <string name="facebook_registration">Commencer avec Facebook</string>
+    <string name="different_password">Les mots de passe ne correspondent pas. Veuillez réessayer.</string>
+    <string name="no_confirm_password">Confirmez votre mot de passe.</string>
+    <string name="no_email">Entrez votre adresse email.</string>
+    <string name="no_password">Entrez un mot de passe.</string>
 </resources>
