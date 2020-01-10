@@ -33,7 +33,10 @@ tests-api:
 tests-web:
   stage: tests
   script:
-    - echo "nothing to do"
+    - apk add --update nodejs npm
+    - cd web
+    - npm install
+    - npm test
 
 tests-mobile:
   stage: tests
