@@ -1,4 +1,4 @@
-import {RestBindings, get, post, patch, del, param, api} from '@loopback/rest';
+import {RestBindings, get, post, param, api} from '@loopback/rest';
 
 // Uncomment these imports to begin using these cool features!
 
