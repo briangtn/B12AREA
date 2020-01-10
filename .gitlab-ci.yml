@@ -52,7 +52,7 @@ tests-mobile:
 tests-docker-compose:
   stage: tests
   script:
-    - apk update && apk add --no-cache py-pip curl gcc libc-dev make
+    - apk update && apk add --no-cache py-pip curl python-dev libffi-dev openssl-dev gcc libc-dev make
     - pip install docker-compose
     - docker-compose build
     - docker-compose up -d
