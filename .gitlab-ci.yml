@@ -4,7 +4,7 @@ services:
   - docker:19.03.0-dind
 
 stages:
-  - test
+  - tests
   - build
   - deploy-namespace
   - deploy-database
@@ -20,8 +20,23 @@ variables:
 
 # ------------------------------------------------------TESTS----------------------------------------------------------
 
-tests:
-  stage: test
+tests-api:
+  stage: tests
+  script:
+    - apk add --update nodejs npm
+    - docker run --name db -p 27017:27017 -d mongo:4.0.14
+    - docker start db
+    - cd server
+    - npm install
+    - npm test
+
+tests-web:
+  stage: tests
+  script:
+    - echo "nothing to do"
+
+tests-mobile:
+  stage: tests
   script:
     - echo "nothing to do"
 
@@ -72,7 +87,6 @@ build-development-api:
   only:
     refs:
       - develop
-      - 31-continuous-deployment
   script:
     - docker login -u ${DOCKER_USER} -p ${DOCKER_PASSWORD}
     - docker build -t ${DEV_DOCKER_REGISTRY_IMAGE_NAME_AREA_API}:${CI_COMMIT_SHORT_SHA} ./server
@@ -85,7 +99,6 @@ build-development-web-client:
   only:
     refs:
       - develop
-      - 31-continuous-deployment
   script:
     - docker login -u ${DOCKER_USER} -p ${DOCKER_PASSWORD}
     - docker build -t ${DEV_DOCKER_REGISTRY_IMAGE_NAME_AREA_WEB_CLIENT}:${CI_COMMIT_SHORT_SHA} ./web
@@ -98,7 +111,6 @@ build-development-apk-builder:
   only:
     refs:
       - develop
-      - 31-continuous-deployment
   script:
     - docker login -u ${DOCKER_USER} -p ${DOCKER_PASSWORD}
     - docker build -t ${DEV_DOCKER_REGISTRY_IMAGE_NAME_AREA_APK_BUILDER}:${CI_COMMIT_SHORT_SHA} ./mobile
@@ -235,7 +247,6 @@ deploy-development-namespace:
   only:
     refs:
       - develop
-      - 31-continuous-deployment
   variables:
     DEPLOYMENT_ENV: "development"
   script:
@@ -254,7 +265,6 @@ deploy-development-database:
   only:
     refs:
       - develop
-      - 31-continuous-deployment
   variables:
     DEPLOYMENT_ENV: "development"
   script:
@@ -279,7 +289,6 @@ deploy-development-api:
   only:
     refs:
       - develop
-      - 31-continuous-deployment
   environment:
     name: development-api
     url: https://dev.api.area.b12powered.com
@@ -311,7 +320,6 @@ deploy-development-apk:
   only:
     refs:
       - develop
-      - 31-continuous-deployment
   script:
     - apk update && apk add --no-cache openssh
     - docker login -u ${DOCKER_USER} -p ${DOCKER_PASSWORD}
@@ -329,7 +337,6 @@ deploy-development-web:
   only:
     refs:
       - develop
-      - 31-continuous-deployment
   environment:
     name: development-web
     url: https://dev.area.b12powered.com

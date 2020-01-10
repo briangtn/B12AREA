@@ -34,7 +34,7 @@ services:
       - "8080:80"
 
   db:
-    image: "mongo"
+    image: "mongo:4.0.14"
     restart: unless-stopped
     ports:
       - '27017:27017'
