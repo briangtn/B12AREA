@@ -192,11 +192,11 @@
         android:layout_marginTop="56dp"
         android:layout_marginEnd="34dp"
         android:background="@drawable/social_network_button_style"
-        android:drawableStart="@drawable/ic_facebook"
+        android:drawableStart="@drawable/ic_twitter"
         android:fontFamily="@font/roboto_bold"
         android:paddingLeft="10dp"
         android:paddingRight="10dp"
-        android:text="@string/facebook_registration"
+        android:text="@string/twitter_registration"
         android:textSize="10sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/register_button" />

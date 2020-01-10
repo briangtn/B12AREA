@@ -26,18 +26,18 @@ class RegisterActivity : AppCompatActivity() {
                     getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
                 inputMethodManager.hideSoftInputFromWindow(currentFocus!!.windowToken, 0)
 
-                register()
+                submitForm()
             }
             return@OnKeyListener true
         })
 
         btnRegister.setOnClickListener {
-            register()
+            submitForm()
         }
 
     }
 
-    private fun register() {
+    private fun submitForm() {
         val etEmail = findViewById<EditText>(R.id.email)
         val etPassword = findViewById<EditText>(R.id.password)
         val etConfirmPassword = findViewById<EditText>(R.id.confirm_password)
@@ -65,6 +65,13 @@ class RegisterActivity : AppCompatActivity() {
             etConfirmPassword.setText("")
             etConfirmPassword.error = getString(R.string.different_password)
         }
+        if (email.isNotEmpty() && password.isNotEmpty() && confirmPassword.isNotEmpty() && password == confirmPassword) {
+            register()
+        }
+    }
+
+    private fun register() {
+
     }
 
 }
