@@ -15,7 +15,7 @@
     "build": "lb-tsc",
     "build:watch": "lb-tsc --watch",
     "clean": "lb-clean dist *.tsbuildinfo",
-    "lint": "npm run eslint src/**",
+    "lint": "npm run eslint",
     "lint:fix": "npm run eslint:fix",
     "eslint": "lb-eslint --report-unused-disable-directives src",
     "eslint:fix": "npm run eslint -- --fix",
