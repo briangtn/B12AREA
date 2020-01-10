@@ -10,10 +10,11 @@ class ClientAPK extends Component<Props, State> {
         .then(response => {
             response.blob().then(blob => {
                 let url = window.URL.createObjectURL(blob);
-                let a = document.createElement('a');
-                a.href = url;
-                a.download = 'area.apk';
-                a.click();
+                let downloadArea = document.createElement('a');
+
+                downloadArea.href = url;
+                downloadArea.download = 'area.apk';
+                downloadArea.click();
             });
         });
     }
