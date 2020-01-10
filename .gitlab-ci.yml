@@ -49,6 +49,18 @@ tests-mobile:
     - cd mobile
     - ./gradlew test
 
+tests-docker-compose:
+  stage: tests
+  script:
+    - apk update && apk add --no-cache py-pip curl
+    - pip install docker-compose
+    - docker-compose build
+    - docker-compose up -d
+    - sleep 5
+    - "curl --GET --silent --output /dev/null --write-out \"API code: %{http_code}\n\" 127.0.0.1:8080/readinessProbe"
+    - "curl --GET --silent --output /dev/null --write-out \"WEB code: %{http_code}\n\" 127.0.0.1:8081/readinessProbe"
+    - "curl --GET --silent --output /dev/null --write-out \"APK code: %{http_code}\nDownloaded %{size_download} bytes\n\" 127.0.0.1:8081/readinessProbe"
+
 # ------------------------------------------------------BUILD----------------------------------------------------------
 
 # PROD
