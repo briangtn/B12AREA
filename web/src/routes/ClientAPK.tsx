@@ -22,7 +22,7 @@ class ClientAPK extends Component<Props, State> {
     render() {
         return (
             <div>
-                <a id="download" href="apk/area.apk" download="area.apk" />
+                Download didn't started ? <a id="download" href="apk/area.apk" download="area.apk">Click here</a>
             </div>
         );
     }
