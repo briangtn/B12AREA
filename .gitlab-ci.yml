@@ -22,6 +22,10 @@ variables:
 
 tests-api:
   stage: tests
+  only:
+    - merge_requests
+    - master
+    - develop
   script:
     - apk add --update nodejs npm
     - docker run --name db -p 27017:27017 -d mongo:4.0.14
@@ -32,6 +36,10 @@ tests-api:
 
 tests-web:
   stage: tests
+  only:
+    - merge_requests
+    - master
+    - develop
   script:
     - apk add --update nodejs npm
     - cd web
@@ -41,6 +49,10 @@ tests-web:
 tests-mobile:
   image: openjdk:8
   stage: tests
+  only:
+    - merge_requests
+    - master
+    - develop
   script:
     - export ANDROID_HOME=/opt/android-sdk-linux
     - mkdir -p ${ANDROID_HOME} && cd ${ANDROID_HOME} && wget -q https://dl.google.com/android/repository/sdk-tools-linux-3859397.zip -O android_tools.zip && unzip android_tools.zip && rm android_tools.zip && cd -
@@ -51,6 +63,10 @@ tests-mobile:
 
 tests-docker-compose:
   stage: tests
+  only:
+    - merge_requests
+    - master
+    - develop
   script:
     - apk update && apk add --no-cache py-pip curl python-dev libffi-dev openssl-dev gcc libc-dev make
     - pip install docker-compose
