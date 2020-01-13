@@ -85,7 +85,8 @@ const styles = (theme: Theme) => createStyles({
     },
     imageButton: {
         backgroundColor: '#FFFFFF',
-        fontSize: "8px"
+        fontSize: "8px",
+        width: '150px'
     },
 });
 
@@ -111,7 +112,7 @@ class Join extends Component<Props, State> {
         this.setState({[id]: value} as Pick<State, keyof State>);
 
         // Email verification
-        if (this.state.email.match(/^\S+@\S+\.\S+$/) === null)
+        if ((id === 'email' && value.match(/^\S+@\S+\.\S+$/) === null))
             this.setState({ email_error: 'true' });
         else
             this.setState({ email_error: 'false' });
@@ -123,12 +124,17 @@ class Join extends Component<Props, State> {
 
         if (this.state.password !== this.state.confirm_password) {
             error = true;
-            errorMessage = "Password doesn't match";
+            errorMessage = "Those passwords didn't match. Try again.";
         }
 
         if (this.state.email_error === 'true') {
             error = true;
-            errorMessage = "Your email is invalid";
+            errorMessage = "This email isn't valid. Try again.";
+        }
+
+        if (this.state.password === '' || this.state.confirm_password === '' || this.state.email === '') {
+            error = true;
+            errorMessage = "Please fill all fields";
         }
 
         if (error)
