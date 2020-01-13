@@ -1,6 +1,7 @@
 package com.b12powered.area.activities
 
 import android.content.Context
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.KeyEvent
@@ -9,6 +10,7 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.EditText
 import com.b12powered.area.R
+import kotlinx.android.synthetic.main.activity_register.*
 
 class RegisterActivity : AppCompatActivity() {
 
@@ -35,6 +37,11 @@ class RegisterActivity : AppCompatActivity() {
             submitForm()
         }
 
+        go_to_login_button.setOnClickListener {
+            val intent = Intent(this, LoginActivity::class.java)
+            finish()
+            startActivity(intent)
+        }
     }
 
     private fun submitForm() {

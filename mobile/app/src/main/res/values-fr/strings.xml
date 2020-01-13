@@ -15,6 +15,6 @@
     <string name="no_confirm_password">Confirmez votre mot de passe.</string>
     <string name="no_email">Entrez votre adresse email.</string>
     <string name="no_password">Entrez un mot de passe.</string>
-    <string name="no_registered">Pas encore enregisté ?</string>
-    <string name="login">Connexion</string>
+    <string name="not_registered">Pas encore inscrit ?</string>
+    <string name="login">Se connecter</string>
 </resources>

@@ -129,6 +129,7 @@
         android:text="@string/here"
         android:textColor="@color/colorSecondary"
         android:textSize="16sp"
+        android:clickable="true"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toEndOf="@+id/click"
@@ -185,7 +186,7 @@
         app:layout_constraintTop_toBottomOf="@+id/register_button" />
 
     <Button
-        android:id="@+id/facebook_button"
+        android:id="@+id/twitter_button"
         style="@android:style/Widget.Button"
         android:layout_width="140dp"
         android:layout_height="40dp"

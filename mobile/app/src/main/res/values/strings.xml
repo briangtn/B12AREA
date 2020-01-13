@@ -14,6 +14,6 @@
     <string name="no_confirm_password">Confirm your password.</string>
     <string name="no_email">Enter your email address.</string>
     <string name="no_password">Enter a password.</string>
-    <string name="no_registered">Not registered yet ?</string>
+    <string name="not_registered">Not registered yet ?</string>
     <string name="login">Sign In</string>
 </resources>
