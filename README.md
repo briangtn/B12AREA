@@ -15,6 +15,7 @@ You first need to copy the `.env.example` file to a `.env` file and modify the v
 
 ```bash
 cp .env.example .env
+npm run install
 npm run dev
 ```
 
