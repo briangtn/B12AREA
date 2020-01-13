@@ -36,6 +36,10 @@ services:
   db:
     image: "mongo:4.0.14"
     restart: unless-stopped
+    environment:
+        - MONGO_INITDB_ROOT_USERNAME=$DB_USER
+        - MONGO_INITDB_ROOT_PASSWORD=$DB_PASS
+        - MONGO_INITDB_DATABASE=$DB_NAME
     ports:
       - '27017:27017'
     networks:
