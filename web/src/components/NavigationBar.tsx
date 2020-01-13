@@ -2,6 +2,8 @@ import React, { Component } from 'react';
 
 import { withStyles, createStyles, Theme } from "@material-ui/core";
 
+import { Link } from 'react-router-dom';
+
 import AppBar from '@material-ui/core/AppBar';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
@@ -19,7 +21,8 @@ interface State {}
 const styles = (theme: Theme) => createStyles({
     title: {
         flexGrow: 1,
-        marginRight: theme.spacing(2)
+        marginRight: theme.spacing(2),
+        textDecoration: 'none'
     },
     root: {
         flexGrow: 1
@@ -35,11 +38,13 @@ class NavigationBar extends Component <Props, State> {
                 <AppBar position="static">
                     <Toolbar>
                         <Typography variant="h6" className={classes.title}>
-                            AREA
+                            <Link to='/' style={{ textDecoration: 'none', color: '#FFFFFF' }}>AREA</Link>
                         </Typography>
                         <Button color="secondary">Sign In</Button>
                         &nbsp;
-                        <Button variant="contained" color="secondary">Sign Up</Button>
+                        <Link to={{pathname: '/join', state: { email: '' }}} style={{ textDecoration: 'none', color: '#FFFFFF' }}>
+                            <Button variant="contained" color="secondary">Sign Up</Button>
+                        </Link>
                     </Toolbar>
                 </AppBar>
             </div>
