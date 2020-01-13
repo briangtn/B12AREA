@@ -17,7 +17,7 @@
     "clean": "lb-clean dist *.tsbuildinfo",
     "lint": "npm run eslint",
     "lint:fix": "npm run eslint:fix",
-    "eslint": "lb-eslint --report-unused-disable-directives .",
+    "eslint": "lb-eslint --report-unused-disable-directives src",
     "eslint:fix": "npm run eslint -- --fix",
     "pretest": "npm run clean && npm run build",
     "test": "lb-mocha --allow-console-logs \"dist/test\"",
@@ -64,9 +64,9 @@
     "eslint-config-prettier": "^6.7.0",
     "eslint-plugin-eslint-plugin": "^2.1.0",
     "eslint-plugin-mocha": "^6.2.2",
-    "mocha": "^7.0.0",
+    "mocha": "^6.2.2",
     "prettier": "^1.19.1",
     "source-map-support": "^0.5.16",
-    "typescript": "^3.7.4"
+    "typescript": "~3.7.3"
   }
 }
