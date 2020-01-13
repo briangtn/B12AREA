@@ -1,7 +1,7 @@
 import {SmtpOptions} from 'nodemailer-smtp-transport';
 
 const config: SmtpOptions = {
-    "host": process.env.SMTP_HOST,
+    "host": process.env.SMTP_HOST ? process.env.SMTP_HOST : "localhost",
     "port": process.env.SMTP_PORT ? parseInt(process.env.SMTP_PORT) : 25,
     "secure": process.env.SMTP_SECURE ? (process.env.SMTP_SECURE == "true") : true,
     "tls": {

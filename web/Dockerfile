@@ -1,9 +1,10 @@
 FROM node:alpine
 WORKDIR /web
-COPY . /web
-RUN npm install
-ENV PATH /root/.yarn/bin:$PATH
 RUN npm install react-scripts serve typescript -g
+COPY ./package* /web/
+RUN npm install
+COPY . /web
+ENV PATH /root/.yarn/bin:$PATH
 RUN npm run build
 CMD serve -s build -p 80
 
