@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  namespace: __ENVIRONMENT_SLUG__-area
+  name: __ENVIRONMENT_SLUG__-area-api
+  labels:
+    app: __ENVIRONMENT_SLUG__-area-api
+    ref: __ENVIRONMENT_SLUG__
+data:
+  DB_NAME: __DB_NAME__
+  DB_HOST: __ENVIRONMENT_SLUG__-area-db

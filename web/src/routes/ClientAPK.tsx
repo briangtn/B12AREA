@@ -6,16 +6,23 @@ interface State {}
 
 class ClientAPK extends Component<Props, State> {
     componentDidMount(): void {
-        const download = document.getElementById("download");
+        fetch('apk/area.apk')
+        .then(response => {
+            response.blob().then(blob => {
+                let url = window.URL.createObjectURL(blob);
+                let downloadArea = document.createElement('a');
 
-        if (download)
-            download.click();
+                downloadArea.href = url;
+                downloadArea.download = 'area.apk';
+                downloadArea.click();
+            });
+        });
     }
 
     render() {
         return (
             <div>
-                <a id="download" href="apk/area.apk" download="area.apk" />
+                Download didn't started ? <a id="download" href="apk/area.apk" download="area.apk">Click here</a>
             </div>
         );
     }
