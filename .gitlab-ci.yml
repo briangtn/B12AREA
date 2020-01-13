@@ -70,6 +70,7 @@ tests-docker-compose:
   script:
     - apk update && apk add --no-cache py-pip curl python-dev libffi-dev openssl-dev gcc libc-dev make
     - pip install docker-compose
+    - cp .env.example .env
     - docker-compose build
     - docker-compose up -d
     - sleep 5
@@ -224,8 +225,14 @@ deploy-production-api:
     - sed -i "s~__REGISTRY_IMAGE__~${DOCKER_REGISTRY_IMAGE_NAME_AREA_API}~" area.api.deployment.yaml
     - sed -i "s/__REGISTRY_VERSION__/${CI_COMMIT_SHORT_SHA}/" area.api.deployment.yaml
     - sed -i "s/__DB_NAME__/${DB_NAME}/" area.api.configmap.yaml
+    - sed -i "s/__SMTP_HOST__/${SMTP_HOST}/" area.api.configmap.yaml
+    - sed -i "s/__SMTP_SECURE__/${SMTP_SECURE}/" area.api.configmap.yaml
+    - sed -i "s/__SMTP_PORT__/${SMTP_PORT}/" area.api.configmap.yaml
+    - sed -i "s/__SMTP_REJECT_UNAUTHORIZED__/${SMTP_REJECT_UNAUTHORIZED}/" area.api.configmap.yaml
     - sed -i "s/__DB_USER__/`echo -ne ${DB_USER} | base64`/" area.api.secrets.yaml
     - sed -i "s/__DB_PASSWORD__/`echo -ne ${DB_PASSWORD} | base64`/" area.api.secrets.yaml
+    - sed -i "s/__SMTP_USER__/`echo -ne ${SMTP_USER} | base64`/" area.api.secrets.yaml
+    - sed -i "s/__SMTP_PASS__/`echo -ne ${SMTP_PASS} | base64`/" area.api.secrets.yaml
     - sed -i "s/__INGRESS_HOST__/${DEPLOYMENT_HOST}/" area.api.ingress.yaml
     - kubectl apply -f area.api.configmap.yaml -f area.api.secrets.yaml
     - kubectl apply -f area.api.deployment.yaml
@@ -344,8 +351,14 @@ deploy-development-api:
     - sed -i "s~__REGISTRY_IMAGE__~${DEV_DOCKER_REGISTRY_IMAGE_NAME_AREA_API}~" area.api.deployment.yaml
     - sed -i "s/__REGISTRY_VERSION__/${CI_COMMIT_SHORT_SHA}/" area.api.deployment.yaml
     - sed -i "s/__DB_NAME__/${DB_NAME}/" area.api.configmap.yaml
+    - sed -i "s/__SMTP_HOST__/${SMTP_HOST}/" area.api.configmap.yaml
+    - sed -i "s/__SMTP_SECURE__/${SMTP_SECURE}/" area.api.configmap.yaml
+    - sed -i "s/__SMTP_PORT__/${SMTP_PORT}/" area.api.configmap.yaml
+    - sed -i "s/__SMTP_REJECT_UNAUTHORIZED__/${SMTP_REJECT_UNAUTHORIZED}/" area.api.configmap.yaml
     - sed -i "s/__DB_USER__/`echo -ne ${DB_USER} | base64`/" area.api.secrets.yaml
     - sed -i "s/__DB_PASSWORD__/`echo -ne ${DB_PASSWORD} | base64`/" area.api.secrets.yaml
+    - sed -i "s/__SMTP_USER__/`echo -ne ${SMTP_USER} | base64`/" area.api.secrets.yaml
+    - sed -i "s/__SMTP_PASS__/`echo -ne ${SMTP_PASS} | base64`/" area.api.secrets.yaml
     - sed -i "s/__INGRESS_HOST__/${DEPLOYMENT_HOST}/" area.api.ingress.yaml
     - kubectl apply -f area.api.configmap.yaml -f area.api.secrets.yaml
     - kubectl apply -f area.api.deployment.yaml
