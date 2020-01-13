@@ -5,7 +5,8 @@
   "main": " ",
   "scripts": {
     "start": "docker-compose up --build",
-    "dev": "docker-compose -f docker-compose-development.yml up --build"
+    "dev": "docker-compose -f docker-compose-development.yml up --build",
+    "install": "cd web && npm install"
   },
   "repository": {
     "type": "git",
