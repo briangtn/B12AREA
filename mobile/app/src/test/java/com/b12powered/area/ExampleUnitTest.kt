@@ -1,4 +1,4 @@
-package com.example.area
+package com.b12powered.area
 
 import org.junit.Test
 

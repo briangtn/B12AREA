@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">AREA</string>
+    <string name="email">Email</string>
+    <string name="password">Mot de passe</string>
+    <string name="confirm_password">Confirmer le mot de passe</string>
+    <string name="register">S\'inscrire</string>
+    <string name="or">ou</string>
+    <string name="already_registered">Déjà inscrit ?</string>
+    <string name="click">Cliquez</string>
+    <string name="here">ici</string>
+    <string name="google_registration">Commencer avec Google</string>
+    <string name="twitter_registration">Commencer avec Twitter</string>
+    <string name="different_password">Les mots de passe ne correspondent pas. Veuillez réessayer.</string>
+    <string name="no_confirm_password">Confirmez votre mot de passe.</string>
+    <string name="no_email">Entrez votre adresse email.</string>
+    <string name="no_password">Entrez un mot de passe.</string>
+    <string name="not_registered">Pas encore inscrit ?</string>
+    <string name="login">Se connecter</string>
+</resources>
