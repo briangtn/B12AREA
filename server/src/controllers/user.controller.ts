@@ -1,9 +1,10 @@
-import {RestBindings, get, post, patch, param, api} from '@loopback/rest';
+import {RestBindings, getModelSchemaRef, requestBody, get, post, patch, param, api} from '@loopback/rest';
 import {inject} from '@loopback/context';
+import {User} from '../models';
 // Uncomment these imports to begin using these cool features!
 
 @api({basePath: '/users', paths: {}})
-export class UsersControllerController {
+export class UserController {
     constructor() {}
 
     @get('/')
@@ -11,7 +12,20 @@ export class UsersControllerController {
 
     }
 
-    @post('/register')
+    @post('/register', {
+        responses: {
+            '200': {
+                description: 'Register an user',
+                content: {
+                    'application/json': {
+                        schema: {
+                            'x-ts-type': User
+                        }
+                    }
+                }
+            }
+        }
+    })
     register() {
 
     }
