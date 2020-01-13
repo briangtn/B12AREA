@@ -40,7 +40,9 @@ class NavigationBar extends Component <Props, State> {
                         <Typography variant="h6" className={classes.title}>
                             <Link to='/' style={{ textDecoration: 'none', color: '#FFFFFF' }}>AREA</Link>
                         </Typography>
-                        <Button color="secondary">Sign In</Button>
+                        <Link to="/login" style={{ textDecoration: 'none', color: '#FFFFFF' }}>
+                            <Button color="secondary">Sign In</Button>
+                        </Link>
                         &nbsp;
                         <Link to={{pathname: '/join', state: { email: '' }}} style={{ textDecoration: 'none', color: '#FFFFFF' }}>
                             <Button variant="contained" color="secondary">Sign Up</Button>

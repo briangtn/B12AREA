@@ -8,6 +8,7 @@ import Typist from 'react-typist';
 import './App.css';
 
 import NavigationBar from "./components/NavigationBar";
+import OrDivider from "./components/OrDivider";
 
 // Material UI components
 import Grid from '@material-ui/core/Grid';
@@ -29,10 +30,7 @@ import Paper from "@material-ui/core/Paper";
 interface Props {
     classes: {
         gridContent: string,
-        quickForm: string,
-        dividerContainer: string,
-        dividerLeft: string,
-        dividerRight: string,
+        quickForm: string
         imageButton: string,
         hero: string,
         heroContent: string,
@@ -65,29 +63,6 @@ const styles = (theme: Theme) => createStyles({
         maxWidth: '500px',
         marginTop: theme.spacing(10),
         marginLeft: theme.spacing(15)
-    },
-    dividerContainer: {
-        width: '100%',
-        textAlign: 'center',
-        color: '#CCCCCC',
-        '& hr': {
-            marginLeft: 'auto',
-            marginRight: 'auto',
-            width: '40%',
-            backgroundColor: '#CCCCCC'
-        }
-    },
-    dividerLeft: {
-        float: 'left',
-        backgroundColor: '#CCCCCC',
-        height: '1px',
-        border: '0'
-    },
-    dividerRight: {
-        float: 'right',
-        backgroundColor: '#CCCCCC',
-        height: '1px',
-        border: '0'
     },
     imageButton: {
         backgroundColor: '#FFFFFF',
@@ -171,10 +146,7 @@ class App extends Component<Props, State> {
                                 <Button color="primary">Get Started</Button>
                             </Link>
                         </Paper>
-                        <br />
-                        <div className={classes.dividerContainer}>
-                            <hr className={classes.dividerLeft} /> or <hr className={classes.dividerRight} />
-                        </div>
+                        <OrDivider />
                         <Grid container spacing={3}>
                             <Grid item xs={6}>
                                 <Button

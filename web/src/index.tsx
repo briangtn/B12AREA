@@ -15,6 +15,7 @@ import ReadinessProbe from "./routes/ReadinessProbe";
 import ClientAPK from "./routes/ClientAPK";
 
 import Join from "./routes/Join";
+import Login from "./routes/Login";
 
 interface Props {}
 
@@ -43,9 +44,10 @@ class RouterComponent extends React.Component<Props, State> {
             <MuiThemeProvider theme={ this.state.theme }>
                 <Router>
                     <Route exact path='/' component={App} />
+                    <Route path='/join' component={Join} />
+                    <Route path='/login' component={Login} />
                     <Route path='/readinessProbe' component={ReadinessProbe} />
                     <Route path='/client.apk' component={ClientAPK} />
-                    <Route path='/join' component={Join} />
                 </Router>
             </MuiThemeProvider>
         );
