@@ -132,9 +132,19 @@ class Join extends Component<Props, State> {
             errorMessage = "This email isn't valid. Try again.";
         }
 
-        if (this.state.password === '' || this.state.confirm_password === '' || this.state.email === '') {
+        if (this.state.password === '' && this.state.confirm_password === '' && this.state.email === '') {
             error = true;
             errorMessage = "Please fill all fields";
+        }
+
+        if (this.state.email !== '' && this.state.confirm_password === '' && this.state.password === '') {
+            error = true;
+            errorMessage = 'Enter a password';
+        }
+
+        if (this.state.email === '' && this.state.confirm_password !== '' && this.state.password !== '') {
+            error = true;
+            errorMessage = 'Enter your email address';
         }
 
         if (error)
