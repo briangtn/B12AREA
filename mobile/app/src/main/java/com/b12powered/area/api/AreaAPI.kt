@@ -7,5 +7,6 @@ object AreaAPI {
 
     init {
         endpoints["Register"] = "/users/register"
+        endpoints["Login"] = "/users/login"
     }
 }
