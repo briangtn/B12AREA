@@ -14,6 +14,8 @@ import * as serviceWorker from './serviceWorker';
 import ReadinessProbe from "./routes/ReadinessProbe";
 import ClientAPK from "./routes/ClientAPK";
 
+import Join from "./routes/Join";
+
 interface Props {}
 
 interface State {
@@ -43,6 +45,7 @@ class RouterComponent extends React.Component<Props, State> {
                     <Route exact path='/' component={App} />
                     <Route path='/readinessProbe' component={ReadinessProbe} />
                     <Route path='/client.apk' component={ClientAPK} />
+                    <Route path='/join' component={Join} />
                 </Router>
             </MuiThemeProvider>
         );

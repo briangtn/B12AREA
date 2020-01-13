@@ -1,13 +1,13 @@
 import React, { Component } from 'react';
 
-import {withStyles, createStyles, Theme } from "@material-ui/core";
+import { withStyles, createStyles, Theme } from "@material-ui/core";
+import { Link } from 'react-router-dom';
 
 import Typist from 'react-typist';
 
 import './App.css';
 
 import NavigationBar from "./components/NavigationBar";
-import ButtonTextField from "./components/ButtonTextField";
 
 // Material UI components
 import Grid from '@material-ui/core/Grid';
@@ -22,6 +22,9 @@ import SpotifyIcon from "./icons/SpotifyIcon";
 import TeamsIcon from "./icons/TeamsIcon";
 import OutlookIcon from "./icons/OutlookIcon";
 import AirtableIcon from "./icons/AirtableIcon";
+import InputBase from "@material-ui/core/InputBase";
+import Divider from "@material-ui/core/Divider";
+import Paper from "@material-ui/core/Paper";
 
 interface Props {
     classes: {
@@ -32,11 +35,17 @@ interface Props {
         dividerRight: string,
         imageButton: string,
         hero: string,
-        heroContent: string
+        heroContent: string,
+        root: string,
+        input: string,
+        iconButton: string,
+        divider: string
     }
 }
 
-interface State {}
+interface State {
+    email: string
+}
 
 interface Services {
     name: string,
@@ -94,79 +103,117 @@ const styles = (theme: Theme) => createStyles({
     heroContent: {
         textAlign: 'center',
         marginTop: '50px'
-    }
+    },
+    root: {
+        marginTop: '10px',
+        padding: '2px 4px',
+        display: 'flex',
+        alignItems: 'center',
+    },
+    input: {
+        marginLeft: theme.spacing(1),
+        flex: 1,
+    },
+    iconButton: {
+        padding: 10,
+    },
+    divider: {
+        height: 40
+    },
 });
 
 class App extends Component<Props, State> {
-  render() {
-      const { classes } = this.props;
+    state: State = {
+        email: ''
+    };
 
-      const services : Array<Services> = [
-          { name: 'Twitter', icon: <TwitterIcon />, xs: 3 },
-          { name: 'Youtube', icon: <YoutubeIcon />, xs: 3 },
-          { name: 'Spotify', icon: <SpotifyIcon />, xs: 3 },
-          { name: 'Github', icon: <GitHubIcon />, xs: 3 },
-          { name: 'Teams', icon: TeamsIcon, xs: 4 },
-          { name: 'Outlook', icon: <OutlookIcon />, xs: 4 },
-          { name: 'Airtable', icon: AirtableIcon, xs: 4 },
-      ];
+    onEmailEnter: React.ChangeEventHandler<HTMLInputElement> = (e) => {
+        this.setState({ email: e.currentTarget.value });
+    };
 
-      return (
-          <div className="App">
-              <NavigationBar />
-              <Grid container spacing={3}>
-                  <Grid item xs={6}>
-                      <Typist>
-                          <Typography className={classes.gridContent} variant="h3" gutterBottom>
-                              Connect all your services together
-                          </Typography>
-                      </Typist>
-                  </Grid>
-                  <Grid className={classes.quickForm} item xs={6}>
-                      <ButtonTextField />
-                      <br />
-                      <div className={classes.dividerContainer}>
-                          <hr className={classes.dividerLeft} /> or <hr className={classes.dividerRight} />
-                      </div>
-                      <Grid container spacing={3}>
-                          <Grid item xs={6}>
-                              <Button
-                                  variant="contained"
-                                  className={classes.imageButton}
-                                  startIcon={<GoogleIcon />}
-                                  disableElevation={true}
-                              >
-                                  Connect with Google
-                              </Button>
-                          </Grid>
-                          <Grid item xs={6}>
-                              <Button
-                                  variant="contained"
-                                  className={classes.imageButton}
-                                  startIcon={<TwitterIcon />}
-                                  disableElevation={true}
-                              >
-                                  Connect with Twitter
-                              </Button>
-                          </Grid>
-                      </Grid>
-                  </Grid>
-              </Grid>
-              <div className={classes.hero}>
-                  <Grid container spacing={3}>
-                      {services.map(elem => (
-                          <Grid className={classes.heroContent} item xs={elem.xs}>
-                              { elem.icon }
-                              <Typography gutterBottom>
-                                  { elem.name }
-                              </Typography>
-                          </Grid>
-                      ))}
-                  </Grid>
-              </div>
-          </div>
-      );
-  }
+    render() {
+        const { classes } = this.props;
+
+        const services : Array<Services> = [
+            { name: 'Twitter', icon: <TwitterIcon />, xs: 3 },
+            { name: 'Youtube', icon: <YoutubeIcon />, xs: 3 },
+            { name: 'Spotify', icon: <SpotifyIcon />, xs: 3 },
+            { name: 'Github', icon: <GitHubIcon />, xs: 3 },
+            { name: 'Teams', icon: TeamsIcon, xs: 4 },
+            { name: 'Outlook', icon: <OutlookIcon />, xs: 4 },
+            { name: 'Airtable', icon: AirtableIcon, xs: 4 },
+        ];
+
+        return (
+            <div>
+                <NavigationBar />
+                <Grid container spacing={3} style={{ width: '100%', margin: '0px'}}>
+                    <Grid item xs={6}>
+                        <Typist>
+                            <Typography className={classes.gridContent} variant="h3" gutterBottom>
+                                Connect all your services together
+                            </Typography>
+                        </Typist>
+                    </Grid>
+                    <Grid className={classes.quickForm} item xs={6}>
+                        <Paper component="form" className={classes.root} elevation={0}>
+                            <InputBase
+                                className={classes.input}
+                                placeholder="Enter your email"
+                                inputProps={{ 'aria-label': 'enter your email' }}
+                                value={this.state.email}
+                                onChange={this.onEmailEnter}
+                            />
+                            <Divider className={classes.divider} orientation="vertical" />
+                            <Link
+                                to={{pathname: '/join', state: { email: this.state.email }}}
+                                style={{ textDecoration: 'none', color: '#FFFFFF' }}>
+                                <Button color="primary">Get Started</Button>
+                            </Link>
+                        </Paper>
+                        <br />
+                        <div className={classes.dividerContainer}>
+                            <hr className={classes.dividerLeft} /> or <hr className={classes.dividerRight} />
+                        </div>
+                        <Grid container spacing={3}>
+                            <Grid item xs={6}>
+                                <Button
+                                    variant="contained"
+                                    className={classes.imageButton}
+                                    startIcon={<GoogleIcon />}
+                                    disableElevation={true}
+                                >
+                                    Connect with Google
+                                </Button>
+                            </Grid>
+                            <Grid item xs={6}>
+                                <Button
+                                    variant="contained"
+                                    className={classes.imageButton}
+                                    startIcon={<TwitterIcon />}
+                                    disableElevation={true}
+                                >
+                                    Connect with Twitter
+                                </Button>
+                            </Grid>
+                        </Grid>
+                    </Grid>
+                </Grid>
+                <div className={classes.hero}>
+                    <Grid container spacing={0}>
+                        {services.map(elem => (
+                            <Grid className={classes.heroContent} item xs={elem.xs} key={elem.name}>
+                                { elem.icon }
+                                <Typography gutterBottom>
+                                    { elem.name }
+                                </Typography>
+                            </Grid>
+                        ))}
+                    </Grid>
+                </div>
+            </div>
+        );
+    }
 }
 
 export default withStyles(styles)(App);
