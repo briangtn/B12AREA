@@ -77,6 +77,7 @@
     "mocha": "^7.0.0",
     "prettier": "^1.19.1",
     "source-map-support": "^0.5.16",
+    "testcontainers": "^2.2.0",
     "typescript": "~3.7.4"
   }
 }

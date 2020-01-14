@@ -9,7 +9,7 @@ import config from './mongo.datasource.config.json';
 
 function updateConfig(dsConfig: AnyObject) {
     dsConfig.host = process.env.DB_HOST;
-    dsConfig.port = parseInt(process.env.DB_PORT as string);
+    dsConfig.port = parseInt((process.env.DB_PORT ? process.env.DB_PORT : '27017') as string);
     dsConfig.user = process.env.DB_USER;
     dsConfig.password = process.env.DB_PASS;
     dsConfig.database = process.env.DB_NAME;

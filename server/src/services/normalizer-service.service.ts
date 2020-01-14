@@ -25,6 +25,7 @@ export class NormalizerServiceService {
     }
 
     normalize(toParse: object, parsingOptions: object): object | void {
+        if(!toParse) return toParse;
         for (const [key, value] of Object.entries(parsingOptions)) {
             if (toParse[key as keyof typeof toParse] === undefined || toParse[key as keyof typeof toParse] === null) {
                 continue;
