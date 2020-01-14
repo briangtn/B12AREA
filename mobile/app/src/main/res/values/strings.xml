@@ -16,4 +16,6 @@
     <string name="no_password">Enter a password.</string>
     <string name="not_registered">Not registered yet ?</string>
     <string name="login">Sign In</string>
+    <string name="first_connection_welcome">Welcome</string>
+    <string name="welcome">Your"\n"Services</string>
 </resources>

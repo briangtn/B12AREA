@@ -69,7 +69,9 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun login() {
-
+        val intent = Intent(this, HomePageActivity::class.java)
+        finish()
+        startActivity(intent)
     }
 
 }
