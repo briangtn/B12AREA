@@ -19,5 +19,5 @@
     <string name="login">Se connecter</string>
     <string name="validation_password">Confirmer</string>
     <string name="new_password">Nouveau mot de passe</string>
-    <string name="confirm_new_password">Confirmer nouveau mot de passe</string>
+    <string name="confirm_new_password">Confirmer le nouveau mot de passe</string>
 </resources>
