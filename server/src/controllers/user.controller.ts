@@ -4,8 +4,8 @@ import {inject} from '@loopback/context';
 import {User} from '../models';
 import validator from 'validator';
 import {NormalizerServiceService} from '../services';
-import {UserRepository} from '../repositories/user.repository';
-// Uncomment these imports to begin using these cool features!
+import {Credentials, UserRepository} from '../repositories/user.repository';
+import {CredentialsRequestBody} from "./specs/user-controller.specs";
 
 @model()
 export class NewUserRequest  {
@@ -62,8 +62,14 @@ export class UserController {
     }
 
     @post('/login')
-    login() {
-
+    async login(
+        @requestBody(CredentialsRequestBody) credentials: Credentials,
+    ): Promise<{token: string}> {
+        const token = "";
+//        const user = await this.userService.verifyCredentials(credentials);
+//        const userProfile = this.userService.convertToUserProfile(user);
+//        const token = await this.jwtService.generateToken(userProfile);
+        return {token};
     }
 
     @get('/{id}')
