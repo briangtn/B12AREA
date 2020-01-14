@@ -1,6 +1,19 @@
 import {Entity, model, property} from '@loopback/repository';
 
-@model({settings: {strict: false}})
+@model({
+    settings: {
+        indexes: {
+            uniqueEmail: {
+                keys: {
+                    email: 1,
+                },
+                options: {
+                    unique: true,
+                },
+            },
+        },
+    },
+})
 export class User extends Entity {
     @property({
         type: 'string',
@@ -12,9 +25,6 @@ export class User extends Entity {
     @property({
         type: 'string',
         required: true,
-        index: {
-            unique: true
-        }
     })
     email: string;
 

@@ -1,5 +1,5 @@
 import {RestBindings, getModelSchemaRef, requestBody, get, post, patch, param, api, HttpErrors} from '@loopback/rest';
-import {property, repository} from '@loopback/repository';
+import {property, repository, model} from '@loopback/repository';
 import {inject} from '@loopback/context';
 import {User} from '../models';
 import validator from 'validator';
@@ -7,7 +7,14 @@ import {NormalizerServiceService} from '../services';
 import {UserRepository} from '../repositories/user.repository';
 // Uncomment these imports to begin using these cool features!
 
-export class NewUserRequest extends User {
+@model()
+export class NewUserRequest  {
+    @property({
+        type: 'string',
+        required: true
+    })
+    email: string;
+
     @property({
         type: 'string',
         required: true
@@ -40,30 +47,18 @@ export class UserController {
             }
         }
     })
-    async register(@requestBody({
-        content: {
-            'application/json': {
-                schema: getModelSchemaRef(NewUserRequest, {
-                    title: 'Register user'
-                })
-            }
-        }
-    }) userRequest: NewUserRequest) {
+    async register(@requestBody() userRequest: NewUserRequest) {
         const normalizedUser: NewUserRequest = this.normalizerService.normalize(userRequest, {email: 'toLower', password: 'hash'}) as NewUserRequest;
 
-        if (!validator.isEmail(userRequest.email)) {
+        if (!validator.isEmail(normalizedUser.email)) {
             throw new HttpErrors.UnprocessableEntity('invalid email');
         }
 
-        try {
-            return await this.userRepository.create(normalizedUser);
-        } catch (e) {
-            if (e.code === 11000 && e.errmsg.includes('index: uniqueEmail')) {
-                throw new HttpErrors.Conflict('Email is already in use');
-            } else {
-                throw e;
-            }
+        const users = await this.userRepository.find({where: {"email": normalizedUser.email}});
+        if (users.length > 0) {
+            throw new HttpErrors.Conflict('Email is already in use');
         }
+        return this.userRepository.create(normalizedUser);
     }
 
     @post('/login')

@@ -9,6 +9,7 @@ metadata:
 data:
   DB_NAME: "__DB_NAME__"
   DB_HOST: "__ENVIRONMENT_SLUG__-area-db"
+  DB_PORT: "27017"
   SMTP_HOST: "__SMTP_HOST__"
   SMTP_SECURE: "__SMTP_SECURE__"
   SMTP_PORT: "__SMTP_PORT__"
