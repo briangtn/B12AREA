@@ -1,4 +1,5 @@
 import {bind} from '@loopback/core';
+import sha256 from 'sha256';
 
 @bind({tags: {namespace: "services", name: "normalizer"}})
 export class NormalizerServiceService {
@@ -16,6 +17,10 @@ export class NormalizerServiceService {
 
         this.actions.set("toLower", (value: string): string => {
             return value.toLowerCase();
+        });
+
+        this.actions.set('hash', (value: string): string => {
+            return sha256(sha256(value));
         });
     }
 

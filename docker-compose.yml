@@ -7,6 +7,8 @@ services:
     environment:
       - NODE_ENV=production
       - API_HOST=server
+    env_file:
+      - .env
     volumes:
       - apk-vol:/web/build/apk
     ports:
@@ -19,12 +21,16 @@ services:
     build: ./mobile
     volumes:
       - apk-vol:/data/apk
+    env_file:
+      - .env
 
   server:
     restart: unless-stopped
     environment:
       - NODE_ENV=production
       - DB_HOST=db
+    env_file:
+      - .env
     networks:
       - "db-tier"
     build: ./server
@@ -36,6 +42,12 @@ services:
   db:
     image: "mongo:4.0.14"
     restart: unless-stopped
+    environment:
+        - MONGO_INITDB_ROOT_USERNAME=$DB_USER
+        - MONGO_INITDB_ROOT_PASSWORD=$DB_PASS
+        - MONGO_INITDB_DATABASE=$DB_NAME
+    env_file:
+      - .env
     ports:
       - '27017:27017'
     networks:

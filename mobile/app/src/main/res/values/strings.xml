@@ -1,3 +1,22 @@
 <resources>
-    <string name="app_name">area</string>
+    <string name="app_name">AREA</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="confirm_password">Confirm password</string>
+    <string name="register">Sign Up</string>
+    <string name="or">or</string>
+    <string name="already_registered">Already registered ?</string>
+    <string name="click">Click</string>
+    <string name="here">here</string>
+    <string name="google_registration">Start with Google</string>
+    <string name="twitter_registration">Start with Twitter</string>
+    <string name="different_password">Those passwords didn\'t match. Try again.</string>
+    <string name="no_confirm_password">Confirm your password.</string>
+    <string name="no_email">Enter your email address.</string>
+    <string name="no_password">Enter a password.</string>
+    <string name="not_registered">Not registered yet ?</string>
+    <string name="login">Sign In</string>
+    <string name="validation_password">Confirm</string>
+    <string name="new_password">New password</string>
+    <string name="confirm_new_password">Confirm new password</string>
 </resources>

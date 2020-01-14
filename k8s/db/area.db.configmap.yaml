@@ -7,4 +7,4 @@ metadata:
     app: __ENVIRONMENT_SLUG__-area-db
     ref: __ENVIRONMENT_SLUG__
 data:
-  MONGO_INITDB_DATABASE: __DB_NAME__
+  MONGO_INITDB_DATABASE: "__DB_NAME__"

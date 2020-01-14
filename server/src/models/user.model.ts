@@ -12,12 +12,9 @@ export class User extends Entity {
     @property({
         type: 'string',
         required: true,
-    })
-    username: string;
-
-    @property({
-        type: 'string',
-        required: true,
+        index: {
+            unique: true
+        }
     })
     email: string;
 
@@ -42,9 +39,9 @@ export class User extends Entity {
 
     @property({
         type: 'string',
-        required: true,
+        required: false,
     })
-    validation_token: string;
+    validation_token?: string;
 
     @property({
         type: 'string',
