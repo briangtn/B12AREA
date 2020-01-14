@@ -21,6 +21,10 @@ export const testdb: juggler.DataSource = new juggler.DataSource({
 });
 
 before(async function() {
+    if (process.env.CI) {
+        console.log("CI");
+        return;
+    }
     process.env.KUBERNETES_SERVICE_HOST = 'localhost';
     // eslint-disable-next-line no-invalid-this
     this.timeout(30 * 1000);
