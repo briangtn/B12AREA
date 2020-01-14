@@ -55,14 +55,14 @@ class PasswordActivity : AppCompatActivity() {
         if (password.isEmpty()) {
             etPassword.error = getString(R.string.no_password)
         }
-        if (confirmPassword.isEmpty()) {
+        else if (confirmPassword.isEmpty()) {
             etConfirmPassword.error = getString(R.string.no_password)
         }
-        if (password != confirmPassword) {
+        else if (password != confirmPassword) {
             etConfirmPassword.setText("")
             etConfirmPassword.error = getString(R.string.different_password)
         }
-        if (password.isNotEmpty() && confirmPassword.isNotEmpty()) {
+        if (password.isNotEmpty() && confirmPassword.isNotEmpty() && password == confirmPassword) {
             changePassword()
         }
     }
