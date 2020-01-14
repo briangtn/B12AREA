@@ -26,17 +26,14 @@ before(async function() {
         process.env.DB_PORT = "27017";
         process.env.DB_USER = "";
         process.env.DB_PASS = "";
-        return;
     } else {
         process.env.KUBERNETES_SERVICE_HOST = 'localhost';
         mongo = await startMongo();
     }
     // eslint-disable-next-line no-invalid-this
-    this.timeout(30 * 1000);
 });
 
 after(async function() {
     // eslint-disable-next-line no-invalid-this
-    this.timeout(30 * 1000);
     if (mongo) await mongo.stop();
 });
