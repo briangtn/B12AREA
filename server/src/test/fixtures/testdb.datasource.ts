@@ -24,7 +24,8 @@ before(async function() {
     if (process.env.CI) {
         process.env.DB_HOST = "localhost";
         process.env.DB_PORT = "27017";
-        console.log(process.env);
+        process.env.DB_USER = "";
+        process.env.DB_PASS = "";
         return;
     } else {
         process.env.KUBERNETES_SERVICE_HOST = 'localhost';
