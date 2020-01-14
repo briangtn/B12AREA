@@ -22,7 +22,8 @@ export const testdb: juggler.DataSource = new juggler.DataSource({
 
 before(async function() {
     if (process.env.CI) {
-        console.log("CI");
+        process.env.DB_HOST = "localhost";
+        process.env.DB_PORT = "27017";
         return;
     }
     process.env.KUBERNETES_SERVICE_HOST = 'localhost';
