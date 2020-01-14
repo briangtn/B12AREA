@@ -12,7 +12,7 @@ import TextField from '@material-ui/core/TextField';
 import Snackbar from '@material-ui/core/Snackbar';
 import MuiAlert from '@material-ui/lab/Alert';
 
-import GoogleIcon from "../icons/GoogleIcon";
+import GoogleIcon from "../components/icons/GoogleIcon";
 import TwitterIcon from '@material-ui/icons/Twitter';
 
 function Alert(props: any) {
