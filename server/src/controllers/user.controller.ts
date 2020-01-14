@@ -1,4 +1,4 @@
-import {RestBindings, getModelSchemaRef, requestBody, get, post, patch, param, api, HttpErrors} from '@loopback/rest';
+import {RestBindings, requestBody, get, post, patch, param, api, HttpErrors} from '@loopback/rest';
 import {property, repository, model} from '@loopback/repository';
 import {inject} from '@loopback/context';
 import {User} from '../models';

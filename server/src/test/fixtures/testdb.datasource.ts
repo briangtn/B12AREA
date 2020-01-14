@@ -30,10 +30,8 @@ before(async function() {
         process.env.KUBERNETES_SERVICE_HOST = 'localhost';
         mongo = await startMongo();
     }
-    // eslint-disable-next-line no-invalid-this
 });
 
 after(async function() {
-    // eslint-disable-next-line no-invalid-this
     if (mongo) await mongo.stop();
 });
