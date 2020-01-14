@@ -16,4 +16,7 @@
     <string name="no_password">Enter a password.</string>
     <string name="not_registered">Not registered yet ?</string>
     <string name="login">Sign In</string>
+    <string name="validation_password">Confirm</string>
+    <string name="new_password">New password</string>
+    <string name="confirm_new_password">Confirm new password</string>
 </resources>
