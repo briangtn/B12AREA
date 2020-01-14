@@ -28,8 +28,6 @@ tests-api:
     - develop
   script:
     - apk add --update nodejs npm
-    - docker run --name db -p 27017:27017 -d mongo:4.0.14
-    - docker start db
     - cd server
     - npm install
     - npm test
