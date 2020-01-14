@@ -44,9 +44,13 @@ services:
       - "${DEV_API_EXTERNAL_PORT}:80"
 
   db:
-    image: "mongo:4.0.14"
+    image: "mongo:3.4"
     command: mongod
     restart: unless-stopped
+    environment:
+        - MONGO_INITDB_ROOT_USERNAME=$DB_USER
+        - MONGO_INITDB_ROOT_PASSWORD=$DB_PASS
+        - MONGO_INITDB_DATABASE=$DB_NAME
     env_file:
       - .env
     ports:
