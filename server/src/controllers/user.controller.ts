@@ -50,13 +50,13 @@ export class UserController {
     async register(@requestBody() userRequest: NewUserRequest) {
         const normalizedUser: NewUserRequest = this.normalizerService.normalize(userRequest, {email: 'toLower', password: 'hash'}) as NewUserRequest;
 
-        if (!validator.isEmail(normalizedUser.email)) {
-            throw new HttpErrors.UnprocessableEntity('invalid email');
+        if (!normalizedUser || !validator.isEmail(normalizedUser.email)) {
+            throw new HttpErrors.UnprocessableEntity('Invalid email.');
         }
 
         const users = await this.userRepository.find({where: {"email": normalizedUser.email}});
         if (users.length > 0) {
-            throw new HttpErrors.Conflict('Email is already in use');
+            throw new HttpErrors.Conflict('Email already in use');
         }
         return this.userRepository.create(normalizedUser);
     }

@@ -49,11 +49,12 @@ services:
     env_file:
       - .env
     ports:
-      - '27017:27017'
+      - '${DB_PORT}:27017'
     networks:
       - "db-tier"
     volumes:
       - db-vol:/data/db
+      - ./scripts/initdb.sh:/docker-entrypoint-initdb.d/initdb.sh
 
 networks:
   db-tier:

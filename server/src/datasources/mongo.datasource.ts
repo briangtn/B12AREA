@@ -8,11 +8,11 @@ import {juggler, AnyObject} from '@loopback/repository';
 import config from './mongo.datasource.config.json';
 
 function updateConfig(dsConfig: AnyObject) {
-    dsConfig.host = process.env.DB_HOST;
-    dsConfig.port = parseInt(process.env.DB_PORT as string);
-    dsConfig.user = process.env.DB_USER;
-    dsConfig.password = process.env.DB_PASS;
-    dsConfig.database = process.env.DB_NAME;
+    dsConfig.host = process.env.DB_HOST ? process.env.DB_HOST : "localhost";
+    dsConfig.port = parseInt((process.env.DB_PORT ? process.env.DB_PORT : '27017') as string);
+    dsConfig.user = process.env.DB_USER ? process.env.DB_USER : dsConfig.user;
+    dsConfig.password = process.env.DB_PASS ? process.env.DB_PASS : dsConfig.password;
+    dsConfig.database = process.env.DB_NAME ? process.env.DB_NAME : dsConfig.database;
 
     return dsConfig;
 }
