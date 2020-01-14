@@ -3,7 +3,7 @@ import {property, repository, model} from '@loopback/repository';
 import {inject} from '@loopback/context';
 import {User} from '../models';
 import validator from 'validator';
-import {NormalizerServiceService} from '../services';
+import {EmailManager, NormalizerServiceService, RandomGeneratorManager} from '../services';
 import {UserRepository} from '../repositories/user.repository';
 // Uncomment these imports to begin using these cool features!
 
@@ -26,7 +26,11 @@ export class NewUserRequest  {
 export class UserController {
     constructor(@repository(UserRepository) public userRepository: UserRepository,
         @inject('services.normalizer')
-        protected normalizerService: NormalizerServiceService) {}
+        protected normalizerService: NormalizerServiceService,
+        @inject('services.randomGenerator')
+        protected randomGeneratorService: RandomGeneratorManager,
+        @inject('services.email')
+        protected emailService: EmailManager) {}
 
     @get('/')
     getUsers() {
@@ -44,12 +48,44 @@ export class UserController {
                         }
                     }
                 }
+            },
+            '400': {
+                description: 'Missing redirect URL',
+                content: {
+                    'application/json': {
+                        schema: {
+                            type: 'object',
+                            properties: {
+                                error: {
+                                    type: 'object',
+                                    properties: {
+                                        statusCode: {
+                                            type: 'number',
+                                            example: 400
+                                        },
+                                        name: {
+                                            type: 'string',
+                                            example: 'BadRequestError'
+                                        },
+                                        message: {
+                                            type: 'string',
+                                            example: 'missing redirect URL'
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
     })
-    async register(@requestBody() userRequest: NewUserRequest) {
-        const normalizedUser: NewUserRequest = this.normalizerService.normalize(userRequest, {email: 'toLower', password: 'hash'}) as NewUserRequest;
+    async register(@requestBody() userRequest: NewUserRequest, @param.query.string('redirectURL') redirectURL?: string) {
+        const normalizedUser: User = this.normalizerService.normalize(userRequest, {email: 'toLower', password: 'hash'}) as User;
 
+        if (!redirectURL) {
+            throw new HttpErrors.BadRequest('missing redirect URL');
+        }
         if (!validator.isEmail(normalizedUser.email)) {
             throw new HttpErrors.UnprocessableEntity('invalid email');
         }
@@ -58,7 +94,27 @@ export class UserController {
         if (users.length > 0) {
             throw new HttpErrors.Conflict('Email is already in use');
         }
-        return this.userRepository.create(normalizedUser);
+
+        normalizedUser.role = ["email_not_validated"];
+        const validationToken: string = this.randomGeneratorService.generateRandomString(24);
+        normalizedUser.validation_token = validationToken;
+        const user: User = await this.userRepository.create(normalizedUser);
+
+        const templateParams: Object = {
+            redirectURL: redirectURL + "?token=" + validationToken
+        };
+        const htmlData: string = await this.emailService.getHtmlFromTemplate("emailValidation", templateParams);
+        const textData: string = await this.emailService.getTextFromTemplate("emailValidation", templateParams);
+        this.emailService.sendMail({
+            from: "AREA <noreply@b12powered.com>",
+            to: normalizedUser.email,
+            subject: "Welcome to AREA",
+            html: htmlData,
+            text: textData
+        })
+        .catch(e => console.log("Failed to deliver email validation email: ", e));
+
+        return user;
     }
 
     @post('/login')
@@ -90,10 +146,96 @@ export class UserController {
     ) {
     }
 
-    @patch('/validate')
-    validateAccount(
+    @patch('/validate', {
+        responses: {
+            '200': {
+                description: 'Email validated',
+                content: {
+                    'application/json': {
+                        schema: {
+                            'x-ts-type': User
+                        }
+                    }
+                }
+            },
+            '400': {
+                description: 'Missing token',
+                content: {
+                    'application/json': {
+                        schema: {
+                            type: 'object',
+                            properties: {
+                                error: {
+                                    type: 'object',
+                                    properties: {
+                                        statusCode: {
+                                            type: 'number',
+                                            example: 400
+                                        },
+                                        name: {
+                                            type: 'string',
+                                            example: 'BadRequestError'
+                                        },
+                                        message: {
+                                            type: 'string',
+                                            example: 'Missing token'
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            '404': {
+                description: 'Token not found',
+                content: {
+                    'application/json': {
+                        schema: {
+                            type: 'object',
+                            properties: {
+                                error: {
+                                    type: 'object',
+                                    properties: {
+                                        statusCode: {
+                                            type: 'number',
+                                            example: 404
+                                        },
+                                        name: {
+                                            type: 'string',
+                                            example: 'NotFoundError'
+                                        },
+                                        message: {
+                                            type: 'string',
+                                            example: 'Token not found'
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    })
+    async validateAccount(
         @param.query.string('token') token?: string
     ) {
+        if (!token) {
+            throw new HttpErrors.BadRequest('Missing token');
+        }
+
+        const user: User|null = await this.userRepository.findOne({
+            where: {
+                validation_token: token
+            }
+        });
+
+        if (!user) {
+            throw new HttpErrors.NotFound('Token not found');
+        }
+
+        return this.userRepository.validateEmail(user.id!);
     }
 
 
