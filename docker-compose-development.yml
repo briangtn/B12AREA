@@ -59,6 +59,7 @@ services:
       - "db-tier"
     volumes:
       - db-vol:/data/db
+      - ./scripts/initdb.sh:/docker-entrypoint-initdb.d/initdb.sh
 
 networks:
   db-tier:

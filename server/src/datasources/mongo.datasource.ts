@@ -28,7 +28,6 @@ export class MongoDataSource extends juggler.DataSource
         @inject('datasources.config.mongo', {optional: true}) dsConfig: object = config,
     ) {
         dsConfig = updateConfig(dsConfig);
-        console.log(dsConfig);
         super(dsConfig);
     }
 
