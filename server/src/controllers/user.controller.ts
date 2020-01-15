@@ -11,7 +11,8 @@ import {UserRepository} from '../repositories/user.repository';
 export class NewUserRequest  {
     @property({
         type: 'string',
-        required: true
+        required: true,
+        regexp: '^w+([.-]?w+)*@w+([.-]?w+)*(.w{2,3})+$',
     })
     email: string;
 
@@ -50,7 +51,10 @@ export class UserController {
     async register(@requestBody() userRequest: NewUserRequest) {
         const normalizedUser: NewUserRequest = this.normalizerService.normalize(userRequest, {email: 'toLower', password: 'hash'}) as NewUserRequest;
 
-        if (!normalizedUser || !validator.isEmail(normalizedUser.email)) {
+        if (!normalizedUser)
+            throw new HttpErrors.InternalServerError();
+
+        if (!validator.isEmail(normalizedUser.email)) {
             throw new HttpErrors.UnprocessableEntity('Invalid email.');
         }
 
