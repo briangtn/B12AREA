@@ -4,9 +4,7 @@ const initialState = {
 
 function rootReducer(state = initialState, action: any) {
     if (action.type === "SWITCH_LANGUAGE") {
-        console.log(action.payload);
-        state.language = action.payload;
-        console.log(state.language);
+        return { ...state, language: action.payload };
     }
     return state;
 }
