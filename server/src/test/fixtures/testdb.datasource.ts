@@ -24,16 +24,14 @@ before(async function() {
     if (process.env.CI) {
         process.env.DB_HOST = "localhost";
         process.env.DB_PORT = "27017";
-        return;
+        process.env.DB_USER = "";
+        process.env.DB_PASS = "";
+    } else {
+        process.env.KUBERNETES_SERVICE_HOST = 'localhost';
+        mongo = await startMongo();
     }
-    process.env.KUBERNETES_SERVICE_HOST = 'localhost';
-    // eslint-disable-next-line no-invalid-this
-    this.timeout(30 * 1000);
-    mongo = await startMongo();
 });
 
 after(async function() {
-    // eslint-disable-next-line no-invalid-this
-    this.timeout(30 * 1000);
     if (mongo) await mongo.stop();
 });
