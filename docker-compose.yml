@@ -42,14 +42,19 @@ services:
   db:
     image: "mongo:4.0.14"
     restart: unless-stopped
+    environment:
+        - MONGO_INITDB_ROOT_USERNAME=$DB_USER
+        - MONGO_INITDB_ROOT_PASSWORD=$DB_PASS
+        - MONGO_INITDB_DATABASE=$DB_NAME
     env_file:
       - .env
     ports:
-      - '27017:27017'
+      - '${DB_PORT}:27017'
     networks:
       - "db-tier"
     volumes:
       - db-vol:/data/db
+      - ./scripts/initdb.sh:/docker-entrypoint-initdb.d/initdb.sh
 
 networks:
   db-tier:
