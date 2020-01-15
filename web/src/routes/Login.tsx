@@ -4,13 +4,14 @@ import { withStyles, createStyles, Theme } from "@material-ui/core";
 
 import NavigationBar from "../components/NavigationBar";
 import OrDivider from "../components/OrDivider";
+import Translator from "../components/Translator";
 
 import Typography from '@material-ui/core/Typography';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 
-import GoogleIcon from "../icons/GoogleIcon";
+import GoogleIcon from "../components/icons/GoogleIcon";
 import TwitterIcon from '@material-ui/icons/Twitter';
 
 interface Props {
@@ -74,7 +75,7 @@ class Login extends Component<Props, State> {
                     style={{ marginTop: '-50px', minHeight: '100vh', textAlign: 'center' }}
                 >
                     <Grid item xs={3}>
-                        <Typography variant="h3" gutterBottom>Sign In</Typography>
+                        <Typography variant="h3" gutterBottom><Translator sentence="signin" /></Typography>
                         <br />
                         <TextField
                             id="email"
@@ -103,7 +104,7 @@ class Login extends Component<Props, State> {
                             className={classes.loginButton}
                             onClick={this.onSubmit}
                         >
-                            Sign In
+                            <Translator sentence="signin" />
                         </Button>
                         <br />
                         <OrDivider />
@@ -115,7 +116,7 @@ class Login extends Component<Props, State> {
                                     className={classes.imageButton}
                                     startIcon={<GoogleIcon />}
                                 >
-                                    Connect with Google
+                                    <Translator sentence="connectGoogle" />
                                 </Button>
                             </Grid>
                             <Grid item xs={6}>
@@ -124,7 +125,7 @@ class Login extends Component<Props, State> {
                                     className={classes.imageButton}
                                     startIcon={<TwitterIcon />}
                                 >
-                                    Connect with Twitter
+                                    <Translator sentence="connectTwitter" />
                                 </Button>
                             </Grid>
                         </Grid>

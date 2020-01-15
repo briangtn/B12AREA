@@ -4,6 +4,7 @@ import { withStyles, createStyles, Theme } from "@material-ui/core";
 
 import NavigationBar from "../components/NavigationBar";
 import OrDivider from "../components/OrDivider";
+import Translator from "../components/Translator";
 
 import Typography from '@material-ui/core/Typography';
 import Grid from '@material-ui/core/Grid';
@@ -12,7 +13,7 @@ import TextField from '@material-ui/core/TextField';
 import Snackbar from '@material-ui/core/Snackbar';
 import MuiAlert from '@material-ui/lab/Alert';
 
-import GoogleIcon from "../icons/GoogleIcon";
+import GoogleIcon from "../components/icons/GoogleIcon";
 import TwitterIcon from '@material-ui/icons/Twitter';
 
 function Alert(props: any) {
@@ -148,7 +149,7 @@ class Join extends Component<Props, State> {
                     style={{ marginTop: '-50px', minHeight: '100vh', textAlign: 'center' }}
                 >
                     <Grid item xs={3}>
-                        <Typography variant="h3" gutterBottom>Sign Up</Typography>
+                        <Typography variant="h3" gutterBottom><Translator sentence="signup" /></Typography>
                         <br />
                         <TextField
                             id="email"
@@ -189,7 +190,7 @@ class Join extends Component<Props, State> {
                             className={classes.signupButton}
                             onClick={this.onSubmit}
                         >
-                            Sign Up
+                            <Translator sentence="signup" />
                         </Button>
                         <br />
                         <OrDivider />
@@ -201,7 +202,7 @@ class Join extends Component<Props, State> {
                                     className={classes.imageButton}
                                     startIcon={<GoogleIcon />}
                                 >
-                                    Connect with Google
+                                    <Translator sentence="connectGoogle" />
                                 </Button>
                             </Grid>
                             <Grid item xs={6}>
@@ -210,7 +211,7 @@ class Join extends Component<Props, State> {
                                     className={classes.imageButton}
                                     startIcon={<TwitterIcon />}
                                 >
-                                    Connect with Twitter
+                                    <Translator sentence="connectTwitter" />
                                 </Button>
                             </Grid>
                         </Grid>

@@ -9,20 +9,21 @@ import './App.css';
 
 import NavigationBar from "./components/NavigationBar";
 import OrDivider from "./components/OrDivider";
+import Translator from "./components/Translator";
 
 // Material UI components
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 
-import GoogleIcon from './icons/GoogleIcon';
+import GoogleIcon from './components/icons/GoogleIcon';
 import TwitterIcon from '@material-ui/icons/Twitter';
 import YoutubeIcon from '@material-ui/icons/YouTube';
 import GitHubIcon from '@material-ui/icons/GitHub';
-import SpotifyIcon from "./icons/SpotifyIcon";
-import TeamsIcon from "./icons/TeamsIcon";
-import OutlookIcon from "./icons/OutlookIcon";
-import AirtableIcon from "./icons/AirtableIcon";
+import SpotifyIcon from "./components/icons/SpotifyIcon";
+import TeamsIcon from "./components/icons/TeamsIcon";
+import OutlookIcon from "./components/icons/OutlookIcon";
+import AirtableIcon from "./components/icons/AirtableIcon";
 import InputBase from "@material-ui/core/InputBase";
 import Divider from "@material-ui/core/Divider";
 import Paper from "@material-ui/core/Paper";
@@ -124,11 +125,9 @@ class App extends Component<Props, State> {
                 <NavigationBar />
                 <Grid container spacing={3} style={{ width: '100%', margin: '0px'}}>
                     <Grid item xs={6}>
-                        <Typist>
-                            <Typography className={classes.gridContent} variant="h3" gutterBottom>
-                                Connect all your services together
-                            </Typography>
-                        </Typist>
+                        <Typography className={classes.gridContent} variant="h3" gutterBottom>
+                            <Translator sentence="heroMessage" />
+                        </Typography>
                     </Grid>
                     <Grid className={classes.quickForm} item xs={6}>
                         <Paper component="form" className={classes.root} elevation={0}>
@@ -143,7 +142,7 @@ class App extends Component<Props, State> {
                             <Link
                                 to={{pathname: '/join', state: { email: this.state.email }}}
                                 style={{ textDecoration: 'none', color: '#FFFFFF' }}>
-                                <Button color="primary">Get Started</Button>
+                                <Button color="primary"><Translator sentence="getStarted" /></Button>
                             </Link>
                         </Paper>
                         <OrDivider />
@@ -155,7 +154,7 @@ class App extends Component<Props, State> {
                                     startIcon={<GoogleIcon />}
                                     disableElevation={true}
                                 >
-                                    Connect with Google
+                                    <Translator sentence="connectGoogle" />
                                 </Button>
                             </Grid>
                             <Grid item xs={6}>
@@ -165,7 +164,7 @@ class App extends Component<Props, State> {
                                     startIcon={<TwitterIcon />}
                                     disableElevation={true}
                                 >
-                                    Connect with Twitter
+                                    <Translator sentence="connectTwitter" />
                                 </Button>
                             </Grid>
                         </Grid>
