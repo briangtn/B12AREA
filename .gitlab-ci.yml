@@ -70,7 +70,7 @@ tests-docker-compose:
   script:
     - apk update && apk add --no-cache py-pip curl python-dev libffi-dev openssl-dev gcc libc-dev make
     - pip install docker-compose
-    - cp .env.example .env
+    - touch .env
     - docker-compose build
     - docker-compose up
     - sleep 5
