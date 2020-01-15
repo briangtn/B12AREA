@@ -9,6 +9,8 @@ import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import Toolbar from '@material-ui/core/Toolbar';
 
+import LanguagePicker from "./LanguagePicker";
+
 interface Props {
     classes: {
         title: string,
@@ -40,6 +42,8 @@ class NavigationBar extends Component <Props, State> {
                         <Typography variant="h6" className={classes.title}>
                             <Link to='/' style={{ textDecoration: 'none', color: '#FFFFFF' }}>AREA</Link>
                         </Typography>
+                        <LanguagePicker />
+                        &nbsp;
                         <Link to="/login" style={{ textDecoration: 'none', color: '#FFFFFF' }}>
                             <Button color="secondary">Sign In</Button>
                         </Link>

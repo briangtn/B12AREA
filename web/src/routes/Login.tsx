@@ -10,7 +10,7 @@ import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 
-import GoogleIcon from "../icons/GoogleIcon";
+import GoogleIcon from "../components/icons/GoogleIcon";
 import TwitterIcon from '@material-ui/icons/Twitter';
 
 interface Props {

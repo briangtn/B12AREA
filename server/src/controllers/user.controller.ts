@@ -1,4 +1,4 @@
-import {RestBindings, getModelSchemaRef, requestBody, get, post, patch, param, api, HttpErrors} from '@loopback/rest';
+import {RestBindings, requestBody, get, post, patch, param, api, HttpErrors} from '@loopback/rest';
 import {property, repository, model} from '@loopback/repository';
 import {inject} from '@loopback/context';
 import {User} from '../models';
@@ -11,7 +11,8 @@ import {UserRepository} from '../repositories/user.repository';
 export class NewUserRequest  {
     @property({
         type: 'string',
-        required: true
+        required: true,
+        regexp: '^w+([.-]?w+)*@w+([.-]?w+)*(.w{2,3})+$',
     })
     email: string;
 
@@ -86,13 +87,16 @@ export class UserController {
         if (!redirectURL) {
             throw new HttpErrors.BadRequest('missing redirect URL');
         }
+        if (!normalizedUser)
+            throw new HttpErrors.InternalServerError();
+
         if (!validator.isEmail(normalizedUser.email)) {
-            throw new HttpErrors.UnprocessableEntity('invalid email');
+            throw new HttpErrors.UnprocessableEntity('Invalid email.');
         }
 
         const users = await this.userRepository.find({where: {"email": normalizedUser.email}});
         if (users.length > 0) {
-            throw new HttpErrors.Conflict('Email is already in use');
+            throw new HttpErrors.Conflict('Email already in use');
         }
 
         normalizedUser.role = ["email_not_validated"];

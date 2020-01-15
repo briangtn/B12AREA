@@ -44,7 +44,7 @@ services:
       - "${DEV_API_EXTERNAL_PORT}:80"
 
   db:
-    image: "mongo:3.4"
+    image: "mongo:4.0.14"
     command: mongod
     restart: unless-stopped
     environment:
