@@ -51,7 +51,7 @@ export class UserController {
                 }
             },
             '400': {
-                description: 'Missing redirect URL',
+                description: 'Missing redirect URL or invalid email',
                 content: {
                     'application/json': {
                         schema: {
@@ -69,8 +69,36 @@ export class UserController {
                                             example: 'BadRequestError'
                                         },
                                         message: {
+                                            type: 'string'
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            '409': {
+                description: 'Email already in use',
+                content: {
+                    'application/json': {
+                        schema: {
+                            type: 'object',
+                            properties: {
+                                error: {
+                                    type: 'object',
+                                    properties: {
+                                        statusCode: {
+                                            type: 'number',
+                                            example: 409
+                                        },
+                                        name: {
                                             type: 'string',
-                                            example: 'missing redirect URL'
+                                            example: 'ConflictError'
+                                        },
+                                        message: {
+                                            type: 'string',
+                                            example: 'Email already in use'
                                         }
                                     }
                                 }
@@ -91,7 +119,7 @@ export class UserController {
             throw new HttpErrors.InternalServerError();
 
         if (!validator.isEmail(normalizedUser.email)) {
-            throw new HttpErrors.UnprocessableEntity('Invalid email.');
+            throw new HttpErrors.BadRequest('Invalid email.');
         }
 
         const users = await this.userRepository.find({where: {"email": normalizedUser.email}});
