@@ -25,6 +25,22 @@ export class NewUserRequest  {
     password: string;
 }
 
+@model()
+export class AskForPasswordResetRequest {
+    @property({
+        type: 'string',
+        required: true,
+        regexp: '^w+([.-]?w+)*@w+([.-]?w+)*(.w{2,3})+$'
+    })
+    email: string;
+
+    @property({
+        type: 'string',
+        required: true
+    })
+    redirectURL: string;
+}
+
 @api({basePath: '/users', paths: {}})
 export class UserController {
     constructor(@repository(UserRepository) public userRepository: UserRepository,
@@ -176,8 +192,86 @@ export class UserController {
 
     }
 
-    @post('/resetPassword')
-    sendResetPasswordMail() {
+    @post('/resetPassword', {
+        responses: {
+            '200': {
+                description: 'Email sent if user exist'
+            },
+            '400': {
+                description: 'Invalid email',
+                content: {
+                    'application/json': {
+                        schema: {
+                            type: 'object',
+                            properties: {
+                                error: {
+                                    type: 'object',
+                                    properties: {
+                                        statusCode: {
+                                            type: 'number',
+                                            example: 400
+                                        },
+                                        name: {
+                                            type: 'string',
+                                            example: 'BadRequestError'
+                                        },
+                                        message: {
+                                            type: 'string',
+                                            example: 'Invalid email.'
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    })
+    async sendResetPasswordMail(@requestBody() userRequest: AskForPasswordResetRequest) {
+        const normalizedRequest: AskForPasswordResetRequest = this.normalizerService.normalize(userRequest, {email: 'toLower'}) as AskForPasswordResetRequest;
+
+        if (!normalizedRequest) {
+            throw new HttpErrors.InternalServerError();
+        }
+
+        if (!validator.isEmail(normalizedRequest.email)) {
+            throw new HttpErrors.BadRequest('Invalid email.');
+        }
+
+        const user: User|null = await this.userRepository.findOne({where: {"email": normalizedRequest.email}});
+
+        const resetToken: string = this.randomGeneratorService.generateRandomString(24);
+
+        const parsedURL: url.UrlWithStringQuery = url.parse(userRequest.redirectURL);
+        let endURL: string = parsedURL.protocol + '//' + parsedURL.host + parsedURL.pathname;
+        if (parsedURL.search) {
+            endURL += parsedURL.search + "&token=" + resetToken;
+        } else {
+            endURL += "?token=" + resetToken;
+        }
+        const templateParams: Object = {
+            redirectURL: endURL,
+            redirectProtocol: parsedURL.protocol,
+            redirectHost: parsedURL.host
+        };
+        const htmlData: string = await this.emailService.getHtmlFromTemplate("emailAskReset", templateParams);
+        const textData: string = await this.emailService.getTextFromTemplate("emailAskReset", templateParams);
+
+        if (user) {
+            await this.userRepository.updateById(user.id, {
+                resetToken: resetToken
+            });
+            this.emailService.sendMail({
+                from: "AREA <noreply@b12powered.com>",
+                to: user.email,
+                subject: "Reset password instructions",
+                html: htmlData,
+                text: textData
+            }).catch(e => console.log("Failed to deliver password reset email: ", e));
+        }
+
+        return {};
     }
 
     @patch('/resetPassword')
