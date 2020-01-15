@@ -115,7 +115,7 @@ export class UserController {
         const normalizedUser: User = this.normalizerService.normalize(userRequest, {email: 'toLower', password: 'hash'}) as User;
 
         if (!redirectURL) {
-            throw new HttpErrors.BadRequest('missing redirect URL');
+            throw new HttpErrors.BadRequest('Missing redirect URL.');
         }
         if (!normalizedUser)
             throw new HttpErrors.InternalServerError();

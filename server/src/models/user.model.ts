@@ -2,6 +2,7 @@ import {Entity, model, property} from '@loopback/repository';
 
 @model({
     settings: {
+        hiddenProperties: ['password', 'validationToken', 'resetToken'],
         indexes: {
             uniqueEmail: {
                 keys: {

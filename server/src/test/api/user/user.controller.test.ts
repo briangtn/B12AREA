@@ -2,6 +2,7 @@ import {AreaApplication} from '../../../application';
 import {setupApplication} from '../../acceptance/test-helper';
 import { UserRepository } from '../../../repositories/user.repository';
 import { Client, expect } from '@loopback/testlab';
+import {User} from "../../../models";
 
 describe('/users', () => {
     let app: AreaApplication;
@@ -73,6 +74,89 @@ describe('/users', () => {
                 .expect(200);
             const body = res.body;
             expect(body.id).to.not.empty();
+            const dbUser: User = await userRepo.findById(body.id);
+            expect(dbUser.validationToken).to.not.empty();
+            expect(dbUser.role).containDeep(['email_not_validated']);
+            expect(dbUser.role).not.containDeep(['user']);
+        });
+
+        it('Should fail when redirect url is not given', async () => {
+            const newUser = {email: "test@area.fr", password: "p@22w0rd"};
+            const res = await client
+                .post('/users/register')
+                .send(newUser)
+                .expect(400);
+            const error = JSON.parse(res.error.text);
+            expect(error.error.message).to.equal('Missing redirect URL.')
+        });
+    });
+
+    describe('PATCH /users/validate', () => {
+        it('Should validate token', async () => {
+            const token = 'azertyuiopqsdfghjklmwxcv';
+            await userRepo.create({
+                email: "test2@test.fr",
+                password: 'test2',
+                validationToken: token,
+                role: ['email_not_validated']
+            });
+            const res = await client
+                .patch('/users/validate?token=' + token)
+                .send({})
+                .expect(200);
+            const body = res.body;
+            expect(body.id).to.not.empty();
+            const dbUser: User = await userRepo.findById(body.id);
+            expect(dbUser.validationToken).to.be.null();
+            expect(dbUser.role).containDeep(['user']);
+            expect(dbUser.role).not.containDeep(['email_not_validated']);
+        });
+
+        it('Should send 400 on empty token', async () => {
+            const token = 'azertyuiopqsdfghjklmwxcv';
+            await userRepo.create({
+                email: "test2@test.fr",
+                password: 'test2',
+                validationToken: token,
+                role: ['email_not_validated']
+            });
+            const res = await client
+                .patch('/users/validate?token=')
+                .send({})
+                .expect(400);
+            const error = JSON.parse(res.error.text);
+            expect(error.error.message).to.equal('Missing token');
+        });
+        it('Should send 400 on missing token', async () => {
+            const token = 'azertyuiopqsdfghjklmwxcv';
+            await userRepo.create({
+                email: "test2@test.fr",
+                password: 'test2',
+                validationToken: token,
+                role: ['email_not_validated']
+            });
+            const res = await client
+                .patch('/users/validate')
+                .send({})
+                .expect(400);
+            const error = JSON.parse(res.error.text);
+            expect(error.error.message).to.equal('Missing token');
+        });
+
+        it('Should send 404 on invalid token', async () => {
+            const token = 'azertyuiopqsdfghjklmwxcv';
+            await userRepo.create({
+                email: "test2@test.fr",
+                password: 'test2',
+                validationToken: token,
+                role: ['email_not_validated']
+            });
+            const res = await client
+                .patch('/users/validate?token=toto')
+                .send({})
+                .expect(404);
+            const error = JSON.parse(res.error.text);
+            expect(error.error.message).to.equal('Token not found');
         });
     });
 
