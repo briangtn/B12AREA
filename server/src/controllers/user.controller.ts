@@ -5,6 +5,8 @@ import {User} from '../models';
 import validator from 'validator';
 import {EmailManager, NormalizerServiceService, RandomGeneratorManager} from '../services';
 import {UserRepository} from '../repositories/user.repository';
+import * as url from 'url';
+import {UrlWithStringQuery} from "url";
 // Uncomment these imports to begin using these cool features!
 
 @model()
@@ -132,8 +134,15 @@ export class UserController {
         normalizedUser.validation_token = validationToken;
         const user: User = await this.userRepository.create(normalizedUser);
 
+        const parsedURL: url.UrlWithStringQuery = url.parse(redirectURL);
+        let endURL: string = parsedURL.protocol + '//' + parsedURL.host + parsedURL.pathname;
+        if (parsedURL.search) {
+            endURL += parsedURL.search + "&token=" + validationToken;
+        } else {
+            endURL += "?token=" + validationToken;
+        }
         const templateParams: Object = {
-            redirectURL: redirectURL + "?token=" + validationToken
+            redirectURL: endURL
         };
         const htmlData: string = await this.emailService.getHtmlFromTemplate("emailValidation", templateParams);
         const textData: string = await this.emailService.getTextFromTemplate("emailValidation", templateParams);
