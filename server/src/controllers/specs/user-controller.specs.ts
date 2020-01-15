@@ -19,3 +19,11 @@ export const CredentialsRequestBody = {
 		'application/json': {schema: CredentialsSchema},
 	},
 };
+
+export const RegisterRequestBody = {
+	description: 'The input of register function',
+	required: true,
+	content: {
+		'application/json': {schema: CredentialsSchema},
+	},
+};

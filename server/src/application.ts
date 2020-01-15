@@ -1,5 +1,5 @@
 import {BootMixin} from '@loopback/boot';
-import {ApplicationConfig} from '@loopback/core';
+import {ApplicationConfig, BindingKey} from '@loopback/core';
 import {
     RestExplorerBindings,
     RestExplorerComponent,
@@ -9,6 +9,17 @@ import {RestApplication} from '@loopback/rest';
 import {ServiceMixin} from '@loopback/service-proxy';
 import path from 'path';
 import {MySequence} from './sequence';
+import {TokenServiceBindings, TokenServiceConstants} from "./keys";
+import {JWTService} from "./services";
+
+export interface PackageInfo {
+    name: string;
+    version: string;
+    description: string;
+}
+export const PackageKey = BindingKey.create<PackageInfo>('application.package');
+
+const pkg: PackageInfo = require('../package.json');
 
 export class AreaApplication extends BootMixin(
     ServiceMixin(RepositoryMixin(RestApplication)),
@@ -24,10 +35,7 @@ export class AreaApplication extends BootMixin(
         // Set up default home page
         this.static('/', path.join(__dirname, '../public'));
 
-        // Customize @loopback/rest-explorer configuration here
-        this.bind(RestExplorerBindings.CONFIG).to({
-            path: '/explorer',
-        });
+        this.setUpBindings();
         this.component(RestExplorerComponent);
 
         this.projectRoot = __dirname;
@@ -40,5 +48,25 @@ export class AreaApplication extends BootMixin(
                 nested: true,
             },
         };
+    }
+
+    setUpBindings(): void {
+        this.bind(RestExplorerBindings.CONFIG).to({
+            path: '/explorer',
+        });
+
+        this.bind(PackageKey).to(pkg);
+
+        if (TokenServiceConstants.TOKEN_SECRET_VALUE == undefined)
+            throw "Please provide a secret value to generate JsonWebToken using the AREA_JWT_SECRET_VALUE environment variable";
+        this.bind(TokenServiceBindings.TOKEN_SECRET).to(
+            TokenServiceConstants.TOKEN_SECRET_VALUE,
+        );
+
+        this.bind(TokenServiceBindings.TOKEN_EXPIRES_IN).to(
+            TokenServiceConstants.TOKEN_EXPIRES_IN_VALUE,
+        );
+
+        this.bind(TokenServiceBindings.TOKEN_SERVICE).toClass(JWTService);
     }
 }

@@ -3,31 +3,25 @@ import {property, repository, model} from '@loopback/repository';
 import {inject} from '@loopback/context';
 import {User} from '../models';
 import validator from 'validator';
-import {NormalizerServiceService} from '../services';
+import {NormalizerServiceService, UserService} from '../services';
 import {Credentials, UserRepository} from '../repositories/user.repository';
-import {CredentialsRequestBody} from "./specs/user-controller.specs";
-
-@model()
-export class NewUserRequest  {
-    @property({
-        type: 'string',
-        required: true,
-        regexp: '^w+([.-]?w+)*@w+([.-]?w+)*(.w{2,3})+$',
-    })
-    email: string;
-
-    @property({
-        type: 'string',
-        required: true
-    })
-    password: string;
-}
+import {TokenService} from "@loopback/authentication";
+import {UserProfile} from "@loopback/security";
+import {TokenServiceBindings} from "../keys";
+import {CredentialsRequestBody, RegisterRequestBody} from "./specs/user-controller.specs";
 
 @api({basePath: '/users', paths: {}})
 export class UserController {
     constructor(@repository(UserRepository) public userRepository: UserRepository,
         @inject('services.normalizer')
-        protected normalizerService: NormalizerServiceService) {}
+        protected normalizerService: NormalizerServiceService,
+
+        @inject('services.user')
+        protected userService: UserService,
+
+        @inject(TokenServiceBindings.TOKEN_SERVICE)
+        protected tokenService: TokenService,
+    ) {}
 
     @get('/')
     getUsers() {
@@ -48,8 +42,8 @@ export class UserController {
             }
         }
     })
-    async register(@requestBody() userRequest: NewUserRequest) {
-        const normalizedUser: NewUserRequest = this.normalizerService.normalize(userRequest, {email: 'toLower', password: 'hash'}) as NewUserRequest;
+    async register(@requestBody(RegisterRequestBody) credentials: Credentials) {
+        const normalizedUser: Credentials = this.normalizerService.normalize(credentials, {email: 'toLower', password: 'hash'}) as Credentials;
 
         if (!normalizedUser)
             throw new HttpErrors.InternalServerError();
@@ -65,14 +59,40 @@ export class UserController {
         return this.userRepository.create(normalizedUser);
     }
 
-    @post('/login')
+    @post('/login', {
+        responses: {
+            '200': {
+                description: 'Gives a JWT to a user that logged in',
+                content: {
+                    'application/json': {
+                        schema: {
+                            type: 'object',
+                            properties: {
+                                token: {
+                                    type: 'string',
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        },
+    })
     async login(
         @requestBody(CredentialsRequestBody) credentials: Credentials,
     ): Promise<{token: string}> {
-        const token = "";
-//        const user = await this.userService.verifyCredentials(credentials);
-//        const userProfile = this.userService.convertToUserProfile(user);
-//        const token = await this.jwtService.generateToken(userProfile);
+        const normalizeCredentials: Credentials = this.normalizerService.normalize(credentials, {email: 'toLower', password: 'hash'}) as Credentials;
+
+        if (!normalizeCredentials)
+            throw new HttpErrors.UnprocessableEntity();
+        else if (!validator.isEmail(normalizeCredentials.email))
+            throw new HttpErrors.UnprocessableEntity('Invalid email');
+
+        const user = await this.userService.checkCredentials(credentials);
+        const token = await this.tokenService.generateToken({
+            email: user.email
+        } as UserProfile);
+
         return {token};
     }
 
