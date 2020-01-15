@@ -2,6 +2,7 @@ import {Entity, model, property} from '@loopback/repository';
 
 @model({
     settings: {
+        hiddenProperties: ['password', 'validationToken', 'resetToken'],
         indexes: {
             uniqueEmail: {
                 keys: {
@@ -51,12 +52,12 @@ export class User extends Entity {
         type: 'string',
         required: false,
     })
-    validation_token?: string;
+    validationToken?: string;
 
     @property({
         type: 'string',
     })
-    reset_token?: string;
+    resetToken?: string;
 
     // Define well-known properties here
 
