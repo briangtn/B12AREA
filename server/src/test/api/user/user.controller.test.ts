@@ -31,7 +31,7 @@ describe('/users', () => {
     describe('POST /users/register', () => {
         it('Error when email already taken', async () => {
             const res = await client
-                .post('/users/register')
+                .post('/users/register?redirectURL=http://localhost:8081/validate?api=http://localhost:8080')
                 .send({email: "test@test.fr", password: "p@22w0rd"})
                 .expect(409);
             const error = JSON.parse(res.error.text);
@@ -40,16 +40,16 @@ describe('/users', () => {
 
         it('Error when email is invalid', async () => {
             const res = await client
-                .post('/users/register')
+                .post('/users/register?redirectURL=http://localhost:8081/validate?api=http://localhost:8080')
                 .send({email: "testest.fr", password: "p@22w0rd"})
-                .expect(422);
+                .expect(400);
             const error = JSON.parse(res.error.text);
             expect(error.error.message).to.equal('Invalid email.')
         });
 
         it('Empty email', async () => {
             const res = await client
-                .post('/users/register')
+                .post('/users/register?redirectURL=http://localhost:8081/validate?api=http://localhost:8080')
                 .send({password: "p@22w0rd"})
                 .expect(422);
             const error = JSON.parse(res.error.text);
@@ -58,7 +58,7 @@ describe('/users', () => {
 
         it('Empty password', async () => {
             const res = await client
-                .post('/users/register')
+                .post('/users/register?redirectURL=http://localhost:8081/validate?api=http://localhost:8080')
                 .send({email: "test@test.fr"})
                 .expect(422);
             const error = JSON.parse(res.error.text);
@@ -68,7 +68,7 @@ describe('/users', () => {
         it('Success', async () => {
             const newUser = {email: "test@area.fr", password: "p@22w0rd"};
             const res = await client
-                .post('/users/register')
+                .post('/users/register?redirectURL=http://localhost:8081/validate?api=http://localhost:8080')
                 .send(newUser)
                 .expect(200);
             const body = res.body;

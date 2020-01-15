@@ -20,9 +20,10 @@ export class UserRepository extends DefaultCrudRepository<
         if (!user)
             return null;
         const newRoles = user.role?.filter((role: string) => {return role !== 'email_not_validated' && role !== 'user'});
-        newRoles?.push('user');
+        if (newRoles)
+            newRoles.push('user');
         await this.updateById(userId, {
-            validation_token: undefined,
+            validationToken: undefined,
             role: newRoles
         });
         return this.findById(userId);

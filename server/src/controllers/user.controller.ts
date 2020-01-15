@@ -131,7 +131,7 @@ export class UserController {
 
         normalizedUser.role = ["email_not_validated"];
         const validationToken: string = this.randomGeneratorService.generateRandomString(24);
-        normalizedUser.validation_token = validationToken;
+        normalizedUser.validationToken = validationToken;
         const user: User = await this.userRepository.create(normalizedUser);
 
         const parsedURL: url.UrlWithStringQuery = url.parse(redirectURL);
@@ -152,8 +152,7 @@ export class UserController {
             subject: "Welcome to AREA",
             html: htmlData,
             text: textData
-        })
-        .catch(e => console.log("Failed to deliver email validation email: ", e));
+        }).catch(e => console.log("Failed to deliver email validation email: ", e));
 
         return user;
     }
@@ -268,7 +267,7 @@ export class UserController {
 
         const user: User|null = await this.userRepository.findOne({
             where: {
-                validation_token: token
+                validationToken: token
             }
         });
 
