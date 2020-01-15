@@ -17,6 +17,11 @@ import ClientAPK from "./routes/ClientAPK";
 import Join from "./routes/Join";
 import Login from "./routes/Login";
 
+// React Redux
+
+import { Provider } from 'react-redux';
+import rootStore from "./store/rootStore.store";
+
 interface Props {}
 
 interface State {
@@ -41,15 +46,17 @@ class RouterComponent extends React.Component<Props, State> {
 
     render() {
         return (
-            <MuiThemeProvider theme={ this.state.theme }>
-                <Router>
-                    <Route exact path='/' component={App} />
-                    <Route path='/join' component={Join} />
-                    <Route path='/login' component={Login} />
-                    <Route path='/readinessProbe' component={ReadinessProbe} />
-                    <Route path='/client.apk' component={ClientAPK} />
-                </Router>
-            </MuiThemeProvider>
+            <Provider store={rootStore}>
+                <MuiThemeProvider theme={ this.state.theme }>
+                    <Router>
+                        <Route exact path='/' component={App} />
+                        <Route path='/join' component={Join} />
+                        <Route path='/login' component={Login} />
+                        <Route path='/readinessProbe' component={ReadinessProbe} />
+                        <Route path='/client.apk' component={ClientAPK} />
+                    </Router>
+                </MuiThemeProvider>
+            </Provider>
         );
     }
 }
