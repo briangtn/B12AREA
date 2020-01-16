@@ -3,6 +3,7 @@ import {setupApplication} from '../../acceptance/test-helper';
 import { UserRepository } from '../../../repositories/user.repository';
 import { Client, expect } from '@loopback/testlab';
 import {User} from "../../../models";
+import {TokenServiceBindings} from "../../../keys";
 
 describe('/users', () => {
     let app: AreaApplication;
@@ -22,7 +23,9 @@ describe('/users', () => {
     before(migrateSchema);
     beforeEach(async () => {
         await userRepo.deleteAll();
-        await userRepo.create(userData);
+        await client
+            .post('/users/register?redirectURL=http://localhost:8081/validate?api=http://localhost:8080')
+            .send(userData)
     });
 
     after(async () => {
@@ -88,6 +91,77 @@ describe('/users', () => {
                 .expect(400);
             const error = JSON.parse(res.error.text);
             expect(error.error.message).to.equal('Missing redirect URL.')
+        });
+    });
+
+    describe('POST /users/login', () => {
+        it('Success', async () => {
+            const res = await client
+                .post('/users/login')
+                .send(userData)
+                .expect(200);
+            const body = res.body;
+            expect(body.token).to.not.empty();
+        });
+
+        it('fails when email invalid', async () => {
+            await client
+                .post('/users/login')
+                .send({
+                    email: "test@testa.fr",
+                    password: 'test'
+                })
+                .expect(401);
+        });
+
+        it('fails when password invalid', async () => {
+            await client
+                .post('/users/login')
+                .send({
+                    email: "test@test.fr",
+                    password: 'testeuh'
+                })
+                .expect(401);
+        });
+
+        it('fails when password and email are invalid', async () => {
+            await client
+                .post('/users/login')
+                .send({
+                    email: "test@testa.fr",
+                    password: 'testeuh'
+                })
+                .expect(401);
+        });
+
+        it('fails when password and email are empty', async () => {
+            await client
+                .post('/users/login')
+                .send({
+                    email: "",
+                    password: ''
+                })
+                .expect(422);
+        });
+
+        it('fails when email is empty', async () => {
+            await client
+                .post('/users/login')
+                .send({
+                    email: "",
+                    password: 'testeuh'
+                })
+                .expect(422);
+        });
+
+        it('fails when password is empty', async () => {
+            await client
+                .post('/users/login')
+                .send({
+                    email: "test@test.fr",
+                    password: ''
+                })
+                .expect(422);
         });
     });
 

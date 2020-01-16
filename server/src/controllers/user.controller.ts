@@ -221,6 +221,8 @@ export class UserController {
     async login(
         @requestBody(CredentialsRequestBody) credentials: Credentials,
     ): Promise<{token: string}> {
+        if (credentials.password.length === 0)
+            throw new HttpErrors.UnprocessableEntity('Empty password');
         const normalizeCredentials: Credentials = this.normalizerService.normalize(credentials, {email: 'toLower', password: 'hash'}) as Credentials;
 
         if (!normalizeCredentials)
