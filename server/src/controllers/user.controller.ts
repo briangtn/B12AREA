@@ -41,6 +41,20 @@ export class AskForPasswordResetRequest {
     redirectURL: string;
 }
 
+@model()
+export class ValidatePasswordResetRequest {
+    @property({
+        type: 'string',
+        required: true
+    })
+    token: string;
+    @property({
+        type: 'string',
+        required: true
+    })
+    password: string;
+}
+
 @api({basePath: '/users', paths: {}})
 export class UserController {
     constructor(@repository(UserRepository) public userRepository: UserRepository,
@@ -255,8 +269,8 @@ export class UserController {
             redirectProtocol: parsedURL.protocol,
             redirectHost: parsedURL.host
         };
-        const htmlData: string = await this.emailService.getHtmlFromTemplate("emailAskReset", templateParams);
-        const textData: string = await this.emailService.getTextFromTemplate("emailAskReset", templateParams);
+        const htmlData: string = await this.emailService.getHtmlFromTemplate("passwordAskReset", templateParams);
+        const textData: string = await this.emailService.getTextFromTemplate("passwordAskReset", templateParams);
 
         if (user) {
             await this.userRepository.updateById(user.id, {
@@ -275,9 +289,24 @@ export class UserController {
     }
 
     @patch('/resetPassword')
-    resetPassword(
-        @param.query.string('token') token?: string
-    ) {
+    async resetPassword(@requestBody() userRequest: ValidatePasswordResetRequest) {
+        const normalizedRequest: ValidatePasswordResetRequest = this.normalizerService.normalize(userRequest, {password: 'hash'}) as ValidatePasswordResetRequest;
+
+        if (!normalizedRequest) {
+            throw new HttpErrors.InternalServerError();
+        }
+
+        const user: User|null = await this.userRepository.findOne({
+            where: {
+                resetToken: normalizedRequest.token
+            }
+        });
+
+        if (!user) {
+            throw new HttpErrors.NotFound('Token not found');
+        }
+
+        return this.userRepository.updatePassword(user.id!, normalizedRequest.password);
     }
 
     @patch('/validate', {
