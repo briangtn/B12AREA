@@ -239,6 +239,47 @@ export class UserController {
                         }
                     }
                 }
+            },
+            '422': {
+                description: 'Invalid params',
+                content: {
+                    'application/json': {
+                        schema: {
+                            type: 'object',
+                            properties: {
+                                error: {
+                                    type: 'object',
+                                    properties: {
+                                        statusCode: {
+                                            type: 'number',
+                                            example: 422
+                                        },
+                                        name: {
+                                            type: 'string',
+                                            example: 'UnprocessableEntityError'
+                                        },
+                                        message: {
+                                            type: 'string',
+                                            example: 'The request body is invalid. See error object `details` property for more info.'
+                                        },
+                                        details: {
+                                            type: 'array',
+                                            items: {
+                                                type: 'object',
+                                                properties: {
+                                                    message: {
+                                                        type: 'string',
+                                                        example: 'should have required property \'email\''
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
     })
@@ -288,7 +329,90 @@ export class UserController {
         return {};
     }
 
-    @patch('/resetPassword')
+    @patch('/resetPassword', {
+        responses: {
+            '200': {
+                description: 'Password changed',
+                content: {
+                    'application/json': {
+                        schema: {
+                            'x-ts-type': User
+                        }
+                    }
+                }
+            },
+            '404': {
+                description: 'Token not found',
+                content: {
+                    'application/json': {
+                        schema: {
+                            type: 'object',
+                            properties: {
+                                error: {
+                                    type: 'object',
+                                    properties: {
+                                        statusCode: {
+                                            type: 'number',
+                                            example: 404
+                                        },
+                                        name: {
+                                            type: 'string',
+                                            example: 'NotFoundError'
+                                        },
+                                        message: {
+                                            type: 'string',
+                                            example: 'Token not found'
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            '422': {
+                description: 'Invalid params',
+                content: {
+                    'application/json': {
+                        schema: {
+                            type: 'object',
+                            properties: {
+                                error: {
+                                    type: 'object',
+                                    properties: {
+                                        statusCode: {
+                                            type: 'number',
+                                            example: 422
+                                        },
+                                        name: {
+                                            type: 'string',
+                                            example: 'UnprocessableEntityError'
+                                        },
+                                        message: {
+                                            type: 'string',
+                                            example: 'The request body is invalid. See error object `details` property for more info.'
+                                        },
+                                        details: {
+                                            type: 'array',
+                                            items: {
+                                                type: 'object',
+                                                properties: {
+                                                    message: {
+                                                        type: 'string',
+                                                        example: 'should have required property \'password\''
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    })
     async resetPassword(@requestBody() userRequest: ValidatePasswordResetRequest) {
         const normalizedRequest: ValidatePasswordResetRequest = this.normalizerService.normalize(userRequest, {password: 'hash'}) as ValidatePasswordResetRequest;
 
