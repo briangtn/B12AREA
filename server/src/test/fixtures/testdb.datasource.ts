@@ -11,7 +11,6 @@ async function startMongo() {
         .start();
     process.env.DB_HOST = container.getContainerIpAddress();
     process.env.DB_PORT = container.getMappedPort(27017).toString();
-
     return container;
 }
 
@@ -21,6 +20,8 @@ export const testdb: juggler.DataSource = new juggler.DataSource({
 });
 
 before(async function() {
+    // eslint-disable-next-line no-invalid-this
+    this.timeout(60000);
     if (process.env.CI) {
         process.env.DB_HOST = "localhost";
         process.env.DB_PORT = "27017";
@@ -30,6 +31,8 @@ before(async function() {
         process.env.KUBERNETES_SERVICE_HOST = 'localhost';
         mongo = await startMongo();
     }
+    // eslint-disable-next-line no-invalid-this
+    this.timeout(6000);
 });
 
 after(async function() {
