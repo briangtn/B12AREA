@@ -1,4 +1,4 @@
-import {RestBindings, requestBody, get, post, patch, param, api, HttpErrors} from '@loopback/rest';
+import {requestBody, get, post, patch, param, api, HttpErrors} from '@loopback/rest';
 import {property, repository, model} from '@loopback/repository';
 import {inject} from '@loopback/context';
 import {User} from '../models';
@@ -6,7 +6,6 @@ import validator from 'validator';
 import {EmailManager, NormalizerServiceService, RandomGeneratorManager} from '../services';
 import {UserRepository} from '../repositories/user.repository';
 import * as url from 'url';
-import {UrlWithStringQuery} from "url";
 // Uncomment these imports to begin using these cool features!
 
 @model()
@@ -163,10 +162,14 @@ export class UserController {
     }
 
     @get('/{id}')
-    getUser(
+    async getUser(
         @param.path.string('id') id: string
-    ): string {
-        return "Salut " + id;
+    ) {
+        const user: User | undefined = await this.userRepository.findById(id);
+
+        if (!user)
+            throw new HttpErrors.NotFound("User not found.");
+        return user;
     }
 
     @patch('/{id}')

@@ -10,6 +10,7 @@ describe('/users', () => {
 
     let userRepo: UserRepository;
 
+    let userId: string | undefined;
     const userData = {
         email: "test@test.fr",
         password: 'test'
@@ -22,7 +23,7 @@ describe('/users', () => {
     before(migrateSchema);
     beforeEach(async () => {
         await userRepo.deleteAll();
-        await userRepo.create(userData);
+        userId = (await userRepo.create(userData)).id;
     });
 
     after(async () => {
@@ -157,6 +158,27 @@ describe('/users', () => {
                 .expect(404);
             const error = JSON.parse(res.error.text);
             expect(error.error.message).to.equal('Token not found');
+        });
+    });
+
+    describe('GET /users/{id}', () => {
+        it("Should send 404 User not found.", async () => {
+            const res = await client
+                .get('/users/invalidId')
+                .send()
+                .expect(404);
+            const error = JSON.parse(res.error.text);
+            expect(error.error.message).to.equal('Entity not found: User with id "invalidId"');
+        });
+
+        it("Success", async () => {
+            const res = await client
+                .get('/users/' + userId)
+                .send()
+                .expect(200);
+            const body = res.body;
+            expect(body.id).to.equal(JSON.parse(JSON.stringify(userId)));
+            expect(body.email).to.equal(userData.email);
         });
     });
 
