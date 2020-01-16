@@ -14,4 +14,18 @@ export class UserRepository extends DefaultCrudRepository<
     ) {
         super(User, datasource);
     }
+
+    async validateEmail(userId: string): Promise<User|null> {
+        const user: User|null = await this.findById(userId);
+        if (!user)
+            return null;
+        const newRoles = user.role?.filter((role: string) => {return role !== 'email_not_validated' && role !== 'user'});
+        if (newRoles)
+            newRoles.push('user');
+        await this.updateById(userId, {
+            validationToken: undefined,
+            role: newRoles
+        });
+        return this.findById(userId);
+    }
 }
