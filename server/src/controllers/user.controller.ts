@@ -1,4 +1,4 @@
-import {RestBindings, requestBody, get, post, patch, param, api, HttpErrors} from '@loopback/rest';
+import {RestBindings, requestBody, get, post, patch, param, api, HttpErrors, getModelSchemaRef} from '@loopback/rest';
 import {property, repository, model} from '@loopback/repository';
 import {inject} from '@loopback/context';
 import {User} from '../models';
@@ -170,10 +170,17 @@ export class UserController {
     }
 
     @patch('/{id}')
-    updateUser(
-        @param.path.string('id') id: string
+    async updateUser(
+        @param.path.string('id') id: string,
+        @requestBody({
+            content: {
+                'application/json': {
+                    schema: getModelSchemaRef(User, {partial: true}),
+                },
+            },
+        }) user: User,
     ) {
-
+        await this.userRepository.updateById(id, user);
     }
 
     @post('/resetPassword')
