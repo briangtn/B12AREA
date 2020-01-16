@@ -91,6 +91,66 @@ describe('/users', () => {
         });
     });
 
+    describe('POST /users/resetPassword', () => {
+        it('Should create a reset password token on existing user', async () => {
+            const user = await userRepo.create({
+                email: "test2@test.fr",
+                password: 'test2',
+                validationToken: undefined,
+                role: ['user']
+            });
+            const postData = {
+                email: 'test2@test.fr',
+                redirectURL: 'http://localhost:8081/reset?api=http://localhost:8080'
+            };
+            await client
+                .post('/users/resetPassword')
+                .send(postData)
+                .expect(200);
+            const dbUser: User = await userRepo.findById(user.id);
+            expect(dbUser.resetToken).to.not.empty();
+            expect(dbUser.resetToken).to.not.null();
+        });
+        it('Should not create error on non existing user', async () => {
+            const postData = {
+                email: 'test2@test.fr',
+                redirectURL: 'http://localhost:8081/reset?api=http://localhost:8080'
+            };
+            await client
+                .post('/users/resetPassword')
+                .send(postData)
+                .expect(200);
+        });
+        it('Should raise error on missing email', async () => {
+            const postData = {
+                redirectURL: 'http://localhost:8081/reset?api=http://localhost:8080'
+            };
+            await client
+                .post('/users/resetPassword')
+                .send(postData)
+                .expect(422);
+        });
+        it('Should raise error on missing redirectURL', async () => {
+            const postData = {
+                email: 'test2@test.fr'
+            };
+            await client
+                .post('/users/resetPassword')
+                .send(postData)
+                .expect(422);
+        });
+        it('Should raise error on invalid email', async () => {
+            const postData = {
+                email: 'thisIsNotAnEmail',
+                redirectURL: 'http://localhost:8081/reset?api=http://localhost:8080'
+            };
+            await client
+                .post('/users/resetPassword')
+                .send(postData)
+                .expect(400);
+        });
+    });
+
     describe('PATCH /users/validate', () => {
         it('Should validate token', async () => {
             const token = 'azertyuiopqsdfghjklmwxcv';
