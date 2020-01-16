@@ -9,6 +9,7 @@ import './App.css';
 
 import NavigationBar from "./components/NavigationBar";
 import OrDivider from "./components/OrDivider";
+import Translator from "./components/Translator";
 
 // Material UI components
 import Grid from '@material-ui/core/Grid';
@@ -124,11 +125,9 @@ class App extends Component<Props, State> {
                 <NavigationBar />
                 <Grid container spacing={3} style={{ width: '100%', margin: '0px'}}>
                     <Grid item xs={6}>
-                        <Typist>
-                            <Typography className={classes.gridContent} variant="h3" gutterBottom>
-                                Connect all your services together
-                            </Typography>
-                        </Typist>
+                        <Typography className={classes.gridContent} variant="h3" gutterBottom>
+                            <Translator sentence="heroMessage" />
+                        </Typography>
                     </Grid>
                     <Grid className={classes.quickForm} item xs={6}>
                         <Paper component="form" className={classes.root} elevation={0}>
@@ -143,7 +142,7 @@ class App extends Component<Props, State> {
                             <Link
                                 to={{pathname: '/join', state: { email: this.state.email }}}
                                 style={{ textDecoration: 'none', color: '#FFFFFF' }}>
-                                <Button color="primary">Get Started</Button>
+                                <Button color="primary"><Translator sentence="getStarted" /></Button>
                             </Link>
                         </Paper>
                         <OrDivider />
@@ -155,7 +154,7 @@ class App extends Component<Props, State> {
                                     startIcon={<GoogleIcon />}
                                     disableElevation={true}
                                 >
-                                    Connect with Google
+                                    <Translator sentence="connectGoogle" />
                                 </Button>
                             </Grid>
                             <Grid item xs={6}>
@@ -165,7 +164,7 @@ class App extends Component<Props, State> {
                                     startIcon={<TwitterIcon />}
                                     disableElevation={true}
                                 >
-                                    Connect with Twitter
+                                    <Translator sentence="connectTwitter" />
                                 </Button>
                             </Grid>
                         </Grid>
