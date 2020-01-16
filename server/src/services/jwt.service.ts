@@ -34,6 +34,13 @@ export class JWTService implements TokenService {
 
 
   verifyToken(token: string): Promise<UserProfile> {
-    return promisify(jwt.decode)(token, this.jwtSecret);
+    let tk = jwt.decode(token, this.jwtSecret);
+    let userProfile: UserProfile = {
+      email: tk.email
+    } as UserProfile;
+
+    return new Promise((resolve, reject) => {
+      resolve(userProfile);
+    });
   }
 }

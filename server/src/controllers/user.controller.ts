@@ -5,10 +5,11 @@ import {User} from '../models';
 import validator from 'validator';
 import {NormalizerServiceService, UserService} from '../services';
 import {Credentials, UserRepository} from '../repositories/user.repository';
-import {TokenService} from "@loopback/authentication";
-import {UserProfile} from "@loopback/security";
+import {authenticate, TokenService} from "@loopback/authentication";
+import {SecurityBindings, UserProfile} from "@loopback/security";
 import {TokenServiceBindings} from "../keys";
 import {CredentialsRequestBody, RegisterRequestBody} from "./specs/user-controller.specs";
+import {OPERATION_SECURITY_SPEC} from "../utils/security-specs";
 
 @api({basePath: '/users', paths: {}})
 export class UserController {
@@ -25,7 +26,6 @@ export class UserController {
 
     @get('/')
     getUsers() {
-
     }
 
     @post('/register', {
@@ -94,6 +94,25 @@ export class UserController {
         } as UserProfile);
 
         return {token};
+    }
+
+    @get('/me', {
+        security: OPERATION_SECURITY_SPEC,
+        responses: {
+            '200': {
+                description: 'Own profile',
+                content: {
+                    'application/json': {
+                        schema: User,
+                    },
+                },
+            },
+        },
+    })
+    @authenticate('jwt')
+    getMe(
+    ) {
+        return true
     }
 
     @get('/{id}')

@@ -14,9 +14,6 @@ export class UserService {
 	 * Add service methods here
 	 */
 	async checkCredentials(credentials: Credentials) : Promise<User> {
-		console.log(credentials.email);
-		console.log(credentials.password);
-
 		const user = await this.userRepository.findOne(
 			{
 				where: {
