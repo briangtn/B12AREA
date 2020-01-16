@@ -91,6 +91,164 @@ describe('/users', () => {
         });
     });
 
+    describe('POST /users/resetPassword', () => {
+        it('Should create a reset password token on existing user', async () => {
+            const user = await userRepo.create({
+                email: "test2@test.fr",
+                password: 'test2',
+                validationToken: undefined,
+                role: ['user']
+            });
+            const postData = {
+                email: 'test2@test.fr',
+                redirectURL: 'http://localhost:8081/reset?api=http://localhost:8080'
+            };
+            await client
+                .post('/users/resetPassword')
+                .send(postData)
+                .expect(200);
+            const dbUser: User = await userRepo.findById(user.id);
+            expect(dbUser.resetToken).to.not.empty();
+            expect(dbUser.resetToken).to.not.null();
+        });
+        it('Should not create error on non existing user', async () => {
+            const postData = {
+                email: 'test2@test.fr',
+                redirectURL: 'http://localhost:8081/reset?api=http://localhost:8080'
+            };
+            await client
+                .post('/users/resetPassword')
+                .send(postData)
+                .expect(200);
+        });
+        it('Should raise error on missing email', async () => {
+            const postData = {
+                redirectURL: 'http://localhost:8081/reset?api=http://localhost:8080'
+            };
+            await client
+                .post('/users/resetPassword')
+                .send(postData)
+                .expect(422);
+        });
+        it('Should raise error on missing redirectURL', async () => {
+            const postData = {
+                email: 'test2@test.fr'
+            };
+            await client
+                .post('/users/resetPassword')
+                .send(postData)
+                .expect(422);
+        });
+        it('Should raise error on invalid email', async () => {
+            const postData = {
+                email: 'thisIsNotAnEmail',
+                redirectURL: 'http://localhost:8081/reset?api=http://localhost:8080'
+            };
+            await client
+                .post('/users/resetPassword')
+                .send(postData)
+                .expect(400);
+        });
+    });
+
+    describe('PATCH /users/resetPassword', () => {
+        it('Should validate a reset token and change password', async () => {
+            const token = 'azertyuiopqsdfghjklmwxcv';
+            const user = await userRepo.create({
+                email: "test2@test.fr",
+                password: 'test2',
+                validationToken: undefined,
+                role: ['user'],
+                resetToken: token
+            });
+            const patchData = {
+                token: token,
+                password: 'newPassword'
+            };
+            await client
+                .patch('/users/resetPassword')
+                .send(patchData)
+                .expect(200);
+            const dbUser: User = await userRepo.findById(user.id);
+            expect(dbUser.resetToken).to.be.null();
+            expect(dbUser.password).to.not.equal(user.password);
+        });
+        it('Should raise an Not Found error on non existing token', async () => {
+            const token = 'azertyuiopqsdfghjklmwxcv';
+            const user = await userRepo.create({
+                email: "test2@test.fr",
+                password: 'test2',
+                validationToken: undefined,
+                role: ['user'],
+                resetToken: undefined
+            });
+            const patchData = {
+                token: token,
+                password: 'newPassword'
+            };
+            await client
+                .patch('/users/resetPassword')
+                .send(patchData)
+                .expect(404);
+            const dbUser: User = await userRepo.findById(user.id);
+            expect(dbUser.password).to.equal(user.password);
+        });
+        it('Should raise an Not Found error on invalid token', async () => {
+            const token = 'azertyuiopqsdfghjklmwxcv';
+            const user = await userRepo.create({
+                email: "test2@test.fr",
+                password: 'test2',
+                validationToken: undefined,
+                role: ['user'],
+                resetToken: 'vcxwmlkjhgfdsqpoiuytreza'
+            });
+            const patchData = {
+                token: token,
+                password: 'newPassword'
+            };
+            await client
+                .patch('/users/resetPassword')
+                .send(patchData)
+                .expect(404);
+            const dbUser: User = await userRepo.findById(user.id);
+            expect(dbUser.password).to.equal(user.password);
+        });
+        it('Should raise an error on missing token', async () => {
+            const token = 'azertyuiopqsdfghjklmwxcv';
+            await userRepo.create({
+                email: "test2@test.fr",
+                password: 'test2',
+                validationToken: undefined,
+                role: ['user'],
+                resetToken: token
+            });
+            const patchData = {
+                password: 'newPassword'
+            };
+            await client
+                .patch('/users/resetPassword')
+                .send(patchData)
+                .expect(422);
+        });
+        it('Should raise an error on missing password', async () => {
+            const token = 'azertyuiopqsdfghjklmwxcv';
+            await userRepo.create({
+                email: "test2@test.fr",
+                password: 'test2',
+                validationToken: undefined,
+                role: ['user'],
+                resetToken: token
+            });
+            const patchData = {
+                token: token
+            };
+            await client
+                .patch('/users/resetPassword')
+                .send(patchData)
+                .expect(422);
+        });
+    });
+
     describe('PATCH /users/validate', () => {
         it('Should validate token', async () => {
             const token = 'azertyuiopqsdfghjklmwxcv';
