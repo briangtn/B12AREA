@@ -7,7 +7,7 @@ import {Credentials, UserRepository} from '../repositories/user.repository';
 import {authenticate, TokenService} from "@loopback/authentication";
 import {SecurityBindings, UserProfile} from "@loopback/security";
 import {TokenServiceBindings} from "../keys";
-import {CredentialsRequestBody, RegisterRequestBody} from "./specs/user-controller.specs";
+import {CredentialsRequestBody} from "./specs/user-controller.specs";
 import {OPERATION_SECURITY_SPEC} from "../utils/security-specs";
 import {EmailManager, NormalizerServiceService, RandomGeneratorManager, UserService} from '../services';
 import * as url from 'url';

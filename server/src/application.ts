@@ -20,6 +20,7 @@ export interface PackageInfo {
     version: string;
     description: string;
 }
+
 export const PackageKey = BindingKey.create<PackageInfo>('application.package');
 
 const pkg: PackageInfo = require('../package.json');
@@ -70,8 +71,8 @@ export class AreaApplication extends BootMixin(
 
         this.bind(PackageKey).to(pkg);
 
-        if (TokenServiceConstants.TOKEN_SECRET_VALUE == undefined)
-            throw "Please provide a secret value to generate JsonWebToken using the AREA_JWT_SECRET_VALUE environment variable";
+        if (TokenServiceConstants.TOKEN_SECRET_VALUE === undefined)
+            throw Error("Please provide a secret value to generate JsonWebToken using the AREA_JWT_SECRET_VALUE environment variable");
         this.bind(TokenServiceBindings.TOKEN_SECRET).to(
             TokenServiceConstants.TOKEN_SECRET_VALUE,
         );

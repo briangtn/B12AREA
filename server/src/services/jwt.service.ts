@@ -9,38 +9,38 @@ const jwt  = require("jsonwebtoken");
 
 @bind({scope: BindingScope.TRANSIENT})
 export class JWTService implements TokenService {
-  constructor(
-      @inject(TokenServiceBindings.TOKEN_SECRET)
-      private jwtSecret: string,
-      @inject(TokenServiceBindings.TOKEN_EXPIRES_IN)
-      private jwtExpiresIn: string,
-  ) {}
+    constructor(
+        @inject(TokenServiceBindings.TOKEN_SECRET)
+        private jwtSecret: string,
+        @inject(TokenServiceBindings.TOKEN_EXPIRES_IN)
+        private jwtExpiresIn: string,
+    ) {}
 
-  generateToken(userProfile: UserProfile): Promise<string> {
-    if (!userProfile || !userProfile.email) {
-      throw new HttpErrors.Unauthorized(
-          'Error generating token: email is null',
-      );
+    generateToken(userProfile: UserProfile): Promise<string> {
+        if (!userProfile || !userProfile.email) {
+            throw new HttpErrors.Unauthorized(
+                'Error generating token: email is null',
+            );
+        }
+
+        const userInfoForToken = {
+            email: userProfile.email,
+        };
+
+        return promisify(jwt.sign)(userInfoForToken, this.jwtSecret, {
+            expiresIn: Number(this.jwtExpiresIn),
+        });
     }
 
-    const userInfoForToken = {
-      email: userProfile.email,
-    };
 
-    return promisify(jwt.sign)(userInfoForToken, this.jwtSecret, {
-      expiresIn: Number(this.jwtExpiresIn),
-    });
-  }
+    verifyToken(token: string): Promise<UserProfile> {
+        const tk = jwt.decode(token, this.jwtSecret);
+        const userProfile: UserProfile = {
+            email: tk.email
+        } as UserProfile;
 
-
-  verifyToken(token: string): Promise<UserProfile> {
-    let tk = jwt.decode(token, this.jwtSecret);
-    let userProfile: UserProfile = {
-      email: tk.email
-    } as UserProfile;
-
-    return new Promise((resolve, reject) => {
-      resolve(userProfile);
-    });
-  }
+        return new Promise((resolve, reject) => {
+            resolve(userProfile);
+        });
+    }
 }
