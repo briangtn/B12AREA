@@ -217,6 +217,47 @@ export class UserController {
                 },
             },
         },
+        '422': {
+            description: 'Invalid params',
+            content: {
+                'application/json': {
+                    schema: {
+                        type: 'object',
+                        properties: {
+                            error: {
+                                type: 'object',
+                                properties: {
+                                    statusCode: {
+                                        type: 'number',
+                                        example: 422
+                                    },
+                                    name: {
+                                        type: 'string',
+                                        example: 'UnprocessableEntityError'
+                                    },
+                                    message: {
+                                        type: 'string',
+                                        example: 'The request body is invalid. See error object `details` property for more info.'
+                                    },
+                                    details: {
+                                        type: 'array',
+                                        items: {
+                                            type: 'object',
+                                            properties: {
+                                                message: {
+                                                    type: 'string',
+                                                    example: 'should have required property \'email\' and \'password\''
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
     })
     async login(
         @requestBody(CredentialsRequestBody) credentials: Credentials,
