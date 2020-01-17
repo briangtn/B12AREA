@@ -59,6 +59,17 @@ export class User extends Entity {
     })
     resetToken?: string;
 
+    @property({
+        type: 'string',
+    })
+    twoFactorAuthenticationSecret?: string;
+
+    @property({
+        type: 'boolean',
+        default: false,
+    })
+    twoFactorAuthenticationEnabled: boolean;
+
     // Define well-known properties here
 
     // Indexer property to allow additional data

@@ -3,7 +3,12 @@ import {property, repository, model} from '@loopback/repository';
 import {inject} from '@loopback/context';
 import {User} from '../models';
 import validator from 'validator';
-import {EmailManager, NormalizerServiceService, RandomGeneratorManager} from '../services';
+import {
+    EmailManager,
+    NormalizerServiceService,
+    RandomGeneratorManager,
+    TwoFactorAuthenticationManager
+} from '../services';
 import {UserRepository} from '../repositories/user.repository';
 import * as url from 'url';
 import {UrlWithStringQuery} from "url";
@@ -63,7 +68,9 @@ export class UserController {
         @inject('services.randomGenerator')
         protected randomGeneratorService: RandomGeneratorManager,
         @inject('services.email')
-        protected emailService: EmailManager) {}
+        protected emailService: EmailManager,
+        @inject('services.2fa')
+        protected twoFactorAuthenticationService: TwoFactorAuthenticationManager) {}
 
     @get('/')
     getUsers() {
@@ -525,6 +532,26 @@ export class UserController {
         return this.userRepository.validateEmail(user.id!);
     }
 
+    @post('/2fa/activate')
+    //@authenticate('jwt-all') todo: uncomment
+    async activate2FAGenerateCode() {
+        //todo: get logged in user
+        const {otpauthUrl, base32} = this.twoFactorAuthenticationService.generate2FACode();
+        console.log(base32);
+        //todo: persist in db base32 for user
+        return {otpauthUrl}
+    }
 
+    @patch('/2fa/activate')
+    //@authenticate('jwt-all') todo: uncomment
+    async activate2FAValidateCode() {
+
+    }
+
+    @post('/2fa/validate')
+    //@authenticate('jwt-2fa') todo: uncomment and check for jwt 2FA enable
+    async validate2FA() {
+
+    }
 
 }

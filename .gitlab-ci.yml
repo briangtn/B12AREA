@@ -230,6 +230,7 @@ deploy-production-api:
     - sed -i "s/__SMTP_SECURE__/${SMTP_SECURE}/" area.api.configmap.yaml
     - sed -i "s/__SMTP_PORT__/${SMTP_PORT}/" area.api.configmap.yaml
     - sed -i "s/__SMTP_REJECT_UNAUTHORIZED__/${SMTP_REJECT_UNAUTHORIZED}/" area.api.configmap.yaml
+    - sed -i "s/__TWO_FACTOR_AUTHENTICATION_ISSUER_NAME__/${TWO_FACTOR_AUTHENTICATION_ISSUER_NAME}/" area.api.configmap.yaml
     - sed -i "s/__DB_USER__/`echo -ne ${DB_USER} | base64`/" area.api.secrets.yaml
     - sed -i "s/__DB_PASSWORD__/`echo -ne ${DB_PASSWORD} | base64`/" area.api.secrets.yaml
     - sed -i "s/__SMTP_USER__/`echo -ne ${SMTP_USER} | base64`/" area.api.secrets.yaml
@@ -356,6 +357,7 @@ deploy-development-api:
     - sed -i "s/__SMTP_SECURE__/${SMTP_SECURE}/" area.api.configmap.yaml
     - sed -i "s/__SMTP_PORT__/${SMTP_PORT}/" area.api.configmap.yaml
     - sed -i "s/__SMTP_REJECT_UNAUTHORIZED__/${SMTP_REJECT_UNAUTHORIZED}/" area.api.configmap.yaml
+    - sed -i "s/__TWO_FACTOR_AUTHENTICATION_ISSUER_NAME__/${TWO_FACTOR_AUTHENTICATION_ISSUER_NAME}/" area.api.configmap.yaml
     - sed -i "s/__DB_USER__/`echo -ne ${DB_USER} | base64`/" area.api.secrets.yaml
     - sed -i "s/__DB_PASSWORD__/`echo -ne ${DB_PASSWORD} | base64`/" area.api.secrets.yaml
     - sed -i "s/__SMTP_USER__/`echo -ne ${SMTP_USER} | base64`/" area.api.secrets.yaml
