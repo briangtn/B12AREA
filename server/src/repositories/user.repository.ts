@@ -6,6 +6,11 @@ import {User} from '../models';
 import {inject} from '@loopback/core';
 import {EmailManager} from "../services";
 
+export type Credentials = {
+    email: string;
+    password: string;
+};
+
 export class UserRepository extends DefaultCrudRepository<
     User,
     typeof User.prototype.id

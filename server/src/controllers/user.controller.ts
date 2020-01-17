@@ -3,16 +3,15 @@ import {property, repository, model} from '@loopback/repository';
 import {inject} from '@loopback/context';
 import {User} from '../models';
 import validator from 'validator';
-import {
-    EmailManager,
-    NormalizerServiceService,
-    RandomGeneratorManager,
-    TwoFactorAuthenticationManager
-} from '../services';
-import {UserRepository} from '../repositories/user.repository';
+import {Credentials, UserRepository} from '../repositories/user.repository';
+import {authenticate, TokenService} from "@loopback/authentication";
+import {SecurityBindings, UserProfile} from "@loopback/security";
+import {TokenServiceBindings} from "../keys";
+import {CredentialsRequestBody} from "./specs/user-controller.specs";
+import {OPERATION_SECURITY_SPEC} from "../utils/security-specs";
+import {EmailManager, NormalizerServiceService, RandomGeneratorManager, TwoFactorAuthenticationManager, UserService} from '../services';
 import * as url from 'url';
 import {UrlWithStringQuery} from "url";
-// Uncomment these imports to begin using these cool features!
 
 @model()
 export class NewUserRequest  {
@@ -65,16 +64,24 @@ export class UserController {
     constructor(@repository(UserRepository) public userRepository: UserRepository,
         @inject('services.normalizer')
         protected normalizerService: NormalizerServiceService,
-        @inject('services.randomGenerator')
-        protected randomGeneratorService: RandomGeneratorManager,
+
+        @inject('services.user')
+        protected userService: UserService,
+
+        @inject(TokenServiceBindings.TOKEN_SERVICE)
+        protected tokenService: TokenService,
+
         @inject('services.email')
         protected emailService: EmailManager,
-        @inject('services.2fa')
-        protected twoFactorAuthenticationService: TwoFactorAuthenticationManager) {}
 
+        @inject('services.randomGenerator')
+        protected randomGeneratorService: RandomGeneratorManager,
+
+        @inject('services.2fa')
+        protected twoFactorAuthenticationService: TwoFactorAuthenticationManager,
+    ) {}
     @get('/')
     getUsers() {
-
     }
 
     @post('/register', {
@@ -194,9 +201,103 @@ export class UserController {
         return user;
     }
 
-    @post('/login')
-    login() {
+    @post('/login', {
+        responses: {
+            '200': {
+                description: 'Gives a JWT to a user that logged in',
+                content: {
+                    'application/json': {
+                        schema: {
+                            type: 'object',
+                            properties: {
+                                token: {
+                                    type: 'string',
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        },
+        '422': {
+            description: 'Invalid params',
+            content: {
+                'application/json': {
+                    schema: {
+                        type: 'object',
+                        properties: {
+                            error: {
+                                type: 'object',
+                                properties: {
+                                    statusCode: {
+                                        type: 'number',
+                                        example: 422
+                                    },
+                                    name: {
+                                        type: 'string',
+                                        example: 'UnprocessableEntityError'
+                                    },
+                                    message: {
+                                        type: 'string',
+                                        example: 'The request body is invalid. See error object `details` property for more info.'
+                                    },
+                                    details: {
+                                        type: 'array',
+                                        items: {
+                                            type: 'object',
+                                            properties: {
+                                                message: {
+                                                    type: 'string',
+                                                    example: 'should have required property \'email\' and \'password\''
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    })
+    async login(
+        @requestBody(CredentialsRequestBody) credentials: Credentials,
+    ): Promise<{token: string}> {
+        if (credentials.password.length === 0)
+            throw new HttpErrors.UnprocessableEntity('Empty password');
+        const normalizeCredentials: Credentials = this.normalizerService.normalize(credentials, {email: 'toLower', password: 'hash'}) as Credentials;
 
+        if (!normalizeCredentials)
+            throw new HttpErrors.UnprocessableEntity();
+        else if (!validator.isEmail(normalizeCredentials.email))
+            throw new HttpErrors.UnprocessableEntity('Invalid email');
+
+        const user = await this.userService.checkCredentials(credentials);
+        const token = await this.tokenService.generateToken({
+            email: user.email
+        } as UserProfile);
+
+        return {token};
+    }
+
+    @get('/me', {
+        security: OPERATION_SECURITY_SPEC,
+        responses: {
+            '200': {
+                description: 'Own profile',
+                content: {
+                    'application/json': {
+                        schema: User,
+                    },
+                },
+            },
+        },
+    })
+    @authenticate('jwt')
+    getMe(
+    ) {
+        return true
     }
 
     @get('/{id}')
