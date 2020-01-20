@@ -230,6 +230,9 @@ export class UserController {
                                 token: {
                                     type: 'string',
                                 },
+                                require2fa: {
+                                    type: 'boolean'
+                                }
                             },
                         },
                     },
@@ -280,7 +283,7 @@ export class UserController {
     })
     async login(
         @requestBody(CredentialsRequestBody) credentials: Credentials,
-    ): Promise<{token: string}> {
+    ): Promise<{token: string, require2fa: boolean}> {
         if (credentials.password.length === 0)
             throw new HttpErrors.UnprocessableEntity('Empty password');
         const normalizeCredentials: Credentials = this.normalizerService.normalize(credentials, {email: 'toLower', password: 'hash'}) as Credentials;
@@ -297,7 +300,7 @@ export class UserController {
             validated2fa: false
         } as CustomUserProfile);
 
-        return {token};
+        return {token, require2fa: user.twoFactorAuthenticationEnabled};
     }
 
     @get('/me', {
