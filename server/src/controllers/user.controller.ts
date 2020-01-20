@@ -184,10 +184,16 @@ export class UserController {
     @authenticate('jwt')
     getMe(
     ) {
-        return true
+        return true;
     }
 
-    @get('/{id}')
+    @get('/{id}', {
+        responses: {
+            '200': response200(User, "Return a user"),
+            '404': response404('User not found')
+        }
+    })
+    @authenticate('jwt')
     async getUser(
         @param.path.string('id') id: string
     ) {
