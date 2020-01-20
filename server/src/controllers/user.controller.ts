@@ -223,7 +223,7 @@ export class UserController {
             '404': response404('User not found')
         }
     })
-    @authenticate('jwt')
+    @authenticate('jwt-all')
     async getUser(
         @param.path.string('id') id: string
     ) {

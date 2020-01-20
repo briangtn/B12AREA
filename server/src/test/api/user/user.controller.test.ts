@@ -3,7 +3,6 @@ import {setupApplication} from '../../acceptance/test-helper';
 import { UserRepository } from '../../../repositories/user.repository';
 import { Client, expect } from '@loopback/testlab';
 import {User} from "../../../models";
-import {TokenServiceBindings} from "../../../keys";
 
 describe('/users', () => {
     let app: AreaApplication;
@@ -12,6 +11,7 @@ describe('/users', () => {
     let userRepo: UserRepository;
 
     let userId: string | undefined;
+    let userToken: string;
     const userData = {
         email: "test@test.fr",
         password: 'test'
@@ -24,10 +24,18 @@ describe('/users', () => {
     before(migrateSchema);
     beforeEach(async () => {
         await userRepo.deleteAll();
-        userId = (await userRepo.create(userData)).id;
-        await client
+        const user = await client
             .post('/users/register?redirectURL=http://localhost:8081/validate?api=http://localhost:8080')
             .send(userData)
+            .expect(200);
+        await userRepo.updateById(user.body.id, {role: ['user']});
+        const res = await client
+            .post('/users/login')
+            .send(userData)
+            .expect(200);
+        userId = user.body.id;
+        const body = res.body;
+        userToken = body.token;
     });
 
     after(async () => {
@@ -398,6 +406,7 @@ describe('/users', () => {
         it("Should send 404 User not found.", async () => {
             const res = await client
                 .get('/users/invalidId')
+                .set('Authorization', 'Bearer ' + userToken)
                 .send()
                 .expect(404);
             const error = JSON.parse(res.error.text);
@@ -407,6 +416,7 @@ describe('/users', () => {
         it("Success", async () => {
             const res = await client
                 .get('/users/' + userId)
+                .set('Authorization', 'Bearer ' + userToken)
                 .send()
                 .expect(200);
             const body = res.body;
