@@ -668,10 +668,23 @@ export class UserController {
                 description: 'Returned otp auth url',
                 content: {
                     'application/json': {
-                        schema: 'string',
+                        schema: {
+                            type: 'object',
+                            properties: {
+                                otpauthUrl: {
+                                    type: 'string'
+                                }
+                            }
+                        }
                     },
                 },
             },
+            '400': {
+                description: '2FA already activated for this account'
+            },
+            '401': {
+                description: 'Unauthorized'
+            }
         },
     })
     @authenticate('jwt-all')
@@ -702,6 +715,12 @@ export class UserController {
                     },
                 },
             },
+            '400': {
+                description: '2FA already activated for this account/Invalid token'
+            },
+            '401': {
+                description: 'Unauthorized'
+            }
         },
     })
     @authenticate('jwt-all')
@@ -744,6 +763,12 @@ export class UserController {
                     },
                 },
             },
+            '400': {
+                description: '2FA not activated for this account/Invalid token'
+            },
+            '401': {
+                description: 'Unauthorized'
+            }
         },
     })
     @authenticate('jwt-2fa')
