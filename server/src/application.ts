@@ -12,8 +12,7 @@ import {MySequence} from './sequence';
 import {TokenServiceBindings, TokenServiceConstants} from "./keys";
 import {JWTService} from "./services";
 import {AuthenticationComponent, registerAuthenticationStrategy} from "@loopback/authentication";
-import {JWTAllAuthenticationStrategy} from "./authentication-strategies/jwt-all-strategy";
-import {JWT2FAAuthenticationStrategy} from "./authentication-strategies/jwt-2fa-strategy";
+import {JWTAllAuthenticationStrategy, JWT2FAAuthenticationStrategy} from "./authentication-strategies";
 import {SECURITY_SCHEME_SPEC} from "./utils/security-specs";
 
 export interface PackageInfo {
