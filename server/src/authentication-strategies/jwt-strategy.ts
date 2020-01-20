@@ -1,18 +1,23 @@
 import {AuthenticationStrategy, TokenService} from '@loopback/authentication';
-import {HttpErrors, Request} from '@loopback/rest';
+import {HttpErrors, Request, RestBindings} from '@loopback/rest';
 import {UserProfile} from '@loopback/security';
 import {inject} from '@loopback/context';
-
+import {TokenServiceBindings} from "../keys";
 
 export class JWTAuthenticationStrategy implements AuthenticationStrategy {
     name = 'jwt';
 
-    constructor(@inject('services.authentication.jwt.tokenservice')
-                public tokenService: TokenService) {}
+    constructor(
+        @inject(TokenServiceBindings.TOKEN_SERVICE)
+        public tokenService: TokenService
+    ) {}
 
     async authenticate(request: Request): Promise<UserProfile | undefined> {
-        const profile: UserProfile = await this.tokenService.verifyToken(this.extractCredentials(request));
-        return profile;
+        return this.tokenService.verifyToken(this.extractCredentials(request)).then((userProfile: UserProfile) => {
+            return userProfile;
+        }).catch((e) => {
+            throw new HttpErrors.Unauthorized;
+        });
     }
 
     extractCredentials(request: Request): string {

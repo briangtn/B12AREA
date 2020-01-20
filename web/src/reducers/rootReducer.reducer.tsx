@@ -1,12 +1,14 @@
+import Cookies from "universal-cookie";
+
+const cookies = new Cookies();
+
 const initialState = {
-    language: 'fr'
+    language: (cookies.get('language')) ? cookies.get('language') : 'fr'
 };
 
 function rootReducer(state = initialState, action: any) {
     if (action.type === "SWITCH_LANGUAGE") {
-        console.log(action.payload);
-        state.language = action.payload;
-        console.log(state.language);
+        return { ...state, language: action.payload };
     }
     return state;
 }
