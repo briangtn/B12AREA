@@ -711,7 +711,9 @@ export class UserController {
                 description: '2FA activated for user',
                 content: {
                     'application/json': {
-                        schema: User,
+                        schema: {
+                            'x-ts-type': User
+                        }
                     },
                 },
             },
