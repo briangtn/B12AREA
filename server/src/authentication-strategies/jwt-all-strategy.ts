@@ -14,7 +14,6 @@ export class JWTAllAuthenticationStrategy implements AuthenticationStrategy {
 
     async authenticate(request: Request): Promise<CustomUserProfile | undefined> {
         return this.tokenService.verifyToken(this.extractCredentials(request)).then((userProfile: CustomUserProfile) => {
-            console.log(userProfile.require2fa, userProfile.validated2fa); //TODO: remove me
             if (userProfile.require2fa && !userProfile.validated2fa)
                 throw new HttpErrors.Unauthorized;
             return userProfile;
