@@ -7,6 +7,11 @@ import {promisify} from "util";
 
 const jwt  = require("jsonwebtoken");
 
+export interface CustomUserProfile extends UserProfile  {
+    require2fa?: boolean;
+    validated2fa?: boolean;
+}
+
 @bind({scope: BindingScope.TRANSIENT})
 export class JWTService implements TokenService {
     constructor(
@@ -16,7 +21,7 @@ export class JWTService implements TokenService {
         private jwtExpiresIn: string,
     ) {}
 
-    generateToken(userProfile: UserProfile): Promise<string> {
+    generateToken(userProfile: CustomUserProfile): Promise<string> {
         if (!userProfile || !userProfile.email) {
             throw new HttpErrors.Unauthorized(
                 'Error generating token: email is null',
@@ -25,6 +30,8 @@ export class JWTService implements TokenService {
 
         const userInfoForToken = {
             email: userProfile.email,
+            require2fa: userProfile.require2fa,
+            validated2fa: userProfile.validated2fa
         };
 
         return promisify(jwt.sign)(userInfoForToken, this.jwtSecret, {
@@ -33,11 +40,11 @@ export class JWTService implements TokenService {
     }
 
 
-    verifyToken(token: string): Promise<UserProfile> {
+    verifyToken(token: string): Promise<CustomUserProfile> {
         return new Promise((resolve, reject) => {
             try {
                 const decoded: object | string = jwt.verify(token, this.jwtSecret);
-                resolve(decoded as UserProfile)
+                resolve(decoded as CustomUserProfile)
             } catch (e) {
                 reject(e);
             }

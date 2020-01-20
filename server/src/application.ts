@@ -12,7 +12,7 @@ import {MySequence} from './sequence';
 import {TokenServiceBindings, TokenServiceConstants} from "./keys";
 import {JWTService} from "./services";
 import {AuthenticationComponent, registerAuthenticationStrategy} from "@loopback/authentication";
-import {JWTAuthenticationStrategy} from "./authentication-strategies/jwt-strategy";
+import {JWTAllAuthenticationStrategy, JWT2FAAuthenticationStrategy} from "./authentication-strategies";
 import {SECURITY_SCHEME_SPEC} from "./utils/security-specs";
 
 export interface PackageInfo {
@@ -50,7 +50,8 @@ export class AreaApplication extends BootMixin(
         this.component(RestExplorerComponent);
         this.component(AuthenticationComponent);
 
-        registerAuthenticationStrategy(this, JWTAuthenticationStrategy);
+        registerAuthenticationStrategy(this, JWTAllAuthenticationStrategy);
+        registerAuthenticationStrategy(this, JWT2FAAuthenticationStrategy);
 
         this.projectRoot = __dirname;
         // Customize @loopback/boot Booter Conventions here
