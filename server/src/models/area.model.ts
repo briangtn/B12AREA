@@ -1,4 +1,6 @@
-import {Entity, model, property} from '@loopback/repository';
+import {Entity, model, property, hasMany, hasOne} from '@loopback/repository';
+import {Reaction} from './reaction.model';
+import {Action} from "./action.model";
 
 @model({settings: {strict: false}})
 export class Area extends Entity {
@@ -20,6 +22,14 @@ export class Area extends Entity {
         required: true,
     })
     enabled: boolean;
+
+    @property({
+        type: 'string',
+    })
+    ownerId?: string;
+
+    @hasMany(() => Reaction)
+    reactions: Reaction[];
 
     // Define well-known properties here
 

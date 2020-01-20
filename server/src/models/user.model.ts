@@ -1,4 +1,5 @@
-import {Entity, model, property} from '@loopback/repository';
+import {Entity, model, property, hasMany} from '@loopback/repository';
+import {Area} from './area.model';
 
 @model({
     settings: {
@@ -58,6 +59,8 @@ export class User extends Entity {
     })
     reset_token?: string;
 
+    @hasMany(() => Area, {keyTo: 'ownerId'})
+    areas: Area[];
     // Define well-known properties here
 
     // Indexer property to allow additional data

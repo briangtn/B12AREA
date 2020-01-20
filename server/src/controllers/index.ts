@@ -5,3 +5,5 @@ export * from './areas.controller';
 export * from './actions.controller';
 export * from './reactions.controller';
 export * from './api-status.controller';
+export * from './user-area.controller';
+export * from './area-reaction.controller';
