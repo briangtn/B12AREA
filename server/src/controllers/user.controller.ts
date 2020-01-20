@@ -11,7 +11,7 @@ import {CredentialsRequestBody} from "./specs/user-controller.specs";
 import {OPERATION_SECURITY_SPEC} from "../utils/security-specs";
 import {EmailManager, NormalizerServiceService, RandomGeneratorManager, UserService} from '../services';
 import * as url from 'url';
-import {UrlWithStringQuery} from "url";
+import {response200, response400, response404, response409, response422} from './specs/doc.specs';
 
 @model()
 export class NewUserRequest  {
@@ -84,73 +84,9 @@ export class UserController {
 
     @post('/register', {
         responses: {
-            '200': {
-                description: 'Register an user',
-                content: {
-                    'application/json': {
-                        schema: {
-                            'x-ts-type': User
-                        }
-                    }
-                }
-            },
-            '400': {
-                description: 'Missing redirect URL or invalid email',
-                content: {
-                    'application/json': {
-                        schema: {
-                            type: 'object',
-                            properties: {
-                                error: {
-                                    type: 'object',
-                                    properties: {
-                                        statusCode: {
-                                            type: 'number',
-                                            example: 400
-                                        },
-                                        name: {
-                                            type: 'string',
-                                            example: 'BadRequestError'
-                                        },
-                                        message: {
-                                            type: 'string'
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            },
-            '409': {
-                description: 'Email already in use',
-                content: {
-                    'application/json': {
-                        schema: {
-                            type: 'object',
-                            properties: {
-                                error: {
-                                    type: 'object',
-                                    properties: {
-                                        statusCode: {
-                                            type: 'number',
-                                            example: 409
-                                        },
-                                        name: {
-                                            type: 'string',
-                                            example: 'ConflictError'
-                                        },
-                                        message: {
-                                            type: 'string',
-                                            example: 'Email already in use'
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+            '200': response200(User, "Register an user"),
+            '400': response400('Missing redirect URL or invalid email'),
+            '409': response409('Email already in use')
         }
     })
     async register(@requestBody() userRequest: NewUserRequest, @param.query.string('redirectURL') redirectURL?: string) {
@@ -217,47 +153,7 @@ export class UserController {
                 },
             },
         },
-        '422': {
-            description: 'Invalid params',
-            content: {
-                'application/json': {
-                    schema: {
-                        type: 'object',
-                        properties: {
-                            error: {
-                                type: 'object',
-                                properties: {
-                                    statusCode: {
-                                        type: 'number',
-                                        example: 422
-                                    },
-                                    name: {
-                                        type: 'string',
-                                        example: 'UnprocessableEntityError'
-                                    },
-                                    message: {
-                                        type: 'string',
-                                        example: 'The request body is invalid. See error object `details` property for more info.'
-                                    },
-                                    details: {
-                                        type: 'array',
-                                        items: {
-                                            type: 'object',
-                                            properties: {
-                                                message: {
-                                                    type: 'string',
-                                                    example: 'should have required property \'email\' and \'password\''
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
+        '422': response422('Invalid params', 'should have required property \'email\' and \'password\'')
     })
     async login(
         @requestBody(CredentialsRequestBody) credentials: Credentials,
@@ -282,14 +178,7 @@ export class UserController {
     @get('/me', {
         security: OPERATION_SECURITY_SPEC,
         responses: {
-            '200': {
-                description: 'Own profile',
-                content: {
-                    'application/json': {
-                        schema: User,
-                    },
-                },
-            },
+            '200': response200(User, 'Own profile')
         },
     })
     @authenticate('jwt')
@@ -321,76 +210,8 @@ export class UserController {
             '200': {
                 description: 'Email sent if user exist'
             },
-            '400': {
-                description: 'Invalid email',
-                content: {
-                    'application/json': {
-                        schema: {
-                            type: 'object',
-                            properties: {
-                                error: {
-                                    type: 'object',
-                                    properties: {
-                                        statusCode: {
-                                            type: 'number',
-                                            example: 400
-                                        },
-                                        name: {
-                                            type: 'string',
-                                            example: 'BadRequestError'
-                                        },
-                                        message: {
-                                            type: 'string',
-                                            example: 'Invalid email.'
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            },
-            '422': {
-                description: 'Invalid params',
-                content: {
-                    'application/json': {
-                        schema: {
-                            type: 'object',
-                            properties: {
-                                error: {
-                                    type: 'object',
-                                    properties: {
-                                        statusCode: {
-                                            type: 'number',
-                                            example: 422
-                                        },
-                                        name: {
-                                            type: 'string',
-                                            example: 'UnprocessableEntityError'
-                                        },
-                                        message: {
-                                            type: 'string',
-                                            example: 'The request body is invalid. See error object `details` property for more info.'
-                                        },
-                                        details: {
-                                            type: 'array',
-                                            items: {
-                                                type: 'object',
-                                                properties: {
-                                                    message: {
-                                                        type: 'string',
-                                                        example: 'should have required property \'email\''
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+            '400': response400("Invalid email"),
+            '422': response422('Invalid params', 'should have required property \'email\'')
         }
     })
     async sendResetPasswordMail(@requestBody() userRequest: AskForPasswordResetRequest) {
@@ -441,86 +262,9 @@ export class UserController {
 
     @patch('/resetPassword', {
         responses: {
-            '200': {
-                description: 'Password changed',
-                content: {
-                    'application/json': {
-                        schema: {
-                            'x-ts-type': User
-                        }
-                    }
-                }
-            },
-            '404': {
-                description: 'Token not found',
-                content: {
-                    'application/json': {
-                        schema: {
-                            type: 'object',
-                            properties: {
-                                error: {
-                                    type: 'object',
-                                    properties: {
-                                        statusCode: {
-                                            type: 'number',
-                                            example: 404
-                                        },
-                                        name: {
-                                            type: 'string',
-                                            example: 'NotFoundError'
-                                        },
-                                        message: {
-                                            type: 'string',
-                                            example: 'Token not found'
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            },
-            '422': {
-                description: 'Invalid params',
-                content: {
-                    'application/json': {
-                        schema: {
-                            type: 'object',
-                            properties: {
-                                error: {
-                                    type: 'object',
-                                    properties: {
-                                        statusCode: {
-                                            type: 'number',
-                                            example: 422
-                                        },
-                                        name: {
-                                            type: 'string',
-                                            example: 'UnprocessableEntityError'
-                                        },
-                                        message: {
-                                            type: 'string',
-                                            example: 'The request body is invalid. See error object `details` property for more info.'
-                                        },
-                                        details: {
-                                            type: 'array',
-                                            items: {
-                                                type: 'object',
-                                                properties: {
-                                                    message: {
-                                                        type: 'string',
-                                                        example: 'should have required property \'password\''
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+            '200': response200(User, 'Password changed'),
+            '404': response404('Token not found'),
+            '422': response422('Invalid params', 'should have required property \'password\'')
         }
     })
     async resetPassword(@requestBody() userRequest: ValidatePasswordResetRequest) {
@@ -545,74 +289,9 @@ export class UserController {
 
     @patch('/validate', {
         responses: {
-            '200': {
-                description: 'Email validated',
-                content: {
-                    'application/json': {
-                        schema: {
-                            'x-ts-type': User
-                        }
-                    }
-                }
-            },
-            '400': {
-                description: 'Missing token',
-                content: {
-                    'application/json': {
-                        schema: {
-                            type: 'object',
-                            properties: {
-                                error: {
-                                    type: 'object',
-                                    properties: {
-                                        statusCode: {
-                                            type: 'number',
-                                            example: 400
-                                        },
-                                        name: {
-                                            type: 'string',
-                                            example: 'BadRequestError'
-                                        },
-                                        message: {
-                                            type: 'string',
-                                            example: 'Missing token'
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            },
-            '404': {
-                description: 'Token not found',
-                content: {
-                    'application/json': {
-                        schema: {
-                            type: 'object',
-                            properties: {
-                                error: {
-                                    type: 'object',
-                                    properties: {
-                                        statusCode: {
-                                            type: 'number',
-                                            example: 404
-                                        },
-                                        name: {
-                                            type: 'string',
-                                            example: 'NotFoundError'
-                                        },
-                                        message: {
-                                            type: 'string',
-                                            example: 'Token not found'
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+            '200': response200(User, 'Email validated'),
+            '400': response400('Missing token'),
+            '404': response404('Token not found')
         }
     })
     async validateAccount(
