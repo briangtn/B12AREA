@@ -34,13 +34,13 @@ export class JWTService implements TokenService {
 
 
     verifyToken(token: string): Promise<UserProfile> {
-        const tk = jwt.decode(token, this.jwtSecret);
-        const userProfile: UserProfile = {
-            email: tk.email
-        } as UserProfile;
-
         return new Promise((resolve, reject) => {
-            resolve(userProfile);
+            try {
+                const decoded: object | string = jwt.verify(token, this.jwtSecret);
+                resolve(decoded as UserProfile)
+            } catch (e) {
+                reject(e);
+            }
         });
     }
 }
