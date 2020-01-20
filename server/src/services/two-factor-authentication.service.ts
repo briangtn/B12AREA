@@ -1,5 +1,6 @@
 import {bind} from '@loopback/core';
-import * as speakeasy from 'speakeasy'
+import * as speakeasy from 'speakeasy';
+import {User} from "../models";
 
 export interface TwoFactorAuthenticationSecretCode {
     otpauthUrl: string,
@@ -8,6 +9,7 @@ export interface TwoFactorAuthenticationSecretCode {
 
 export interface TwoFactorAuthenticationManager {
     generate2FACode(): TwoFactorAuthenticationSecretCode;
+    verify2FACode(code: string, user: User): boolean;
 }
 
 @bind({tags: {namespace: "services", name: "2fa"}})
@@ -24,4 +26,13 @@ export class TwoFactorAuthenticationService implements TwoFactorAuthenticationMa
         }
     }
 
+    verify2FACode(code: string, user: User): boolean {
+        if (!user.twoFactorAuthenticationSecret)
+            return false;
+        return speakeasy.totp.verify({
+            secret: user.twoFactorAuthenticationSecret,
+            encoding: 'base32',
+            token: code,
+        });
+    }
 }

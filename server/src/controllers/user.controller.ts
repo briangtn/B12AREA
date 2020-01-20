@@ -9,7 +9,14 @@ import {SecurityBindings, UserProfile} from "@loopback/security";
 import {TokenServiceBindings} from "../keys";
 import {CredentialsRequestBody} from "./specs/user-controller.specs";
 import {OPERATION_SECURITY_SPEC} from "../utils/security-specs";
-import {EmailManager, NormalizerServiceService, RandomGeneratorManager, TwoFactorAuthenticationManager, UserService} from '../services';
+import {
+    CustomUserProfile,
+    EmailManager,
+    NormalizerServiceService,
+    RandomGeneratorManager,
+    TwoFactorAuthenticationManager,
+    UserService
+} from '../services';
 import * as url from 'url';
 import {UrlWithStringQuery} from "url";
 
@@ -57,6 +64,15 @@ export class ValidatePasswordResetRequest {
         required: true
     })
     password: string;
+}
+
+@model()
+export class Validate2FARequest {
+    @property({
+        type: 'string',
+        required: true
+    })
+    token: string;
 }
 
 @api({basePath: '/users', paths: {}})
@@ -176,6 +192,7 @@ export class UserController {
         normalizedUser.role = ["email_not_validated"];
         const validationToken: string = this.randomGeneratorService.generateRandomString(24);
         normalizedUser.validationToken = validationToken;
+        normalizedUser.twoFactorAuthenticationEnabled = false;
         const user: User = await this.userRepository.create(normalizedUser);
 
         const parsedURL: url.UrlWithStringQuery = url.parse(redirectURL);
@@ -273,10 +290,12 @@ export class UserController {
         else if (!validator.isEmail(normalizeCredentials.email))
             throw new HttpErrors.UnprocessableEntity('Invalid email');
 
-        const user = await this.userService.checkCredentials(credentials);
+        const user: User = await this.userService.checkCredentials(credentials);
         const token = await this.tokenService.generateToken({
-            email: user.email
-        } as UserProfile);
+            email: user.email,
+            require2fa: user.twoFactorAuthenticationEnabled,
+            validated2fa: false
+        } as CustomUserProfile);
 
         return {token};
     }
@@ -294,10 +313,16 @@ export class UserController {
             },
         },
     })
-    @authenticate('jwt')
-    getMe(
+    @authenticate('jwt-all')
+    async getMe(
+        @inject(SecurityBindings.USER) currentUserProfile: UserProfile
     ) {
-        return true
+        const user: User|null = await this.userRepository.findOne({
+            where: {
+                email: currentUserProfile.email
+            }
+        });
+        return user;
     }
 
     @get('/{id}')
@@ -633,26 +658,113 @@ export class UserController {
         return this.userRepository.validateEmail(user.id!);
     }
 
-    @post('/2fa/activate')
-    //@authenticate('jwt-all') todo: uncomment
-    async activate2FAGenerateCode() {
-        //todo: get logged in user
+    @post('/2fa/activate', {
+        security: OPERATION_SECURITY_SPEC,
+        responses: {
+            '200': {
+                description: 'Returned otp auth url',
+                content: {
+                    'application/json': {
+                        schema: 'string',
+                    },
+                },
+            },
+        },
+    })
+    @authenticate('jwt-all')
+    async activate2FAGenerateCode(@inject(SecurityBindings.USER) currentUserProfile: CustomUserProfile) {
+        const user: User|null = await this.userRepository.getFromUserProfile(currentUserProfile);
+        if (!user) {
+            throw new HttpErrors.InternalServerError('Failed to retrieve user from database');
+        }
+        if (user.twoFactorAuthenticationEnabled) {
+            throw new HttpErrors.BadRequest('2FA already activated');
+        }
         const {otpauthUrl, base32} = this.twoFactorAuthenticationService.generate2FACode();
-        console.log(base32);
-        //todo: persist in db base32 for user
+        await this.userRepository.updateById(user.id, {
+            twoFactorAuthenticationSecret: base32,
+            twoFactorAuthenticationEnabled: false
+        });
         return {otpauthUrl}
     }
 
-    @patch('/2fa/activate')
-    //@authenticate('jwt-all') todo: uncomment
-    async activate2FAValidateCode() {
-
+    @patch('/2fa/activate', {
+        security: OPERATION_SECURITY_SPEC,
+        responses: {
+            '200': {
+                description: '2FA activated for user',
+                content: {
+                    'application/json': {
+                        schema: User,
+                    },
+                },
+            },
+        },
+    })
+    @authenticate('jwt-all')
+    async activate2FAValidateCode(
+        @requestBody() userRequest: Validate2FARequest,
+        @inject(SecurityBindings.USER) currentUserProfile: CustomUserProfile
+    ) {
+        const user: User|null = await this.userRepository.getFromUserProfile(currentUserProfile);
+        if (!user) {
+            throw new HttpErrors.InternalServerError('Failed to retrieve user from database');
+        }
+        if (user.twoFactorAuthenticationEnabled) {
+            throw new HttpErrors.BadRequest('2FA already activated');
+        }
+        const verified: boolean = this.twoFactorAuthenticationService.verify2FACode(userRequest.token, user);
+        if (!verified) {
+            throw new HttpErrors.BadRequest('Invalid token please retry');
+        }
+        await this.userRepository.updateById(user.id, {
+            twoFactorAuthenticationEnabled: true
+        });
+        return this.userRepository.findById(user.id);
     }
 
-    @post('/2fa/validate')
-    //@authenticate('jwt-2fa') todo: uncomment and check for jwt 2FA enable
-    async validate2FA() {
-
+    @post('/2fa/validate', {
+        security: OPERATION_SECURITY_SPEC,
+        responses: {
+            '200': {
+                description: 'JWT token returned',
+                content: {
+                    'application/json': {
+                        schema: {
+                            type: 'object',
+                            properties: {
+                                token: {
+                                    type: 'string',
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        },
+    })
+    @authenticate('jwt-2fa')
+    async validate2FA(
+        @requestBody() userRequest: Validate2FARequest,
+        @inject(SecurityBindings.USER) currentUserProfile: CustomUserProfile
+    ) {
+        const user: User|null = await this.userRepository.getFromUserProfile(currentUserProfile);
+        if (!user) {
+            throw new HttpErrors.InternalServerError('Failed to retrieve user from database');
+        }
+        if (!user.twoFactorAuthenticationEnabled) {
+            throw new HttpErrors.BadRequest('2FA is not activated for this account');
+        }
+        const verified: boolean = this.twoFactorAuthenticationService.verify2FACode(userRequest.token, user);
+        if (!verified) {
+            throw new HttpErrors.BadRequest('Invalid token please retry');
+        }
+        const token = await this.tokenService.generateToken({
+            email: user.email,
+            require2fa: user.twoFactorAuthenticationEnabled,
+            validated2fa: true
+        } as CustomUserProfile);
+        return {token};
     }
 
 }

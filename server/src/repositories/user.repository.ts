@@ -5,6 +5,7 @@ import {
 import {User} from '../models';
 import {inject} from '@loopback/core';
 import {EmailManager} from "../services";
+import {UserProfile} from "@loopback/security";
 
 export type Credentials = {
     email: string;
@@ -56,5 +57,13 @@ export class UserRepository extends DefaultCrudRepository<
             text: textData
         }).catch(e => console.log("Failed to deliver password reset validation email: ", e));
         return this.findById(userId);
+    }
+
+    async getFromUserProfile(userProfile: UserProfile): Promise<User|null> {
+        return this.findOne({
+            where: {
+                email: userProfile.email
+            }
+        });
     }
 }
