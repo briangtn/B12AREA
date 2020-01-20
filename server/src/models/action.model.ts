@@ -21,6 +21,10 @@ export class Action extends Entity {
     })
     options: object;
 
+    @property({
+        type: 'string',
+    })
+    areaId?: string;
     // Define well-known properties here
 
     // Indexer property to allow additional data

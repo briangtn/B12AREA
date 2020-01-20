@@ -7,3 +7,4 @@ export * from './reactions.controller';
 export * from './api-status.controller';
 export * from './user-area.controller';
 export * from './area-reaction.controller';
+export * from './area-action.controller';

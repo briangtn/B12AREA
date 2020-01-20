@@ -31,6 +31,8 @@ export class Area extends Entity {
     @hasMany(() => Reaction)
     reactions: Reaction[];
 
+    @hasOne(() => Action)
+    action: Action;
     // Define well-known properties here
 
     // Indexer property to allow additional data
