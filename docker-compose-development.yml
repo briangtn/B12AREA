@@ -32,14 +32,17 @@ services:
     restart: unless-stopped
     environment:
       - DB_HOST=db
+      - REDIS_HOST=redis
     env_file:
       - .env
     volumes:
-    - ./server:/server
+      - ./server:/server
     networks:
       - "db-tier"
+      - "redis-tier"
     depends_on:
       - db
+      - redis
     ports:
       - "${DEV_API_EXTERNAL_PORT}:80"
 
@@ -48,9 +51,9 @@ services:
     command: mongod
     restart: unless-stopped
     environment:
-        - MONGO_INITDB_ROOT_USERNAME=$DB_USER
-        - MONGO_INITDB_ROOT_PASSWORD=$DB_PASS
-        - MONGO_INITDB_DATABASE=$DB_NAME
+      - MONGO_INITDB_ROOT_USERNAME=$DB_USER
+      - MONGO_INITDB_ROOT_PASSWORD=$DB_PASS
+      - MONGO_INITDB_DATABASE=$DB_NAME
     env_file:
       - .env
     ports:
@@ -61,8 +64,15 @@ services:
       - db-vol:/data/db
       - ./scripts/initdb.sh:/docker-entrypoint-initdb.d/initdb.sh
 
+  redis:
+    image: "redis"
+    restart: unless-stopped
+    networks:
+      - "redis-tier"
+
 networks:
   db-tier:
+  redis-tier:
 
 volumes:
   apk-vol:
