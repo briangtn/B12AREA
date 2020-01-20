@@ -4,6 +4,11 @@ import {MongoDataSource} from '../datasources';
 import {inject, Getter} from '@loopback/core';
 import {AreaRepository} from './area.repository';
 
+export type Credentials = {
+    email: string;
+    password: string;
+};
+
 export class UserRepository extends DefaultCrudRepository<
   User,
   typeof User.prototype.id,

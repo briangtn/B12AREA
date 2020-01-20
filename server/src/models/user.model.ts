@@ -3,6 +3,7 @@ import {Area} from './area.model';
 
 @model({
     settings: {
+        hiddenProperties: ['password', 'validationToken', 'resetToken'],
         indexes: {
             uniqueEmail: {
                 keys: {
@@ -52,12 +53,12 @@ export class User extends Entity {
         type: 'string',
         required: false,
     })
-    validation_token?: string;
+    validationToken?: string;
 
     @property({
         type: 'string',
     })
-    reset_token?: string;
+    resetToken?: string;
 
     @hasMany(() => Area, {keyTo: 'ownerId'})
     areas: Area[];
