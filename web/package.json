@@ -24,6 +24,7 @@
     "react-router-dom": "^5.1.2",
     "react-scripts": "3.3.0",
     "react-typist": "^2.0.5",
+    "react-typist-loop": "0.0.5",
     "redux": "^4.0.5",
     "typescript": "^3.7.4",
     "universal-cookie": "^4.0.3"
