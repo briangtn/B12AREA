@@ -8,5 +8,11 @@
       "default": "Champignon"
     },
     "count": "number"
-  }
+  },
+  "placeholders": [
+    {
+      "name": "toReplace",
+      "description": "A placeholder example"
+    }
+  ]
 }
