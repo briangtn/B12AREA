@@ -42,6 +42,37 @@ export const response400 = function(description = "Bad request") {
     }
 };
 
+export const response401 = function(description = "Unauthorized") {
+    return {
+        description,
+        content: {
+            'application/json': {
+                schema: {
+                    type: 'object',
+                    properties: {
+                        error: {
+                            type: 'object',
+                            properties: {
+                                statusCode: {
+                                    type: 'number',
+                                    example: 401
+                                },
+                                name: {
+                                    type: 'string',
+                                    example: 'UnauthorizedError'
+                                },
+                                message: {
+                                    type: 'string'
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+};
+
 export const response409 = function(description: string, exampleMessage = "Email already in use") {
     return {
         description,

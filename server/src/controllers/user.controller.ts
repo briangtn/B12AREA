@@ -18,7 +18,7 @@ import {
     UserService
 } from '../services';
 import * as url from 'url';
-import {response200, response400, response404, response409, response422} from './specs/doc.specs';
+import {response200, response400, response401, response404, response409, response422} from './specs/doc.specs';
 
 @model()
 export class NewUserRequest  {
@@ -261,7 +261,7 @@ export class UserController {
             throw new HttpErrors.BadRequest('Invalid email.');
         }
 
-        const user: User|null = await this.userRepository.findOne({where: {"email": normalizedRequest.email}});
+        const user: User | null = await this.userRepository.findOne({where: {"email": normalizedRequest.email}});
 
         const resetToken: string = this.randomGeneratorService.generateRandomString(24);
 
@@ -310,7 +310,7 @@ export class UserController {
             throw new HttpErrors.InternalServerError();
         }
 
-        const user: User|null = await this.userRepository.findOne({
+        const user: User | null = await this.userRepository.findOne({
             where: {
                 resetToken: normalizedRequest.token
             }
@@ -337,7 +337,7 @@ export class UserController {
             throw new HttpErrors.BadRequest('Missing token');
         }
 
-        const user: User|null = await this.userRepository.findOne({
+        const user: User | null = await this.userRepository.findOne({
             where: {
                 validationToken: token
             }
@@ -368,17 +368,13 @@ export class UserController {
                     },
                 },
             },
-            '400': {
-                description: '2FA already activated for this account'
-            },
-            '401': {
-                description: 'Unauthorized'
-            }
+            '400': response400('2FA already activated for this account'),
+            '401': response401()
         },
     })
     @authenticate('jwt-all')
     async activate2FAGenerateCode(@inject(SecurityBindings.USER) currentUserProfile: CustomUserProfile) {
-        const user: User|null = await this.userRepository.getFromUserProfile(currentUserProfile);
+        const user: User | null = await this.userRepository.getFromUserProfile(currentUserProfile);
         if (!user) {
             throw new HttpErrors.InternalServerError('Failed to retrieve user from database');
         }
@@ -396,22 +392,9 @@ export class UserController {
     @patch('/2fa/activate', {
         security: OPERATION_SECURITY_SPEC,
         responses: {
-            '200': {
-                description: '2FA activated for user',
-                content: {
-                    'application/json': {
-                        schema: {
-                            'x-ts-type': User
-                        }
-                    },
-                },
-            },
-            '400': {
-                description: '2FA already activated for this account/Invalid token'
-            },
-            '401': {
-                description: 'Unauthorized'
-            }
+            '200': response200(User, '2FA activated'),
+            '400': response400('2FA already activated for this account/Invalid token'),
+            '401': response401()
         },
     })
     @authenticate('jwt-all')
@@ -419,7 +402,7 @@ export class UserController {
         @requestBody() userRequest: Validate2FARequest,
         @inject(SecurityBindings.USER) currentUserProfile: CustomUserProfile
     ) {
-        const user: User|null = await this.userRepository.getFromUserProfile(currentUserProfile);
+        const user: User | null = await this.userRepository.getFromUserProfile(currentUserProfile);
         if (!user) {
             throw new HttpErrors.InternalServerError('Failed to retrieve user from database');
         }
@@ -455,9 +438,7 @@ export class UserController {
                 },
             },
             '400': response400('2FA not activated for this account / Invalid token'),
-            '401': {
-                description: 'Unauthorized'
-            }
+            '401': response401()
         },
     })
     @authenticate('jwt-2fa')
@@ -465,7 +446,7 @@ export class UserController {
         @requestBody() userRequest: Validate2FARequest,
         @inject(SecurityBindings.USER) currentUserProfile: CustomUserProfile
     ) {
-        const user: User|null = await this.userRepository.getFromUserProfile(currentUserProfile);
+        const user: User | null = await this.userRepository.getFromUserProfile(currentUserProfile);
         if (!user) {
             throw new HttpErrors.InternalServerError('Failed to retrieve user from database');
         }
