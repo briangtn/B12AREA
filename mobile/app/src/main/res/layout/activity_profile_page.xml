@@ -12,7 +12,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:textSize="50sp"
-        android:text="Home Page" />
+        android:text="Profile Page" />
 
     <include layout="@layout/fragment_toolbar"/>
 
