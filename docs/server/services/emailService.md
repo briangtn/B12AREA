@@ -20,13 +20,13 @@ To use this service you first need to inject his dependency (for example in a Co
 
 ```typescript
 import {RestBindings, get, api} from '@loopback/rest';
-import {EmailService} from '../services';
+import {EmailManager} from '../services';
 import {inject} from '@loopback/context';
 
 @api({basePath: '/test', paths: {}})
 export class TestController {
     constructor(@inject('services.email')
-                protected emailService: EmailService) {}
+                protected emailService: EmailManager) {}
 
     @get('/')
     mainPage() {
