@@ -1,0 +1,11 @@
+{
+  "displayName": "Do something",
+  "description": "Do something",
+  "configSchema": {
+    "TODO": {
+      "type": "string",
+      "required": true,
+      "default": "Cuire les champignons"
+    }
+  }
+}

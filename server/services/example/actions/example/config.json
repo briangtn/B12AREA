@@ -1,0 +1,12 @@
+{
+  "displayName": "On something",
+  "description": "Triggered when something",
+  "configSchema": {
+    "resource": {
+      "type": "string",
+      "required": true,
+      "default": "Champignon"
+    },
+    "count": "number"
+  }
+}
