@@ -95,6 +95,13 @@ export class UpdateUserRequest {
         required: false
     })
     disable2FA?: boolean
+
+    @property({
+        type: 'array',
+        itemType: 'string',
+        required: false
+    })
+    role?: string[];
 }
 
 @api({basePath: '/users', paths: {}})
@@ -244,6 +251,9 @@ export class UserController {
 
         if (!currentUser) {
             throw new HttpErrors.NotFound('User not found');
+        }
+        if (updatedUser.role) {
+            throw new HttpErrors.Unauthorized('You\'re not authorized to edit your own roles');
         }
         if (updatedUser.disable2FA) {
             updatedUser.twoFactorAuthenticationEnabled = false;

@@ -496,6 +496,18 @@ describe('/users', () => {
             expect(dbUser.role).not.containDeep(['email_not_validated']);
             expect(dbUser.role).containDeep(['user']);
         });
+
+        it('Should edit user roles', async () => {
+            const res = await client
+                .patch('/users/' + createdUser.id)
+                .set('Authorization', 'Bearer ' + userToken)
+                .send({role: ['user', 'admin']})
+                .expect(200);
+            const body = res.body;
+            expect(body.id).to.not.empty();
+            const dbUser: User = await userRepo.findById(body.id);
+            expect(dbUser.role).containDeep(['user', 'admin']);
+        });
     });
 
     describe('PATCH /users/me', () => {
@@ -533,6 +545,16 @@ describe('/users', () => {
                 .expect(400);
             const error = JSON.parse(res.error.text);
             expect(error.error.message).to.equal('Missing redirect URL.');
+        });
+
+        it('Should send 401 not allowed to edit your own roles', async () => {
+            const res = await client
+                .patch('/users/me')
+                .set('Authorization', 'Bearer ' + userToken)
+                .send({role: ['admin']})
+                .expect(401);
+            const error = JSON.parse(res.error.text);
+            expect(error.error.message).to.equal('You\'re not authorized to edit your own roles');
         });
 
         it('Should edit my password', async () => {
