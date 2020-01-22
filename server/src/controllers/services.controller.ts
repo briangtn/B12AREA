@@ -6,7 +6,8 @@ import {RestBindings, get, post, param, api} from '@loopback/rest';
 
 @api({basePath: '/services', paths: {}})
 export class ServicesControllerController {
-    constructor() {}
+    constructor() {
+    }
 
     @get('/')
     getServices() {

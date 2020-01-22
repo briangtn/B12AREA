@@ -6,7 +6,8 @@ import {RestBindings, get, post, patch, del, param, api} from '@loopback/rest';
 
 @api({basePath: '/areas', paths: {}})
 export class AreasControllerController {
-    constructor() {}
+    constructor() {
+    }
 
     @get('/')
     getAreas() {

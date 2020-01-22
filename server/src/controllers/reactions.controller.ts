@@ -6,7 +6,8 @@ import {RestBindings, get, post, patch, del, param, api} from '@loopback/rest';
 
 @api({basePath: '/reactions', paths: {}})
 export class ReactionsControllerController {
-    constructor() {}
+    constructor() {
+    }
 
     @get('/{area_id}')
     getReactionForArea(

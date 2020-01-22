@@ -21,7 +21,7 @@ import * as url from 'url';
 import {response200, response400, response401, response404, response409, response422} from './specs/doc.specs';
 
 @model()
-export class NewUserRequest  {
+export class NewUserRequest {
     @property({
         type: 'string',
         required: true,
@@ -78,24 +78,21 @@ export class Validate2FARequest {
 @api({basePath: '/users', paths: {}})
 export class UserController {
     constructor(@repository(UserRepository) public userRepository: UserRepository,
-        @inject('services.normalizer')
-        protected normalizerService: NormalizerServiceService,
+                @inject('services.normalizer')
+                protected normalizerService: NormalizerServiceService,
+                @inject('services.user')
+                protected userService: UserService,
+                @inject(TokenServiceBindings.TOKEN_SERVICE)
+                protected tokenService: TokenService,
+                @inject('services.email')
+                protected emailService: EmailManager,
+                @inject('services.randomGenerator')
+                protected randomGeneratorService: RandomGeneratorManager,
+                @inject('services.2fa')
+                protected twoFactorAuthenticationService: TwoFactorAuthenticationManager,
+    ) {
+    }
 
-        @inject('services.user')
-        protected userService: UserService,
-
-        @inject(TokenServiceBindings.TOKEN_SERVICE)
-        protected tokenService: TokenService,
-
-        @inject('services.email')
-        protected emailService: EmailManager,
-
-        @inject('services.randomGenerator')
-        protected randomGeneratorService: RandomGeneratorManager,
-
-        @inject('services.2fa')
-        protected twoFactorAuthenticationService: TwoFactorAuthenticationManager,
-    ) {}
     @get('/')
     getUsers() {
     }
@@ -108,7 +105,10 @@ export class UserController {
         }
     })
     async register(@requestBody() userRequest: NewUserRequest, @param.query.string('redirectURL') redirectURL?: string) {
-        const normalizedUser: User = this.normalizerService.normalize(userRequest, {email: 'toLower', password: 'hash'}) as User;
+        const normalizedUser: User = this.normalizerService.normalize(userRequest, {
+            email: 'toLower',
+            password: 'hash'
+        }) as User;
 
         if (!redirectURL) {
             throw new HttpErrors.BadRequest('Missing redirect URL.');
@@ -179,10 +179,13 @@ export class UserController {
     })
     async login(
         @requestBody(CredentialsRequestBody) credentials: Credentials,
-    ): Promise<{token: string, require2fa: boolean}> {
+    ): Promise<{ token: string, require2fa: boolean }> {
         if (credentials.password.length === 0)
             throw new HttpErrors.UnprocessableEntity('Empty password');
-        const normalizeCredentials: Credentials = this.normalizerService.normalize(credentials, {email: 'toLower', password: 'hash'}) as Credentials;
+        const normalizeCredentials: Credentials = this.normalizerService.normalize(credentials, {
+            email: 'toLower',
+            password: 'hash'
+        }) as Credentials;
 
         if (!normalizeCredentials)
             throw new HttpErrors.UnprocessableEntity();
