@@ -9,7 +9,9 @@ import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.EditText
+import android.widget.Toast
 import com.b12powered.area.R
+import com.b12powered.area.api.ApiClient
 import kotlinx.android.synthetic.main.activity_login.*
 
 class LoginActivity : AppCompatActivity() {
@@ -64,12 +66,23 @@ class LoginActivity : AppCompatActivity() {
             etPassword.error = getString(R.string.no_password)
         }
         if (email.isNotEmpty() && password.isNotEmpty()) {
-            login()
+            login(email.toString(), password.toString())
         }
     }
 
-    private fun login() {
-
+    private fun login(email: String, password: String) {
+        ApiClient(this)
+            .login(email, password) { user, message ->
+                if (user != null) {
+                    //TODO redirect to homepage
+                } else {
+                    Toast.makeText(
+                        this,
+                        message,
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
     }
 
 }
