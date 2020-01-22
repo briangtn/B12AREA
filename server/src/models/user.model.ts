@@ -3,7 +3,7 @@ import {Area} from './area.model';
 
 @model({
     settings: {
-        hiddenProperties: ['password', 'validationToken', 'resetToken'],
+        hiddenProperties: ['password', 'validationToken', 'resetToken', 'twoFactorAuthenticationSecret'],
         indexes: {
             uniqueEmail: {
                 keys: {
@@ -59,6 +59,17 @@ export class User extends Entity {
         type: 'string',
     })
     resetToken?: string;
+
+    @property({
+        type: 'string',
+    })
+    twoFactorAuthenticationSecret?: string;
+
+    @property({
+        type: 'boolean',
+        default: false,
+    })
+    twoFactorAuthenticationEnabled: boolean;
 
     @hasMany(() => Area, {keyTo: 'ownerId'})
     areas: Area[];

@@ -1,4 +1,4 @@
-import {RestBindings, requestBody, get, post, patch, param, api, HttpErrors} from '@loopback/rest';
+import {requestBody, get, post, patch, param, api, HttpErrors} from '@loopback/rest';
 import {property, repository, model} from '@loopback/repository';
 import {inject} from '@loopback/context';
 import {User} from '../models';
@@ -9,9 +9,16 @@ import {SecurityBindings, UserProfile} from "@loopback/security";
 import {TokenServiceBindings} from "../keys";
 import {CredentialsRequestBody} from "./specs/user-controller.specs";
 import {OPERATION_SECURITY_SPEC} from "../utils/security-specs";
-import {EmailManager, NormalizerServiceService, RandomGeneratorManager, UserService} from '../services';
+import {
+    CustomUserProfile,
+    EmailManager,
+    NormalizerServiceService,
+    RandomGeneratorManager,
+    TwoFactorAuthenticationManager,
+    UserService
+} from '../services';
 import * as url from 'url';
-import {UrlWithStringQuery} from "url";
+import {response200, response400, response401, response404, response409, response422} from './specs/doc.specs';
 
 @model()
 export class NewUserRequest  {
@@ -59,6 +66,15 @@ export class ValidatePasswordResetRequest {
     password: string;
 }
 
+@model()
+export class Validate2FARequest {
+    @property({
+        type: 'string',
+        required: true
+    })
+    token: string;
+}
+
 @api({basePath: '/users', paths: {}})
 export class UserController {
     constructor(@repository(UserRepository) public userRepository: UserRepository,
@@ -76,81 +92,19 @@ export class UserController {
 
         @inject('services.randomGenerator')
         protected randomGeneratorService: RandomGeneratorManager,
-    ) {}
 
+        @inject('services.2fa')
+        protected twoFactorAuthenticationService: TwoFactorAuthenticationManager,
+    ) {}
     @get('/')
     getUsers() {
     }
 
     @post('/register', {
         responses: {
-            '200': {
-                description: 'Register an user',
-                content: {
-                    'application/json': {
-                        schema: {
-                            'x-ts-type': User
-                        }
-                    }
-                }
-            },
-            '400': {
-                description: 'Missing redirect URL or invalid email',
-                content: {
-                    'application/json': {
-                        schema: {
-                            type: 'object',
-                            properties: {
-                                error: {
-                                    type: 'object',
-                                    properties: {
-                                        statusCode: {
-                                            type: 'number',
-                                            example: 400
-                                        },
-                                        name: {
-                                            type: 'string',
-                                            example: 'BadRequestError'
-                                        },
-                                        message: {
-                                            type: 'string'
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            },
-            '409': {
-                description: 'Email already in use',
-                content: {
-                    'application/json': {
-                        schema: {
-                            type: 'object',
-                            properties: {
-                                error: {
-                                    type: 'object',
-                                    properties: {
-                                        statusCode: {
-                                            type: 'number',
-                                            example: 409
-                                        },
-                                        name: {
-                                            type: 'string',
-                                            example: 'ConflictError'
-                                        },
-                                        message: {
-                                            type: 'string',
-                                            example: 'Email already in use'
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+            '200': response200(User, "Register an user"),
+            '400': response400('Missing redirect URL or invalid email'),
+            '409': response409('Email already in use')
         }
     })
     async register(@requestBody() userRequest: NewUserRequest, @param.query.string('redirectURL') redirectURL?: string) {
@@ -174,6 +128,7 @@ export class UserController {
         normalizedUser.role = ["email_not_validated"];
         const validationToken: string = this.randomGeneratorService.generateRandomString(24);
         normalizedUser.validationToken = validationToken;
+        normalizedUser.twoFactorAuthenticationEnabled = false;
         const user: User = await this.userRepository.create(normalizedUser);
 
         const parsedURL: url.UrlWithStringQuery = url.parse(redirectURL);
@@ -211,57 +166,20 @@ export class UserController {
                                 token: {
                                     type: 'string',
                                 },
+                                require2fa: {
+                                    type: 'boolean'
+                                }
                             },
                         },
                     },
                 },
             },
         },
-        '422': {
-            description: 'Invalid params',
-            content: {
-                'application/json': {
-                    schema: {
-                        type: 'object',
-                        properties: {
-                            error: {
-                                type: 'object',
-                                properties: {
-                                    statusCode: {
-                                        type: 'number',
-                                        example: 422
-                                    },
-                                    name: {
-                                        type: 'string',
-                                        example: 'UnprocessableEntityError'
-                                    },
-                                    message: {
-                                        type: 'string',
-                                        example: 'The request body is invalid. See error object `details` property for more info.'
-                                    },
-                                    details: {
-                                        type: 'array',
-                                        items: {
-                                            type: 'object',
-                                            properties: {
-                                                message: {
-                                                    type: 'string',
-                                                    example: 'should have required property \'email\' and \'password\''
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
+        '422': response422('Invalid params', 'should have required property \'email\' and \'password\'')
     })
     async login(
         @requestBody(CredentialsRequestBody) credentials: Credentials,
-    ): Promise<{token: string}> {
+    ): Promise<{token: string, require2fa: boolean}> {
         if (credentials.password.length === 0)
             throw new HttpErrors.UnprocessableEntity('Empty password');
         const normalizeCredentials: Credentials = this.normalizerService.normalize(credentials, {email: 'toLower', password: 'hash'}) as Credentials;
@@ -271,38 +189,49 @@ export class UserController {
         else if (!validator.isEmail(normalizeCredentials.email))
             throw new HttpErrors.UnprocessableEntity('Invalid email');
 
-        const user = await this.userService.checkCredentials(credentials);
+        const user: User = await this.userService.checkCredentials(credentials);
         const token = await this.tokenService.generateToken({
-            email: user.email
-        } as UserProfile);
+            email: user.email,
+            require2fa: user.twoFactorAuthenticationEnabled,
+            validated2fa: false
+        } as CustomUserProfile);
 
-        return {token};
+        return {token, require2fa: user.twoFactorAuthenticationEnabled};
     }
 
     @get('/me', {
         security: OPERATION_SECURITY_SPEC,
         responses: {
-            '200': {
-                description: 'Own profile',
-                content: {
-                    'application/json': {
-                        schema: User,
-                    },
-                },
-            },
+            '200': response200(User, 'Own profile')
         },
     })
-    @authenticate('jwt')
-    getMe(
+    @authenticate('jwt-all')
+    async getMe(
+        @inject(SecurityBindings.USER) currentUserProfile: UserProfile
     ) {
-        return true
+        const user: User | null = await this.userRepository.findOne({
+            where: {
+                email: currentUserProfile.email
+            }
+        });
+        return user;
     }
 
-    @get('/{id}')
-    getUser(
+    @get('/{id}', {
+        responses: {
+            '200': response200(User, "Return a user"),
+            '404': response404('User not found')
+        }
+    })
+    @authenticate('jwt-all')
+    async getUser(
         @param.path.string('id') id: string
-    ): string {
-        return "Salut " + id;
+    ) {
+        const user: User | undefined = await this.userRepository.findById(id);
+
+        if (!user)
+            throw new HttpErrors.NotFound("User not found.");
+        return user;
     }
 
     @patch('/{id}')
@@ -317,76 +246,8 @@ export class UserController {
             '200': {
                 description: 'Email sent if user exist'
             },
-            '400': {
-                description: 'Invalid email',
-                content: {
-                    'application/json': {
-                        schema: {
-                            type: 'object',
-                            properties: {
-                                error: {
-                                    type: 'object',
-                                    properties: {
-                                        statusCode: {
-                                            type: 'number',
-                                            example: 400
-                                        },
-                                        name: {
-                                            type: 'string',
-                                            example: 'BadRequestError'
-                                        },
-                                        message: {
-                                            type: 'string',
-                                            example: 'Invalid email.'
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            },
-            '422': {
-                description: 'Invalid params',
-                content: {
-                    'application/json': {
-                        schema: {
-                            type: 'object',
-                            properties: {
-                                error: {
-                                    type: 'object',
-                                    properties: {
-                                        statusCode: {
-                                            type: 'number',
-                                            example: 422
-                                        },
-                                        name: {
-                                            type: 'string',
-                                            example: 'UnprocessableEntityError'
-                                        },
-                                        message: {
-                                            type: 'string',
-                                            example: 'The request body is invalid. See error object `details` property for more info.'
-                                        },
-                                        details: {
-                                            type: 'array',
-                                            items: {
-                                                type: 'object',
-                                                properties: {
-                                                    message: {
-                                                        type: 'string',
-                                                        example: 'should have required property \'email\''
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+            '400': response400("Invalid email"),
+            '422': response422('Invalid params', 'should have required property \'email\'')
         }
     })
     async sendResetPasswordMail(@requestBody() userRequest: AskForPasswordResetRequest) {
@@ -400,7 +261,7 @@ export class UserController {
             throw new HttpErrors.BadRequest('Invalid email.');
         }
 
-        const user: User|null = await this.userRepository.findOne({where: {"email": normalizedRequest.email}});
+        const user: User | null = await this.userRepository.findOne({where: {"email": normalizedRequest.email}});
 
         const resetToken: string = this.randomGeneratorService.generateRandomString(24);
 
@@ -437,86 +298,9 @@ export class UserController {
 
     @patch('/resetPassword', {
         responses: {
-            '200': {
-                description: 'Password changed',
-                content: {
-                    'application/json': {
-                        schema: {
-                            'x-ts-type': User
-                        }
-                    }
-                }
-            },
-            '404': {
-                description: 'Token not found',
-                content: {
-                    'application/json': {
-                        schema: {
-                            type: 'object',
-                            properties: {
-                                error: {
-                                    type: 'object',
-                                    properties: {
-                                        statusCode: {
-                                            type: 'number',
-                                            example: 404
-                                        },
-                                        name: {
-                                            type: 'string',
-                                            example: 'NotFoundError'
-                                        },
-                                        message: {
-                                            type: 'string',
-                                            example: 'Token not found'
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            },
-            '422': {
-                description: 'Invalid params',
-                content: {
-                    'application/json': {
-                        schema: {
-                            type: 'object',
-                            properties: {
-                                error: {
-                                    type: 'object',
-                                    properties: {
-                                        statusCode: {
-                                            type: 'number',
-                                            example: 422
-                                        },
-                                        name: {
-                                            type: 'string',
-                                            example: 'UnprocessableEntityError'
-                                        },
-                                        message: {
-                                            type: 'string',
-                                            example: 'The request body is invalid. See error object `details` property for more info.'
-                                        },
-                                        details: {
-                                            type: 'array',
-                                            items: {
-                                                type: 'object',
-                                                properties: {
-                                                    message: {
-                                                        type: 'string',
-                                                        example: 'should have required property \'password\''
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+            '200': response200(User, 'Password changed'),
+            '404': response404('Token not found'),
+            '422': response422('Invalid params', 'should have required property \'password\'')
         }
     })
     async resetPassword(@requestBody() userRequest: ValidatePasswordResetRequest) {
@@ -526,7 +310,7 @@ export class UserController {
             throw new HttpErrors.InternalServerError();
         }
 
-        const user: User|null = await this.userRepository.findOne({
+        const user: User | null = await this.userRepository.findOne({
             where: {
                 resetToken: normalizedRequest.token
             }
@@ -541,74 +325,9 @@ export class UserController {
 
     @patch('/validate', {
         responses: {
-            '200': {
-                description: 'Email validated',
-                content: {
-                    'application/json': {
-                        schema: {
-                            'x-ts-type': User
-                        }
-                    }
-                }
-            },
-            '400': {
-                description: 'Missing token',
-                content: {
-                    'application/json': {
-                        schema: {
-                            type: 'object',
-                            properties: {
-                                error: {
-                                    type: 'object',
-                                    properties: {
-                                        statusCode: {
-                                            type: 'number',
-                                            example: 400
-                                        },
-                                        name: {
-                                            type: 'string',
-                                            example: 'BadRequestError'
-                                        },
-                                        message: {
-                                            type: 'string',
-                                            example: 'Missing token'
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            },
-            '404': {
-                description: 'Token not found',
-                content: {
-                    'application/json': {
-                        schema: {
-                            type: 'object',
-                            properties: {
-                                error: {
-                                    type: 'object',
-                                    properties: {
-                                        statusCode: {
-                                            type: 'number',
-                                            example: 404
-                                        },
-                                        name: {
-                                            type: 'string',
-                                            example: 'NotFoundError'
-                                        },
-                                        message: {
-                                            type: 'string',
-                                            example: 'Token not found'
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+            '200': response200(User, 'Email validated'),
+            '400': response400('Missing token'),
+            '404': response404('Token not found')
         }
     })
     async validateAccount(
@@ -618,7 +337,7 @@ export class UserController {
             throw new HttpErrors.BadRequest('Missing token');
         }
 
-        const user: User|null = await this.userRepository.findOne({
+        const user: User | null = await this.userRepository.findOne({
             where: {
                 validationToken: token
             }
@@ -630,4 +349,120 @@ export class UserController {
 
         return this.userRepository.validateEmail(user.id!);
     }
+
+    @post('/2fa/activate', {
+        security: OPERATION_SECURITY_SPEC,
+        responses: {
+            '200': {
+                description: 'Returned otp auth url',
+                content: {
+                    'application/json': {
+                        schema: {
+                            type: 'object',
+                            properties: {
+                                otpauthUrl: {
+                                    type: 'string'
+                                }
+                            }
+                        }
+                    },
+                },
+            },
+            '400': response400('2FA already activated for this account'),
+            '401': response401()
+        },
+    })
+    @authenticate('jwt-all')
+    async activate2FAGenerateCode(@inject(SecurityBindings.USER) currentUserProfile: CustomUserProfile) {
+        const user: User | null = await this.userRepository.getFromUserProfile(currentUserProfile);
+        if (!user) {
+            throw new HttpErrors.InternalServerError('Failed to retrieve user from database');
+        }
+        if (user.twoFactorAuthenticationEnabled) {
+            throw new HttpErrors.BadRequest('2FA already activated');
+        }
+        const {otpauthUrl, base32} = this.twoFactorAuthenticationService.generate2FACode();
+        await this.userRepository.updateById(user.id, {
+            twoFactorAuthenticationSecret: base32,
+            twoFactorAuthenticationEnabled: false
+        });
+        return {otpauthUrl}
+    }
+
+    @patch('/2fa/activate', {
+        security: OPERATION_SECURITY_SPEC,
+        responses: {
+            '200': response200(User, '2FA activated'),
+            '400': response400('2FA already activated for this account/Invalid token'),
+            '401': response401()
+        },
+    })
+    @authenticate('jwt-all')
+    async activate2FAValidateCode(
+        @requestBody() userRequest: Validate2FARequest,
+        @inject(SecurityBindings.USER) currentUserProfile: CustomUserProfile
+    ) {
+        const user: User | null = await this.userRepository.getFromUserProfile(currentUserProfile);
+        if (!user) {
+            throw new HttpErrors.InternalServerError('Failed to retrieve user from database');
+        }
+        if (user.twoFactorAuthenticationEnabled) {
+            throw new HttpErrors.BadRequest('2FA already activated');
+        }
+        const verified: boolean = this.twoFactorAuthenticationService.verify2FACode(userRequest.token, user);
+        if (!verified) {
+            throw new HttpErrors.BadRequest('Invalid token please retry');
+        }
+        await this.userRepository.updateById(user.id, {
+            twoFactorAuthenticationEnabled: true
+        });
+        return this.userRepository.findById(user.id);
+    }
+
+    @post('/2fa/validate', {
+        security: OPERATION_SECURITY_SPEC,
+        responses: {
+            '200': {
+                description: 'JWT token returned',
+                content: {
+                    'application/json': {
+                        schema: {
+                            type: 'object',
+                            properties: {
+                                token: {
+                                    type: 'string',
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+            '400': response400('2FA not activated for this account / Invalid token'),
+            '401': response401()
+        },
+    })
+    @authenticate('jwt-2fa')
+    async validate2FA(
+        @requestBody() userRequest: Validate2FARequest,
+        @inject(SecurityBindings.USER) currentUserProfile: CustomUserProfile
+    ) {
+        const user: User | null = await this.userRepository.getFromUserProfile(currentUserProfile);
+        if (!user) {
+            throw new HttpErrors.InternalServerError('Failed to retrieve user from database');
+        }
+        if (!user.twoFactorAuthenticationEnabled) {
+            throw new HttpErrors.BadRequest('2FA is not activated for this account');
+        }
+        const verified: boolean = this.twoFactorAuthenticationService.verify2FACode(userRequest.token, user);
+        if (!verified) {
+            throw new HttpErrors.BadRequest('Invalid token please retry');
+        }
+        const token = await this.tokenService.generateToken({
+            email: user.email,
+            require2fa: user.twoFactorAuthenticationEnabled,
+            validated2fa: true
+        } as CustomUserProfile);
+        return {token};
+    }
+
 }

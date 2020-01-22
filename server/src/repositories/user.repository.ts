@@ -5,6 +5,7 @@ import {inject, Getter} from '@loopback/core';
 import {AreaRepository} from './area.repository';
 import { UserProfile } from '@loopback/security';
 import {EmailManager} from "../services";
+import {UserProfile} from "@loopback/security";
 
 export type Credentials = {
     email: string;
@@ -64,7 +65,7 @@ export class UserRepository extends DefaultCrudRepository<User,
         return this.findById(userId);
     }
 
-    async getFromUserProfile(userProfile: UserProfile): Promise<User | null> {
+    async getFromUserProfile(userProfile: UserProfile): Promise<User|null> {
         return this.findOne({
             where: {
                 email: userProfile.email
