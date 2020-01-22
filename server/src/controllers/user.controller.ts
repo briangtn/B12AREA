@@ -75,6 +75,35 @@ export class Validate2FARequest {
     token: string;
 }
 
+@model()
+export class UpdateUserRequest {
+    @property({
+        type: 'string',
+        required: false,
+        regexp: '^w+([.-]?w+)*@w+([.-]?w+)*(.w{2,3})+$',
+    })
+    email?: string;
+
+    @property({
+        type: 'string',
+        required: false
+    })
+    password?: string;
+
+    @property({
+        type: 'boolean',
+        required: false
+    })
+    disable2FA?: boolean
+
+    @property({
+        type: 'array',
+        itemType: 'string',
+        required: false
+    })
+    role?: string[];
+}
+
 @api({basePath: '/users', paths: {}})
 export class UserController {
     constructor(@repository(UserRepository) public userRepository: UserRepository,
@@ -126,30 +155,9 @@ export class UserController {
         }
 
         normalizedUser.role = ["email_not_validated"];
-        const validationToken: string = this.randomGeneratorService.generateRandomString(24);
-        normalizedUser.validationToken = validationToken;
+        normalizedUser.validationToken = await this.userRepository.changeMail(normalizedUser.email, redirectURL);
         normalizedUser.twoFactorAuthenticationEnabled = false;
         const user: User = await this.userRepository.create(normalizedUser);
-
-        const parsedURL: url.UrlWithStringQuery = url.parse(redirectURL);
-        let endURL: string = parsedURL.protocol + '//' + parsedURL.host + parsedURL.pathname;
-        if (parsedURL.search) {
-            endURL += parsedURL.search + "&token=" + validationToken;
-        } else {
-            endURL += "?token=" + validationToken;
-        }
-        const templateParams: Object = {
-            redirectURL: endURL
-        };
-        const htmlData: string = await this.emailService.getHtmlFromTemplate("emailValidation", templateParams);
-        const textData: string = await this.emailService.getTextFromTemplate("emailValidation", templateParams);
-        this.emailService.sendMail({
-            from: "AREA <noreply@b12powered.com>",
-            to: normalizedUser.email,
-            subject: "Welcome to AREA",
-            html: htmlData,
-            text: textData
-        }).catch(e => console.log("Failed to deliver email validation email: ", e));
 
         return user;
     }
@@ -217,6 +225,61 @@ export class UserController {
         return user;
     }
 
+    @patch('/me', {
+        security: OPERATION_SECURITY_SPEC,
+        responses: {
+            '200': response200(User, 'Return user'),
+            '400': response400('Bad request'),
+            '404': response404('User not found'),
+            '401': {
+                description: 'Unauthorized'
+            }
+        }
+    })
+    @authenticate('jwt-all')
+    async updateMe(
+        @requestBody() newUser: UpdateUserRequest,
+        @inject(SecurityBindings.USER) currentUserProfile: UserProfile,
+        @param.query.string('redirectURL') redirectURL?: string
+    ) {
+        const updatedUser: User = this.normalizerService.normalize(newUser, {email: 'toLower', password: 'hash'}) as User;
+        const currentUser: User | null = await this.userRepository.findOne({
+            where: {
+                email: currentUserProfile.email
+            }
+        });
+
+        if (!currentUser) {
+            throw new HttpErrors.NotFound('User not found');
+        }
+        if (updatedUser.role) {
+            throw new HttpErrors.Unauthorized('You\'re not authorized to edit your own roles');
+        }
+        if (updatedUser.disable2FA) {
+            updatedUser.twoFactorAuthenticationEnabled = false;
+        }
+        if (updatedUser.email) {
+            if (!validator.isEmail(updatedUser.email)) {
+                throw new HttpErrors.BadRequest('Invalid email.');
+            }
+            if (await this.userService.isEmailUsed(updatedUser.email)) {
+                throw new HttpErrors.Conflict('Email already in use');
+            }
+            if (!redirectURL) {
+                throw new HttpErrors.BadRequest('Missing redirect URL.');
+            }
+            if (!currentUser.role)
+                throw new HttpErrors.InternalServerError();
+            updatedUser.role = currentUser.role.filter((role: string) => {
+                return role !== "user" && role !== "email_not_validated";
+            });
+            updatedUser.role.push('email_not_validated');
+            updatedUser.validationToken = await this.userRepository.changeMail(updatedUser.email, redirectURL);
+        }
+        await this.userRepository.updateById(currentUser.id, updatedUser);
+        return this.userRepository.findById(currentUser.id);
+    }
+
     @get('/{id}', {
         responses: {
             '200': response200(User, "Return a user"),
@@ -234,11 +297,40 @@ export class UserController {
         return user;
     }
 
-    @patch('/{id}')
-    updateUser(
-        @param.path.string('id') id: string
+    @patch('/{id}', {
+        security: OPERATION_SECURITY_SPEC,
+        responses: {
+            '200': response200(User, 'Return user'),
+            '404': response404('User not found'),
+            '401': {
+                description: 'Unauthorized'
+            }
+        }
+    })
+    @authenticate('jwt-all')
+    async updateUser(
+        @param.path.string('id') id: string,
+        @requestBody() newUser: UpdateUserRequest,
     ) {
+        const updatedUser: User = this.normalizerService.normalize(newUser, {email: 'toLower', password: 'hash'}) as User;
+        const currentUser: User | undefined = await this.userRepository.findById(id);
 
+        if (!currentUser) {
+            throw new HttpErrors.NotFound('User not found');
+        }
+        if (updatedUser.email) {
+            if (await this.userService.isEmailUsed(updatedUser.email)) {
+                throw new HttpErrors.Conflict('Email already in use');
+            }
+            if (!validator.isEmail(updatedUser.email)) {
+                throw new HttpErrors.BadRequest('Invalid email.');
+            }
+        }
+        if (updatedUser.disable2FA) {
+            updatedUser.twoFactorAuthenticationEnabled = false;
+        }
+        await this.userRepository.updateById(id, updatedUser);
+        return this.userRepository.findById(id);
     }
 
     @post('/resetPassword', {

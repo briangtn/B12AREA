@@ -26,4 +26,14 @@ export class UserService {
             throw new HttpErrors.Unauthorized('Invalid email or password');
         return user;
     }
+
+    async isEmailUsed(email: string): Promise<boolean> {
+        const user = await this.userRepository.findOne({
+            where: {
+                email: email
+            }
+        });
+
+        return user !== undefined && user !== null;
+    }
 }
