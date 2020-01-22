@@ -1,14 +1,14 @@
 {
   "displayName": "On something",
   "description": "Triggered when something",
-  "configSchema": {
-    "resource": {
+  "configSchema": [
+    {
+      "name": "resource",
       "type": "string",
       "required": true,
       "default": "Champignon"
-    },
-    "count": "number"
-  },
+    }
+  ],
   "placeholders": [
     {
       "name": "toReplace",
