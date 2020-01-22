@@ -3,7 +3,6 @@ import {User, UserRelations, Area} from '../models';
 import {MongoDataSource} from '../datasources';
 import {inject, Getter} from '@loopback/core';
 import {AreaRepository} from './area.repository';
-import { UserProfile } from '@loopback/security';
 import {EmailManager} from "../services";
 import {UserProfile} from "@loopback/security";
 
