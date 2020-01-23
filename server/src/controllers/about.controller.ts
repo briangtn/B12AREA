@@ -60,7 +60,7 @@ export class AboutController {
         try {
             serviceDirs = await readdir(servicesPath);
         } catch (e) {
-            console.log('Unable to scan directory: ' + e);
+            console.log(`Unable to scan directory ${servicesPath}: ${e}`);
             return services;
         }
         for (const serviceName of serviceDirs) {
@@ -85,7 +85,7 @@ export class AboutController {
             try {
                 actionDirs = await readdir(serviceActionsPath);
             } catch (e) {
-                console.log('Unable to scan directory: ' + e);
+                console.log(`Unable to scan directory ${serviceActionsPath}: ${e}`);
                 continue;
             }
             for (const actionName of actionDirs) {
@@ -112,7 +112,7 @@ export class AboutController {
             try {
                 reactionDirs = await readdir(serviceReactionsPath);
             } catch (e) {
-                console.log('Unable to scan directory: ' + e);
+                console.log(`Unable to scan directory ${serviceReactionsPath}: ${e}`);
                 continue;
             }
             for (const reactionName of reactionDirs) {
