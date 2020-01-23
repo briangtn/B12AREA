@@ -81,7 +81,7 @@ class RegisterActivity : AppCompatActivity() {
 
     private fun register(email: String, password: String) {
         ApiClient(this)
-            .register(email, password) { user, message ->
+            .register(email, password, "http://" + (System.getenv("HOST") ?: "dev.area.b12powered.com") + "/email_validation") { user, message ->
                 if (user != null) {
                     Toast.makeText(
                         this,

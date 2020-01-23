@@ -9,12 +9,11 @@ import com.android.volley.toolbox.StringRequest
 import com.b12powered.area.User
 import com.b12powered.area.toObject
 import com.google.gson.Gson
-import org.json.JSONObject
 
 class ApiClient(private val context: Context) {
 
     private fun performRequest(route: ApiRoute, completion: (success: Boolean, apiResponse: ApiResponse) -> Unit) {
-        val request: StringRequest = object : StringRequest(route.httpMethod, route.url, { response ->
+        val request: StringRequest = object : StringRequest(route.httpMethod, route.url + getQueryParams(route), { response ->
             this.handle(response, completion)
         }, {
             it.printStackTrace()
@@ -25,7 +24,7 @@ class ApiClient(private val context: Context) {
             }
         }) {
             override fun getBody(): ByteArray {
-                val jsonString = Gson().toJson(route.params)
+                val jsonString = Gson().toJson(route.body)
                 return jsonString.toByteArray()
             }
 
@@ -38,6 +37,7 @@ class ApiClient(private val context: Context) {
             }
         }
         request.retryPolicy = DefaultRetryPolicy(route.timeout, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT)
+        request.setShouldCache(false)
         getRequestQueue().add(request)
     }
 
@@ -56,6 +56,12 @@ class ApiClient(private val context: Context) {
             is ParseError -> "Error while parsing the server response."
             else -> "Internet error."
         }
+    }
+
+    private fun getQueryParams(route: ApiRoute): String {
+        var query = "?"
+        route.params.forEach { (key, value) -> query += "${key}=${value}&" }
+        return query
     }
 
     private fun getRequestQueue(): RequestQueue {
@@ -80,8 +86,8 @@ class ApiClient(private val context: Context) {
         }
     }
 
-    fun register(email: String, password: String, completion: (user: User?, message: String) -> Unit) {
-        val route = ApiRoute.Register(email, password, context)
+    fun register(email: String, password: String, redirectUrl: String, completion: (user: User?, message: String) -> Unit) {
+        val route = ApiRoute.Register(email, password, redirectUrl, context)
         this.performRequest(route) { success, response ->
             if (success) {
                 val user: User = response.json.toObject()

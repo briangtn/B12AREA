@@ -6,7 +6,7 @@ import com.android.volley.Request
 sealed class ApiRoute {
 
     data class Login(var email: String, var password: String, var context: Context) : ApiRoute()
-    data class Register(var email: String, var password: String, var context: Context) : ApiRoute()
+    data class Register(var email: String, var password: String, var redirectUrl: String, var context: Context) : ApiRoute()
 
     val timeout: Int
         get() {
@@ -36,14 +36,24 @@ sealed class ApiRoute {
             }
         }
 
-    val params: HashMap<String, String>
+    val body: HashMap<String, String>
         get() {
             return when (this) {
                 is Login -> {
                     hashMapOf(Pair("email", this.email), Pair("password", this.password))
                 }
                 is Register -> {
-                    hashMapOf(Pair("email", this.email), Pair("password", this.email))
+                    hashMapOf(Pair("email", this.email), Pair("password", this.password))
+                }
+                else -> hashMapOf()
+            }
+        }
+
+    val params: HashMap<String, String>
+        get() {
+            return when (this) {
+                is Register -> {
+                    hashMapOf(Pair("redirectURL", this.redirectUrl))
                 }
                 else -> hashMapOf()
             }
