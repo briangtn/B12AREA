@@ -21,4 +21,6 @@
     <string name="confirm_new_password">Confirm new password</string>
     <string name="error">Error</string>
     <string name="success">Success</string>
+    <string name="successful_registration">Registration successful !</string>
+    <string name="email_confirmation_message">We\'ve sent you an email in order to validate your account. Check your spams if you don\'t see it !</string>
 </resources>

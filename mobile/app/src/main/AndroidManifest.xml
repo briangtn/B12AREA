@@ -19,6 +19,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".activities.LoginActivity" />
+        <activity android:name=".activities.RegistrationValidationActivity" />
         <activity android:name=".activities.EmailValidationActivity">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />

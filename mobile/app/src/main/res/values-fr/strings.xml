@@ -22,4 +22,6 @@
     <string name="confirm_new_password">Confirmer le nouveau mot de passe</string>
     <string name="error">Erreur</string>
     <string name="success">Succès</string>
+    <string name="successful_registration">Inscription réussie !</string>
+    <string name="email_confirmation_message">Nous vous avons envoyé un email afin de valider votre compte. Vérifiez vos spams si vous ne le voyez pas !</string>
 </resources>

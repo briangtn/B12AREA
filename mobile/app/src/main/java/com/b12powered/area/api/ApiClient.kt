@@ -81,9 +81,9 @@ class ApiClient(private val context: Context) {
         this.performRequest(route) { success, response ->
             if (success) {
                 val user: User = response.json.toObject()
-                completion.invoke(user, Resources.getSystem().getString(R.string.success))
+                completion.invoke(user, "success")
             } else {
-                completion.invoke(null, Resources.getSystem().getString(R.string.error) + ": ${response.message}")
+                completion.invoke(null, response.message)
             }
         }
     }
@@ -93,9 +93,9 @@ class ApiClient(private val context: Context) {
         this.performRequest(route) { success, response ->
             if (success) {
                 val user: User = response.json.toObject()
-                completion.invoke(user, Resources.getSystem().getString(R.string.success))
+                completion.invoke(user, "success")
             } else {
-                completion.invoke(null, Resources.getSystem().getString(R.string.error) + ": ${response.message}")
+                completion.invoke(null, response.message)
             }
         }
     }
