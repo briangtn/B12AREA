@@ -85,7 +85,7 @@ class RegisterActivity : AppCompatActivity() {
                 if (user != null) {
                     Toast.makeText(
                         this,
-                        "registered",
+                        user.email,
                         Toast.LENGTH_SHORT
                     ).show()
                 } else {

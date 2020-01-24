@@ -10,6 +10,8 @@ interface JSONConvertable {
 inline fun <reified T: JSONConvertable> String.toObject(): T = Gson().fromJson(this, T::class.java)
 
 data class User(
-    @SerializedName("id") val id: Int,
+    @SerializedName("id") val id: String,
     @SerializedName("email") val email: String,
-    @SerializedName("token") val token: String) : JSONConvertable
+    @SerializedName("role") val role: List<String>,
+    @SerializedName("services") val services: List<String>,
+    @SerializedName("twoFactorAuthenticationEnabled") val twoFactorAuthenticationEnabled: Boolean) : JSONConvertable

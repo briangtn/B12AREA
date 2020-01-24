@@ -1,11 +1,13 @@
 package com.b12powered.area.api
 
 import android.content.Context
+import android.content.res.Resources
 import com.android.volley.*
 import com.android.volley.toolbox.BasicNetwork
 import com.android.volley.toolbox.DiskBasedCache
 import com.android.volley.toolbox.HurlStack
 import com.android.volley.toolbox.StringRequest
+import com.b12powered.area.R
 import com.b12powered.area.User
 import com.b12powered.area.toObject
 import com.google.gson.Gson
@@ -79,9 +81,9 @@ class ApiClient(private val context: Context) {
         this.performRequest(route) { success, response ->
             if (success) {
                 val user: User = response.json.toObject()
-                completion.invoke(user, "")
+                completion.invoke(user, Resources.getSystem().getString(R.string.success))
             } else {
-                completion.invoke(null, response.message)
+                completion.invoke(null, Resources.getSystem().getString(R.string.error) + ": ${response.message}")
             }
         }
     }
@@ -91,9 +93,9 @@ class ApiClient(private val context: Context) {
         this.performRequest(route) { success, response ->
             if (success) {
                 val user: User = response.json.toObject()
-                completion.invoke(user, "")
+                completion.invoke(user, Resources.getSystem().getString(R.string.success))
             } else {
-                completion.invoke(null, response.message)
+                completion.invoke(null, Resources.getSystem().getString(R.string.error) + ": ${response.message}")
             }
         }
     }
