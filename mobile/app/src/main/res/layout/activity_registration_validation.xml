@@ -24,6 +24,7 @@
         android:layout_width="291dp"
         android:layout_height="70dp"
         android:layout_marginTop="148dp"
+        android:fontFamily="@font/roboto_light"
         android:text="@string/email_confirmation_message"
         android:textAlignment="center"
         android:textColor="@color/colorPrimary"

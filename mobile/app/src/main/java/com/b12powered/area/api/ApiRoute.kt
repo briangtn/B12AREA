@@ -7,6 +7,7 @@ sealed class ApiRoute {
 
     data class Login(var email: String, var password: String, var context: Context) : ApiRoute()
     data class Register(var email: String, var password: String, var redirectUrl: String, var context: Context) : ApiRoute()
+    data class Validate(var token: String, var context: Context) : ApiRoute()
 
     val timeout: Int
         get() {
@@ -23,6 +24,7 @@ sealed class ApiRoute {
             return "$baseUrl/${when (this@ApiRoute) {
                 is Login -> "users/login"
                 is Register -> "users/register"
+                is Validate -> "users/validate"
                 else -> ""
             }}"
         }
@@ -32,6 +34,7 @@ sealed class ApiRoute {
             return when (this) {
                 is Login -> Request.Method.POST
                 is Register -> Request.Method.POST
+                is Validate -> Request.Method.PATCH
                 else -> Request.Method.GET
             }
         }
@@ -54,6 +57,9 @@ sealed class ApiRoute {
             return when (this) {
                 is Register -> {
                     hashMapOf(Pair("redirectURL", this.redirectUrl))
+                }
+                is Validate -> {
+                    hashMapOf(Pair("token", this.token))
                 }
                 else -> hashMapOf()
             }

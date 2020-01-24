@@ -99,4 +99,11 @@ class ApiClient(private val context: Context) {
             }
         }
     }
+
+    fun validate(token: String, completion: (message: String) -> Unit) {
+        val route = ApiRoute.Validate(token, context)
+        this.performRequest(route) { _, response ->
+            completion.invoke(response.message)
+        }
+    }
 }

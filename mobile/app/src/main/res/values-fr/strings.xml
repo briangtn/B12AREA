@@ -24,4 +24,6 @@
     <string name="success">Succès</string>
     <string name="successful_registration">Inscription réussie !</string>
     <string name="email_confirmation_message">Nous vous avons envoyé un email afin de valider votre compte. Vérifiez vos spams si vous ne le voyez pas !</string>
+    <string name="verified_email">Email vérifié !</string>
+    <string name="verified_email_message">Vous pouvez dès à présent vous connecter.</string>
 </resources>

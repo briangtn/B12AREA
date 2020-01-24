@@ -23,4 +23,6 @@
     <string name="success">Success</string>
     <string name="successful_registration">Registration successful !</string>
     <string name="email_confirmation_message">We\'ve sent you an email in order to validate your account. Check your spams if you don\'t see it !</string>
+    <string name="verified_email">Email verification successful !</string>
+    <string name="verified_email_message">You can login right now.</string>
 </resources>

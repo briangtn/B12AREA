@@ -84,6 +84,7 @@ class RegisterActivity : AppCompatActivity() {
             .register(email, password, "http://" + (System.getenv("HOST") ?: "dev.area.b12powered.com") + "/email_validation") { user, message ->
                 if (user != null) {
                     val intent = Intent(this, RegistrationValidationActivity::class.java)
+                    finish()
                     startActivity(intent)
                 } else {
                     Toast.makeText(
