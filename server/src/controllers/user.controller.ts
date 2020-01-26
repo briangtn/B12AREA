@@ -207,6 +207,18 @@ export class UserController {
         return {token, require2fa: user.twoFactorAuthenticationEnabled};
     }
 
+    @get('/serviceLogin/{serviceName}')
+    async serviceLogin(@param.path.string('serviceName') serviceName: string): Promise<string> {
+        return new Promise((resolve, reject) => {
+            import('../area-auth-services/' + serviceName + '/controller').then((module) => {
+                const controller = module.default;
+
+                resolve(controller.login(''));
+            }).catch(reject);
+        })
+
+    }
+
     @get('/me', {
         security: OPERATION_SECURITY_SPEC,
         responses: {
