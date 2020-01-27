@@ -16,11 +16,14 @@ import ClientAPK from "./routes/ClientAPK";
 
 import Join from "./routes/Join";
 import Login from "./routes/Login";
+import ConfirmEmail from "./routes/ConfirmEmail";
 
 // React Redux
 
 import { Provider } from 'react-redux';
 import rootStore from "./store/rootStore.store";
+import EmailValidation from "./routes/EmailValidation";
+import Services from "./routes/Services";
 
 interface Props {}
 
@@ -52,6 +55,9 @@ class RouterComponent extends React.Component<Props, State> {
                         <Route exact path='/' component={App} />
                         <Route path='/join' component={Join} />
                         <Route path='/login' component={Login} />
+                        <Route path='/confirm_email' component={ConfirmEmail} />
+                        <Route path='/email_validation' component={EmailValidation} />
+                        <Route path='/services' component={Services} />
                         <Route path='/readinessProbe' component={ReadinessProbe} />
                         <Route path='/client.apk' component={ClientAPK} />
                     </Router>

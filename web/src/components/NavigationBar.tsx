@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
 
+import { connect } from "react-redux";
+
 import { withStyles, createStyles, Theme } from "@material-ui/core";
 
 import { Link } from 'react-router-dom';
@@ -16,10 +18,15 @@ interface Props {
     classes: {
         title: string,
         root: string
-    }
+    },
+    token: string
 }
 
 interface State {}
+
+const mapStateToProps = (state: any) => {
+    return { token: state.token };
+};
 
 const styles = (theme: Theme) => createStyles({
     title: {
@@ -34,7 +41,28 @@ const styles = (theme: Theme) => createStyles({
 
 class NavigationBar extends Component <Props, State> {
     render() {
-        const { classes } = this.props;
+        const { classes, token } = this.props;
+
+        let leftSide;
+
+        if (!token)
+            leftSide = (
+                <div>
+                    <Link to="/login" style={{ textDecoration: 'none', color: '#FFFFFF' }}>
+                        <Button color="secondary"><Translator sentence="signin" /></Button>
+                    </Link>
+                    &nbsp;
+                    <Link to={{pathname: '/join', state: { email: '' }}} style={{ textDecoration: 'none', color: '#FFFFFF' }}>
+                        <Button variant="contained" color="secondary"><Translator sentence="signup" /></Button>
+                    </Link>
+                </div>
+            );
+        else
+            leftSide = (
+                <div>
+                    Connected
+                </div>
+            );
 
         return (
             <div className="App">
@@ -45,13 +73,7 @@ class NavigationBar extends Component <Props, State> {
                         </Typography>
                         <LanguagePicker />
                         &nbsp;
-                        <Link to="/login" style={{ textDecoration: 'none', color: '#FFFFFF' }}>
-                            <Button color="secondary"><Translator sentence="signin" /></Button>
-                        </Link>
-                        &nbsp;
-                        <Link to={{pathname: '/join', state: { email: '' }}} style={{ textDecoration: 'none', color: '#FFFFFF' }}>
-                            <Button variant="contained" color="secondary"><Translator sentence="signup" /></Button>
-                        </Link>
+                        { leftSide }
                     </Toolbar>
                 </AppBar>
             </div>
@@ -59,4 +81,4 @@ class NavigationBar extends Component <Props, State> {
     }
 }
 
-export default withStyles(styles)(NavigationBar);
+export default connect(mapStateToProps)(withStyles(styles)(NavigationBar));
