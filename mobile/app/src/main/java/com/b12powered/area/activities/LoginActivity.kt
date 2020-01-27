@@ -74,7 +74,11 @@ class LoginActivity : AppCompatActivity() {
         ApiClient(this)
             .login(email, password) { user, message ->
                 if (user != null) {
-                    //TODO redirect to homepage
+                    if (user.require2fa) {
+                        //TODO redirect tot 2fa page
+                    } else {
+                        //TODO redirect to homepage
+                    }
                 } else {
                     Toast.makeText(
                         this,
