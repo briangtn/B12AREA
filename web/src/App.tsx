@@ -5,6 +5,8 @@ import { Link } from 'react-router-dom';
 
 import Typist from 'react-typist';
 
+import { connect } from 'react-redux';
+
 import './App.css';
 
 import NavigationBar from "./components/NavigationBar";
@@ -39,7 +41,12 @@ interface Props {
         input: string,
         iconButton: string,
         divider: string
-    }
+    },
+    history: {
+        push: any
+    },
+    language: string,
+    token: string
 }
 
 interface State {
@@ -72,7 +79,7 @@ const styles = (theme: Theme) => createStyles({
     hero: {
         backgroundColor: '#FFBE76',
         width: '100%',
-        minHeight: '300px',
+        minHeight: '250px',
         marginTop: theme.spacing(10),
         position: 'absolute'
     },
@@ -98,14 +105,25 @@ const styles = (theme: Theme) => createStyles({
     },
 });
 
+const mapStateToProps = (state: any) => {
+    return { language: state.language, token : state.token };
+};
+
 class App extends Component<Props, State> {
     state: State = {
-        email: ''
+        email: '',
     };
 
     onEmailEnter: React.ChangeEventHandler<HTMLInputElement> = (e) => {
         this.setState({ email: e.currentTarget.value });
     };
+
+    componentDidMount(): void {
+        const { token } = this.props;
+
+        if (token)
+            this.props.history.push('/services');
+    }
 
     render() {
         const { classes } = this.props;
@@ -126,7 +144,12 @@ class App extends Component<Props, State> {
                 <Grid container spacing={3} style={{ width: '100%', margin: '0px'}}>
                     <Grid item xs={6}>
                         <Typography className={classes.gridContent} variant="h3" gutterBottom>
-                            <Translator sentence="heroMessage" />
+                            {
+                                (this.props.language === 'fr') ?
+                                    <div><Typist>Connecte tes applications ensemble</Typist></div>
+                                    :
+                                    <Typist>Connect all your services together</Typist>
+                            }
                         </Typography>
                     </Grid>
                     <Grid className={classes.quickForm} item xs={6}>
@@ -187,4 +210,4 @@ class App extends Component<Props, State> {
     }
 }
 
-export default withStyles(styles)(App);
+export default connect(mapStateToProps)(withStyles(styles)(App));
