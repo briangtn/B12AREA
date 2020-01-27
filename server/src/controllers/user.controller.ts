@@ -209,15 +209,27 @@ export class UserController {
         return {token, require2fa: user.twoFactorAuthenticationEnabled};
     }
 
-    @get('/serviceLogin/{serviceName}')
-    async serviceLogin(@param.path.string('serviceName') serviceName: string, @param.query.string('redirectURL') redirectURL: string): Promise<string> {
-
+    @get('/serviceLogin/{serviceName}', {
+        responses: {
+            '200': {
+                description: 'The url where you have to redirect'
+            },
+            '400': response400('Missing redirect url'),
+            '404': response404('Service not found')
+        }
+    })
+    async serviceLogin(@param.path.string('serviceName') serviceName: string, @param.query.string('redirectURL') redirectURL?: string): Promise<string> {
+        if (!redirectURL) {
+            throw new HttpErrors.BadRequest('Missing redirect url');
+        }
         return new Promise((resolve, reject) => {
             import('../area-auth-services/' + serviceName + '/controller').then((module) => {
                 const controller = module.default;
 
                 resolve(controller.login(redirectURL, this.ctx));
-            }).catch(reject);
+            }).catch((err) => {
+                throw new HttpErrors.NotFound('Service not found');
+            });
         })
 
     }
