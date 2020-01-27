@@ -10,9 +10,9 @@ import { inject } from "@loopback/context";
 export class DataCodeController {
     constructor(@inject('services.exchangeCodeGenerator') protected exchangeCodeGenerator: ExchangeCodeGeneratorManager) {}
 
-    @get('/{id}')
+    @get('/{code}')
     async getDataFromCode(@param.path.string('code') code: string) {
-        const data: object | null = this.exchangeCodeGenerator.getData(code, true, true);
+        const data: object | null = await this.exchangeCodeGenerator.getData(code, true, true);
 
         if (!data) {
             throw new HttpErrors.NotFound('Data for this code not found');
