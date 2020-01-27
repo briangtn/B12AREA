@@ -1,6 +1,6 @@
 import {requestBody, get, post, patch, param, api, HttpErrors} from '@loopback/rest';
 import {property, repository, model} from '@loopback/repository';
-import {inject} from '@loopback/context';
+import {inject, Context} from '@loopback/context';
 import {User} from '../models';
 import validator from 'validator';
 import {Credentials, UserRepository} from '../repositories/user.repository';
@@ -124,6 +124,8 @@ export class UserController {
 
         @inject('services.2fa')
         protected twoFactorAuthenticationService: TwoFactorAuthenticationManager,
+
+        @inject.context() private ctx: Context
     ) {}
     @get('/')
     getUsers() {
@@ -208,12 +210,13 @@ export class UserController {
     }
 
     @get('/serviceLogin/{serviceName}')
-    async serviceLogin(@param.path.string('serviceName') serviceName: string): Promise<string> {
+    async serviceLogin(@param.path.string('serviceName') serviceName: string, @param.query.string('redirectURL') redirectURL: string): Promise<string> {
+
         return new Promise((resolve, reject) => {
             import('../area-auth-services/' + serviceName + '/controller').then((module) => {
                 const controller = module.default;
 
-                resolve(controller.login(''));
+                resolve(controller.login(redirectURL, this.ctx));
             }).catch(reject);
         })
 
