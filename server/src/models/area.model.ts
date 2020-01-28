@@ -2,7 +2,7 @@ import {Entity, model, property, hasMany, hasOne} from '@loopback/repository';
 import {Reaction} from './reaction.model';
 import {Action} from "./action.model";
 
-@model({settings: {strict: false}})
+@model()
 export class Area extends Entity {
     @property({
         type: 'string',

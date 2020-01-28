@@ -3,13 +3,6 @@ import {User, UserRelations, Area} from '../models';
 import {MongoDataSource} from '../datasources';
 import {inject, Getter} from '@loopback/core';
 import {AreaRepository} from './area.repository';
-import {EmailManager} from "../services";
-import {
-    DefaultCrudRepository,
-    juggler,
-} from '@loopback/repository';
-import {User} from '../models';
-import {inject} from '@loopback/core';
 import {EmailManager, RandomGeneratorManager} from '../services';
 import {UserProfile} from "@loopback/security";
 import * as url from 'url';
@@ -104,5 +97,9 @@ export class UserRepository extends DefaultCrudRepository<User,
                 email: userProfile.email
             }
         });
+    }
+
+    async createArea(userId: typeof User.prototype.id, area: Omit<Area, 'id'>) : Promise<Area> {
+        return this.areas(userId).create(area);
     }
 }
