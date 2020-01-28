@@ -3,7 +3,8 @@ import {ApplicationConfig} from '@loopback/core';
 
 export {AreaApplication};
 
-export async function main(options: ApplicationConfig = {}) {
+async function startAsAPI(options: ApplicationConfig)
+{
     const app = new AreaApplication(options);
     await app.boot();
     await app.start();
@@ -13,4 +14,24 @@ export async function main(options: ApplicationConfig = {}) {
     console.log(`Try ${url}/ping`);
 
     return app;
+}
+
+async function startAsWorker()
+{
+    console.log(`Worker started, redis host: ${process.env.REDIS_HOST}`);
+}
+
+export async function main(options: ApplicationConfig = {})
+{
+    let runAsWorker = false;
+    for (const arg of process.argv) {
+        if (arg === 'worker') {
+            runAsWorker = true;
+        }
+    }
+    if (runAsWorker) {
+        return startAsWorker();
+    } else {
+        return startAsAPI(options);
+    }
 }
