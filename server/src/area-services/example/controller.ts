@@ -1,12 +1,12 @@
-import {LoginObject, ServiceConfig, ServiceControllerInterface} from "../../services-interfaces";
+import {LoginObject, ServiceConfig} from "../../services-interfaces";
 import config from './config.json'
 
-export default class ServiceController implements ServiceControllerInterface {
-    login(params: LoginObject): void {
+export default class ServiceController {
+    static login(params: LoginObject): void {
         console.log('Login method of example service ', params);
     }
 
-    getConfig(): ServiceConfig {
+    static getConfig(): ServiceConfig {
         return config;
     }
 }

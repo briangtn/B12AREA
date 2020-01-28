@@ -1,8 +1,8 @@
 import {post} from "@loopback/rest";
-import {ActionConfig, ActionControllerInterface, ActionFunction} from '../../../../services-interfaces'
+import {ActionConfig, ActionFunction} from '../../../../services-interfaces'
 import config from './config.json';
 
-export default class ActionController implements ActionControllerInterface {
+export default class ActionController {
 
     constructor() {}
 
@@ -17,7 +17,7 @@ export default class ActionController implements ActionControllerInterface {
         })
     }
 
-    getConfig(): ActionConfig {
+    static getConfig(): ActionConfig {
         return config;
     }
 }
