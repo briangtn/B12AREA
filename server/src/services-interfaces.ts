@@ -44,17 +44,3 @@ export interface ReactionConfig {
     description: string;
     configSchema: ConfigShema[];
 }
-
-export interface ServiceControllerInterface {
-    getConfig(): ServiceConfig;
-    login(params: LoginObject): void;
-}
-
-export interface ActionControllerInterface {
-    getConfig(): ActionConfig;
-}
-
-export interface ReactionControllerInterface {
-    getConfig(): ReactionConfig;
-    trigger(params: TriggerObject): void;
-}
