@@ -222,16 +222,14 @@ export class UserController {
         if (!redirectURL) {
             throw new HttpErrors.BadRequest('Missing redirect url');
         }
-        return new Promise((resolve, reject) => {
-            import('../area-auth-services/' + serviceName + '/controller').then((module) => {
-                const controller = module.default;
-
-                resolve(controller.login(redirectURL, this.ctx));
-            }).catch((err) => {
-                throw new HttpErrors.NotFound('Service not found');
-            });
-        })
-
+        try {
+            const module = await import('../area-auth-services/' + serviceName + '/controller');
+            const controller = module.default;
+            const res = await controller.login(redirectURL, this.ctx);;
+            return res;
+        } catch (e) {
+            throw new HttpErrors.NotFound('Service not found');
+        }
     }
 
     @get('/me', {
