@@ -1,5 +1,6 @@
 import {AreaApplication} from './application';
 import {ApplicationConfig} from '@loopback/core';
+import {Worker} from "./worker";
 
 export {AreaApplication};
 
@@ -18,7 +19,10 @@ async function startAsAPI(options: ApplicationConfig)
 
 async function startAsWorker()
 {
-    console.log(`Worker started, redis host: ${process.env.REDIS_HOST}`);
+    const app = new Worker();
+    app.boot();
+    app.start();
+    console.log(`Worker started with redis host: ${process.env.REDIS_HOST}`);
 }
 
 export async function main(options: ApplicationConfig = {})
