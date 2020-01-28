@@ -8,6 +8,7 @@ import {repository} from "@loopback/repository";
 import {AreaRepository, UserRepository} from "../repositories";
 import {OPERATION_SECURITY_SPEC} from "../utils/security-specs";
 import {response200Schema} from "./specs/doc.specs";
+import {HttpErrors} from "@loopback/rest/dist";
 
 @authenticate('jwt-all')
 @api({basePath: '/areas', paths: {}})
@@ -29,11 +30,25 @@ export class AreasController {
         return this.areaRepository.find({where: {ownerId: this.user.email}});
     }
 
-    @get('/{id}')
-    getArea(
+    @get('/{id}', {
+        security: OPERATION_SECURITY_SPEC,
+        responses: {
+            '200': response200Schema(getModelSchemaRef(Area), 'Specific Area')
+        },
+    })
+    async getArea(
         @param.path.string('id') id: string
     ) {
+        const area = await this.areaRepository.findOne({where: {ownerId: this.user.email, id: id}});
 
+        if (area === null) {
+            throw new HttpErrors.NotFound(`Area ${id} not found`);
+        }
+        if (area?.ownerId !== this.user.email) {
+            throw new HttpErrors.Unauthorized("Invalid user");
+        } else {
+            return area;
+        }
     }
 
     @post('/', {
