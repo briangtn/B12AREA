@@ -4,7 +4,15 @@ import {MongoDataSource} from '../datasources';
 import {inject, Getter} from '@loopback/core';
 import {AreaRepository} from './area.repository';
 import {EmailManager} from "../services";
+import {
+    DefaultCrudRepository,
+    juggler,
+} from '@loopback/repository';
+import {User} from '../models';
+import {inject} from '@loopback/core';
+import {EmailManager, RandomGeneratorManager} from '../services';
 import {UserProfile} from "@loopback/security";
+import * as url from 'url';
 
 export type Credentials = {
     email: string;
@@ -19,7 +27,8 @@ export class UserRepository extends DefaultCrudRepository<User,
 
     constructor(
         @inject('datasources.mongo') dataSource: MongoDataSource, @repository.getter('AreaRepository') protected areaRepositoryGetter: Getter<AreaRepository>,
-        @inject('services.email') protected emailService: EmailManager
+        @inject('services.email') protected emailService: EmailManager,
+        @inject('services.randomGenerator') protected randomGeneratorService: RandomGeneratorManager
     ) {
         super(User, dataSource);
         this.areas = this.createHasManyRepositoryFactoryFor('areas', areaRepositoryGetter,);
@@ -40,6 +49,31 @@ export class UserRepository extends DefaultCrudRepository<User,
             role: newRoles
         });
         return this.findById(userId);
+    }
+
+    async changeMail(email: string, redirectURL: string): Promise<string> {
+        const validationToken: string = this.randomGeneratorService.generateRandomString(24);
+
+        const parsedURL: url.UrlWithStringQuery = url.parse(redirectURL);
+        let endURL: string = parsedURL.protocol + '//' + parsedURL.host + parsedURL.pathname;
+        if (parsedURL.search) {
+            endURL += parsedURL.search + "&token=" + validationToken;
+        } else {
+            endURL += "?token=" + validationToken;
+        }
+        const templateParams: Object = {
+            redirectURL: endURL
+        };
+        const htmlData: string = await this.emailService.getHtmlFromTemplate("emailValidation", templateParams);
+        const textData: string = await this.emailService.getTextFromTemplate("emailValidation", templateParams);
+        this.emailService.sendMail({
+            from: "AREA <noreply@b12powered.com>",
+            to: email,
+            subject: "Welcome to AREA",
+            html: htmlData,
+            text: textData
+        }).catch(e => console.log("Failed to deliver email validation email: ", e));
+        return validationToken;
     }
 
     async updatePassword(userId: string, password: string): Promise<User | null> {

@@ -1,0 +1,18 @@
+{
+  "displayName": "On something",
+  "description": "Triggered when something",
+  "configSchema": [
+    {
+      "name": "resource",
+      "type": "string",
+      "required": true,
+      "default": "Champignon"
+    }
+  ],
+  "placeholders": [
+    {
+      "name": "toReplace",
+      "description": "A placeholder example"
+    }
+  ]
+}

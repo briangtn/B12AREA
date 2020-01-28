@@ -9,7 +9,9 @@ import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.EditText
+import android.widget.Toast
 import com.b12powered.area.R
+import com.b12powered.area.api.ApiClient
 import kotlinx.android.synthetic.main.activity_register.*
 
 class RegisterActivity : AppCompatActivity() {
@@ -68,17 +70,30 @@ class RegisterActivity : AppCompatActivity() {
             etPassword.error = getString(R.string.no_password)
         } else if (confirmPassword.isEmpty()) {
             etConfirmPassword.error = getString(R.string.no_confirm_password)
-        } else if (password != confirmPassword) {
+        } else if (password.toString() != confirmPassword.toString()) {
             etConfirmPassword.setText("")
             etConfirmPassword.error = getString(R.string.different_password)
         }
-        if (email.isNotEmpty() && password.isNotEmpty() && confirmPassword.isNotEmpty() && password == confirmPassword) {
-            register()
+        if (email.isNotEmpty() && password.isNotEmpty() && confirmPassword.isNotEmpty() && password.toString() == confirmPassword.toString()) {
+            register(email.toString(), password.toString())
         }
     }
 
-    private fun register() {
-
+    private fun register(email: String, password: String) {
+        ApiClient(this)
+            .register(email, password, "http://" + (System.getenv("HOST") ?: "dev.area.b12powered.com") + "/email_validation") { user, message ->
+                if (user != null) {
+                    val intent = Intent(this, RegistrationValidationActivity::class.java)
+                    finish()
+                    startActivity(intent)
+                } else {
+                    Toast.makeText(
+                        this,
+                        message,
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
     }
 
 }

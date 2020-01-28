@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
 
+import { connect } from "react-redux";
+
 import { withStyles, createStyles, Theme } from "@material-ui/core";
 
 import NavigationBar from "../components/NavigationBar";
@@ -20,6 +22,10 @@ function Alert(props: any) {
     return <MuiAlert elevation={6} variant="filled" {...props} />;
 }
 
+const mapStateToProps = (state: any) => {
+    return { api_url: state.api_url, token: state.token };
+};
+
 interface Props {
     location: {
         pathname: string,
@@ -34,7 +40,12 @@ interface Props {
         field: string,
         signupButton: string,
         imageButton: string
-    }
+    },
+    history: {
+        push: any
+    },
+    api_url: string,
+    token: string
 }
 
 interface State {
@@ -76,9 +87,10 @@ class Join extends Component<Props, State> {
     };
 
     componentDidMount(): void {
-        const { location } = this.props;
+        const { location, token } = this.props;
 
-        this.setState({ email: location.state.email });
+        if (token) this.props.history.push('/services');
+        if (location.state) this.setState({email: (location.state.email) ? location.state.email : ''});
     }
 
     onChange: React.ChangeEventHandler<HTMLInputElement> = (e) => {
@@ -94,10 +106,11 @@ class Join extends Component<Props, State> {
     };
 
     onSubmit = (e: React.FormEvent) => {
+        const { email, password, confirm_password } = this.state; // Parameters
         let error : boolean = false;
         let errorMessage : string = '';
 
-        if (this.state.password !== this.state.confirm_password) {
+        if (password !== confirm_password) {
             error = true;
             errorMessage = "Those passwords didn't match. Try again.";
         }
@@ -107,17 +120,17 @@ class Join extends Component<Props, State> {
             errorMessage = "This email isn't valid. Try again.";
         }
 
-        if (this.state.password === '' && this.state.confirm_password === '' && this.state.email === '') {
+        if (password === '' && confirm_password === '' && email === '') {
             error = true;
             errorMessage = "Please fill all fields";
         }
 
-        if (this.state.email !== '' && this.state.confirm_password === '' && this.state.password === '') {
+        if (email !== '' && confirm_password === '' && password === '') {
             error = true;
             errorMessage = 'Enter a password';
         }
 
-        if (this.state.email === '' && this.state.confirm_password !== '' && this.state.password !== '') {
+        if (email === '' && confirm_password !== '' && password !== '') {
             error = true;
             errorMessage = 'Enter your email address';
         }
@@ -125,7 +138,24 @@ class Join extends Component<Props, State> {
         if (error)
             this.setState({ error: 'true', errorMessage: errorMessage });
         else {
-            // Do a flip
+            const { api_url } = this.props;
+            const { email, password } = this.state;
+            const payload : Object = { email: email, password: password };
+            const redirectURL : string = `${window.location.protocol}//${window.location.host}/email_validation?api_url=${api_url}`;
+
+            fetch(api_url + `/users/register?redirectURL=${redirectURL}`, {
+                method: 'POST',
+                body: JSON.stringify(payload),
+                headers: { 'Content-Type': 'application/json' }
+            }).then((res) => {
+                if (res.status === 200)
+                    this.props.history.push('/confirm_email');
+                else
+                    return res.json();
+            }).then((data) => {
+                if (data)
+                    this.setState({ error: 'true', errorMessage: `${data.error.name}: ${data.error.message}` });
+            });
         }
     };
 
@@ -227,5 +257,5 @@ class Join extends Component<Props, State> {
     }
 }
 
-export default withStyles(styles)(Join);
+export default connect(mapStateToProps)(withStyles(styles)(Join));
 

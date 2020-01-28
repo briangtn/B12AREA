@@ -42,7 +42,11 @@ interface Props {
         iconButton: string,
         divider: string
     },
-    language: string
+    history: {
+        push: any
+    },
+    language: string,
+    token: string
 }
 
 interface State {
@@ -102,7 +106,7 @@ const styles = (theme: Theme) => createStyles({
 });
 
 const mapStateToProps = (state: any) => {
-    return { language: state.language };
+    return { language: state.language, token : state.token };
 };
 
 class App extends Component<Props, State> {
@@ -113,6 +117,13 @@ class App extends Component<Props, State> {
     onEmailEnter: React.ChangeEventHandler<HTMLInputElement> = (e) => {
         this.setState({ email: e.currentTarget.value });
     };
+
+    componentDidMount(): void {
+        const { token } = this.props;
+
+        if (token)
+            this.props.history.push('/services');
+    }
 
     render() {
         const { classes } = this.props;

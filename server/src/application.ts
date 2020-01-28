@@ -58,8 +58,8 @@ export class AreaApplication extends BootMixin(
         this.bootOptions = {
             controllers: {
                 // Customize ControllerBooter Conventions here
-                dirs: ['controllers'],
-                extensions: ['.controller.js'],
+                dirs: ['controllers', 'area-services'],
+                extensions: ['.controller.js', '.lb-controller.js'],
                 nested: true,
             },
         };

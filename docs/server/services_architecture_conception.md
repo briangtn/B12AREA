@@ -3,20 +3,20 @@
 * /auth_services
     * /google
         * config.json
-        * controller.ts
+        * google.lb-controller.ts
 
 * /services
     * /twitter
-        * controller.ts
+        * twitter.lb-controller.ts
         * config.json
         * /actions
             * /on_tweet
                 * config.json
-                * controller.ts
+                * on_tweet.lb-controller.ts
         * /reactions
             * /tweet
                 * config.json
-                * controller.ts
+                * tweet.ts
 ---
                 
 ### /auth_services
@@ -35,11 +35,13 @@ This is a service who expose an authentication method
 }
 ```
 
-*controller.ts:*
+*service_name.lb-controller.ts:*
 
 This controller must have a login method and can be used as a [loopback 4 controllers](https://loopback.io/doc/en/lb4/Controllers.html)
 
 ### /services
+
+(the json file are not mandatory and are only here to describe the object returned by getConfig())
 
 **/{service_name}:**
 
@@ -55,9 +57,11 @@ This is a service who expose an authentification method and some actions and rea
 }
 ```
 
-*controller.ts:*
+*service_name.lb-controller.ts:*
 
-This controller must have a login method and can be used as a [loopback 4 controllers](https://loopback.io/doc/en/lb4/Controllers.html)
+This controller can be used as a [loopback 4 controllers](https://loopback.io/doc/en/lb4/Controllers.html).
+It should implement the [ServiceControllerInterface](../../server/src/services-interfaces.ts) interface.
+It should export a `ServiceController` class.
 
 **/{service_name}/actions/{action_name}:**
 
@@ -70,14 +74,28 @@ This controller must have a login method and can be used as a [loopback 4 contro
   "displayName": "On tweet",
   "description": "Triggered when a tweet is posted by X",
   "configSchema": {
-    "username": "string"
-  }
+    "username": "string",
+// You can also use objects
+//  "name": {
+//    "type": "string",
+//    "required": true,
+//    "default": "Champignon"
+//  }
+  },
+  "placeholders": [
+    {
+      "name": "tweet",
+      "description": "this action is triggered when a tweet from @username is published"
+    }
+  ]
 }
 ```
 
-*controller.ts*
+*action_name.lb-controller.ts*
 
-This controller can be used as a [loopback 4 controllers](https://loopback.io/doc/en/lb4/Controllers.html)
+This controller can be used as a [loopback 4 controllers](https://loopback.io/doc/en/lb4/Controllers.html).
+It should implement the [ActionControllerInterface](../../server/src/services-interfaces.ts) interface.
+It should export a `ActionController` class.
 
 **/{service_name}/reactions/{reaction_name}:**
 
@@ -90,12 +108,19 @@ This controller can be used as a [loopback 4 controllers](https://loopback.io/do
   "displayName": "Tweet",
   "description": "Tweet something with a content",
   "configSchema": {
-    "content": "string"
+    "content": "string",
+// You can also use objects
+//  "name": {
+//    "type": "string",
+//    "required": true,
+//    "default": "Champignon"
+//  }
   }
 }
 ```
 
-*controller.ts*
+*reaction_name.ts*
 
-This controller **IS NOT** a loopback 4 controller, this controller **MUST** have a trigger method called when a the reactions is triggered
-
+This controller **IS NOT** a loopback 4 controller.
+It should implement the [ReactionControllerInterface](../../server/src/services-interfaces.ts) interface.
+It should export a `ReactionController` class.
