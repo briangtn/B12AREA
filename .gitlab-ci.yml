@@ -198,8 +198,8 @@ deploy-production-database:
     - cd k8s/db
     - sed -i "s/__ENVIRONMENT_SLUG__/${DEPLOYMENT_ENV}/" area.db.configmap.yaml area.db.secrets.yaml area.db.volume.yaml area.db.deployment.yaml area.db.service.yaml
     - sed -i "s/__DB_NAME__/${DB_NAME}/" area.db.configmap.yaml
-    - sed -i "s/__DB_USER__/`echo -ne ${DB_USER} | base64`/" area.db.secrets.yaml
-    - sed -i "s/__DB_PASSWORD__/`echo -ne ${DB_PASSWORD} | base64`/" area.db.secrets.yaml
+    - sed -i "s/__DB_USER__/`echo -ne ${DB_USER} | base64 -w 0`/" area.db.secrets.yaml
+    - sed -i "s/__DB_PASSWORD__/`echo -ne ${DB_PASSWORD} | base64 -w 0`/" area.db.secrets.yaml
     - kubectl apply -f area.db.configmap.yaml -f area.db.secrets.yaml
     - kubectl apply -f area.db.volume.yaml
     - kubectl apply -f area.db.deployment.yaml
@@ -257,14 +257,14 @@ deploy-production-api:
     - sed -i "s/__AREA_JWT_TTL__/${AREA_JWT_TTL}/" area.api.configmap.yaml
     - sed -i "s/__BULL_QUEUE_NAME__/${BULL_QUEUE_NAME}/" area.api.configmap.yaml
     - sed -i "s/__API_URL__/${DEPLOYMENT_HOST}/" area.api.configmap.yaml
-    - sed -i "s/__DB_USER__/`echo -ne ${DB_USER} | base64`/" area.api.secrets.yaml
-    - sed -i "s/__DB_PASSWORD__/`echo -ne ${DB_PASSWORD} | base64`/" area.api.secrets.yaml
-    - sed -i "s/__SMTP_USER__/`echo -ne ${SMTP_USER} | base64`/" area.api.secrets.yaml
-    - sed -i "s/__SMTP_PASS__/`echo -ne ${SMTP_PASS} | base64`/" area.api.secrets.yaml
-    - sed -i "s/__AREA_JWT_SECRET_VALUE__/`echo -ne ${AREA_JWT_SECRET_VALUE} | base64`/" area.api.secrets.yaml
-    - sed -i "s/__REDIS_PASSWORD__/`echo -ne ${REDIS_PASSWORD} | base64`/" area.api.secrets.yaml
-    - sed -i "s/__GOOGLE_CLIENT_ID__/`echo -ne ${PROD_GOOGLE_CLIENT_ID} | base64`/" area.api.secrets.yaml
-    - sed -i "s/__GOOGLE_CLIENT_SECRET__/`echo -ne ${PROD_GOOGLE_CLIENT_SECRET} | base64`/" area.api.secrets.yaml
+    - sed -i "s/__DB_USER__/`echo -ne ${DB_USER} | base64 -w 0`/" area.api.secrets.yaml
+    - sed -i "s/__DB_PASSWORD__/`echo -ne ${DB_PASSWORD} | base64 -w 0`/" area.api.secrets.yaml
+    - sed -i "s/__SMTP_USER__/`echo -ne ${SMTP_USER} | base64 -w 0`/" area.api.secrets.yaml
+    - sed -i "s/__SMTP_PASS__/`echo -ne ${SMTP_PASS} | base64 -w 0`/" area.api.secrets.yaml
+    - sed -i "s/__AREA_JWT_SECRET_VALUE__/`echo -ne ${AREA_JWT_SECRET_VALUE} | base64 -w 0`/" area.api.secrets.yaml
+    - sed -i "s/__REDIS_PASSWORD__/`echo -ne ${REDIS_PASSWORD} | base64 -w 0`/" area.api.secrets.yaml
+    - sed -i "s/__GOOGLE_CLIENT_ID__/`echo -ne ${PROD_GOOGLE_CLIENT_ID} | base64 -w 0`/" area.api.secrets.yaml
+    - sed -i "s/__GOOGLE_CLIENT_SECRET__/`echo -ne ${PROD_GOOGLE_CLIENT_SECRET} | base64 -w 0`/" area.api.secrets.yaml
     - sed -i "s/__INGRESS_HOST__/${DEPLOYMENT_HOST}/" area.api.ingress.yaml
     - kubectl apply -f area.api.configmap.yaml -f area.api.secrets.yaml
     - kubectl apply -f area.api.deployment.yaml
@@ -299,14 +299,14 @@ deploy-production-worker:
     - sed -i "s/__AREA_JWT_TTL__/${AREA_JWT_TTL}/" area.worker.configmap.yaml
     - sed -i "s/__BULL_QUEUE_NAME__/${BULL_QUEUE_NAME}/" area.worker.configmap.yaml
     - sed -i "s/__API_URL__/${DEPLOYMENT_HOST}/" area.worker.configmap.yaml
-    - sed -i "s/__DB_USER__/`echo -ne ${DB_USER} | base64`/" area.worker.secrets.yaml
-    - sed -i "s/__DB_PASSWORD__/`echo -ne ${DB_PASSWORD} | base64`/" area.worker.secrets.yaml
-    - sed -i "s/__SMTP_USER__/`echo -ne ${SMTP_USER} | base64`/" area.worker.secrets.yaml
-    - sed -i "s/__SMTP_PASS__/`echo -ne ${SMTP_PASS} | base64`/" area.worker.secrets.yaml
-    - sed -i "s/__AREA_JWT_SECRET_VALUE__/`echo -ne ${AREA_JWT_SECRET_VALUE} | base64`/" area.worker.secrets.yaml
-    - sed -i "s/__REDIS_PASSWORD__/`echo -ne ${REDIS_PASSWORD} | base64`/" area.worker.secrets.yaml
-    - sed -i "s/__GOOGLE_CLIENT_ID__/`echo -ne ${PROD_GOOGLE_CLIENT_ID} | base64`/" area.worker.secrets.yaml
-    - sed -i "s/__GOOGLE_CLIENT_SECRET__/`echo -ne ${PROD_GOOGLE_CLIENT_SECRET} | base64`/" area.worker.secrets.yaml
+    - sed -i "s/__DB_USER__/`echo -ne ${DB_USER} | base64 -w 0`/" area.worker.secrets.yaml
+    - sed -i "s/__DB_PASSWORD__/`echo -ne ${DB_PASSWORD} | base64 -w 0`/" area.worker.secrets.yaml
+    - sed -i "s/__SMTP_USER__/`echo -ne ${SMTP_USER} | base64 -w 0`/" area.worker.secrets.yaml
+    - sed -i "s/__SMTP_PASS__/`echo -ne ${SMTP_PASS} | base64 -w 0`/" area.worker.secrets.yaml
+    - sed -i "s/__AREA_JWT_SECRET_VALUE__/`echo -ne ${AREA_JWT_SECRET_VALUE} | base64 -w 0`/" area.worker.secrets.yaml
+    - sed -i "s/__REDIS_PASSWORD__/`echo -ne ${REDIS_PASSWORD} | base64 -w 0`/" area.worker.secrets.yaml
+    - sed -i "s/__GOOGLE_CLIENT_ID__/`echo -ne ${PROD_GOOGLE_CLIENT_ID} | base64 -w 0`/" area.worker.secrets.yaml
+    - sed -i "s/__GOOGLE_CLIENT_SECRET__/`echo -ne ${PROD_GOOGLE_CLIENT_SECRET} | base64 -w 0`/" area.worker.secrets.yaml
     - kubectl apply -f area.worker.configmap.yaml -f area.worker.secrets.yaml
     - kubectl apply -f area.worker.deployment.yaml
 
@@ -392,8 +392,8 @@ deploy-development-database:
     - cd k8s/db
     - sed -i "s/__ENVIRONMENT_SLUG__/${DEPLOYMENT_ENV}/" area.db.configmap.yaml area.db.secrets.yaml area.db.volume.yaml area.db.deployment.yaml area.db.service.yaml
     - sed -i "s/__DB_NAME__/${DB_NAME}/" area.db.configmap.yaml
-    - sed -i "s/__DB_USER__/`echo -ne ${DB_USER} | base64`/" area.db.secrets.yaml
-    - sed -i "s/__DB_PASSWORD__/`echo -ne ${DB_PASSWORD} | base64`/" area.db.secrets.yaml
+    - sed -i "s/__DB_USER__/`echo -ne ${DB_USER} | base64 -w 0`/" area.db.secrets.yaml
+    - sed -i "s/__DB_PASSWORD__/`echo -ne ${DB_PASSWORD} | base64 -w 0`/" area.db.secrets.yaml
     - kubectl apply -f area.db.configmap.yaml -f area.db.secrets.yaml
     - kubectl apply -f area.db.volume.yaml
     - kubectl apply -f area.db.deployment.yaml
@@ -451,14 +451,14 @@ deploy-development-api:
     - sed -i "s/__AREA_JWT_TTL__/${AREA_JWT_TTL}/" area.api.configmap.yaml
     - sed -i "s/__BULL_QUEUE_NAME__/${BULL_QUEUE_NAME}/" area.api.configmap.yaml
     - sed -i "s/__API_URL__/${DEPLOYMENT_HOST}/" area.api.configmap.yaml
-    - sed -i "s/__DB_USER__/`echo -ne ${DB_USER} | base64`/" area.api.secrets.yaml
-    - sed -i "s/__DB_PASSWORD__/`echo -ne ${DB_PASSWORD} | base64`/" area.api.secrets.yaml
-    - sed -i "s/__SMTP_USER__/`echo -ne ${SMTP_USER} | base64`/" area.api.secrets.yaml
-    - sed -i "s/__SMTP_PASS__/`echo -ne ${SMTP_PASS} | base64`/" area.api.secrets.yaml
-    - sed -i "s/__AREA_JWT_SECRET_VALUE__/`echo -ne ${AREA_JWT_SECRET_VALUE} | base64`/" area.api.secrets.yaml
-    - sed -i "s/__REDIS_PASSWORD__/`echo -ne ${REDIS_PASSWORD} | base64`/" area.api.secrets.yaml
-    - sed -i "s/__GOOGLE_CLIENT_ID__/`echo -ne ${DEV_GOOGLE_CLIENT_ID} | base64`/" area.api.secrets.yaml
-    - sed -i "s/__GOOGLE_CLIENT_SECRET__/`echo -ne ${DEV_GOOGLE_CLIENT_SECRET} | base64`/" area.api.secrets.yaml
+    - sed -i "s/__DB_USER__/`echo -ne ${DB_USER} | base64 -w 0`/" area.api.secrets.yaml
+    - sed -i "s/__DB_PASSWORD__/`echo -ne ${DB_PASSWORD} | base64 -w 0`/" area.api.secrets.yaml
+    - sed -i "s/__SMTP_USER__/`echo -ne ${SMTP_USER} | base64 -w 0`/" area.api.secrets.yaml
+    - sed -i "s/__SMTP_PASS__/`echo -ne ${SMTP_PASS} | base64 -w 0`/" area.api.secrets.yaml
+    - sed -i "s/__AREA_JWT_SECRET_VALUE__/`echo -ne ${AREA_JWT_SECRET_VALUE} | base64 -w 0`/" area.api.secrets.yaml
+    - sed -i "s/__REDIS_PASSWORD__/`echo -ne ${REDIS_PASSWORD} | base64 -w 0`/" area.api.secrets.yaml
+    - sed -i "s/__GOOGLE_CLIENT_ID__/`echo -ne ${DEV_GOOGLE_CLIENT_ID} | base64 -w 0`/" area.api.secrets.yaml
+    - sed -i "s/__GOOGLE_CLIENT_SECRET__/`echo -ne ${DEV_GOOGLE_CLIENT_SECRET} | base64 -w 0`/" area.api.secrets.yaml
     - sed -i "s/__INGRESS_HOST__/${DEPLOYMENT_HOST}/" area.api.ingress.yaml
     - kubectl apply -f area.api.configmap.yaml -f area.api.secrets.yaml
     - kubectl apply -f area.api.deployment.yaml
@@ -493,14 +493,14 @@ deploy-development-worker:
     - sed -i "s/__AREA_JWT_TTL__/${AREA_JWT_TTL}/" area.worker.configmap.yaml
     - sed -i "s/__BULL_QUEUE_NAME__/${BULL_QUEUE_NAME}/" area.worker.configmap.yaml
     - sed -i "s/__API_URL__/${DEPLOYMENT_HOST}/" area.worker.configmap.yaml
-    - sed -i "s/__DB_USER__/`echo -ne ${DB_USER} | base64`/" area.worker.secrets.yaml
-    - sed -i "s/__DB_PASSWORD__/`echo -ne ${DB_PASSWORD} | base64`/" area.worker.secrets.yaml
-    - sed -i "s/__SMTP_USER__/`echo -ne ${SMTP_USER} | base64`/" area.worker.secrets.yaml
-    - sed -i "s/__SMTP_PASS__/`echo -ne ${SMTP_PASS} | base64`/" area.worker.secrets.yaml
-    - sed -i "s/__AREA_JWT_SECRET_VALUE__/`echo -ne ${AREA_JWT_SECRET_VALUE} | base64`/" area.worker.secrets.yaml
-    - sed -i "s/__REDIS_PASSWORD__/`echo -ne ${REDIS_PASSWORD} | base64`/" area.worker.secrets.yaml
-    - sed -i "s/__GOOGLE_CLIENT_ID__/`echo -ne ${DEV_GOOGLE_CLIENT_ID} | base64`/" area.worker.secrets.yaml
-    - sed -i "s/__GOOGLE_CLIENT_SECRET__/`echo -ne ${DEV_GOOGLE_CLIENT_SECRET} | base64`/" area.worker.secrets.yaml
+    - sed -i "s/__DB_USER__/`echo -ne ${DB_USER} | base64 -w 0`/" area.worker.secrets.yaml
+    - sed -i "s/__DB_PASSWORD__/`echo -ne ${DB_PASSWORD} | base64 -w 0`/" area.worker.secrets.yaml
+    - sed -i "s/__SMTP_USER__/`echo -ne ${SMTP_USER} | base64 -w 0`/" area.worker.secrets.yaml
+    - sed -i "s/__SMTP_PASS__/`echo -ne ${SMTP_PASS} | base64 -w 0`/" area.worker.secrets.yaml
+    - sed -i "s/__AREA_JWT_SECRET_VALUE__/`echo -ne ${AREA_JWT_SECRET_VALUE} | base64 -w 0`/" area.worker.secrets.yaml
+    - sed -i "s/__REDIS_PASSWORD__/`echo -ne ${REDIS_PASSWORD} | base64 -w 0`/" area.worker.secrets.yaml
+    - sed -i "s/__GOOGLE_CLIENT_ID__/`echo -ne ${DEV_GOOGLE_CLIENT_ID} | base64 -w 0`/" area.worker.secrets.yaml
+    - sed -i "s/__GOOGLE_CLIENT_SECRET__/`echo -ne ${DEV_GOOGLE_CLIENT_SECRET} | base64 -w 0`/" area.worker.secrets.yaml
     - kubectl apply -f area.worker.configmap.yaml -f area.worker.secrets.yaml
     - kubectl apply -f area.worker.deployment.yaml
 
