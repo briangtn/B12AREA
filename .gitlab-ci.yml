@@ -8,7 +8,7 @@ stages:
   - build
   - deploy-namespace
   - deploy-database
-  - deploy-api
+  - deploy-backend
   - deploy-apk
   - deploy-web
 
@@ -71,11 +71,12 @@ tests-docker-compose:
     - apk update && apk add --no-cache py-pip curl python-dev libffi-dev openssl-dev gcc libc-dev make
     - pip install docker-compose
     - touch .env
-    - echo "AREA_JWT_SECRET_VALUE=verySecretEnv\n" >> .env
-    - echo "DB_PASS=area\nDB_PORT=27017" >> .env
+    - echo -ne "AREA_JWT_SECRET_VALUE=verySecretEnv\n" >> .env
+    - echo -ne "DB_PASS=area\nDB_PORT=27017\n" >> .env
+    - echo -ne "REDIS_PORT=6379\n" >> .env
     - docker-compose build
     - docker-compose up -d
-    - sleep 5
+    - sleep 10
     - "curl --GET --silent --output /dev/null --write-out \"API code: %{http_code}\n\" 127.0.0.1:8080/readinessProbe"
     - "curl --GET --silent --output /dev/null --write-out \"WEB code: %{http_code}\n\" 127.0.0.1:8081/readinessProbe"
     - "curl --GET --silent --output /dev/null --write-out \"APK code: %{http_code}\nDownloaded %{size_download} bytes\n\" 127.0.0.1:8081/readinessProbe"
@@ -83,7 +84,7 @@ tests-docker-compose:
 # ------------------------------------------------------BUILD----------------------------------------------------------
 
 # PROD
-build-production-api:
+build-production-backend:
   stage: build
   only:
     refs:
@@ -122,7 +123,7 @@ build-production-apk-builder:
 
 # DEV
 
-build-development-api:
+build-development-backend:
   stage: build
   only:
     refs:
@@ -204,8 +205,29 @@ deploy-production-database:
     - kubectl apply -f area.db.deployment.yaml
     - kubectl apply -f area.db.service.yaml
 
+deploy-production-redis:
+  stage: deploy-database
+  only:
+    refs:
+      - master
+  variables:
+    DEPLOYMENT_ENV: "production"
+  script:
+    - apk update && apk add --no-cache curl
+    - curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
+    - chmod +x ./kubectl && mv ./kubectl /usr/local/bin/kubectl
+    - mkdir -p $HOME/.kube
+    - echo -n ${KUBE_CONFIG} | base64 -d > $HOME/.kube/config
+    - kubectl config view
+    - cd k8s/redis
+    - sed -i "s/__ENVIRONMENT_SLUG__/${DEPLOYMENT_ENV}/" area.redis.volume.yaml area.redis.deployment.yaml area.redis.service.yaml
+    - sed -i "s/__REDIS_PASSWORD__/${REDIS_PASSWORD}/" area.redis.deployment.yaml
+    - kubectl apply -f area.redis.volume.yaml
+    - kubectl apply -f area.redis.deployment.yaml
+    - kubectl apply -f area.redis.service.yaml
+
 deploy-production-api:
-  stage: deploy-api
+  stage: deploy-backend
   only:
     refs:
       - master
@@ -233,16 +255,53 @@ deploy-production-api:
     - sed -i "s/__SMTP_REJECT_UNAUTHORIZED__/${SMTP_REJECT_UNAUTHORIZED}/" area.api.configmap.yaml
     - sed -i "s/__TWO_FACTOR_AUTHENTICATION_ISSUER_NAME__/${TWO_FACTOR_AUTHENTICATION_ISSUER_NAME}/" area.api.configmap.yaml
     - sed -i "s/__AREA_JWT_TTL__/${AREA_JWT_TTL}/" area.api.configmap.yaml
+    - sed -i "s/__BULL_QUEUE_NAME__/${BULL_QUEUE_NAME}/" area.api.configmap.yaml
     - sed -i "s/__DB_USER__/`echo -ne ${DB_USER} | base64`/" area.api.secrets.yaml
     - sed -i "s/__DB_PASSWORD__/`echo -ne ${DB_PASSWORD} | base64`/" area.api.secrets.yaml
     - sed -i "s/__SMTP_USER__/`echo -ne ${SMTP_USER} | base64`/" area.api.secrets.yaml
     - sed -i "s/__SMTP_PASS__/`echo -ne ${SMTP_PASS} | base64`/" area.api.secrets.yaml
     - sed -i "s/__AREA_JWT_SECRET_VALUE__/`echo -ne ${AREA_JWT_SECRET_VALUE} | base64`/" area.api.secrets.yaml
+    - sed -i "s/__REDIS_PASSWORD__/`echo -ne ${REDIS_PASSWORD} | base64`/" area.api.secrets.yaml
     - sed -i "s/__INGRESS_HOST__/${DEPLOYMENT_HOST}/" area.api.ingress.yaml
     - kubectl apply -f area.api.configmap.yaml -f area.api.secrets.yaml
     - kubectl apply -f area.api.deployment.yaml
     - kubectl apply -f area.api.service.yaml
     - kubectl apply -f area.api.ingress.yaml
+
+deploy-production-worker:
+  stage: deploy-backend
+  only:
+    refs:
+      - master
+  variables:
+    DEPLOYMENT_ENV: "production"
+  script:
+    - apk update && apk add --no-cache curl
+    - curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
+    - chmod +x ./kubectl && mv ./kubectl /usr/local/bin/kubectl
+    - mkdir -p $HOME/.kube
+    - echo -n ${KUBE_CONFIG} | base64 -d > $HOME/.kube/config
+    - kubectl config view
+    - cd k8s/worker
+    - sed -i "s/__ENVIRONMENT_SLUG__/${DEPLOYMENT_ENV}/" area.worker.configmap.yaml area.worker.deployment.yaml area.worker.secrets.yaml
+    - sed -i "s~__REGISTRY_IMAGE__~${DOCKER_REGISTRY_IMAGE_NAME_AREA_API}~" area.worker.deployment.yaml
+    - sed -i "s/__REGISTRY_VERSION__/${CI_COMMIT_SHORT_SHA}/" area.worker.deployment.yaml
+    - sed -i "s/__DB_NAME__/${DB_NAME}/" area.worker.configmap.yaml
+    - sed -i "s/__SMTP_HOST__/${SMTP_HOST}/" area.worker.configmap.yaml
+    - sed -i "s/__SMTP_SECURE__/${SMTP_SECURE}/" area.worker.configmap.yaml
+    - sed -i "s/__SMTP_PORT__/${SMTP_PORT}/" area.worker.configmap.yaml
+    - sed -i "s/__SMTP_REJECT_UNAUTHORIZED__/${SMTP_REJECT_UNAUTHORIZED}/" area.worker.configmap.yaml
+    - sed -i "s/__TWO_FACTOR_AUTHENTICATION_ISSUER_NAME__/${TWO_FACTOR_AUTHENTICATION_ISSUER_NAME}/" area.worker.configmap.yaml
+    - sed -i "s/__AREA_JWT_TTL__/${AREA_JWT_TTL}/" area.worker.configmap.yaml
+    - sed -i "s/__BULL_QUEUE_NAME__/${BULL_QUEUE_NAME}/" area.worker.configmap.yaml
+    - sed -i "s/__DB_USER__/`echo -ne ${DB_USER} | base64`/" area.worker.secrets.yaml
+    - sed -i "s/__DB_PASSWORD__/`echo -ne ${DB_PASSWORD} | base64`/" area.worker.secrets.yaml
+    - sed -i "s/__SMTP_USER__/`echo -ne ${SMTP_USER} | base64`/" area.worker.secrets.yaml
+    - sed -i "s/__SMTP_PASS__/`echo -ne ${SMTP_PASS} | base64`/" area.worker.secrets.yaml
+    - sed -i "s/__AREA_JWT_SECRET_VALUE__/`echo -ne ${AREA_JWT_SECRET_VALUE} | base64`/" area.worker.secrets.yaml
+    - sed -i "s/__REDIS_PASSWORD__/`echo -ne ${REDIS_PASSWORD} | base64`/" area.worker.secrets.yaml
+    - kubectl apply -f area.worker.configmap.yaml -f area.worker.secrets.yaml
+    - kubectl apply -f area.worker.deployment.yaml
 
 deploy-production-apk:
   stage: deploy-apk
@@ -333,8 +392,29 @@ deploy-development-database:
     - kubectl apply -f area.db.deployment.yaml
     - kubectl apply -f area.db.service.yaml
 
+deploy-development-redis:
+  stage: deploy-database
+  only:
+    refs:
+      - develop
+  variables:
+    DEPLOYMENT_ENV: "development"
+  script:
+    - apk update && apk add --no-cache curl
+    - curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
+    - chmod +x ./kubectl && mv ./kubectl /usr/local/bin/kubectl
+    - mkdir -p $HOME/.kube
+    - echo -n ${KUBE_CONFIG} | base64 -d > $HOME/.kube/config
+    - kubectl config view
+    - cd k8s/redis
+    - sed -i "s/__ENVIRONMENT_SLUG__/${DEPLOYMENT_ENV}/" area.redis.volume.yaml area.redis.deployment.yaml area.redis.service.yaml
+    - sed -i "s/__REDIS_PASSWORD__/${REDIS_PASSWORD}/" area.redis.deployment.yaml
+    - kubectl apply -f area.redis.volume.yaml
+    - kubectl apply -f area.redis.deployment.yaml
+    - kubectl apply -f area.redis.service.yaml
+
 deploy-development-api:
-  stage: deploy-api
+  stage: deploy-backend
   only:
     refs:
       - develop
@@ -362,16 +442,53 @@ deploy-development-api:
     - sed -i "s/__SMTP_REJECT_UNAUTHORIZED__/${SMTP_REJECT_UNAUTHORIZED}/" area.api.configmap.yaml
     - sed -i "s/__TWO_FACTOR_AUTHENTICATION_ISSUER_NAME__/${TWO_FACTOR_AUTHENTICATION_ISSUER_NAME}/" area.api.configmap.yaml
     - sed -i "s/__AREA_JWT_TTL__/${AREA_JWT_TTL}/" area.api.configmap.yaml
+    - sed -i "s/__BULL_QUEUE_NAME__/${BULL_QUEUE_NAME}/" area.api.configmap.yaml
     - sed -i "s/__DB_USER__/`echo -ne ${DB_USER} | base64`/" area.api.secrets.yaml
     - sed -i "s/__DB_PASSWORD__/`echo -ne ${DB_PASSWORD} | base64`/" area.api.secrets.yaml
     - sed -i "s/__SMTP_USER__/`echo -ne ${SMTP_USER} | base64`/" area.api.secrets.yaml
     - sed -i "s/__SMTP_PASS__/`echo -ne ${SMTP_PASS} | base64`/" area.api.secrets.yaml
     - sed -i "s/__AREA_JWT_SECRET_VALUE__/`echo -ne ${AREA_JWT_SECRET_VALUE} | base64`/" area.api.secrets.yaml
+    - sed -i "s/__REDIS_PASSWORD__/`echo -ne ${REDIS_PASSWORD} | base64`/" area.api.secrets.yaml
     - sed -i "s/__INGRESS_HOST__/${DEPLOYMENT_HOST}/" area.api.ingress.yaml
     - kubectl apply -f area.api.configmap.yaml -f area.api.secrets.yaml
     - kubectl apply -f area.api.deployment.yaml
     - kubectl apply -f area.api.service.yaml
     - kubectl apply -f area.api.ingress.yaml
+
+deploy-development-worker:
+  stage: deploy-backend
+  only:
+    refs:
+      - develop
+  variables:
+    DEPLOYMENT_ENV: "development"
+  script:
+    - apk update && apk add --no-cache curl
+    - curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
+    - chmod +x ./kubectl && mv ./kubectl /usr/local/bin/kubectl
+    - mkdir -p $HOME/.kube
+    - echo -n ${KUBE_CONFIG} | base64 -d > $HOME/.kube/config
+    - kubectl config view
+    - cd k8s/worker
+    - sed -i "s/__ENVIRONMENT_SLUG__/${DEPLOYMENT_ENV}/" area.worker.configmap.yaml area.worker.deployment.yaml area.worker.secrets.yaml
+    - sed -i "s~__REGISTRY_IMAGE__~${DEV_DOCKER_REGISTRY_IMAGE_NAME_AREA_API}~" area.worker.deployment.yaml
+    - sed -i "s/__REGISTRY_VERSION__/${CI_COMMIT_SHORT_SHA}/" area.worker.deployment.yaml
+    - sed -i "s/__DB_NAME__/${DB_NAME}/" area.worker.configmap.yaml
+    - sed -i "s/__SMTP_HOST__/${SMTP_HOST}/" area.worker.configmap.yaml
+    - sed -i "s/__SMTP_SECURE__/${SMTP_SECURE}/" area.worker.configmap.yaml
+    - sed -i "s/__SMTP_PORT__/${SMTP_PORT}/" area.worker.configmap.yaml
+    - sed -i "s/__SMTP_REJECT_UNAUTHORIZED__/${SMTP_REJECT_UNAUTHORIZED}/" area.worker.configmap.yaml
+    - sed -i "s/__TWO_FACTOR_AUTHENTICATION_ISSUER_NAME__/${TWO_FACTOR_AUTHENTICATION_ISSUER_NAME}/" area.worker.configmap.yaml
+    - sed -i "s/__AREA_JWT_TTL__/${AREA_JWT_TTL}/" area.worker.configmap.yaml
+    - sed -i "s/__BULL_QUEUE_NAME__/${BULL_QUEUE_NAME}/" area.worker.configmap.yaml
+    - sed -i "s/__DB_USER__/`echo -ne ${DB_USER} | base64`/" area.worker.secrets.yaml
+    - sed -i "s/__DB_PASSWORD__/`echo -ne ${DB_PASSWORD} | base64`/" area.worker.secrets.yaml
+    - sed -i "s/__SMTP_USER__/`echo -ne ${SMTP_USER} | base64`/" area.worker.secrets.yaml
+    - sed -i "s/__SMTP_PASS__/`echo -ne ${SMTP_PASS} | base64`/" area.worker.secrets.yaml
+    - sed -i "s/__AREA_JWT_SECRET_VALUE__/`echo -ne ${AREA_JWT_SECRET_VALUE} | base64`/" area.worker.secrets.yaml
+    - sed -i "s/__REDIS_PASSWORD__/`echo -ne ${REDIS_PASSWORD} | base64`/" area.worker.secrets.yaml
+    - kubectl apply -f area.worker.configmap.yaml -f area.worker.secrets.yaml
+    - kubectl apply -f area.worker.deployment.yaml
 
 deploy-development-apk:
   stage: deploy-apk
