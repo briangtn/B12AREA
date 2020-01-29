@@ -1,5 +1,5 @@
 import {getModelSchemaRef} from "@loopback/rest";
-import {Action, Area} from "../../models";
+import {Action, Area, Reaction} from "../../models";
 
 export const NewArea = {
     content: {
@@ -31,4 +31,16 @@ export const NewActionInArea = {
             }),
         },
     },
-}
+};
+
+export const NewReactionInArea = {
+    content: {
+        'application/json': {
+            schema: getModelSchemaRef(Reaction, {
+                title: 'NewReactionInArea',
+                exclude: ['id'],
+                optional: ['areaId']
+            }),
+        },
+    },
+};

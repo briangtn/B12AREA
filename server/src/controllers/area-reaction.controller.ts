@@ -6,6 +6,7 @@ import {
     Where,
 } from '@loopback/repository';
 import {
+    api,
     del,
     get,
     getModelSchemaRef,
@@ -20,63 +21,54 @@ import {
     Reaction,
 } from '../models';
 import {AreaRepository} from '../repositories';
+import {inject} from "@loopback/context";
+import {SecurityBindings, UserProfile} from "@loopback/security";
+import {authenticate} from "@loopback/authentication";
+import {response200Schema} from "./specs/doc.specs";
+import {NewReactionInArea} from "./specs/area.specs";
 
+@authenticate('jwt-all')
+@api({basePath: '/areas', paths: {}})
 export class AreaReactionController {
     constructor(
         @repository(AreaRepository) protected areaRepository: AreaRepository,
+        @inject(SecurityBindings.USER) private user: UserProfile,
     ) {
     }
 
-    @get('/areas/{id}/reactions', {
+    @get('/{id}/reactions', {
         responses: {
-            '200': {
-                description: 'Array of Reaction\'s belonging to Area',
-                content: {
-                    'application/json': {
-                        schema: {type: 'array', items: getModelSchemaRef(Reaction)},
-                    },
-                },
-            },
+            '200': response200Schema({type: 'array', items: getModelSchemaRef(Reaction)},'Array of Reaction\'s belonging to Area'),
         },
     })
     async find(
         @param.path.string('id') id: string,
         @param.query.object('filter') filter?: Filter<Reaction>,
     ): Promise<Reaction[]> {
+        const area = await this.areaRepository.findById(id, filter);
+        this.areaRepository.checkArea(area, this.user);
+
         return this.areaRepository.reactions(id).find(filter);
     }
 
-    @post('/areas/{id}/reactions', {
+    @post('/{id}/reactions', {
         responses: {
-            '200': {
-                description: 'Area model instance',
-                content: {'application/json': {schema: getModelSchemaRef(Reaction)}},
-            },
+            '200': response200Schema(getModelSchemaRef(Reaction), 'Area model instance'),
         },
     })
     async create(
         @param.path.string('id') id: typeof Area.prototype.id,
-        @requestBody({
-            content: {
-                'application/json': {
-                    schema: getModelSchemaRef(Reaction, {
-                        title: 'NewReactionInArea',
-                        exclude: ['id'],
-                        optional: ['areaId']
-                    }),
-                },
-            },
-        }) reaction: Omit<Reaction, 'id'>,
+        @requestBody(NewReactionInArea) reaction: Omit<Reaction, 'id'>,
     ): Promise<Reaction> {
+        const area = await this.areaRepository.findById(id);
+        this.areaRepository.checkArea(area, this.user);
+
         return this.areaRepository.reactions(id).create(reaction);
     }
 
-    @patch('/areas/{id}/reactions', {
+    @patch('/{id}/reactions', {
         responses: {
-            '200': {
-                description: 'Area.Reaction PATCH success count',
-                content: {'application/json': {schema: CountSchema}},
-            },
+            '200': response200Schema(CountSchema, 'Area.Reaction PATCH success count'),
         },
     })
     async patch(
@@ -91,21 +83,24 @@ export class AreaReactionController {
             reaction: Partial<Reaction>,
         @param.query.object('where', getWhereSchemaFor(Reaction)) where?: Where<Reaction>,
     ): Promise<Count> {
+        const area = await this.areaRepository.findById(id);
+        this.areaRepository.checkArea(area, this.user);
+
         return this.areaRepository.reactions(id).patch(reaction, where);
     }
 
-    @del('/areas/{id}/reactions', {
+    @del('/{id}/reactions', {
         responses: {
-            '200': {
-                description: 'Area.Reaction DELETE success count',
-                content: {'application/json': {schema: CountSchema}},
-            },
+            '200': response200Schema(CountSchema, 'Area.Reaction DELETE success count'),
         },
     })
     async delete(
         @param.path.string('id') id: string,
         @param.query.object('where', getWhereSchemaFor(Reaction)) where?: Where<Reaction>,
     ): Promise<Count> {
+        const area = await this.areaRepository.findById(id);
+        this.areaRepository.checkArea(area, this.user);
+
         return this.areaRepository.reactions(id).delete(where);
     }
 }
