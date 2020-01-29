@@ -109,7 +109,6 @@ class ApiClient(private val context: Context) {
     fun readinessProbe(completion: (isUp: Boolean) -> Unit) {
         val route = ApiRoute.ReadinessProbe(context)
         this.performRequest(route) { success, _ ->
-            Log.e("success", success.toString())
             completion.invoke(success)
         }
     }

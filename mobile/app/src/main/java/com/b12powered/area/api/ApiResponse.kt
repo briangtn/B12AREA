@@ -21,7 +21,11 @@ class ApiResponse(response: String) {
                 success = true
             }
         } catch (e: Exception) {
-            e.printStackTrace()
+            if (response == "true") {
+                success = true
+            } else {
+                e.printStackTrace()
+            }
         }
     }
 }
