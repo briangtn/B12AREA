@@ -1,13 +1,24 @@
-import {api, del, get, getModelSchemaRef, param, patch, post, requestBody} from '@loopback/rest';
+import {
+    post,
+    param,
+    get,
+    getFilterSchemaFor,
+    getModelSchemaRef,
+    getWhereSchemaFor,
+    patch,
+    put,
+    del,
+    requestBody, api,
+} from '@loopback/rest';
 import {authenticate} from "@loopback/authentication";
 import {SecurityBindings, UserProfile} from "@loopback/security";
 import {inject} from "@loopback/context";
-import {Area} from "../models";
-import {NewArea} from "./specs/area.specs";
-import {repository} from "@loopback/repository";
+import {Area, AreaWithRelations} from "../models";
+import {NewArea, PatchArea} from "./specs/area.specs";
+import {Count, CountSchema, Filter, repository, Where} from "@loopback/repository";
 import {AreaRepository, UserRepository} from "../repositories";
 import {OPERATION_SECURITY_SPEC} from "../utils/security-specs";
-import {response200Schema} from "./specs/doc.specs";
+import {response200Schema, response204} from "./specs/doc.specs";
 import {HttpErrors} from "@loopback/rest/dist";
 
 @authenticate('jwt-all')
@@ -26,29 +37,10 @@ export class AreasController {
             '200': response200Schema({type: 'array', items: getModelSchemaRef(Area)}, 'List of user\'s Areas')
         },
     })
-    async getAreas() {
-        return this.areaRepository.find({where: {ownerId: this.user.email}});
-    }
-
-    @get('/{id}', {
-        security: OPERATION_SECURITY_SPEC,
-        responses: {
-            '200': response200Schema(getModelSchemaRef(Area), 'Specific Area')
-        },
-    })
-    async getArea(
-        @param.path.string('id') id: string
-    ) {
-        const area = await this.areaRepository.findOne({where: {ownerId: this.user.email, id: id}});
-
-        if (area === null) {
-            throw new HttpErrors.NotFound(`Area ${id} not found`);
-        }
-        if (area?.ownerId !== this.user.email) {
-            throw new HttpErrors.Unauthorized("Invalid user");
-        } else {
-            return area;
-        }
+    async getAreas(
+        @param.query.object('filter', getFilterSchemaFor(Area)) filter?: Filter<Area>
+    ): Promise<Area[]> {
+        return this.areaRepository.find({where: {ownerId: this.user.email, and: filter}});
     }
 
     @post('/', {
@@ -63,45 +55,93 @@ export class AreasController {
         return this.userRepository.createArea(this.user.email, area);
     }
 
-    @patch('/{id}')
-    update() {
-
+    @get('/count', {
+        security: OPERATION_SECURITY_SPEC,
+        responses: {
+            '200': response200Schema(CountSchema, 'Area model count')
+        },
+    })
+    async count(
+        @param.query.object('where', getWhereSchemaFor(Area)) where?: Where<Area>,
+    ): Promise<Count> {
+        return this.areaRepository.count({ownerId: this.user.email, and: where});
     }
 
-    @del('/{id}')
-    delete() {
+    @get('/{id}', {
+        security: OPERATION_SECURITY_SPEC,
+        responses: {
+            '200': response200Schema(getModelSchemaRef(Area), 'Specific Area')
+        },
+    })
+    async getArea(
+        @param.path.string('id') id: string,
+    ) {
+        const area = await this.areaRepository.findOne({where: {ownerId: this.user.email, id: id}});
+        this.checkArea(area);
 
+        return area;
+    }
+
+    @patch('/{id}', {
+        security: OPERATION_SECURITY_SPEC,
+        responses: {
+            '200': response200Schema(getModelSchemaRef(Area), 'Area model instance')
+        },
+    })
+    async update(
+        @param.path.string('id') id: string,
+        @requestBody(PatchArea) areaPatch: Partial<Area>,
+    ) {
+        this.getArea(id).catch((e) => {
+            throw e
+        });
+        await this.areaRepository.updateById(id, areaPatch);
+    }
+
+    @del('/{id}', {
+        security: OPERATION_SECURITY_SPEC,
+        responses: {
+            '204': response204('Area DELETE success')
+        },
+    })
+    async deleteById(@param.path.string('id') id: string): Promise<void> {
+        this.getArea(id).catch((e) => {
+            throw e
+        });
+        await this.areaRepository.deleteById(id);
     }
 
     @patch('/enable/{id}')
-    enable(
+    async enable(
         @param.path.string('id')
             id: string
     ) {
+        return this.enableDisableArea(id, true);
     }
 
     @patch('/disable/{id}')
-    disable(
+    async disable(
         @param.path.string('id')
             id: string
     ) {
+        return this.enableDisableArea(id, false);
     }
 
-    @get('/actions/{area_id}')
-    getActions(
-        @param.path.string('area_id')
-            areaId: string
-    ) {
-
+    checkArea(area: Area | null): void {
+        if (area === null) {
+            throw new HttpErrors.NotFound(`Area not found`);
+        }
+        if (area?.ownerId !== this.user.email) {
+            throw new HttpErrors.Unauthorized("Invalid user");
+        }
     }
 
-    @get('/reactions/{area_id}')
-    getReactions(
-        @param.path.string('area_id')
-            areadId: string
-    ) {
+    async enableDisableArea(id: string, status: boolean): Promise<void> {
+        const area = await this.getArea(id);
+        this.checkArea(area);
 
+        return this.areaRepository.updateById(id, {
+            enabled: true
+        });
     }
-
 }
-

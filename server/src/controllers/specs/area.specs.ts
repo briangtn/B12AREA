@@ -12,3 +12,11 @@ export const NewArea = {
         },
     },
 };
+
+export const PatchArea = {
+    content: {
+        'application/json': {
+            schema: getModelSchemaRef(Area, {partial: true}),
+        },
+    },
+}

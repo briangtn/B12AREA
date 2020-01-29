@@ -15,6 +15,12 @@ export const response200Schema = function(schema: Object, description: string) {
     }
 };
 
+export const response204 = function(description: string) {
+    return {
+        description: description,
+    };
+};
+
 export const response400 = function(description = "Bad request") {
     return {
         description,
