@@ -72,8 +72,8 @@ tests-docker-compose:
     - pip install docker-compose
     - touch .env
     - echo "AREA_JWT_SECRET_VALUE=verySecretEnv\n" >> .env
-    - echo "DB_PASS=area\nDB_PORT=27017" >> .env
-    - echo "REDIS_PORT=6379" >> .env
+    - echo "DB_PASS=area\nDB_PORT=27017\n" >> .env
+    - echo "REDIS_PORT=6379\n" >> .env
     - docker-compose build
     - docker-compose up -d
     - sleep 10
