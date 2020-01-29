@@ -51,8 +51,6 @@ services:
       - REDIS_HOST=redis
     env_file:
       - .env
-    volumes:
-      - ./server:/server
     networks:
       - "db-tier"
       - "redis-tier"
