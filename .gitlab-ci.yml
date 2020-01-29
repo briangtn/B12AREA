@@ -18,6 +18,9 @@ variables:
   # MANDATORY
   DOCKER_TLS_CERTDIR: ""
 
+before_script:
+  - apk add --update coreutils
+
 # ------------------------------------------------------TESTS----------------------------------------------------------
 
 tests-api:
