@@ -20,6 +20,9 @@ import MuiAlert from "@material-ui/lab/Alert/Alert";
 import Snackbar from "@material-ui/core/Snackbar";
 
 import Cookies from "universal-cookie";
+import DialogContent from "@material-ui/core/DialogContent";
+import DialogActions from "@material-ui/core/DialogActions";
+import Dialog from "@material-ui/core/Dialog";
 
 const cookies = new Cookies();
 
@@ -32,7 +35,7 @@ function mapDispatchToProps(dispatch: any) {
 }
 
 function Alert(props: any) {
-    return <MuiAlert elevation={6} variant="filled" {...props} />;
+    return <MuiAlert id='alert' elevation={6} variant="filled" {...props} />;
 }
 
 interface Props {
@@ -53,7 +56,10 @@ interface State {
     email: string,
     password: string,
     error: string,
-    errorMessage: string
+    errorMessage: string,
+    fakey: string,
+    faopen: boolean,
+    tmptoken: string
 }
 
 const styles = (theme: Theme) => createStyles({
@@ -77,7 +83,10 @@ class Login extends Component<Props, State> {
         email: '',
         password: '',
         error: 'false',
-        errorMessage: ''
+        errorMessage: '',
+        fakey: '',
+        faopen: false,
+        tmptoken: ''
     };
 
     componentDidMount() : void {
@@ -90,11 +99,42 @@ class Login extends Component<Props, State> {
     onChange: React.ChangeEventHandler<HTMLInputElement> = (e) => {
         const { id, value } = e.currentTarget;
 
-        this.setState({ [id]: value } as Pick<State, keyof State>);
+        if (id === 'fakey' && (value.length === 7 || isNaN(value as any)))
+            return;
+        this.setState({ [id]: value } as unknown as Pick<State, keyof State>);
+    };
+
+    dialogClose = (e: React.SyntheticEvent): void => {
+        this.setState({ faopen: false });
     };
 
     onClose = (e: React.SyntheticEvent): void => {
         this.setState({ error: 'false' });
+    };
+
+    dialogSubmit = (e: React.FormEvent) => {
+        const { fakey, tmptoken } = this.state;
+        const { api_url } = this.props;
+
+        fetch(`${api_url}/users/2fa/validate`, {
+            method: 'POST',
+            body: JSON.stringify({ token: fakey }),
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${tmptoken}` }
+        })
+            .then(res => res.json())
+            .then((data) => {
+                const { token } = data;
+
+                if (token) {
+                    cookies.set('token', token);
+                    this.props.setToken(token);
+                    this.props.history.push('/services');
+                } else {
+                    const {error} = data;
+
+                    this.setState({error: 'true', errorMessage: `${error.name}: ${error.message}`});
+                }
+            });
     };
 
     onSubmit = (e: React.FormEvent) => {
@@ -109,16 +149,20 @@ class Login extends Component<Props, State> {
         }).then((res) => {
             return res.json();
         }).then((data) => {
-            const { token } = data;
+            const { require2fa, token } = data;
 
-            if (token) {
-                cookies.set('token', token);
-                this.props.setToken(token);
-                this.props.history.push('/services');
+            if (!require2fa) {
+                if (token) {
+                    cookies.set('token', token);
+                    this.props.setToken(token);
+                    this.props.history.push('/services');
+                } else {
+                    const {error} = data;
+
+                    this.setState({error: 'true', errorMessage: `${error.name}: ${error.message}`});
+                }
             } else {
-                const { error } = data;
-
-                this.setState({ error: 'true', errorMessage: `${error.name}: ${error.message}` });
+                this.setState({ faopen: true, tmptoken: token });
             }
         });
     };
@@ -129,7 +173,7 @@ class Login extends Component<Props, State> {
 
         return (
             <div>
-                <NavigationBar />
+                <NavigationBar history={this.props.history} />
                 <Grid
                     container
                     spacing={0}
@@ -163,6 +207,7 @@ class Login extends Component<Props, State> {
                         />
                         <br />
                         <Button
+                            id="signin"
                             variant="contained"
                             color="secondary"
                             className={classes.loginButton}
@@ -195,6 +240,33 @@ class Login extends Component<Props, State> {
                         </Grid>
                     </Grid>
                 </Grid>
+                <Dialog
+                    open={this.state.faopen}
+                    onClose={this.dialogClose}
+                >
+                    <DialogContent>
+                        <Typography variant="h5" gutterBottom><Translator sentence="twoFactorEnabled" /></Typography>
+                        <Typography variant="body1"><Translator sentence="twoFactorEnabledSub" /></Typography>
+                        <TextField
+                            id="fakey"
+                            label="Your Key"
+                            variant="outlined"
+                            className={classes.field}
+                            value={this.state.fakey}
+                            onChange={this.onChange}
+                            fullWidth
+                            style={{ left: '15%' }}
+                        />
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={this.dialogClose} color="primary">
+                            <Translator sentence="cancel" />
+                        </Button>
+                        <Button id="fa-submit" onClick={this.dialogSubmit} color="primary" autoFocus>
+                            <Translator sentence="save" />
+                        </Button>
+                    </DialogActions>
+                </Dialog>
                 <Snackbar open={(this.state.error !== 'false')} autoHideDuration={6000} onClose={this.onClose}>
                     <Alert onClose={this.onClose} severity="error">
                         { this.state.errorMessage }

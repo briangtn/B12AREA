@@ -169,7 +169,7 @@ class Join extends Component<Props, State> {
 
         return (
             <div>
-                <NavigationBar />
+                <NavigationBar history={this.props.history} />
                 <Grid
                     container
                     spacing={0}
