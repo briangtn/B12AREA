@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: __ENVIRONMENT_SLUG__-area
+  name: __ENVIRONMENT_SLUG__-area-redis
+  labels:
+    app: __ENVIRONMENT_SLUG__-area-redis
+    ref: __ENVIRONMENT_SLUG__
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 0
+      maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: __ENVIRONMENT_SLUG__-area-redis
+  template:
+    metadata:
+      labels:
+        app: __ENVIRONMENT_SLUG__-area-redis
+    spec:
+      containers:
+        - name: redis
+          image: redis:buster
+          command: ["redis-server"]
+          args: ["--appendonly", "yes", "--requirepass" "__REDIS_PASSWORD__"]
+          imagePullPolicy: "IfNotPresent"
+          ports:
+            - containerPort: 6379
+          volumeMounts:
+            - mountPath: /data
+              name: redisdata
+      volumes:
+        - name: redisdata
+          persistentVolumeClaim:
+            claimName: __ENVIRONMENT_SLUG__-area-redis-pv-claim
