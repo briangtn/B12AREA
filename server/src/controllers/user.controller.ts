@@ -1,6 +1,6 @@
 import {requestBody, get, post, patch, param, api, HttpErrors} from '@loopback/rest';
 import {property, repository, model} from '@loopback/repository';
-import {inject} from '@loopback/context';
+import {inject, Context} from '@loopback/context';
 import {User} from '../models';
 import validator from 'validator';
 import {Credentials, UserRepository} from '../repositories/user.repository';
@@ -124,6 +124,8 @@ export class UserController {
 
         @inject('services.2fa')
         protected twoFactorAuthenticationService: TwoFactorAuthenticationManager,
+
+        @inject.context() private ctx: Context
     ) {}
     @get('/')
     getUsers() {
@@ -205,6 +207,29 @@ export class UserController {
         } as CustomUserProfile);
 
         return {token, require2fa: user.twoFactorAuthenticationEnabled};
+    }
+
+    @get('/serviceLogin/{serviceName}', {
+        responses: {
+            '200': {
+                description: 'The url where you have to redirect'
+            },
+            '400': response400('Missing redirect url'),
+            '404': response404('Service not found')
+        }
+    })
+    async serviceLogin(@param.path.string('serviceName') serviceName: string, @param.query.string('redirectURL') redirectURL?: string): Promise<string> {
+        if (!redirectURL) {
+            throw new HttpErrors.BadRequest('Missing redirect url');
+        }
+        try {
+            const module = await import('../area-auth-services/' + serviceName + '/controller');
+            const controller = module.default;
+            const res = await controller.login(redirectURL, this.ctx);;
+            return res;
+        } catch (e) {
+            throw new HttpErrors.NotFound('Service not found');
+        }
     }
 
     @get('/me', {

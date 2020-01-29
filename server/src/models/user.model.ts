@@ -70,6 +70,14 @@ export class User extends Entity {
     })
     twoFactorAuthenticationEnabled: boolean;
 
+    @property({
+        type: 'array',
+        itemType: 'string',
+        required: false,
+        default: []
+    })
+    authServices?: string[];
+
     // Define well-known properties here
 
     // Indexer property to allow additional data
