@@ -1,6 +1,6 @@
 const english = {
-    save: "Sauvegarder",
-    cancel: "Annuler",
+    save: "Save",
+    cancel: "Cancel",
     signin: "Sign in",
     signup: "Sign up",
     enterEmail: "Enter your email",
