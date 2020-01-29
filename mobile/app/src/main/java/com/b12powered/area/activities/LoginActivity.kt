@@ -2,16 +2,17 @@ package com.b12powered.area.activities
 
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.KeyEvent
 import android.view.View
 import android.view.inputmethod.InputMethodManager
-import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
 import com.b12powered.area.R
 import com.b12powered.area.api.ApiClient
+import com.b12powered.area.fragments.SettingsFragment
 import kotlinx.android.synthetic.main.activity_login.*
 
 class LoginActivity : AppCompatActivity() {
@@ -19,8 +20,6 @@ class LoginActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
-
-        val btnRegister = findViewById<Button>(R.id.login_button)
 
         val etPassword = findViewById<EditText>(R.id.password)
 
@@ -35,7 +34,12 @@ class LoginActivity : AppCompatActivity() {
             return@OnKeyListener true
         })
 
-        btnRegister.setOnClickListener {
+        settings_button.setOnClickListener {
+            val fragment = SettingsFragment()
+            fragment.show(supportFragmentManager, "settings")
+        }
+
+        login_button.setOnClickListener {
             submitLogin()
         }
 
