@@ -19,6 +19,7 @@ import {
 } from '../services';
 import * as url from 'url';
 import {response200, response400, response401, response404, response409, response422} from './specs/doc.specs';
+import { authorize } from '@loopback/authorization';
 
 @model()
 export class NewUserRequest  {
@@ -94,7 +95,7 @@ export class UpdateUserRequest {
         type: 'boolean',
         required: false
     })
-    disable2FA?: boolean
+    disable2FA?: boolean;
 
     @property({
         type: 'array',
@@ -225,7 +226,7 @@ export class UserController {
         try {
             const module = await import('../area-auth-services/' + serviceName + '/controller');
             const controller = module.default;
-            const res = await controller.login(redirectURL, this.ctx);;
+            const res = await controller.login(redirectURL, this.ctx);
             return res;
         } catch (e) {
             throw new HttpErrors.NotFound('Service not found');
@@ -239,6 +240,7 @@ export class UserController {
         },
     })
     @authenticate('jwt-all')
+    @authorize({allowedRoles: ['admin']})
     async getMe(
         @inject(SecurityBindings.USER) currentUserProfile: UserProfile
     ) {
