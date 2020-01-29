@@ -5,7 +5,7 @@ import {RestBindings, get, post, param, api} from '@loopback/rest';
 // import {inject} from '@loopback/context';
 
 @api({basePath: '/services', paths: {}})
-export class ServicesControllerController {
+export class ServicesController {
     constructor() {
     }
 
