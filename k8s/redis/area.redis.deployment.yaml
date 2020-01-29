@@ -25,7 +25,7 @@ spec:
         - name: redis
           image: redis:buster
           command: ["redis-server"]
-          args: ["--appendonly", "yes", "--requirepass" "__REDIS_PASSWORD__"]
+          args: ["--appendonly", "yes", "--requirepass", "__REDIS_PASSWORD__"]
           imagePullPolicy: "IfNotPresent"
           ports:
             - containerPort: 6379
