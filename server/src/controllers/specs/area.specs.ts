@@ -1,5 +1,5 @@
 import {getModelSchemaRef} from "@loopback/rest";
-import {Area} from "../../models";
+import {Action, Area} from "../../models";
 
 export const NewArea = {
     content: {
@@ -17,6 +17,18 @@ export const PatchArea = {
     content: {
         'application/json': {
             schema: getModelSchemaRef(Area, {partial: true}),
+        },
+    },
+};
+
+export const NewActionInArea = {
+    content: {
+        'application/json': {
+            schema: getModelSchemaRef(Action, {
+                title: 'NewActionInArea',
+                exclude: ['id'],
+                optional: ['areaId']
+            }),
         },
     },
 }

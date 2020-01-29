@@ -77,7 +77,7 @@ export class AreasController {
         @param.path.string('id') id: string,
     ) {
         const area = await this.areaRepository.findOne({where: {ownerId: this.user.email, id: id}});
-        this.checkArea(area);
+        this.areaRepository.checkArea(area, this.user);
 
         return area;
     }
@@ -127,18 +127,9 @@ export class AreasController {
         return this.enableDisableArea(id, false);
     }
 
-    checkArea(area: Area | null): void {
-        if (area === null) {
-            throw new HttpErrors.NotFound(`Area not found`);
-        }
-        if (area?.ownerId !== this.user.email) {
-            throw new HttpErrors.Unauthorized("Invalid user");
-        }
-    }
-
     async enableDisableArea(id: string, status: boolean): Promise<void> {
         const area = await this.getArea(id);
-        this.checkArea(area);
+        this.areaRepository.checkArea(area, this.user);
 
         return this.areaRepository.updateById(id, {
             enabled: true
