@@ -19,3 +19,4 @@ data:
   REDIS_HOST: "__ENVIRONMENT_SLUG__-area-redis"
   REDIS_PORT: "6379"
   BULL_QUEUE_NAME: "__BULL_QUEUE_NAME__"
+  API_URL: "__API_URL__"

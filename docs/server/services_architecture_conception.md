@@ -3,16 +3,16 @@
 * /auth_services
     * /google
         * config.json
-        * google.lb-controller.ts
+        * controller.ts
 
 * /services
     * /twitter
-        * twitter.lb-controller.ts
+        * controller.ts
         * config.json
         * /actions
             * /on_tweet
                 * config.json
-                * on_tweet.lb-controller.ts
+                * controller.ts
         * /reactions
             * /tweet
                 * config.json
@@ -35,8 +35,9 @@ This is a service who expose an authentication method
 }
 ```
 
-*service_name.lb-controller.ts:*
+*controller.ts:*
 
+Controller class must be exported as default class
 This controller must have a login method and can be used as a [loopback 4 controllers](https://loopback.io/doc/en/lb4/Controllers.html)
 
 ### /services
@@ -57,8 +58,9 @@ This is a service who expose an authentification method and some actions and rea
 }
 ```
 
-*service_name.lb-controller.ts:*
+*controller.ts:*
 
+Controller class must be exported as default class
 This controller can be used as a [loopback 4 controllers](https://loopback.io/doc/en/lb4/Controllers.html).
 It should implement the [ServiceControllerInterface](../../server/src/services-interfaces.ts) interface.
 It should export a `ServiceController` class.

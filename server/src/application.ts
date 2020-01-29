@@ -54,12 +54,13 @@ export class AreaApplication extends BootMixin(
 
         this.projectRoot = __dirname;
         this.loadAuthControllers();
+        this.loadAreaServicesControllers();
         // Customize @loopback/boot Booter Conventions here
         this.bootOptions = {
             controllers: {
                 // Customize ControllerBooter Conventions here
-                dirs: ['controllers', 'area-services'],
-                extensions: ['.controller.js', '.lb-controller.js'],
+                dirs: ['controllers'],
+                extensions: ['.controller.js'],
                 nested: true,
             },
         };
@@ -81,6 +82,49 @@ export class AreaApplication extends BootMixin(
         );
 
         this.bind(TokenServiceBindings.TOKEN_SERVICE).toClass(JWTService);
+    }
+
+    loadAreaServicesControllers() {
+        fs.readdir(path.join(__dirname + '/area-services'), (err, dirs) => {
+            if (err)
+                return console.log(err);
+            for (const dirIndex in dirs) {
+                const dir = dirs[dirIndex];
+                import('./area-services/' + dir + '/controller').then(module => {
+                    @api({basePath: '/services/' + dir, paths: {}})
+                    class AreaServices extends module.default {
+
+                    }
+
+                    this.controller(AreaServices, dir);
+                    this.loadActionsControllers(dir);
+                }).catch(error => {
+                    return console.log(error);
+                });
+            }
+        });
+    }
+
+    loadActionsControllers(serviceName: string) {
+        const baseDir = __dirname + '/area-services/' + serviceName + '/actions/';
+
+        fs.readdir(path.join(baseDir), (err, dirs) => {
+            if (err)
+                return console.log(err);
+            for (const dirIndex in dirs) {
+                const dir = dirs[dirIndex];
+                import(baseDir + dir + '/controller').then(module => {
+                    @api({basePath: '/services/' + serviceName + '/actions/' + dir, paths: {}})
+                    class AreaActions extends module.default {
+
+                    }
+
+                    this.controller(AreaActions, dir);
+                }).catch(error => {
+                    return console.log(error);
+                });
+            }
+        });
     }
 
     loadAuthControllers() {
