@@ -70,9 +70,7 @@ tests-docker-compose:
   script:
     - apk update && apk add --no-cache py-pip curl python-dev libffi-dev openssl-dev gcc libc-dev make
     - pip install docker-compose
-    - touch .env
-    - echo "AREA_JWT_SECRET_VALUE=verySecretEnv\n" >> .env
-    - echo "DB_PASS=area\nDB_PORT=27017" >> .env
+    - cp .env.example .env
     - docker-compose build
     - docker-compose up -d
     - sleep 5
