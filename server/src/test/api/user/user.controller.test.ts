@@ -47,9 +47,9 @@ describe('/users', () => {
             const res = await client
                 .post('/users/register?redirectURL=http://localhost:8081/validate?api=http://localhost:8080')
                 .send({email: "testest.fr", password: "p@22w0rd"})
-                .expect(400);
+                .expect(422);
             const error = JSON.parse(res.error.text);
-            expect(error.error.message).to.equal('Invalid email.')
+            expect(error.error.details[0].message).to.equal('should match format "email"') // TODO: Looking for replacing this message by a custom message
         });
 
         it('Empty email', async () => {
@@ -58,7 +58,7 @@ describe('/users', () => {
                 .send({password: "p@22w0rd"})
                 .expect(422);
             const error = JSON.parse(res.error.text);
-            expect(error.error.message).to.equal('The request body is invalid. See error object `details` property for more info.')
+            expect(error.error.details[0].message).to.equal('should have required property \'email\'')
         });
 
         it('Empty password', async () => {
@@ -67,7 +67,7 @@ describe('/users', () => {
                 .send({email: "test@test.fr"})
                 .expect(422);
             const error = JSON.parse(res.error.text);
-            expect(error.error.message).to.equal('The request body is invalid. See error object `details` property for more info.')
+            expect(error.error.details[0].message).to.equal('should have required property \'password\'')
         });
 
         it('Success', async () => {

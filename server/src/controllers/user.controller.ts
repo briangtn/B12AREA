@@ -94,7 +94,7 @@ export class UpdateUserRequest {
         type: 'boolean',
         required: false
     })
-    disable2FA?: boolean
+    disable2FA?: boolean;
 
     @property({
         type: 'array',
@@ -138,7 +138,7 @@ export class UserController {
             '409': response409('Email already in use')
         }
     })
-    async register(@requestBody() userRequest: NewUserRequest, @param.query.string('redirectURL') redirectURL?: string) {
+    async register(@requestBody(CredentialsRequestBody) userRequest: NewUserRequest, @param.query.string('redirectURL') redirectURL?: string) {
         const normalizedUser: User = this.normalizerService.normalize(userRequest, {email: 'toLower', password: 'hash'}) as User;
 
         if (!redirectURL) {
@@ -225,7 +225,7 @@ export class UserController {
         try {
             const module = await import('../area-auth-services/' + serviceName + '/controller');
             const controller = module.default;
-            const res = await controller.login(redirectURL, this.ctx);;
+            const res = await controller.login(redirectURL, this.ctx);
             return res;
         } catch (e) {
             throw new HttpErrors.NotFound('Service not found');
