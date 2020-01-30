@@ -1,13 +1,12 @@
 package com.b12powered.area.api
 
 import android.content.Context
-import android.content.res.Resources
+import android.util.Log
 import com.android.volley.*
 import com.android.volley.toolbox.BasicNetwork
 import com.android.volley.toolbox.DiskBasedCache
 import com.android.volley.toolbox.HurlStack
 import com.android.volley.toolbox.StringRequest
-import com.b12powered.area.R
 import com.b12powered.area.User
 import com.b12powered.area.toObject
 import com.google.gson.Gson
@@ -104,6 +103,13 @@ class ApiClient(private val context: Context) {
         val route = ApiRoute.Validate(token, context)
         this.performRequest(route) { _, response ->
             completion.invoke(response.message)
+        }
+    }
+
+    fun readinessProbe(completion: (isUp: Boolean) -> Unit) {
+        val route = ApiRoute.ReadinessProbe(context)
+        this.performRequest(route) { success, _ ->
+            completion.invoke(success)
         }
     }
 }

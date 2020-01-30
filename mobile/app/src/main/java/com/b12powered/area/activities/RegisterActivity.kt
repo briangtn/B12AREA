@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.provider.Settings
 import android.view.KeyEvent
 import android.view.View
 import android.view.inputmethod.InputMethodManager
@@ -12,7 +13,9 @@ import android.widget.EditText
 import android.widget.Toast
 import com.b12powered.area.R
 import com.b12powered.area.api.ApiClient
+import com.b12powered.area.fragments.SettingsFragment
 import kotlinx.android.synthetic.main.activity_register.*
+import kotlinx.android.synthetic.main.fragment_settings.*
 
 class RegisterActivity : AppCompatActivity() {
 
@@ -21,8 +24,6 @@ class RegisterActivity : AppCompatActivity() {
         setContentView(R.layout.activity_register)
 
         val etConfirmPassword = findViewById<EditText>(R.id.confirm_password)
-
-        val btnRegister = findViewById<Button>(R.id.register_button)
 
         etConfirmPassword.setOnKeyListener(View.OnKeyListener { _, keyCode, event ->
             if (keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_UP) {
@@ -35,7 +36,12 @@ class RegisterActivity : AppCompatActivity() {
             return@OnKeyListener true
         })
 
-        btnRegister.setOnClickListener {
+        settings_button.setOnClickListener {
+            val fragment = SettingsFragment()
+            fragment.show(supportFragmentManager, "settings")
+        }
+
+        register_button.setOnClickListener {
             submitForm()
         }
 
