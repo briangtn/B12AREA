@@ -47,7 +47,7 @@ describe('/users', () => {
             const res = await client
                 .post('/users/register?redirectURL=http://localhost:8081/validate?api=http://localhost:8080')
                 .send({email: "testest.fr", password: "p@22w0rd"})
-                .expect(400);
+                .expect(422);
             const error = JSON.parse(res.error.text);
             expect(error.error.message).to.equal('Invalid email.')
         });
