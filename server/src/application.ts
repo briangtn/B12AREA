@@ -5,7 +5,7 @@ import {
     RestExplorerComponent,
 } from '@loopback/rest-explorer';
 import {RepositoryMixin} from '@loopback/repository';
-import {RestApplication} from '@loopback/rest';
+import {RestApplication, api} from '@loopback/rest';
 import {ServiceMixin} from '@loopback/service-proxy';
 import path from 'path';
 import {MySequence} from './sequence';
@@ -14,6 +14,7 @@ import {JWTService} from "./services";
 import {AuthenticationComponent, registerAuthenticationStrategy} from "@loopback/authentication";
 import {JWTAllAuthenticationStrategy, JWT2FAAuthenticationStrategy} from "./authentication-strategies";
 import {SECURITY_SCHEME_SPEC} from "./utils/security-specs";
+import * as fs from 'fs';
 
 export interface PackageInfo {
     name: string;
@@ -22,8 +23,6 @@ export interface PackageInfo {
 }
 
 export const PackageKey = BindingKey.create<PackageInfo>('application.package');
-
-const pkg: PackageInfo = require('../package.json');
 
 export class AreaApplication extends BootMixin(
     ServiceMixin(RepositoryMixin(RestApplication)),
@@ -35,7 +34,7 @@ export class AreaApplication extends BootMixin(
 
         this.api({
             openapi: '3.0.0',
-            info: {title: pkg.name, version: pkg.version},
+            info: {title: "AREA", version: "1.0"},
             paths: {},
             components: {securitySchemes: SECURITY_SCHEME_SPEC},
         });
@@ -54,12 +53,14 @@ export class AreaApplication extends BootMixin(
         registerAuthenticationStrategy(this, JWT2FAAuthenticationStrategy);
 
         this.projectRoot = __dirname;
+        this.loadAuthControllers();
+        this.loadAreaServicesControllers();
         // Customize @loopback/boot Booter Conventions here
         this.bootOptions = {
             controllers: {
                 // Customize ControllerBooter Conventions here
-                dirs: ['controllers', 'area-services'],
-                extensions: ['.controller.js', '.lb-controller.js'],
+                dirs: ['controllers'],
+                extensions: ['.controller.js'],
                 nested: true,
             },
         };
@@ -69,8 +70,6 @@ export class AreaApplication extends BootMixin(
         this.bind(RestExplorerBindings.CONFIG).to({
             path: '/explorer',
         });
-
-        this.bind(PackageKey).to(pkg);
 
         if (TokenServiceConstants.TOKEN_SECRET_VALUE === undefined)
             throw Error("Please provide a secret value to generate JsonWebToken using the AREA_JWT_SECRET_VALUE environment variable");
@@ -83,5 +82,69 @@ export class AreaApplication extends BootMixin(
         );
 
         this.bind(TokenServiceBindings.TOKEN_SERVICE).toClass(JWTService);
+    }
+
+    loadAreaServicesControllers() {
+        fs.readdir(path.join(__dirname + '/area-services'), (err, dirs) => {
+            if (err)
+                return console.log(err);
+            for (const dirIndex in dirs) {
+                const dir = dirs[dirIndex];
+                import('./area-services/' + dir + '/controller').then(module => {
+                    @api({basePath: '/services/' + dir, paths: {}})
+                    class AreaServices extends module.default {
+
+                    }
+
+                    this.controller(AreaServices, dir);
+                    this.loadActionsControllers(dir);
+                }).catch(error => {
+                    return console.log(error);
+                });
+            }
+        });
+    }
+
+    loadActionsControllers(serviceName: string) {
+        const baseDir = __dirname + '/area-services/' + serviceName + '/actions/';
+
+        fs.readdir(path.join(baseDir), (err, dirs) => {
+            if (err)
+                return console.log(err);
+            for (const dirIndex in dirs) {
+                const dir = dirs[dirIndex];
+                import(baseDir + dir + '/controller').then(module => {
+                    @api({basePath: '/services/' + serviceName + '/actions/' + dir, paths: {}})
+                    class AreaActions extends module.default {
+
+                    }
+
+                    this.controller(AreaActions, dir);
+                }).catch(error => {
+                    return console.log(error);
+                });
+            }
+        });
+    }
+
+    loadAuthControllers() {
+        fs.readdir(path.join(__dirname + '/area-auth-services'), (err, dirs) => {
+            if (err)
+                return console.log(err);
+            for (const dirIndex in dirs) {
+                const dir = dirs[dirIndex];
+                import('./area-auth-services/' + dir + '/controller').then(module => {
+                    @api({basePath: '/auth-services/' + dir, paths: {}})
+                    class AuthServices extends module.default {
+
+                    }
+
+                    this.controller(AuthServices, dir);
+                }).catch(error => {
+                    return console.log(error);
+                });
+            }
+        });
+
     }
 }

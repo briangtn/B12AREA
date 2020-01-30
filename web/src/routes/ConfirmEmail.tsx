@@ -4,7 +4,11 @@ import Grid from "@material-ui/core/Grid";
 import Translator from "../components/Translator";
 import Typography from "@material-ui/core/Typography";
 
-interface Props {}
+interface Props {
+    history: {
+        push: any
+    },
+}
 
 interface State {}
 
@@ -12,7 +16,7 @@ class ConfirmEmail extends Component<Props, State> {
     render() {
         return (
             <div>
-                <NavigationBar />
+                <NavigationBar history={this.props.history} />
                 <Grid
                     container
                     spacing={0}

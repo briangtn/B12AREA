@@ -13,7 +13,10 @@ const mapStateToProps = (state: any) => {
 };
 
 interface Props {
-    api_url: string
+    api_url: string,
+    history: {
+        push: any
+    },
 }
 
 interface State {}
@@ -44,7 +47,7 @@ class EmailValidation extends Component<Props, State> {
     render() {
         return (
             <div>
-                <NavigationBar />
+                <NavigationBar history={this.props.history} />
                 <Grid
                     container
                     spacing={0}

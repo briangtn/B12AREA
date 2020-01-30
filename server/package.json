@@ -28,7 +28,8 @@
     "migrate": "node ./dist/migrate",
     "prestart": "npm run build",
     "start": "node -r source-map-support/register .",
-    "prepublishOnly": "npm run test"
+    "prepublishOnly": "npm run test",
+    "worker": "tsc-watch --onSuccess \"nodemon . worker\""
   },
   "repository": {
     "type": "git"
@@ -61,6 +62,8 @@
     "@types/sha256": "^0.2.0",
     "@types/speakeasy": "^2.0.5",
     "@types/validator": "^12.0.1",
+    "bull": "^3.12.1",
+    "axios": "^0.19.2",
     "ejs": "^3.0.1",
     "jsonwebtoken": "^8.5.1",
     "loopback-connector-mongodb": "^4.2.0",
@@ -73,6 +76,8 @@
     "@loopback/build": "^3.0.1",
     "@loopback/eslint-config": "^5.0.1",
     "@loopback/testlab": "^1.10.1",
+    "@types/bull": "^3.12.0",
+    "@types/axios": "^0.14.0",
     "@types/node": "^10.17.13",
     "@typescript-eslint/eslint-plugin": "^2.15.0",
     "@typescript-eslint/parser": "^2.15.0",

@@ -25,6 +25,25 @@ npm run dev
 npm start
 ```
 
+# Information
+
+You can have more information on the development process by going into the [docs](./docs) folder.
+
+The project is organised as follow:
+![Organisation](./docs/area_services_organisation.png)
+
+The API and Worker uses the [server](./server) folder to be build.
+
+The WEB front uses the [web](./web) folder to be build.
+
+The Mobile front uses the [mobile](./mobile) folder to be build.
+
+## UML
+You can generate uml diagram from *.puml files by using the plantuml command.
+```shell script
+plantuml ./path/to/file.puml
+```
+
 # Authors
 
 * [Brian Guitteny](https://github.com/briangtn)

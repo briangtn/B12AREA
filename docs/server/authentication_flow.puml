@@ -27,4 +27,22 @@ else Invalid pair
 Server -> Client : 401
 end
 
+== With service ==
+
+Client -> Server : /users/serviceLogin/{serviceName}: Login Redirect url request
+Client <- Server : 200 (Redirect url)
+Client -> Service : Redirect
+Server <- Service : Redirection (Redirect for auth)
+Client <- Server : Redirection (redirectUrl?code={code} (If Valid JWT generated now))
+Client -> Server : /data_code/{code}
+
+alt Login success
+Server -> Client : 200 (JWT Token)
+  alt 2FA
+    Client -> Server : Please see "With email/password 2FA active"
+  end
+else Login failed
+Server -> Client : 200 (Object with error message)
+end
+
 @enduml

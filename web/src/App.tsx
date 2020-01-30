@@ -140,7 +140,7 @@ class App extends Component<Props, State> {
 
         return (
             <div>
-                <NavigationBar />
+                <NavigationBar history={this.props.history} />
                 <Grid container spacing={3} style={{ width: '100%', margin: '0px'}}>
                     <Grid item xs={6}>
                         <Typography className={classes.gridContent} variant="h3" gutterBottom>

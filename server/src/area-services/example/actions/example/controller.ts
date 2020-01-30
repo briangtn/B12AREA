@@ -1,12 +1,12 @@
 import {post} from "@loopback/rest";
-import {ActionConfig, ActionControllerInterface, ActionFunction} from '../../../../services-interfaces'
+import {ActionConfig, ActionFunction} from '../../../../services-interfaces'
 import config from './config.json';
 
-export class ActionController implements ActionControllerInterface {
+export default class ActionController {
 
     constructor() {}
 
-    @post('/services/example/actions/example/webhook')
+    @post('/webhook')
     webhook() {
         ActionFunction({
             from: "example.example",
@@ -17,7 +17,7 @@ export class ActionController implements ActionControllerInterface {
         })
     }
 
-    getConfig(): ActionConfig {
+    static getConfig(): ActionConfig {
         return config;
     }
 }

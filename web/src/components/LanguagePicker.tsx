@@ -94,7 +94,7 @@ class LanguagePicker extends Component<Props, State> {
                         }
                     }}
                 >
-                    <MenuItem value={0}><span role="img" aria-label="fr">🇫🇷</span>&nbsp;&nbsp;French</MenuItem>
+                    <MenuItem value={0}><span role="img" aria-label="fr">🇫🇷</span>&nbsp;&nbsp;Français</MenuItem>
                     <MenuItem value={1}><span role="img" aria-label="en">🇺🇸</span>&nbsp;&nbsp;English</MenuItem>
                 </Select>
             </FormControl>
