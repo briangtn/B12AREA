@@ -10,6 +10,7 @@ import com.android.volley.toolbox.StringRequest
 import com.b12powered.area.User
 import com.b12powered.area.toObject
 import com.google.gson.Gson
+import org.json.JSONObject
 
 class ApiClient(private val context: Context) {
 
@@ -103,6 +104,42 @@ class ApiClient(private val context: Context) {
         val route = ApiRoute.Validate(token, context)
         this.performRequest(route) { _, response ->
             completion.invoke(response.message)
+        }
+    }
+
+    fun activate2fa(completion: (url: String?, message: String) -> Unit) {
+        val route = ApiRoute.Activate2fa(context)
+        this.performRequest(route) { success, response ->
+            if (success) {
+                val url = JSONObject(response.json).getString("otpauthUrl")
+                completion.invoke(url, "success")
+            } else {
+                completion.invoke(null, response.message)
+            }
+        }
+    }
+
+    fun confirm2fa(token: String, completion: (user: User?, message: String) -> Unit) {
+        val route = ApiRoute.Confirm2fa(token, context)
+        this.performRequest(route) { success, response ->
+            if (success) {
+                val user: User = response.json.toObject()
+                completion.invoke(user, "success")
+            } else {
+                completion.invoke(null, response.message)
+            }
+        }
+    }
+
+    fun validate2fa(token: String, completion: (user: User?, message: String) -> Unit) {
+        val route = ApiRoute.Validate2fa(token, context)
+        this.performRequest(route) { success, response ->
+            if (success) {
+                val user: User = response.json.toObject()
+                completion.invoke(user, "success")
+            } else {
+                completion.invoke(null, response.message)
+            }
         }
     }
 

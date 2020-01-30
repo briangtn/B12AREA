@@ -7,9 +7,12 @@ import com.android.volley.Request
 
 sealed class ApiRoute(var mainContext: Context) {
 
-    data class Login(var email: String, var password: String, var context: Context) : ApiRoute(context)
-    data class Register(var email: String, var password: String, var redirectUrl: String, var context: Context) : ApiRoute(context)
-    data class Validate(var token: String, var context: Context) : ApiRoute(context)
+    data class Login(var email: String, var password: String, var context: Context) : ApiRoute()
+    data class Register(var email: String, var password: String, var redirectUrl: String, var context: Context) : ApiRoute()
+    data class Validate(var token: String, var context: Context) : ApiRoute()
+    data class Activate2fa(var context: Context) : ApiRoute()
+    data class Confirm2fa(var token: String, var context: Context) : ApiRoute()
+    data class Validate2fa(var token: String, var context: Context) : ApiRoute()
     data class ReadinessProbe(var context: Context) : ApiRoute(context)
 
     val timeout: Int
@@ -33,6 +36,9 @@ sealed class ApiRoute(var mainContext: Context) {
                 is Login -> "users/login"
                 is Register -> "users/register"
                 is Validate -> "users/validate"
+                is Activate2fa -> "users/2fa/activate"
+                is Confirm2fa -> "users/2fa/activate"
+                is Validate2fa -> "users/2fa/validate"
                 is ReadinessProbe -> "readinessProbe"
                 else -> ""
             }}"
@@ -44,7 +50,9 @@ sealed class ApiRoute(var mainContext: Context) {
                 is Login -> Request.Method.POST
                 is Register -> Request.Method.POST
                 is Validate -> Request.Method.PATCH
-                is ReadinessProbe -> Request.Method.GET
+                is Activate2fa -> Request.Method.POST
+                is Confirm2fa -> Request.Method.PATCH
+                is Validate2fa -> Request.Method.POST
                 else -> Request.Method.GET
             }
         }
@@ -57,6 +65,12 @@ sealed class ApiRoute(var mainContext: Context) {
                 }
                 is Register -> {
                     hashMapOf(Pair("email", this.email), Pair("password", this.password))
+                }
+                is Confirm2fa -> {
+                    hashMapOf(Pair("token", this.token))
+                }
+                is Validate2fa -> {
+                    hashMapOf(Pair("token", this.token))
                 }
                 else -> hashMapOf()
             }
@@ -78,8 +92,12 @@ sealed class ApiRoute(var mainContext: Context) {
     val headers: HashMap<String, String>
         get() {
             val map: HashMap<String, String> = hashMapOf()
+            val sharedPreferences =
             map["Accept"] = "application/json"
             return when (this) {
+                is Activate2fa -> {
+                    hashMapOf(Pair("Authorization", "Bearer ${}"))
+                }
                 else -> hashMapOf()
             }
         }

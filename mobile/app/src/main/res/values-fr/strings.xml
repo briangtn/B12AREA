@@ -26,6 +26,7 @@
     <string name="email_confirmation_message">Nous vous avons envoyé un email afin de valider votre compte. Vérifiez vos spams si vous ne le voyez pas !</string>
     <string name="verified_email">Email vérifié !</string>
     <string name="verified_email_message">Vous pouvez dès à présent vous connecter.</string>
+    <string name="security_code">Code de sécurité</string>
     <string name="change_api_url">Modifier l\'url de l\'api</string>
     <string name="confirm">Confirmer</string>
     <string name="cancel">Annuler</string>
