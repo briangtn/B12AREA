@@ -29,15 +29,15 @@ export class AreaAuthorizationProvider implements Provider<Authorizer> {
         if (!userProfile)
             return AuthorizationDecision.DENY;
         const user: User | null = await this.userRepository.findOne({where: {email: userProfile.email}});
-        if (!user)
+        if (!user || !user.role || user.role.length === 0)
             return AuthorizationDecision.DENY;
         if (!roles)
             return AuthorizationDecision.ALLOW;
         for (const role of roles) {
-            if (user?.role?.indexOf(role) !== -1) {
-                return AuthorizationDecision.ALLOW;
+            if (user?.role?.indexOf(role) === -1) {
+                return AuthorizationDecision.DENY;
             }
         }
-        return AuthorizationDecision.DENY;
+        return AuthorizationDecision.ALLOW;
     }
 }
