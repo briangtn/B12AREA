@@ -6,7 +6,6 @@ import {TokenServiceBindings} from "../keys";
 import {promisify} from "util";
 import {UserRepository} from '../repositories/user.repository';
 import { repository } from '@loopback/repository';
-import {User} from '../models';
 
 const jwt  = require("jsonwebtoken");
 

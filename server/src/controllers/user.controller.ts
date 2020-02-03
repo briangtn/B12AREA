@@ -240,7 +240,6 @@ export class UserController {
         },
     })
     @authenticate('jwt-all')
-    @authorize({allowedRoles: ['admin']})
     async getMe(
         @inject(SecurityBindings.USER) currentUserProfile: UserProfile
     ) {
@@ -314,8 +313,10 @@ export class UserController {
         }
     })
     @authenticate('jwt-all')
+    @authorize({allowedRoles: ['admin']})
     async getUser(
-        @param.path.string('id') id: string
+        @param.path.string('id') id: string,
+        @inject(SecurityBindings.USER) currentUserProfile: UserProfile,
     ) {
         const user: User | undefined = await this.userRepository.findById(id);
 
@@ -335,9 +336,11 @@ export class UserController {
         }
     })
     @authenticate('jwt-all')
+    @authorize({allowedRoles: ['admin']})
     async updateUser(
         @param.path.string('id') id: string,
         @requestBody() newUser: UpdateUserRequest,
+        @inject(SecurityBindings.USER) currentUserProfile: UserProfile
     ) {
         const updatedUser: User = this.normalizerService.normalize(newUser, {email: 'toLower', password: 'hash'}) as User;
         const currentUser: User | undefined = await this.userRepository.findById(id);
