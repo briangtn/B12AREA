@@ -4,6 +4,9 @@ import {UserProfile} from "@loopback/security";
 import {HttpErrors} from "@loopback/rest/dist";
 import {TokenServiceBindings} from "../keys";
 import {promisify} from "util";
+import {UserRepository} from '../repositories/user.repository';
+import { repository } from '@loopback/repository';
+import {User} from '../models';
 
 const jwt  = require("jsonwebtoken");
 
@@ -19,6 +22,8 @@ export class JWTService implements TokenService {
         private jwtSecret: string,
         @inject(TokenServiceBindings.TOKEN_EXPIRES_IN)
         private jwtExpiresIn: string,
+        @repository(UserRepository)
+        private userRepository: UserRepository,
     ) {}
 
     generateToken(userProfile: CustomUserProfile): Promise<string> {
@@ -43,8 +48,16 @@ export class JWTService implements TokenService {
     verifyToken(token: string): Promise<CustomUserProfile> {
         return new Promise((resolve, reject) => {
             try {
-                const decoded: object | string = jwt.verify(token, this.jwtSecret);
-                resolve(decoded as CustomUserProfile)
+                const profile: CustomUserProfile = jwt.verify(token, this.jwtSecret) as CustomUserProfile;
+                this.userRepository.getFromUserProfile(profile).then((user) => {
+                    if (!user || !user.role || user.role.indexOf("email_not_validated") !== -1) {
+                        reject("Email not validated");
+                        return;
+                    }
+                    resolve(profile)
+                }).catch(err => {
+                    reject(err);
+                });
             } catch (e) {
                 reject(e);
             }

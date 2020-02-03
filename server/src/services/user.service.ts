@@ -24,6 +24,8 @@ export class UserService {
         );
         if (!user)
             throw new HttpErrors.Unauthorized('Invalid email or password');
+        if (!user.role || user.role.indexOf("email_not_validated") !== -1)
+            throw new HttpErrors.Unauthorized("Email not validated");
         return user;
     }
 
