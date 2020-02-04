@@ -19,6 +19,7 @@ import {
 } from '../services';
 import * as url from 'url';
 import {response200, response400, response401, response404, response409, response422} from './specs/doc.specs';
+import { authorize } from '@loopback/authorization';
 
 @model()
 export class NewUserRequest  {
@@ -312,8 +313,10 @@ export class UserController {
         }
     })
     @authenticate('jwt-all')
+    @authorize({allowedRoles: ['admin']})
     async getUser(
-        @param.path.string('id') id: string
+        @param.path.string('id') id: string,
+        @inject(SecurityBindings.USER) currentUserProfile: UserProfile,
     ) {
         const user: User | undefined = await this.userRepository.findById(id);
 
@@ -333,9 +336,11 @@ export class UserController {
         }
     })
     @authenticate('jwt-all')
+    @authorize({allowedRoles: ['admin']})
     async updateUser(
         @param.path.string('id') id: string,
         @requestBody() newUser: UpdateUserRequest,
+        @inject(SecurityBindings.USER) currentUserProfile: UserProfile
     ) {
         const updatedUser: User = this.normalizerService.normalize(newUser, {email: 'toLower', password: 'hash'}) as User;
         const currentUser: User | undefined = await this.userRepository.findById(id);

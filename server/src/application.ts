@@ -10,10 +10,11 @@ import {ServiceMixin} from '@loopback/service-proxy';
 import path from 'path';
 import {MySequence} from './sequence';
 import {TokenServiceBindings, TokenServiceConstants} from "./keys";
-import {JWTService} from "./services";
+import {JWTService, AreaAuthorizationProvider} from "./services";
 import {AuthenticationComponent, registerAuthenticationStrategy} from "@loopback/authentication";
 import {JWTAllAuthenticationStrategy, JWT2FAAuthenticationStrategy} from "./authentication-strategies";
 import {SECURITY_SCHEME_SPEC} from "./utils/security-specs";
+import {AuthorizationComponent, AuthorizationTags} from '@loopback/authorization';
 import * as fs from 'fs';
 
 export interface PackageInfo {
@@ -48,9 +49,14 @@ export class AreaApplication extends BootMixin(
         this.setUpBindings();
         this.component(RestExplorerComponent);
         this.component(AuthenticationComponent);
+        this.component(AuthorizationComponent);
 
         registerAuthenticationStrategy(this, JWTAllAuthenticationStrategy);
         registerAuthenticationStrategy(this, JWT2FAAuthenticationStrategy);
+
+        this.bind('authorizationProviders.custom-provider')
+            .toProvider(AreaAuthorizationProvider)
+            .tag(AuthorizationTags.AUTHORIZER);
 
         this.projectRoot = __dirname;
         this.loadAuthControllers();
