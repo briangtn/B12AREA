@@ -42,6 +42,22 @@ services:
     ports:
       - "8080:80"
 
+  worker:
+    build: ./server
+    command: node . worker
+    restart: unless-stopped
+    environment:
+      - DB_HOST=db
+      - REDIS_HOST=redis
+    env_file:
+      - .env
+    networks:
+      - "db-tier"
+      - "redis-tier"
+    depends_on:
+      - db
+      - redis
+
   db:
     image: "mongo:4.0.14"
     restart: unless-stopped
@@ -60,8 +76,15 @@ services:
       - ./scripts/initdb.sh:/docker-entrypoint-initdb.d/initdb.sh
 
   redis:
-    image: "redis"
+    image: "redis:buster"
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
     restart: unless-stopped
+    ports:
+      - '${REDIS_PORT}:6379'
+    env_file:
+      - .env
+    volumes:
+      - redis-vol:/data
     networks:
       - "redis-tier"
 
@@ -72,3 +95,4 @@ networks:
 volumes:
   apk-vol:
   db-vol:
+  redis-vol:

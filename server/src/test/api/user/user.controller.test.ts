@@ -24,7 +24,7 @@ describe('/users', () => {
     before(migrateSchema);
     beforeEach(async () => {
         await userRepo.deleteAll();
-        const user = await createUser(userData.email, userData.password);
+        const user = await createUser(userData.email, userData.password, true);
         userId = user.id;
         userToken = await getJWT(userData.email, userData.password);
     });
@@ -47,9 +47,9 @@ describe('/users', () => {
             const res = await client
                 .post('/users/register?redirectURL=http://localhost:8081/validate?api=http://localhost:8080')
                 .send({email: "testest.fr", password: "p@22w0rd"})
-                .expect(400);
+                .expect(422);
             const error = JSON.parse(res.error.text);
-            expect(error.error.message).to.equal('Invalid email.')
+            expect(error.error.details[0].message).to.equal('should match format "email"') // TODO: Looking for replacing this message by a custom message
         });
 
         it('Empty email', async () => {
@@ -58,7 +58,7 @@ describe('/users', () => {
                 .send({password: "p@22w0rd"})
                 .expect(422);
             const error = JSON.parse(res.error.text);
-            expect(error.error.message).to.equal('The request body is invalid. See error object `details` property for more info.')
+            expect(error.error.details[0].message).to.equal('should have required property \'email\'')
         });
 
         it('Empty password', async () => {
@@ -67,7 +67,7 @@ describe('/users', () => {
                 .send({email: "test@test.fr"})
                 .expect(422);
             const error = JSON.parse(res.error.text);
-            expect(error.error.message).to.equal('The request body is invalid. See error object `details` property for more info.')
+            expect(error.error.details[0].message).to.equal('should have required property \'password\'')
         });
 
         it('Success', async () => {
@@ -404,6 +404,18 @@ describe('/users', () => {
             expect(error.error.message).to.equal('Entity not found: User with id "invalidId"');
         });
 
+        it("Should send 401 Access denied", async () => {
+            await createUser('notadmin@notadmin.fr', 'notadmin', false);
+            const currentUserToken = await getJWT('notadmin@notadmin.fr', 'notadmin');
+            const res = await client
+                .get('/users/' + userId)
+                .set('Authorization', 'Bearer ' + currentUserToken)
+                .send()
+                .expect(401);
+            const error = JSON.parse(res.error.text);
+            expect(error.error.message).to.equal('Access denied');
+        });
+
         it("Success", async () => {
             const res = await client
                 .get('/users/' + userId)
@@ -416,11 +428,11 @@ describe('/users', () => {
         });
     });
 
-    describe('PATCH /user/{id}', () => {
+    describe('PATCH /users/{id}', () => {
         let createdUser: User;
 
         beforeEach(async () => {
-            createdUser = await createUser('patcher@patcher.fr', 'patcher');
+            createdUser = await createUser('patcher@patcher.fr', 'patcher', false);
         });
 
         it("Should send 404 user not found", async () => {
@@ -453,6 +465,18 @@ describe('/users', () => {
                 .expect(400);
             const error = JSON.parse(res.error.text);
             expect(error.error.message).to.equal('Invalid email.');
+        });
+
+        it('Should send 401 Unauthorized (Role is not admin)', async () => {
+            await createUser('notadmin@notadmin.fr', 'notadmin', false);
+            const currentUserToken = await getJWT('notadmin@notadmin.fr', 'notadmin');
+            const res = await client
+                .patch('/users/' + createdUser.id)
+                .set('Authorization', 'Bearer ' + currentUserToken)
+                .send({email: "test@test.fr", password: "p@22w0rd"})
+                .expect(401);
+            const error = JSON.parse(res.error.text);
+            expect(error.error.message).to.equal('Access denied');
         });
 
         it('Should edit the user password', async () => {
@@ -551,7 +575,7 @@ describe('/users', () => {
             const res = await client
                 .patch('/users/me')
                 .set('Authorization', 'Bearer ' + userToken)
-                .send({role: ['admin']})
+                .send({role: ['user']})
                 .expect(401);
             const error = JSON.parse(res.error.text);
             expect(error.error.message).to.equal('You\'re not authorized to edit your own roles');
@@ -567,7 +591,7 @@ describe('/users', () => {
             expect(body.id).to.not.empty();
             const dbUser: User = await userRepo.findById(body.id);
             expect(dbUser.role).not.containDeep(['email_not_validated']);
-            expect(dbUser.role).containDeep(['user']);
+            expect(dbUser.role).containDeep(['user', 'admin']);
         });
 
         it('Should disable 2FA', async () => {
@@ -595,7 +619,7 @@ describe('/users', () => {
             expect(body.email).to.equal('yolo@yolo.fr');
             const dbUser: User = await userRepo.findById(body.id);
             expect(dbUser.email).to.equal('yolo@yolo.fr');
-            expect(dbUser.role).containDeep(['email_not_validated']);
+            expect(dbUser.role).containDeep(['email_not_validated', 'admin']);
             expect(dbUser.role).not.containDeep(['user']);
         });
     });
@@ -604,19 +628,22 @@ describe('/users', () => {
         await app.migrateSchema();
     }
 
-    async function createUser(email: string, password: string) {
+    async function createUser(email: string, password: string, isAdmin = false) {
         const user = await client
             .post('/users/register?redirectURL=http://localhost:8081/validate?api=http://localhost:8080')
             .send({email, password})
             .expect(200);
-        await userRepo.updateById(user.body.id, {role: ['user']});
+        const roles = ['user'];
+        if (isAdmin)
+            roles.push('admin');
+        await userRepo.updateById(user.body.id, {role: roles});
         return userRepo.findById(user.body.id);
     }
 
     async function getJWT(email: string, password: string) {
         const res = await client
             .post('/users/login')
-            .send(userData)
+            .send({email, password})
             .expect(200);
         const body = res.body;
         return body.token;

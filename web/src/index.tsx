@@ -17,6 +17,7 @@ import ClientAPK from "./routes/ClientAPK";
 import Join from "./routes/Join";
 import Login from "./routes/Login";
 import ConfirmEmail from "./routes/ConfirmEmail";
+import Profile from "./routes/Profile";
 
 // React Redux
 
@@ -56,6 +57,7 @@ class RouterComponent extends React.Component<Props, State> {
                         <Route path='/join' component={Join} />
                         <Route path='/login' component={Login} />
                         <Route path='/confirm_email' component={ConfirmEmail} />
+                        <Route path='/profile' component={Profile} />
                         <Route path='/email_validation' component={EmailValidation} />
                         <Route path='/services' component={Services} />
                         <Route path='/readinessProbe' component={ReadinessProbe} />

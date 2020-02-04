@@ -30,7 +30,7 @@ class Services extends Component<Props, State> {
 
         return (
             <div>
-                <NavigationBar />
+                <NavigationBar history={this.props.history} />
                 <Typography variant="h4" gutterBottom>
                     { token }
                 </Typography>

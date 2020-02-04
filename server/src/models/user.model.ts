@@ -71,6 +71,14 @@ export class User extends Entity {
     })
     twoFactorAuthenticationEnabled: boolean;
 
+    @property({
+        type: 'array',
+        itemType: 'string',
+        required: false,
+        default: []
+    })
+    authServices?: string[];
+
     @hasMany(() => Area, {keyTo: 'ownerId'})
     areas: Area[];
     // Define well-known properties here

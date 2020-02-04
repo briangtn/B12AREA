@@ -3,12 +3,6 @@ import {inject} from '@loopback/context';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as util from 'util';
-import {
-    ActionControllerInterface,
-    ReactionControllerInterface,
-    ServiceControllerInterface
-} from "../services-interfaces";
-
 const readdir = util.promisify(fs.readdir);
 
 class Action {
@@ -66,21 +60,25 @@ export class AboutController {
         }
         for (const serviceName of serviceDirs) {
             const newService = new Service;
-            const serviceControllerPath = path.join(servicesPath, serviceName, serviceName + '.lb-controller.js');
+            const serviceControllerPath = path.join(servicesPath, serviceName, 'controller.js');
             try {
-                const {ServiceController} = require(serviceControllerPath);
-                const controller: ServiceControllerInterface = new ServiceController();
-                newService.name = controller.getConfig().displayName;
-                newService.actions = [];
-                newService.reactions = [];
-            } catch (e) {
-                if (e.code !== 'MODULE_NOT_FOUND') {
-                    console.log('Error ', e.code, ' while loading ', serviceControllerPath);
+                const module = await import(serviceControllerPath);
+                if (!module.default) {
+                    console.log("The service controller class is not exported as default in " + serviceName)
+                }
+                const controller = module.default;
+                if (!controller.getConfig) {
+                    console.log("Static method getConfig not found in " + serviceName + " controller");
                     continue;
                 }
-                console.log(`ServiceController could not be found in ${serviceControllerPath}`);
-                continue;
+                const config = controller.getConfig();
+                newService.name = config.displayName;
+                newService.actions = [];
+                newService.reactions = [];
+            } catch (e){
+                console.log(`${serviceControllerPath} module not found.`);
             }
+
             const serviceActionsPath = path.join(servicesPath, serviceName, 'actions');
             let actionDirs: Array<string> = [];
             try {
@@ -91,12 +89,20 @@ export class AboutController {
             }
             for (const actionName of actionDirs) {
                 const newAction = new Action;
-                const actionControllerPath = path.join(serviceActionsPath, actionName, actionName + '.lb-controller.js');
+                const actionControllerPath = path.join(serviceActionsPath, actionName, 'controller.js');
                 try {
-                    const {ActionController} = require(actionControllerPath);
-                    const controller: ActionControllerInterface = new ActionController();
-                    newAction.name = controller.getConfig().displayName;
-                    newAction.description = controller.getConfig().description;
+                    const module = await import(actionControllerPath);
+                    if (!module.default) {
+                        console.log("The service controller class is not exported as default in " + serviceName + ' (action: ' + actionName + ')');
+                    }
+                    const controller = module.default;
+                    if (!controller.getConfig) {
+                        console.log("Static method getConfig not found in " + serviceName + " controller (action: " + actionName + ')');
+                        continue;
+                    }
+                    const config = controller.getConfig();
+                    newAction.name = config.displayName;
+                    newAction.description = config.description;
                 } catch (e) {
                     if (e.code !== 'MODULE_NOT_FOUND') {
                         console.log('Error ', e.code, ' while loading ', actionControllerPath);
@@ -118,18 +124,21 @@ export class AboutController {
             }
             for (const reactionName of reactionDirs) {
                 const newReaction = new Reaction;
-                const reactionControllerPath = path.join(serviceReactionsPath, reactionName, reactionName + '.js');
+                const reactionControllerPath = path.join(serviceReactionsPath, reactionName, 'controller.js');
                 try {
-                    const {ReactionController} = require(reactionControllerPath);
-                    const controller: ReactionControllerInterface = new ReactionController();
-                    newReaction.name = controller.getConfig().displayName;
-                    newReaction.description = controller.getConfig().description;
+                    const module = await import(reactionControllerPath);
+                    const controller = module.default;
+                    if (!controller)
+                        console.log("The service controller class is not exported as default in " + serviceName + ' (reaction: ' + reactionName + ')');
+                    const config = controller.getConfig();
+                    newReaction.name = config.displayName;
+                    newReaction.description = config.description;
                 } catch (e) {
                     if (e.code !== 'MODULE_NOT_FOUND') {
                         console.log('Error ', e.code, ' while loading ', reactionControllerPath);
                         continue;
                     }
-                    console.log(`ActionController could not be found in ${reactionControllerPath}`);
+                    console.log(`ReactionController could not be found in ${reactionControllerPath}`);
                     continue;
                 }
                 newService.reactions.push(newReaction);

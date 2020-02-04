@@ -1,6 +1,6 @@
 import {requestBody, get, post, patch, param, api, HttpErrors} from '@loopback/rest';
 import {property, repository, model} from '@loopback/repository';
-import {inject} from '@loopback/context';
+import {inject, Context} from '@loopback/context';
 import {User} from '../models';
 import validator from 'validator';
 import {Credentials, UserRepository} from '../repositories/user.repository';
@@ -19,6 +19,7 @@ import {
 } from '../services';
 import * as url from 'url';
 import {response200, response400, response401, response404, response409, response422} from './specs/doc.specs';
+import { authorize } from '@loopback/authorization';
 
 @model()
 export class NewUserRequest {
@@ -94,7 +95,7 @@ export class UpdateUserRequest {
         type: 'boolean',
         required: false
     })
-    disable2FA?: boolean
+    disable2FA?: boolean;
 
     @property({
         type: 'array',
@@ -107,21 +108,26 @@ export class UpdateUserRequest {
 @api({basePath: '/users', paths: {}})
 export class UserController {
     constructor(@repository(UserRepository) public userRepository: UserRepository,
-                @inject('services.normalizer')
-                protected normalizerService: NormalizerServiceService,
-                @inject('services.user')
-                protected userService: UserService,
-                @inject(TokenServiceBindings.TOKEN_SERVICE)
-                protected tokenService: TokenService,
-                @inject('services.email')
-                protected emailService: EmailManager,
-                @inject('services.randomGenerator')
-                protected randomGeneratorService: RandomGeneratorManager,
-                @inject('services.2fa')
-                protected twoFactorAuthenticationService: TwoFactorAuthenticationManager,
-    ) {
-    }
+        @inject('services.normalizer')
+        protected normalizerService: NormalizerServiceService,
 
+        @inject('services.user')
+        protected userService: UserService,
+
+        @inject(TokenServiceBindings.TOKEN_SERVICE)
+        protected tokenService: TokenService,
+
+        @inject('services.email')
+        protected emailService: EmailManager,
+
+        @inject('services.randomGenerator')
+        protected randomGeneratorService: RandomGeneratorManager,
+
+        @inject('services.2fa')
+        protected twoFactorAuthenticationService: TwoFactorAuthenticationManager,
+
+        @inject.context() private ctx: Context
+    ) {}
     @get('/')
     getUsers() {
     }
@@ -210,6 +216,29 @@ export class UserController {
         return {token, require2fa: user.twoFactorAuthenticationEnabled};
     }
 
+    @get('/serviceLogin/{serviceName}', {
+        responses: {
+            '200': {
+                description: 'The url where you have to redirect'
+            },
+            '400': response400('Missing redirect url'),
+            '404': response404('Service not found')
+        }
+    })
+    async serviceLogin(@param.path.string('serviceName') serviceName: string, @param.query.string('redirectURL') redirectURL?: string): Promise<string> {
+        if (!redirectURL) {
+            throw new HttpErrors.BadRequest('Missing redirect url');
+        }
+        try {
+            const module = await import('../area-auth-services/' + serviceName + '/controller');
+            const controller = module.default;
+            const res = await controller.login(redirectURL, this.ctx);
+            return res;
+        } catch (e) {
+            throw new HttpErrors.NotFound('Service not found');
+        }
+    }
+
     @get('/me', {
         security: OPERATION_SECURITY_SPEC,
         responses: {
@@ -290,8 +319,10 @@ export class UserController {
         }
     })
     @authenticate('jwt-all')
+    @authorize({allowedRoles: ['admin']})
     async getUser(
-        @param.path.string('id') id: string
+        @param.path.string('id') id: string,
+        @inject(SecurityBindings.USER) currentUserProfile: UserProfile,
     ) {
         const user: User | undefined = await this.userRepository.findById(id);
 
@@ -311,9 +342,11 @@ export class UserController {
         }
     })
     @authenticate('jwt-all')
+    @authorize({allowedRoles: ['admin']})
     async updateUser(
         @param.path.string('id') id: string,
         @requestBody() newUser: UpdateUserRequest,
+        @inject(SecurityBindings.USER) currentUserProfile: UserProfile
     ) {
         const updatedUser: User = this.normalizerService.normalize(newUser, {email: 'toLower', password: 'hash'}) as User;
         const currentUser: User | undefined = await this.userRepository.findById(id);
