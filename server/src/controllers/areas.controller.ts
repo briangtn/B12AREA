@@ -6,20 +6,18 @@ import {
     getModelSchemaRef,
     getWhereSchemaFor,
     patch,
-    put,
     del,
     requestBody, api,
 } from '@loopback/rest';
 import {authenticate} from "@loopback/authentication";
 import {SecurityBindings, UserProfile} from "@loopback/security";
 import {inject} from "@loopback/context";
-import {Area, AreaWithRelations} from "../models";
+import {Area} from "../models";
 import {NewArea, PatchArea} from "./specs/area.specs";
 import {Count, CountSchema, Filter, repository, Where} from "@loopback/repository";
 import {AreaRepository, UserRepository} from "../repositories";
 import {OPERATION_SECURITY_SPEC} from "../utils/security-specs";
 import {response200Schema, response204} from "./specs/doc.specs";
-import {HttpErrors} from "@loopback/rest/dist";
 
 @authenticate('jwt-all')
 @api({basePath: '/areas', paths: {}})
