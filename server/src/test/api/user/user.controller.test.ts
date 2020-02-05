@@ -416,6 +416,15 @@ describe('/users', () => {
             expect(error.error.message).to.equal('Access denied');
         });
 
+        it('Should send 401 not logged in', async () => {
+            const res = await client
+                .get('/users/' + userId)
+                .send()
+                .expect(401);
+            const error = JSON.parse(res.error.text);
+            expect(error.error.message).to.equal('Authorization header not found.');
+        });
+
         it("Success", async () => {
             const res = await client
                 .get('/users/' + userId)
@@ -490,6 +499,15 @@ describe('/users', () => {
             const dbUser: User = await userRepo.findById(body.id);
             expect(dbUser.role).not.containDeep(['email_not_validated']);
             expect(dbUser.role).containDeep(['user']);
+        });
+
+        it ('Should send 401 not logged in', async () => {
+            const res = await client
+                .patch('/users/' + createdUser.id)
+                .send({role: ['user', 'admin']})
+                .expect(401);
+            const error = JSON.parse(res.error.text);
+            expect(error.error.message).to.equal('Authorization header not found.');
         });
 
         it('Should disable user 2FA', async () => {
@@ -581,6 +599,15 @@ describe('/users', () => {
             expect(error.error.message).to.equal('You\'re not authorized to edit your own roles');
         });
 
+        it ('Should send 401 not logged in', async () => {
+            const res = await client
+                .patch('/users/me?redirectURL=http://localhost:8080')
+                .send({email: 'yolo@yolo.fr'})
+                .expect(401);
+            const error = JSON.parse(res.error.text);
+            expect(error.error.message).to.equal('Authorization header not found.');
+        });
+
         it('Should edit my password', async () => {
             const res = await client
                 .patch('/users/me')
@@ -622,6 +649,19 @@ describe('/users', () => {
             expect(dbUser.role).containDeep(['email_not_validated', 'admin']);
             expect(dbUser.role).not.containDeep(['user']);
         });
+    });
+
+    describe('GET /users/me', () => {
+        it('Should return my profile', async () => {
+            const res = await client
+                .get('/users/me')
+                .set('Authorization', 'Bearer ' + userToken)
+                .expect(200);
+            const body = res.body;
+            expect(body.id).to.equal(JSON.parse(JSON.stringify(userId)));
+            expect(body.email).to.equal(userData.email);
+            expect(body.role).containDeep(['user', 'admin']);
+        })
     });
 
     async function migrateSchema() {
