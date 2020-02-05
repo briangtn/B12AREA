@@ -7,7 +7,7 @@ export const NewArea = {
             schema: getModelSchemaRef(Area, {
                 title: 'NewArea',
                 exclude: ['id', 'ownerId'],
-                optional: ['action', 'reactions']
+                optional: ['action', 'reactions', 'enabled']
             }),
         },
     },

@@ -18,6 +18,7 @@ import {Count, CountSchema, Filter, repository, Where} from "@loopback/repositor
 import {AreaRepository, UserRepository} from "../repositories";
 import {OPERATION_SECURITY_SPEC} from "../utils/security-specs";
 import {response200Schema, response204} from "./specs/doc.specs";
+import {HttpErrors} from "@loopback/rest/dist";
 
 @authenticate('jwt-all')
 @api({basePath: '/areas', paths: {}})
@@ -47,9 +48,17 @@ export class AreasController {
             '200': response200Schema(getModelSchemaRef(Area), 'Area model instance')
         },
     })
-    create(
+    async create(
         @requestBody(NewArea) area: Omit<Area, 'id'>
     ) {
+        const count = await this.areaRepository.count({
+            name: area.name,
+            ownerId: this.user.email,
+        });
+        if (count.count > 0)
+            throw new HttpErrors.Conflict;
+        if (area.enabled === undefined)
+            area.enabled = true;
         return this.userRepository.createArea(this.user.email, area);
     }
 

@@ -1,6 +1,5 @@
 import {TestHelper} from '../../acceptance/test-helper';
 import {expect} from '@loopback/testlab';
-import {User} from "../../../models";
 import {AreaRepository} from "../../../repositories";
 
 describe('/areas', () => {
@@ -25,10 +24,10 @@ describe('/areas', () => {
     before('setupApplication', async() => {
         await helper.initTestHelper();
         areaRepo = await helper.app.get('repositories.AreaRepository');
+        await helper.createUser(users[0].email, users[0].password, false);
+        await helper.createUser(users[1].email, users[0].password, false);
     });
     beforeEach(async () => {
-        //const user = await helper.createUser(users[0].email, users[0].password, false);
-        //const user2 = await helper.createUser(users[1].email, users[0].password, false);
         users[0].token = await helper.getJWT(users[0].email, users[0].password);
         users[1].token = await helper.getJWT(users[1].email, users[1].password);
     });
@@ -38,34 +37,76 @@ describe('/areas', () => {
     });
 
     describe('POST /areas', () => {
+        const newArea = {
+            name: "Test AREA",
+            enabled: false
+        };
+
         it('Should create a new area instance', async () => {
-            const newArea = {
-                name: "Test AREA",
-                enabled: true
-            };
             const res = await helper.client
                 .post('/areas')
                 .send(newArea)
                 .set('Authorization', 'Bearer ' + users[0].token)
                 .expect(200);
             const body = res.body;
-            console.log(body);
-            const dbUser: User = await helper.userRepository.findById(body.id);
-            expect(dbUser.validationToken).to.not.empty();
-            expect(dbUser.role).containDeep(['email_not_validated']);
-            expect(dbUser.role).not.containDeep(['user']);
+            expect(body.id).not.empty();
+            const area = await areaRepo.findById(body.id);
+            expect(area.name).eql(newArea.name);
+            expect(area.enabled).eql(newArea.enabled);
+            expect(area.ownerId).eql(users[0].email);
         });
 
         it('Should send a 409 Conflict if an area with the same name exists', async () => {
-
+            before(async () => {
+                await helper.client
+                    .post('/areas')
+                    .send(newArea)
+                    .set('Authorization', 'Bearer ' + users[0].token)
+            });
+            await helper.client
+                .post('/areas')
+                .send(newArea)
+                .set('Authorization', 'Bearer ' + users[0].token)
+                .expect(409);
         });
 
         it('Should send 401 Unauthorized for a request without token', async () => {
-
+            const res = await helper.client
+                .post('/areas')
+                .send(newArea)
+                .expect(401);
+            const error = JSON.parse(res.error.text);
+            expect(error.error.message).to.equal('Authorization header not found.');
         });
 
-        it('Should send a 400 Bad Request if there is no name', async () => {
+        it('Should enabled by default if not specified', async () => {
+            const area = {
+                name: 'Hello AREA'
+            };
 
+            const res = await helper.client
+                .post('/areas')
+                .send(area)
+                .set('Authorization', 'Bearer ' + users[0].token)
+                .expect(200);
+            const body = res.body;
+            expect(body.id).not.empty();
+            const createdArea = await areaRepo.findById(body.id);
+            expect(createdArea.name).eql(area.name);
+            expect(createdArea.enabled).eql(true);
+            expect(createdArea.ownerId).eql(users[0].email);
+        });
+
+        it('Should send a 422 if there is no name', async () => {
+            const res = await helper.client
+                .post('/areas')
+                .send({
+                    enabled: true
+                })
+                .set('Authorization', 'Bearer ' + users[0].token)
+                .expect(422);
+            const error = JSON.parse(res.error.text);
+            expect(error.error.details[0].message).to.equal('should have required property \'name\'')
         });
     });
 
@@ -79,7 +120,11 @@ describe('/areas', () => {
         });
 
         it('Should send 401 Unauthorized for a request without token', async () => {
-
+            const res = await helper.client
+                .get('/areas')
+                .expect(401);
+            const error = JSON.parse(res.error.text);
+            expect(error.error.message).to.equal('Authorization header not found.');
         });
     });
 
