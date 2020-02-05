@@ -7,11 +7,11 @@ import com.b12powered.area.R
 import kotlinx.android.synthetic.main.fragment_toolbar.view.*
 
 
-class HomePageActivity : AppCompatActivity() {
+class UserPageActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_home_page)
+        setContentView(R.layout.activity_profile_page)
 
     }
 

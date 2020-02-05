@@ -21,42 +21,41 @@
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
             android:minHeight="57dp"
             android:padding="1dp"
-            android:layout_gravity="bottom"
-            app:layout_constraintTop_toTopOf="parent"
-            android:theme="@style/AppTheme">
+            android:theme="@style/AppTheme"
+            app:layout_constraintTop_toTopOf="parent">
 
+            <ImageButton
+                android:id="@+id/homebtnToolbar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                app:layout_anchor="@+id/appBarLayout"
+                app:layout_anchorGravity="start|center"
+                app:srcCompat="@drawable/ic_action_home" />
+
+            <ImageButton
+                android:id="@+id/userbtnToolbar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="left"
+                app:layout_anchor="@+id/appBarLayout"
+                app:layout_anchorGravity="end|center"
+                app:srcCompat="@drawable/ic_action_user" />
+
+            <ImageButton
+                android:id="@+id/searchbtnToolbar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="right"
+                app:layout_anchor="@+id/appBarLayout"
+                app:layout_anchorGravity="center"
+                app:srcCompat="@drawable/ic_action_search" />
 
         </androidx.appcompat.widget.Toolbar>
 
     </com.google.android.material.appbar.AppBarLayout>
-
-    <ImageButton
-        android:id="@+id/imageButton6"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_anchor="@+id/appBarLayout"
-        app:layout_anchorGravity="start|center"
-        app:srcCompat="@drawable/ic_action_home"
-        android:contentDescription="TODO" />
-
-    <ImageButton
-        android:id="@+id/imageButton7"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_anchor="@+id/appBarLayout"
-        app:layout_anchorGravity="end|center"
-        app:srcCompat="@drawable/ic_action_user"
-        android:contentDescription="TODO" />
-
-    <ImageButton
-        android:id="@+id/imageButton8"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_anchor="@+id/appBarLayout"
-        app:layout_anchorGravity="center"
-        app:srcCompat="@drawable/ic_action_search" />
-
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
