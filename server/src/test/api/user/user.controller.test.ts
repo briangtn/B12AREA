@@ -661,7 +661,15 @@ describe('/users', () => {
             expect(body.id).to.equal(JSON.parse(JSON.stringify(userId)));
             expect(body.email).to.equal(userData.email);
             expect(body.role).containDeep(['user', 'admin']);
-        })
+        });
+
+        it ('Should send 401 not logged in', async () => {
+            const res = await client
+                .get('/users/me')
+                .expect(401);
+            const error = JSON.parse(res.error.text);
+            expect(error.error.message).to.equal('Authorization header not found.');
+        });
     });
 
     async function migrateSchema() {
