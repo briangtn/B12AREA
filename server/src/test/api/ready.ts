@@ -1,21 +1,18 @@
-import {Client} from '@loopback/testlab';
-import {AreaApplication} from '../..';
-import {setupApplication} from '../acceptance/test-helper';
+import {TestHelper} from '../acceptance/test-helper';
 
 describe('Ready', () => {
-    let app: AreaApplication;
-    let client: Client;
+    const helper: TestHelper = new TestHelper();
 
     before('setupApplication', async () => {
-        ({app, client} = await setupApplication());
+        await helper.initTestHelper();
     });
 
     after(async () => {
-        await app.stop();
+        await helper.stop();
     });
 
     it('expose a ready page (return 200 and write true)', async () => {
-        await client
+        await helper.client
             .get('/readinessProbe')
             .expect(200).expect('true');
     });

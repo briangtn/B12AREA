@@ -139,7 +139,7 @@ export class UserController {
             '409': response409('Email already in use')
         }
     })
-    async register(@requestBody() userRequest: NewUserRequest, @param.query.string('redirectURL') redirectURL?: string) {
+    async register(@requestBody(CredentialsRequestBody) userRequest: NewUserRequest, @param.query.string('redirectURL') redirectURL?: string) {
         const normalizedUser: User = this.normalizerService.normalize(userRequest, {
             email: 'toLower',
             password: 'hash'

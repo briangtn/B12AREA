@@ -1,19 +1,14 @@
-import {AreaApplication} from '../../../application';
-import {setupApplication} from '../../acceptance/test-helper';
-import { UserRepository } from '../../../repositories/user.repository';
-import { Client } from '@loopback/testlab';
+import {TestHelper} from '../../acceptance/test-helper';
+import {expect} from '@loopback/testlab';
+import {User} from "../../../models";
 import {AreaRepository} from "../../../repositories";
-import {createUser, getJWT} from "../utils";
 
 describe('/areas', () => {
-    let app: AreaApplication;
-    let client: Client;
-
-    let userRepo: UserRepository;
+    const helper: TestHelper = new TestHelper();
     let areaRepo: AreaRepository;
 
-    let userId: string | undefined;
-    let userToken: string;
+    //let userId: string | undefined;
+    //let userToken: string;
     const users = [
         {
             email: "user@mail.fr",
@@ -28,27 +23,37 @@ describe('/areas', () => {
     ];
 
     before('setupApplication', async() => {
-        ({app, client} = await setupApplication());
-        userRepo = await app.get('repositories.UserRepository');
-        areaRepo = await app.get('repositories.AreaRepository');
-    });
-    before(async () => {
-        await app.migrateSchema();
+        await helper.initTestHelper();
+        areaRepo = await helper.app.get('repositories.AreaRepository');
     });
     beforeEach(async () => {
-        const user = await createUser(users[0].email, users[0].password);
-        const user2 = await createUser(users[1].email, users[0].password);
-        users[0].token = await getJWT(users[0].email, users[0].password);
-        users[1].token = await getJWT(users[1].email, users[1].password);
+        //const user = await helper.createUser(users[0].email, users[0].password, false);
+        //const user2 = await helper.createUser(users[1].email, users[0].password, false);
+        users[0].token = await helper.getJWT(users[0].email, users[0].password);
+        users[1].token = await helper.getJWT(users[1].email, users[1].password);
     });
 
     after(async () => {
-        await app.stop();
+        await helper.stop();
     });
 
     describe('POST /areas', () => {
         it('Should create a new area instance', async () => {
-
+            const newArea = {
+                name: "Test AREA",
+                enabled: true
+            };
+            const res = await helper.client
+                .post('/areas')
+                .send(newArea)
+                .set('Authorization', 'Bearer ' + users[0].token)
+                .expect(200);
+            const body = res.body;
+            console.log(body);
+            const dbUser: User = await helper.userRepository.findById(body.id);
+            expect(dbUser.validationToken).to.not.empty();
+            expect(dbUser.role).containDeep(['email_not_validated']);
+            expect(dbUser.role).not.containDeep(['user']);
         });
 
         it('Should send a 409 Conflict if an area with the same name exists', async () => {
