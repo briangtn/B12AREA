@@ -37,12 +37,12 @@ describe('/areas', () => {
         await helper.stop();
     });
 
-    describe('POST /areas', () => {
-        const newArea = {
-            name: "Test AREA",
-            enabled: false
-        };
+    const newArea = {
+        name: "Test AREA",
+        enabled: false
+    };
 
+    describe('POST /areas', () => {
         it('Should create a new area instance', async () => {
             const res = await helper.client
                 .post('/areas')
@@ -143,14 +143,13 @@ describe('/areas', () => {
 
     describe('GET /areas/count', () => {
         it('Should return the count of areas', async () => {
-            await helper.userRepository.areas(users[0].email).create({name: "Area1", enabled: true});
+            await helper.userRepository.areas(users[0].email).create(newArea);
             const res = await helper.client
                 .get('/areas/count')
                 .set('Authorization', 'Bearer ' + users[0].token)
                 .expect(200);
             const body = res.body;
             expect(body.count).to.be.equal(1);
-            console.log(body);
         });
 
         it('Should 0 if there is no area', async () => {
@@ -160,7 +159,6 @@ describe('/areas', () => {
                 .expect(200);
             const body = res.body;
             expect(body.count).to.be.equal(0);
-            console.log(body);
         });
 
         it('Should send 401 Unauthorized for a request without token', async () => {
@@ -174,55 +172,141 @@ describe('/areas', () => {
 
     describe('GET /areas/{id}', () => {
         it('Should send the requested area', async () => {
+            const area = await helper.userRepository.areas(users[0].email).create(newArea);
 
+            const res = await helper.client
+                .get('/areas/' + area.id)
+                .set('Authorization', 'Bearer ' + users[0].token)
+                .expect(200);
+            const body = res.body;
+
+            expect(area.name).to.be.equal(body.name);
+            expect(area.id?.toString()).to.be.equal(body.id);
+            expect(area.enabled).to.be.equal(body.enabled);
+            expect(area.ownerId).to.be.equal(body.ownerId);
         });
 
         it('Should send 404 Not Found if the id doesn\'t match', async () => {
+            await helper.userRepository.areas(users[0].email).create(newArea);
 
+            const res = await helper.client
+                .get('/areas/NOT_AN_ID')
+                .set('Authorization', 'Bearer ' + users[0].token)
+                .expect(404);
+            const error = JSON.parse(res.error.text);
+            expect(error.error.message).to.equal('Area not found.');
         });
 
         it('Should send 404 Not Found if the area belongs to another user', async () => {
+            const area = await helper.userRepository.areas(users[0].email).create(newArea);
 
+            const res = await helper.client
+                .get('/areas/' + area.id)
+                .set('Authorization', 'Bearer ' + users[1].token)
+                .expect(404);
+            const error = JSON.parse(res.error.text);
+            expect(error.error.message).to.equal('Area not found.');
         });
 
         it('Should send 401 Unauthorized for a request without token', async () => {
-
+            const res = await helper.client
+                .get('/areas/NOT_AN_ID')
+                .expect(401);
+            const error = JSON.parse(res.error.text);
+            expect(error.error.message).to.equal('Authorization header not found.');
         });
     });
 
     describe('DELETE /areas/{id}', () => {
         it('Should delete the specified area', async () => {
+            const area = await helper.userRepository.areas(users[0].email).create(newArea);
 
+            const res = await helper.client
+                .delete('/areas/' + area.id)
+                .set('Authorization', 'Bearer ' + users[0].token)
+                .expect(200);
+            const body = res.body;
+            console.log(body);
         });
 
         it('Should send 404 Not Found if the id doesn\'t match', async () => {
+            await helper.userRepository.areas(users[0].email).create(newArea);
 
+            const res = await helper.client
+                .delete('/areas/NOT_AN_ID')
+                .set('Authorization', 'Bearer ' + users[0].token)
+                .expect(404);
+            const body = res.body;
+            console.log(body);
         });
 
         it('Should send 404 Not Found if the area belongs to another user', async () => {
+            const area = await helper.userRepository.areas(users[0].email).create(newArea);
 
+            const res = await helper.client
+                .delete('/areas/' + area.id)
+                .set('Authorization', 'Bearer ' + users[1].token)
+                .expect(404);
+            const body = res.body;
+            console.log(body);
         });
 
         it('Should send 401 Unauthorized for a request without token', async () => {
-
+            const res = await helper.client
+                .delete('/areas/NOT_AN_ID')
+                .expect(401);
+            const error = JSON.parse(res.error.text);
+            expect(error.error.message).to.equal('Authorization header not found.');
         });
     });
 
     describe('PATCH /areas/{id}', () => {
-        it('Should update the specified area', async () => {
+        const patchData = {
+            name: "PATCHED"
+        };
 
+        it('Should update the specified area', async () => {
+            const area = await helper.userRepository.areas(users[0].email).create(newArea);
+
+            const res = await helper.client
+                .patch('/areas/' + area.id)
+                .send(patchData)
+                .set('Authorization', 'Bearer ' + users[0].token)
+                .expect(200);
+            const body = res.body;
+            console.log(body);
         });
 
         it('Should send 404 Not Found if the id doesn\'t match', async () => {
+            await helper.userRepository.areas(users[0].email).create(newArea);
 
+            const res = await helper.client
+                .patch('/areas/NOT_AN_ID')
+                .send(patchData)
+                .set('Authorization', 'Bearer ' + users[0].token)
+                .expect(404);
+            const body = res.body;
+            console.log(body);
         });
 
         it('Should send 404 Not Found if the area belongs to another user', async () => {
+            const area = await helper.userRepository.areas(users[0].email).create(newArea);
 
+            const res = await helper.client
+                .patch('/areas/' + area.id)
+                .send(patchData)
+                .set('Authorization', 'Bearer ' + users[1].token)
+                .expect(404);
+            const body = res.body;
+            console.log(body);
         });
 
         it('Should send 401 Unauthorized for a request without token', async () => {
-
+            const res = await helper.client
+                .patch('/areas/NOT_AN_ID')
+                .expect(401);
+            const error = JSON.parse(res.error.text);
+            expect(error.error.message).to.equal('Authorization header not found.');
         });
     });
 
