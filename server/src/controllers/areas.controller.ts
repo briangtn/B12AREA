@@ -12,7 +12,7 @@ import {
 import {authenticate} from "@loopback/authentication";
 import {SecurityBindings, UserProfile} from "@loopback/security";
 import {inject} from "@loopback/context";
-import {Area} from "../models";
+import {Area, AreaWithRelations} from "../models";
 import {NewArea, PatchArea} from "./specs/area.specs";
 import {Count, CountSchema, Filter, repository, Where} from "@loopback/repository";
 import {AreaRepository, UserRepository} from "../repositories";
@@ -99,10 +99,12 @@ export class AreasController {
         @param.path.string('id') id: string,
         @requestBody(PatchArea) areaPatch: Partial<Area>,
     ) {
-        this.getArea(id).catch((e) => {
-            throw e
-        });
+        const area = await this.getArea(id);
+
+        if (area === undefined)
+            throw new HttpErrors.NotFound;
         await this.areaRepository.updateById(id, areaPatch);
+        return this.getArea(id);
     }
 
     @del('/{id}', {
@@ -112,9 +114,10 @@ export class AreasController {
         },
     })
     async deleteById(@param.path.string('id') id: string): Promise<void> {
-        this.getArea(id).catch((e) => {
-            throw e
-        });
+        const area = await this.getArea(id);
+
+        if (area === undefined)
+            throw new HttpErrors.NotFound;
         await this.areaRepository.deleteById(id);
     }
 
@@ -134,12 +137,13 @@ export class AreasController {
         return this.enableDisableArea(id, false);
     }
 
-    async enableDisableArea(id: string, status: boolean): Promise<void> {
+    async enableDisableArea(id: string, status: boolean): Promise<AreaWithRelations | null> {
         const area = await this.getArea(id);
         this.areaRepository.checkArea(area, this.user);
 
-        return this.areaRepository.updateById(id, {
-            enabled: true
+        await this.areaRepository.updateById(id, {
+            enabled: status
         });
+        return this.getArea(id);
     }
 }
