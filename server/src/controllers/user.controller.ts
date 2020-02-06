@@ -1,5 +1,5 @@
-import {requestBody, get, post, patch, param, api, HttpErrors} from '@loopback/rest';
-import {property, repository, model} from '@loopback/repository';
+import {requestBody, get, post, patch, param, api, HttpErrors, getModelSchemaRef, getFilterSchemaFor} from '@loopback/rest';
+import {property, repository, model, Filter} from '@loopback/repository';
 import {inject, Context} from '@loopback/context';
 import {User} from '../models';
 import validator from 'validator';
@@ -128,8 +128,30 @@ export class UserController {
 
         @inject.context() private ctx: Context
     ) {}
-    @get('/')
-    getUsers() {
+
+    @get('/', {
+        security: OPERATION_SECURITY_SPEC,
+        responses: {
+            '200': {
+                description: 'All users',
+                content: {
+                    'application/json': {
+                        schema: {
+                            type: 'array',
+                            items: getModelSchemaRef(User),
+                        },
+                    },
+                },
+            },
+        }
+    })
+    @authenticate('jwt-all')
+    @authorize({allowedRoles: ['admin']})
+    async getUsers(
+        @inject(SecurityBindings.USER) currentUserProfile: UserProfile,
+        @param.query.object('filter', getFilterSchemaFor(User)) filter?: Filter<User>
+    ) {
+        return this.userRepository.find();
     }
 
     @post('/register', {
@@ -307,13 +329,14 @@ export class UserController {
     }
 
     @get('/{id}', {
+        security: OPERATION_SECURITY_SPEC,
         responses: {
             '200': response200(User, "Return a user"),
             '404': response404('User not found')
         }
     })
-    @authenticate('jwt-all')
     @authorize({allowedRoles: ['admin']})
+    @authenticate('jwt-all')
     async getUser(
         @param.path.string('id') id: string,
         @inject(SecurityBindings.USER) currentUserProfile: UserProfile,

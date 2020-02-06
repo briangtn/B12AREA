@@ -624,6 +624,55 @@ describe('/users', () => {
         });
     });
 
+    describe('GET /users', () => {
+        it('Should return all users', async () => {
+            const newUser = await createUser('test@admin.fr', 'abcd', false);
+            const res = await client
+                .get('/users')
+                .set('Authorization', 'Bearer ' + userToken)
+                .expect(200);
+            const data = res.body;
+            expect(data.length).to.be.eql(2);
+            expect(data).containEql({
+                id: JSON.parse(JSON.stringify(userId)),
+                email: userData.email,
+                role: ['user', 'admin'],
+                services: [],
+                twoFactorAuthenticationEnabled: false,
+                authServices: []
+            });
+            expect(data).containEql({
+                id: JSON.parse(JSON.stringify(newUser.id)),
+                email: newUser.email,
+                role: newUser.role,
+                services: newUser.services,
+                twoFactorAuthenticationEnabled: newUser.twoFactorAuthenticationEnabled,
+                authServices: newUser.authServices
+            });
+        });
+
+        it ('Should send 401 not logged in', async () => {
+            const res = await client
+                .get('/users')
+                .expect(401);
+            const error = JSON.parse(res.error.text);
+            expect(error.error.message).to.equal('Authorization header not found.');
+        });
+
+        it("Should send 401 Access denied", async () => {
+            await createUser('notadmin@notadmin.fr', 'notadmin', false);
+            const currentUserToken = await getJWT('notadmin@notadmin.fr', 'notadmin');
+            const res = await client
+                .get('/users/')
+                .set('Authorization', 'Bearer ' + currentUserToken)
+                .send()
+                .expect(401);
+            const error = JSON.parse(res.error.text);
+            expect(error.error.message).to.equal('Access denied');
+        });
+    });
+
+
     async function migrateSchema() {
         await app.migrateSchema();
     }
