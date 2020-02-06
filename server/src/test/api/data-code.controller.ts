@@ -1,5 +1,5 @@
 import {TestHelper} from '../acceptance/test-helper';
-import {expect } from '@loopback/testlab';
+import {expect} from '@loopback/testlab';
 import {DataExchangeCodeRepository} from '../../repositories';
 import { ExchangeCodeGeneratorManager } from '../../services';
 
