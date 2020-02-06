@@ -30,6 +30,7 @@ describe('/areas', () => {
     beforeEach(async () => {
         users[0].token = await helper.getJWT(users[0].email, users[0].password);
         users[1].token = await helper.getJWT(users[1].email, users[1].password);
+        await areaRepo.deleteAll();
     });
 
     after(async () => {
@@ -57,12 +58,10 @@ describe('/areas', () => {
         });
 
         it('Should send a 409 Conflict if an area with the same name exists', async () => {
-            before(async () => {
-                await helper.client
-                    .post('/areas')
-                    .send(newArea)
-                    .set('Authorization', 'Bearer ' + users[0].token)
-            });
+            await helper.client
+                .post('/areas')
+                .send(newArea)
+                .set('Authorization', 'Bearer ' + users[0].token);
             await helper.client
                 .post('/areas')
                 .send(newArea)
@@ -112,11 +111,25 @@ describe('/areas', () => {
 
     describe('GET /areas', () => {
         it('Should return an array of areas', async () => {
-
+            await helper.userRepository.areas(users[0].email).create({name: "Area1", enabled: true});
+            await helper.userRepository.areas(users[0].email).create({name: "Area2", enabled: false});
+            const res = await helper.client
+                .get('/areas')
+                .set('Authorization', 'Bearer ' + users[0].token)
+                .expect(200);
+            const body = res.body;
+            expect(body).Array();
+            expect(body).containDeep([{name: "Area1", enabled: true}, {name: "Area2", enabled: false}]);
         });
 
         it('Should return an empty array if there is none', async () => {
-
+            const res = await helper.client
+                .get('/areas')
+                .set('Authorization', 'Bearer ' + users[0].token)
+                .expect(200);
+            const body = res.body;
+            expect(body).Array();
+            expect(body).empty();
         });
 
         it('Should send 401 Unauthorized for a request without token', async () => {
@@ -130,11 +143,32 @@ describe('/areas', () => {
 
     describe('GET /areas/count', () => {
         it('Should return the count of areas', async () => {
-            //TODO Test 0 and X
+            await helper.userRepository.areas(users[0].email).create({name: "Area1", enabled: true});
+            const res = await helper.client
+                .get('/areas/count')
+                .set('Authorization', 'Bearer ' + users[0].token)
+                .expect(200);
+            const body = res.body;
+            expect(body.count).to.be.equal(1);
+            console.log(body);
+        });
+
+        it('Should 0 if there is no area', async () => {
+            const res = await helper.client
+                .get('/areas/count')
+                .set('Authorization', 'Bearer ' + users[0].token)
+                .expect(200);
+            const body = res.body;
+            expect(body.count).to.be.equal(0);
+            console.log(body);
         });
 
         it('Should send 401 Unauthorized for a request without token', async () => {
-
+            const res = await helper.client
+                .get('/areas/count')
+                .expect(401);
+            const error = JSON.parse(res.error.text);
+            expect(error.error.message).to.equal('Authorization header not found.');
         });
     });
 
