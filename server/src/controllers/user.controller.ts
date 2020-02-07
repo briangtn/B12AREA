@@ -22,7 +22,7 @@ import {response200, response400, response401, response404, response409, respons
 import { authorize } from '@loopback/authorization';
 
 @model()
-export class NewUserRequest  {
+export class NewUserRequest {
     @property({
         type: 'string',
         required: true,
@@ -162,7 +162,10 @@ export class UserController {
         }
     })
     async register(@requestBody(CredentialsRequestBody) userRequest: NewUserRequest, @param.query.string('redirectURL') redirectURL?: string) {
-        const normalizedUser: User = this.normalizerService.normalize(userRequest, {email: 'toLower', password: 'hash'}) as User;
+        const normalizedUser: User = this.normalizerService.normalize(userRequest, {
+            email: 'toLower',
+            password: 'hash'
+        }) as User;
 
         if (!redirectURL) {
             throw new HttpErrors.BadRequest('Missing redirect URL.');
@@ -212,10 +215,13 @@ export class UserController {
     })
     async login(
         @requestBody(CredentialsRequestBody) credentials: Credentials,
-    ): Promise<{token: string, require2fa: boolean}> {
+    ): Promise<{ token: string, require2fa: boolean }> {
         if (credentials.password.length === 0)
             throw new HttpErrors.UnprocessableEntity('Empty password');
-        const normalizeCredentials: Credentials = this.normalizerService.normalize(credentials, {email: 'toLower', password: 'hash'}) as Credentials;
+        const normalizeCredentials: Credentials = this.normalizerService.normalize(credentials, {
+            email: 'toLower',
+            password: 'hash'
+        }) as Credentials;
 
         if (!normalizeCredentials)
             throw new HttpErrors.UnprocessableEntity();

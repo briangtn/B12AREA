@@ -260,7 +260,7 @@ deploy-production-api:
     - sed -i "s/__TWO_FACTOR_AUTHENTICATION_ISSUER_NAME__/${TWO_FACTOR_AUTHENTICATION_ISSUER_NAME}/" area.api.configmap.yaml
     - sed -i "s/__AREA_JWT_TTL__/${AREA_JWT_TTL}/" area.api.configmap.yaml
     - sed -i "s/__BULL_QUEUE_NAME__/${BULL_QUEUE_NAME}/" area.api.configmap.yaml
-    - sed -i "s/__API_URL__/${DEPLOYMENT_HOST}/" area.api.configmap.yaml
+    - sed -i "s/__API_URL__/https:\/\/${DEPLOYMENT_HOST}/" area.api.configmap.yaml
     - sed -i "s/__DB_USER__/`echo -ne ${DB_USER} | base64 -w 0`/" area.api.secrets.yaml
     - sed -i "s/__DB_PASSWORD__/`echo -ne ${DB_PASSWORD} | base64 -w 0`/" area.api.secrets.yaml
     - sed -i "s/__SMTP_USER__/`echo -ne ${SMTP_USER} | base64 -w 0`/" area.api.secrets.yaml
@@ -303,7 +303,7 @@ deploy-production-worker:
     - sed -i "s/__TWO_FACTOR_AUTHENTICATION_ISSUER_NAME__/${TWO_FACTOR_AUTHENTICATION_ISSUER_NAME}/" area.worker.configmap.yaml
     - sed -i "s/__AREA_JWT_TTL__/${AREA_JWT_TTL}/" area.worker.configmap.yaml
     - sed -i "s/__BULL_QUEUE_NAME__/${BULL_QUEUE_NAME}/" area.worker.configmap.yaml
-    - sed -i "s/__API_URL__/${DEPLOYMENT_HOST}/" area.worker.configmap.yaml
+    - sed -i "s/__API_URL__/https:\/\/${DEPLOYMENT_HOST}/" area.worker.configmap.yaml
     - sed -i "s/__DB_USER__/`echo -ne ${DB_USER} | base64 -w 0`/" area.worker.secrets.yaml
     - sed -i "s/__DB_PASSWORD__/`echo -ne ${DB_PASSWORD} | base64 -w 0`/" area.worker.secrets.yaml
     - sed -i "s/__SMTP_USER__/`echo -ne ${SMTP_USER} | base64 -w 0`/" area.worker.secrets.yaml
@@ -461,7 +461,7 @@ deploy-development-api:
     - sed -i "s/__TWO_FACTOR_AUTHENTICATION_ISSUER_NAME__/${TWO_FACTOR_AUTHENTICATION_ISSUER_NAME}/" area.api.configmap.yaml
     - sed -i "s/__AREA_JWT_TTL__/${AREA_JWT_TTL}/" area.api.configmap.yaml
     - sed -i "s/__BULL_QUEUE_NAME__/${BULL_QUEUE_NAME}/" area.api.configmap.yaml
-    - sed -i "s/__API_URL__/${DEPLOYMENT_HOST}/" area.api.configmap.yaml
+    - sed -i "s/__API_URL__/https:\/\/${DEPLOYMENT_HOST}/" area.api.configmap.yaml
     - sed -i "s/__DB_USER__/`echo -ne ${DB_USER} | base64 -w 0`/" area.api.secrets.yaml
     - sed -i "s/__DB_PASSWORD__/`echo -ne ${DB_PASSWORD} | base64 -w 0`/" area.api.secrets.yaml
     - sed -i "s/__SMTP_USER__/`echo -ne ${SMTP_USER} | base64 -w 0`/" area.api.secrets.yaml
@@ -504,7 +504,7 @@ deploy-development-worker:
     - sed -i "s/__TWO_FACTOR_AUTHENTICATION_ISSUER_NAME__/${TWO_FACTOR_AUTHENTICATION_ISSUER_NAME}/" area.worker.configmap.yaml
     - sed -i "s/__AREA_JWT_TTL__/${AREA_JWT_TTL}/" area.worker.configmap.yaml
     - sed -i "s/__BULL_QUEUE_NAME__/${BULL_QUEUE_NAME}/" area.worker.configmap.yaml
-    - sed -i "s/__API_URL__/${DEPLOYMENT_HOST}/" area.worker.configmap.yaml
+    - sed -i "s/__API_URL__/https:\/\/${DEPLOYMENT_HOST}/" area.worker.configmap.yaml
     - sed -i "s/__DB_USER__/`echo -ne ${DB_USER} | base64 -w 0`/" area.worker.secrets.yaml
     - sed -i "s/__DB_PASSWORD__/`echo -ne ${DB_PASSWORD} | base64 -w 0`/" area.worker.secrets.yaml
     - sed -i "s/__SMTP_USER__/`echo -ne ${SMTP_USER} | base64 -w 0`/" area.worker.secrets.yaml
