@@ -1,14 +1,24 @@
 export const response200 = function(model: Object, description: string) {
+    return response200Schema({
+        'x-ts-type': model
+    }, description);
+};
+
+export const response200Schema = function(schema: Object, description: string) {
     return {
         description,
         content: {
             'application/json': {
-                schema: {
-                    'x-ts-type': model
-                }
+                schema: schema
             }
         }
     }
+};
+
+export const response204 = function(description: string) {
+    return {
+        description: description,
+    };
 };
 
 export const response400 = function(description = "Bad request") {
