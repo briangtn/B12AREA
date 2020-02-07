@@ -1,6 +1,6 @@
 import {bind, inject} from '@loopback/core';
 import {DataExchangeCodeRepository} from '../repositories';
-import { repository } from '@loopback/repository';
+import { repository, Filter, Where } from '@loopback/repository';
 import {RandomGeneratorManager} from './random-generator.service';
 import {DataExchangeCode} from '../models';
 
@@ -17,14 +17,19 @@ export class ExchangeCodeGeneratorService implements ExchangeCodeGeneratorManage
     generate(data: object, isPublic = true): Promise<string> {
         return new Promise<string>((resolve, reject) => {
             const code = this.randomGeneratorService.generateRandomString(16);
-            this.exchangeCodeRepository.create({code, data, public: isPublic}).then((result) => {
+            this.exchangeCodeRepository.create({code, data}).then((result) => {
                 resolve(code);
-            }).catch(reject)
+            }).catch((err) => {
+                reject(err);
+            })
         });
     }
 
     async getData(code: string, onlyPublic = true, shouldDelete = true): Promise<object | null> {
-        const dataExchangeCode: DataExchangeCode | null = await this.exchangeCodeRepository.findOne({where: {code, public: onlyPublic}});
+        const where: Where<DataExchangeCode> = {code};
+        if (onlyPublic)
+            where.public = true;
+        const dataExchangeCode: DataExchangeCode | null = await this.exchangeCodeRepository.findOne({where: where});
 
         if (!dataExchangeCode) {
             return null;
