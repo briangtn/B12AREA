@@ -1,6 +1,6 @@
 import {bind, inject} from '@loopback/core';
 import {DataExchangeCodeRepository} from '../repositories';
-import { repository, Filter, Where } from '@loopback/repository';
+import { repository, Where } from '@loopback/repository';
 import {RandomGeneratorManager} from './random-generator.service';
 import {DataExchangeCode} from '../models';
 
