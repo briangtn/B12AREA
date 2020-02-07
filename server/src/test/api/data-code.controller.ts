@@ -25,13 +25,13 @@ describe('/users', () => {
         await app.stop();
     });
 
-    describe('GET /data_code/{code}', () => {
+    describe('GET /data-code/{code}', () => {
         it('Should return 200 (public)', async () => {
             const data = {name: "Hello", password: "p@ssword"};
             const code = await generator.generate(data, true);
 
             const res = await client
-                .get('/data_code/' + code)
+                .get('/data-code/' + code)
                 .expect(200);
             const body = res.body;
             expect(JSON.stringify(body)).to.equal(JSON.stringify(data));
@@ -42,13 +42,13 @@ describe('/users', () => {
             const code = await generator.generate(data, false);
 
             await client
-                .get('/data_code/' + code)
+                .get('/data-code/' + code)
                 .expect(404);
         });
 
         it('Should return 404 (Not exist)', async () => {
             await client
-                .get('/data_code/not_exist')
+                .get('/data-code/not_exist')
                 .expect(404);
         });
     });
