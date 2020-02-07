@@ -12,7 +12,7 @@ services:
     volumes:
       - apk-vol:/web/build/apk
     ports:
-    - "8081:80"
+      - "8081:80"
     depends_on:
       - client_mobile
       - server
@@ -62,9 +62,9 @@ services:
     image: "mongo:4.0.14"
     restart: unless-stopped
     environment:
-        - MONGO_INITDB_ROOT_USERNAME=$DB_USER
-        - MONGO_INITDB_ROOT_PASSWORD=$DB_PASS
-        - MONGO_INITDB_DATABASE=$DB_NAME
+      - MONGO_INITDB_ROOT_USERNAME=$DB_USER
+      - MONGO_INITDB_ROOT_PASSWORD=$DB_PASS
+      - MONGO_INITDB_DATABASE=$DB_NAME
     env_file:
       - .env
     ports:

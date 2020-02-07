@@ -40,6 +40,7 @@ export class AboutController {
                 host: this.request.ip
             },
             server: {
+                //EPITECH MANDATORY
                 // eslint-disable-next-line @typescript-eslint/camelcase
                 current_time: Math.floor(Date.now() / 1000),
                 services: await this.parseServices()
