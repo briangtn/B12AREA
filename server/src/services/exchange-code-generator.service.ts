@@ -17,7 +17,7 @@ export class ExchangeCodeGeneratorService implements ExchangeCodeGeneratorManage
     generate(data: object, isPublic = true): Promise<string> {
         return new Promise<string>((resolve, reject) => {
             const code = this.randomGeneratorService.generateRandomString(16);
-            this.exchangeCodeRepository.create({code, data}).then((result) => {
+            this.exchangeCodeRepository.create({code, data, public: isPublic}).then((result) => {
                 resolve(code);
             }).catch((err) => {
                 reject(err);
