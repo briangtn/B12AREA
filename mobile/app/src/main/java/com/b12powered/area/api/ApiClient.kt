@@ -1,7 +1,10 @@
 package com.b12powered.area.api
 
 import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import android.util.Log
+import androidx.core.net.toUri
 import com.android.volley.*
 import com.android.volley.toolbox.BasicNetwork
 import com.android.volley.toolbox.DiskBasedCache
@@ -10,6 +13,7 @@ import com.android.volley.toolbox.StringRequest
 import com.b12powered.area.User
 import com.b12powered.area.toObject
 import com.google.gson.Gson
+import org.json.JSONObject
 
 class ApiClient(private val context: Context) {
 
@@ -89,6 +93,29 @@ class ApiClient(private val context: Context) {
 
     fun register(email: String, password: String, redirectUrl: String, completion: (user: User?, message: String) -> Unit) {
         val route = ApiRoute.Register(email, password, redirectUrl, context)
+        this.performRequest(route) { success, response ->
+            if (success) {
+                val user: User = response.json.toObject()
+                completion.invoke(user, "success")
+            } else {
+                completion.invoke(null, response.message)
+            }
+        }
+    }
+
+    fun oauth2(service: String, redirectUrl: String, completion: (uri: Uri?, message: String) -> Unit) {
+        val route = ApiRoute.OAuth2(service, redirectUrl, context)
+        this.performRequest(route) { success, response ->
+            if (success) {
+                completion.invoke(JSONObject(response.json).getString("url").toUri(), "success")
+            } else {
+                completion.invoke(null, response.message)
+            }
+        }
+    }
+
+    fun dataCode(code: String, completion: (user: User?, message: String) -> Unit) {
+        val route = ApiRoute.DataCode(code, context)
         this.performRequest(route) { success, response ->
             if (success) {
                 val user: User = response.json.toObject()

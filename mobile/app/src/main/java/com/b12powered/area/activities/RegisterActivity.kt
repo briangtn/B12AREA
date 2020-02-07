@@ -4,18 +4,15 @@ import android.content.Context
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.provider.Settings
 import android.view.KeyEvent
 import android.view.View
 import android.view.inputmethod.InputMethodManager
-import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
 import com.b12powered.area.R
 import com.b12powered.area.api.ApiClient
 import com.b12powered.area.fragments.SettingsFragment
 import kotlinx.android.synthetic.main.activity_register.*
-import kotlinx.android.synthetic.main.fragment_settings.*
 
 class RegisterActivity : AppCompatActivity() {
 
@@ -49,6 +46,14 @@ class RegisterActivity : AppCompatActivity() {
             val intent = Intent(this, LoginActivity::class.java)
             finish()
             startActivity(intent)
+        }
+
+        google_button.setOnClickListener {
+            oauth("google")
+        }
+
+        twitter_button.setOnClickListener {
+            oauth("twitter")
         }
     }
 
@@ -90,6 +95,23 @@ class RegisterActivity : AppCompatActivity() {
             .register(email, password, "http://" + (System.getenv("HOST") ?: "dev.area.b12powered.com") + "/email_validation") { user, message ->
                 if (user != null) {
                     val intent = Intent(this, RegistrationValidationActivity::class.java)
+                    finish()
+                    startActivity(intent)
+                } else {
+                    Toast.makeText(
+                        this,
+                        message,
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+    }
+
+    private fun oauth(service: String) {
+        ApiClient(this)
+            .oauth2(service, "http://" + (System.getenv("HOST") ?: "dev.area.b12powered.com")) { uri, message ->
+                if (uri != null) {
+                    val intent = Intent(Intent.ACTION_VIEW, uri)
                     finish()
                     startActivity(intent)
                 } else {

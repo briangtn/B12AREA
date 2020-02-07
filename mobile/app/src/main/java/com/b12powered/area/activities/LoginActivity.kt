@@ -2,7 +2,6 @@ package com.b12powered.area.activities
 
 import android.content.Context
 import android.content.Intent
-import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.KeyEvent
@@ -48,6 +47,15 @@ class LoginActivity : AppCompatActivity() {
             finish()
             startActivity(intent)
         }
+
+        google_button.setOnClickListener {
+            oauth("google")
+        }
+
+        twitter_button.setOnClickListener {
+            oauth("twitter")
+        }
+
     }
 
     private fun submitLogin() {
@@ -83,6 +91,23 @@ class LoginActivity : AppCompatActivity() {
                     } else {
                         //TODO redirect to homepage
                     }
+                } else {
+                    Toast.makeText(
+                        this,
+                        message,
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+    }
+
+    private fun oauth(service: String) {
+        ApiClient(this)
+            .oauth2(service, "http://" + (System.getenv("HOST") ?: "dev.area.b12powered.com")) { uri, message ->
+                if (uri != null) {
+                    val intent = Intent(Intent.ACTION_VIEW, uri)
+                    finish()
+                    startActivity(intent)
                 } else {
                     Toast.makeText(
                         this,

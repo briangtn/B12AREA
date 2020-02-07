@@ -9,6 +9,8 @@ sealed class ApiRoute(var mainContext: Context) {
 
     data class Login(var email: String, var password: String, var context: Context) : ApiRoute(context)
     data class Register(var email: String, var password: String, var redirectUrl: String, var context: Context) : ApiRoute(context)
+    data class OAuth2(var service: String, var redirectUrl: String, var context: Context) : ApiRoute(context)
+    data class DataCode(var code: String, var context: Context) : ApiRoute(context)
     data class Validate(var token: String, var context: Context) : ApiRoute(context)
     data class ReadinessProbe(var context: Context) : ApiRoute(context)
 
@@ -32,6 +34,8 @@ sealed class ApiRoute(var mainContext: Context) {
             return "$baseUrl/${when (this@ApiRoute) {
                 is Login -> "users/login"
                 is Register -> "users/register"
+                is OAuth2 -> "users/serviceLogin/${service}"
+                is DataCode -> "data-code/${code}"
                 is Validate -> "users/validate"
                 is ReadinessProbe -> "readinessProbe"
                 else -> ""
@@ -53,10 +57,10 @@ sealed class ApiRoute(var mainContext: Context) {
         get() {
             return when (this) {
                 is Login -> {
-                    hashMapOf(Pair("email", this.email), Pair("password", this.password))
+                    hashMapOf(Pair("email", email), Pair("password", password))
                 }
                 is Register -> {
-                    hashMapOf(Pair("email", this.email), Pair("password", this.password))
+                    hashMapOf(Pair("email", email), Pair("password", password))
                 }
                 else -> hashMapOf()
             }
@@ -66,10 +70,13 @@ sealed class ApiRoute(var mainContext: Context) {
         get() {
             return when (this) {
                 is Register -> {
-                    hashMapOf(Pair("redirectURL", this.redirectUrl))
+                    hashMapOf(Pair("redirectURL", redirectUrl))
+                }
+                is OAuth2 -> {
+                    hashMapOf(Pair("redirectURL", redirectUrl))
                 }
                 is Validate -> {
-                    hashMapOf(Pair("token", this.token))
+                    hashMapOf(Pair("token", token))
                 }
                 else -> hashMapOf()
             }
