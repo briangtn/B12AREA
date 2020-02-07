@@ -213,7 +213,19 @@ export class UserController {
     @get('/serviceLogin/{serviceName}', {
         responses: {
             '200': {
-                description: 'The url where you have to redirect'
+                description: 'The url where you have to redirect',
+                content: {
+                    'application/json': {
+                        schema: {
+                            type: 'object',
+                            properties: {
+                                url: {
+                                    type: 'string',
+                                },
+                            },
+                        },
+                    },
+                },
             },
             '400': response400('Missing redirect url'),
             '404': response404('Service not found')
