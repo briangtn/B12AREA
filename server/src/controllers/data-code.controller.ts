@@ -7,7 +7,7 @@ import {response404} from './specs/doc.specs';
 
 // import {inject} from '@loopback/context';
 
-@api({basePath: '/data_code', paths: {}})
+@api({basePath: '/data-code', paths: {}})
 export class DataCodeController {
     constructor(@inject('services.exchangeCodeGenerator') protected exchangeCodeGenerator: ExchangeCodeGeneratorManager) {}
 
