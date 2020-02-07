@@ -664,4 +664,74 @@ describe('/users', () => {
             expect(error.error.message).to.equal('Authorization header not found.');
         });
     });
+
+    describe('DEL /users/{id}', () => {
+        it('Should delete the user', async () => {
+            const newUser = await helper.createUser('test@b12.com', 'abcde');
+
+            const startCount = (await helper.userRepository.count()).count;
+
+            await helper.client
+                .del('/users/' + newUser.id)
+                .set('Authorization', 'Bearer ' + userToken)
+                .send()
+                .expect(200);
+
+            const usersCount = (await helper.userRepository.count()).count;
+            expect(usersCount).to.be.eql(startCount - 1);
+
+            const userWithIdCount = (await helper.userRepository.count({id: newUser.id})).count;
+            expect(userWithIdCount).to.be.eql(0);
+        });
+
+        it("Should send 404 user not found", async () => {
+            const startCount = (await helper.userRepository.count()).count;
+
+            const res = await helper.client
+                .del('/users/test')
+                .set('Authorization', 'Bearer ' + userToken)
+                .send()
+                .expect(404);
+
+            const usersCount = (await helper.userRepository.count()).count;
+            expect(usersCount).to.be.eql(startCount);
+            const error = JSON.parse(res.error.text);
+            expect(error.error.message).to.be.eql('Entity not found: User with id "test"');
+        });
+
+        it ('Should send 401 not logged in', async () => {
+            const newUser = await helper.createUser('test@b12.com', 'abcde');
+
+            const startCount = (await helper.userRepository.count()).count;
+
+            const res = await helper.client
+                .del('/users/' + newUser.id)
+                .send()
+                .expect(401);
+
+            const usersCount = (await helper.userRepository.count()).count;
+            expect(usersCount).to.be.eql(startCount);
+            const error = JSON.parse(res.error.text);
+            expect(error.error.message).to.be.eql('Authorization header not found.');
+        });
+
+        it ('Should send 401 access denied', async () => {
+            const newUser = await helper.createUser('test@b12.com', 'abcde');
+            const token = await helper.getJWT(newUser.email, 'abcde');
+
+
+            const startCount = (await helper.userRepository.count()).count;
+
+            const res = await helper.client
+                .del('/users/' + newUser.id)
+                .set('Authorization', 'Bearer ' + token)
+                .send()
+                .expect(401);
+
+            const usersCount = (await helper.userRepository.count()).count;
+            expect(usersCount).to.be.eql(startCount);
+            const error = JSON.parse(res.error.text);
+            expect(error.error.message).to.be.eql('Access denied');
+        });
+    });
 });

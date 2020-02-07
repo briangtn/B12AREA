@@ -1,4 +1,4 @@
-import {requestBody, get, post, patch, param, api, HttpErrors} from '@loopback/rest';
+import {requestBody, get, post, patch, param, api, HttpErrors, del} from '@loopback/rest';
 import {property, repository, model} from '@loopback/repository';
 import {inject, Context} from '@loopback/context';
 import {User} from '../models';
@@ -225,15 +225,14 @@ export class UserController {
             '404': response404('Service not found')
         }
     })
-    async serviceLogin(@param.path.string('serviceName') serviceName: string, @param.query.string('redirectURL') redirectURL?: string): Promise<string> {
-        if (!redirectURL) {
-            throw new HttpErrors.BadRequest('Missing redirect url');
-        }
+    async serviceLogin(
+        @param.path.string('serviceName') serviceName: string,
+        @param.query.string('redirectURL') redirectURL: string
+    ): Promise<string> {
         try {
             const module = await import('../area-auth-services/' + serviceName + '/controller');
             const controller = module.default;
-            const res = await controller.login(redirectURL, this.ctx);
-            return res;
+            return controller.login(redirectURL, this.ctx);
         } catch (e) {
             throw new HttpErrors.NotFound('Service not found');
         }
@@ -329,6 +328,32 @@ export class UserController {
         if (!user)
             throw new HttpErrors.NotFound("User not found.");
         return user;
+    }
+
+    @del('/{id}', {
+        security: OPERATION_SECURITY_SPEC,
+        responses: {
+            '200': 'OK',
+            '404': response404('User not found'),
+            '401': {
+                description: 'Unauthorized'
+            }
+        }
+    })
+    @authenticate('jwt-all')
+    @authorize({allowedRoles: ['admin']})
+    async deleteUser(
+        @param.path.string('id') id: string,
+        @inject(SecurityBindings.USER) currentUserProfile: UserProfile
+    ) {
+        const currentUser: User | undefined = await this.userRepository.findById(id);
+
+        if (!currentUser) {
+            throw new HttpErrors.NotFound('User not found')
+        }
+
+        await this.userRepository.deleteById(id);
+        return "OK";
     }
 
     @patch('/{id}', {
