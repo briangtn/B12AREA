@@ -101,7 +101,7 @@ export class AreasController {
     ) {
         const area = await this.getArea(id);
 
-        if (area === undefined)
+        if (!area)
             throw new HttpErrors.NotFound;
         await this.areaRepository.updateById(id, areaPatch);
         return this.getArea(id);
@@ -116,7 +116,7 @@ export class AreasController {
     async deleteById(@param.path.string('id') id: string): Promise<void> {
         const area = await this.getArea(id);
 
-        if (area === undefined)
+        if (!area)
             throw new HttpErrors.NotFound;
         await this.areaRepository.deleteById(id);
     }
