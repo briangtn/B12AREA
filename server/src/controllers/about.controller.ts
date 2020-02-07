@@ -17,6 +17,7 @@ class Reaction {
 
 class Service {
     name: string;
+    description: string;
     icon: string;
     color: string;
     actions: Array<Action>;
@@ -75,6 +76,7 @@ export class AboutController {
                 }
                 const config = controller.getConfig();
                 newService.name = config.displayName;
+                newService.description = config.description;
                 newService.icon = config.icon;
                 newService.color = config.color;
                 newService.actions = [];
