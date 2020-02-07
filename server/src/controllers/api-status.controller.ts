@@ -2,8 +2,9 @@ import {RestBindings, Response, get} from '@loopback/rest';
 import {inject} from '@loopback/context';
 
 
-export class ApiStatusControllerController {
-    constructor(@inject(RestBindings.Http.RESPONSE) protected response: Response) {}
+export class ApiStatusController {
+    constructor(@inject(RestBindings.Http.RESPONSE) protected response: Response) {
+    }
 
     @get('/readinessProbe', {
         responses: {
