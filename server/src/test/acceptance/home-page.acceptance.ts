@@ -1,28 +1,25 @@
-import {Client} from '@loopback/testlab';
-import {AreaApplication} from '../..';
-import {setupApplication} from './test-helper';
+import {TestHelper} from './test-helper';
 
 describe('HomePage', () => {
-    let app: AreaApplication;
-    let client: Client;
+    const helper: TestHelper = new TestHelper();
 
     before('setupApplication', async () => {
-        ({app, client} = await setupApplication());
+        await helper.initTestHelper();
     });
 
     after(async () => {
-        await app.stop();
+        await helper.stop();
     });
 
     it('exposes a default home page', async () => {
-        await client
+        await helper.client
             .get('/')
             .expect(200)
             .expect('Content-Type', /text\/html/);
     });
 
     it('exposes self-hosted explorer', async () => {
-        await client
+        await helper.client
             .get('/explorer/')
             .expect(200)
             .expect('Content-Type', /text\/html/)

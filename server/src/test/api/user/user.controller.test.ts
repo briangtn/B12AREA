@@ -1,14 +1,9 @@
-import {AreaApplication} from '../../../application';
-import {setupApplication} from '../../acceptance/test-helper';
-import { UserRepository } from '../../../repositories/user.repository';
-import { Client, expect } from '@loopback/testlab';
+import {expect} from '@loopback/testlab';
 import {User} from "../../../models";
+import {TestHelper} from "../../acceptance/test-helper";
 
 describe('/users', () => {
-    let app: AreaApplication;
-    let client: Client;
-
-    let userRepo: UserRepository;
+    const helper: TestHelper = new TestHelper();
 
     let userId: string | undefined;
     let userToken: string;
@@ -17,25 +12,23 @@ describe('/users', () => {
         password: 'test'
     };
 
-    before('setupApplication', async() => {
-        ({app, client} = await setupApplication());
-        userRepo = await app.get('repositories.UserRepository');
+    before('setupApplication', async () => {
+        await helper.initTestHelper();
     });
-    before(migrateSchema);
     beforeEach(async () => {
-        await userRepo.deleteAll();
-        const user = await createUser(userData.email, userData.password, true);
+        await helper.userRepository.deleteAll();
+        const user = await helper.createUser(userData.email, userData.password, true);
         userId = user.id;
-        userToken = await getJWT(userData.email, userData.password);
+        userToken = await helper.getJWT(userData.email, userData.password);
     });
 
     after(async () => {
-        await app.stop();
+        await helper.stop();
     });
 
     describe('POST /users/register', () => {
         it('Error when email already taken', async () => {
-            const res = await client
+            const res = await helper.client
                 .post('/users/register?redirectURL=http://localhost:8081/validate?api=http://localhost:8080')
                 .send({email: "test@test.fr", password: "p@22w0rd"})
                 .expect(409);
@@ -44,7 +37,7 @@ describe('/users', () => {
         });
 
         it('Error when email is invalid', async () => {
-            const res = await client
+            const res = await helper.client
                 .post('/users/register?redirectURL=http://localhost:8081/validate?api=http://localhost:8080')
                 .send({email: "testest.fr", password: "p@22w0rd"})
                 .expect(422);
@@ -53,7 +46,7 @@ describe('/users', () => {
         });
 
         it('Empty email', async () => {
-            const res = await client
+            const res = await helper.client
                 .post('/users/register?redirectURL=http://localhost:8081/validate?api=http://localhost:8080')
                 .send({password: "p@22w0rd"})
                 .expect(422);
@@ -62,7 +55,7 @@ describe('/users', () => {
         });
 
         it('Empty password', async () => {
-            const res = await client
+            const res = await helper.client
                 .post('/users/register?redirectURL=http://localhost:8081/validate?api=http://localhost:8080')
                 .send({email: "test@test.fr"})
                 .expect(422);
@@ -72,13 +65,13 @@ describe('/users', () => {
 
         it('Success', async () => {
             const newUser = {email: "test@area.fr", password: "p@22w0rd"};
-            const res = await client
+            const res = await helper.client
                 .post('/users/register?redirectURL=http://localhost:8081/validate?api=http://localhost:8080')
                 .send(newUser)
                 .expect(200);
             const body = res.body;
             expect(body.id).to.not.empty();
-            const dbUser: User = await userRepo.findById(body.id);
+            const dbUser: User = await helper.userRepository.findById(body.id);
             expect(dbUser.validationToken).to.not.empty();
             expect(dbUser.role).containDeep(['email_not_validated']);
             expect(dbUser.role).not.containDeep(['user']);
@@ -86,7 +79,7 @@ describe('/users', () => {
 
         it('Should fail when redirect url is not given', async () => {
             const newUser = {email: "test@area.fr", password: "p@22w0rd"};
-            const res = await client
+            const res = await helper.client
                 .post('/users/register')
                 .send(newUser)
                 .expect(400);
@@ -97,7 +90,7 @@ describe('/users', () => {
 
     describe('POST /users/login', () => {
         it('Success', async () => {
-            const res = await client
+            const res = await helper.client
                 .post('/users/login')
                 .send(userData)
                 .expect(200);
@@ -106,7 +99,7 @@ describe('/users', () => {
         });
 
         it('fails when email invalid', async () => {
-            await client
+            await helper.client
                 .post('/users/login')
                 .send({
                     email: "test@testa.fr",
@@ -116,7 +109,7 @@ describe('/users', () => {
         });
 
         it('fails when password invalid', async () => {
-            await client
+            await helper.client
                 .post('/users/login')
                 .send({
                     email: "test@test.fr",
@@ -126,7 +119,7 @@ describe('/users', () => {
         });
 
         it('fails when password and email are invalid', async () => {
-            await client
+            await helper.client
                 .post('/users/login')
                 .send({
                     email: "test@testa.fr",
@@ -136,7 +129,7 @@ describe('/users', () => {
         });
 
         it('fails when password and email are empty', async () => {
-            await client
+            await helper.client
                 .post('/users/login')
                 .send({
                     email: "",
@@ -146,7 +139,7 @@ describe('/users', () => {
         });
 
         it('fails when email is empty', async () => {
-            await client
+            await helper.client
                 .post('/users/login')
                 .send({
                     email: "",
@@ -156,7 +149,7 @@ describe('/users', () => {
         });
 
         it('fails when password is empty', async () => {
-            await client
+            await helper.client
                 .post('/users/login')
                 .send({
                     email: "test@test.fr",
@@ -168,7 +161,7 @@ describe('/users', () => {
 
     describe('POST /users/resetPassword', () => {
         it('Should create a reset password token on existing user', async () => {
-            const user = await userRepo.create({
+            const user = await helper.userRepository.create({
                 email: "test2@test.fr",
                 password: 'test2',
                 validationToken: undefined,
@@ -178,11 +171,11 @@ describe('/users', () => {
                 email: 'test2@test.fr',
                 redirectURL: 'http://localhost:8081/reset?api=http://localhost:8080'
             };
-            await client
+            await helper.client
                 .post('/users/resetPassword')
                 .send(postData)
                 .expect(200);
-            const dbUser: User = await userRepo.findById(user.id);
+            const dbUser: User = await helper.userRepository.findById(user.id);
             expect(dbUser.resetToken).to.not.empty();
             expect(dbUser.resetToken).to.not.null();
         });
@@ -191,7 +184,7 @@ describe('/users', () => {
                 email: 'test2@test.fr',
                 redirectURL: 'http://localhost:8081/reset?api=http://localhost:8080'
             };
-            await client
+            await helper.client
                 .post('/users/resetPassword')
                 .send(postData)
                 .expect(200);
@@ -200,7 +193,7 @@ describe('/users', () => {
             const postData = {
                 redirectURL: 'http://localhost:8081/reset?api=http://localhost:8080'
             };
-            await client
+            await helper.client
                 .post('/users/resetPassword')
                 .send(postData)
                 .expect(422);
@@ -209,7 +202,7 @@ describe('/users', () => {
             const postData = {
                 email: 'test2@test.fr'
             };
-            await client
+            await helper.client
                 .post('/users/resetPassword')
                 .send(postData)
                 .expect(422);
@@ -219,7 +212,7 @@ describe('/users', () => {
                 email: 'thisIsNotAnEmail',
                 redirectURL: 'http://localhost:8081/reset?api=http://localhost:8080'
             };
-            await client
+            await helper.client
                 .post('/users/resetPassword')
                 .send(postData)
                 .expect(400);
@@ -229,7 +222,7 @@ describe('/users', () => {
     describe('PATCH /users/resetPassword', () => {
         it('Should validate a reset token and change password', async () => {
             const token = 'azertyuiopqsdfghjklmwxcv';
-            const user = await userRepo.create({
+            const user = await helper.userRepository.create({
                 email: "test2@test.fr",
                 password: 'test2',
                 validationToken: undefined,
@@ -240,17 +233,17 @@ describe('/users', () => {
                 token: token,
                 password: 'newPassword'
             };
-            await client
+            await helper.client
                 .patch('/users/resetPassword')
                 .send(patchData)
                 .expect(200);
-            const dbUser: User = await userRepo.findById(user.id);
+            const dbUser: User = await helper.userRepository.findById(user.id);
             expect(dbUser.resetToken).to.be.null();
             expect(dbUser.password).to.not.equal(user.password);
         });
         it('Should raise an Not Found error on non existing token', async () => {
             const token = 'azertyuiopqsdfghjklmwxcv';
-            const user = await userRepo.create({
+            const user = await helper.userRepository.create({
                 email: "test2@test.fr",
                 password: 'test2',
                 validationToken: undefined,
@@ -261,16 +254,16 @@ describe('/users', () => {
                 token: token,
                 password: 'newPassword'
             };
-            await client
+            await helper.client
                 .patch('/users/resetPassword')
                 .send(patchData)
                 .expect(404);
-            const dbUser: User = await userRepo.findById(user.id);
+            const dbUser: User = await helper.userRepository.findById(user.id);
             expect(dbUser.password).to.equal(user.password);
         });
         it('Should raise an Not Found error on invalid token', async () => {
             const token = 'azertyuiopqsdfghjklmwxcv';
-            const user = await userRepo.create({
+            const user = await helper.userRepository.create({
                 email: "test2@test.fr",
                 password: 'test2',
                 validationToken: undefined,
@@ -281,16 +274,16 @@ describe('/users', () => {
                 token: token,
                 password: 'newPassword'
             };
-            await client
+            await helper.client
                 .patch('/users/resetPassword')
                 .send(patchData)
                 .expect(404);
-            const dbUser: User = await userRepo.findById(user.id);
+            const dbUser: User = await helper.userRepository.findById(user.id);
             expect(dbUser.password).to.equal(user.password);
         });
         it('Should raise an error on missing token', async () => {
             const token = 'azertyuiopqsdfghjklmwxcv';
-            await userRepo.create({
+            await helper.userRepository.create({
                 email: "test2@test.fr",
                 password: 'test2',
                 validationToken: undefined,
@@ -300,14 +293,14 @@ describe('/users', () => {
             const patchData = {
                 password: 'newPassword'
             };
-            await client
+            await helper.client
                 .patch('/users/resetPassword')
                 .send(patchData)
                 .expect(422);
         });
         it('Should raise an error on missing password', async () => {
             const token = 'azertyuiopqsdfghjklmwxcv';
-            await userRepo.create({
+            await helper.userRepository.create({
                 email: "test2@test.fr",
                 password: 'test2',
                 validationToken: undefined,
@@ -317,7 +310,7 @@ describe('/users', () => {
             const patchData = {
                 token: token
             };
-            await client
+            await helper.client
                 .patch('/users/resetPassword')
                 .send(patchData)
                 .expect(422);
@@ -327,19 +320,19 @@ describe('/users', () => {
     describe('PATCH /users/validate', () => {
         it('Should validate token', async () => {
             const token = 'azertyuiopqsdfghjklmwxcv';
-            await userRepo.create({
+            await helper.userRepository.create({
                 email: "test2@test.fr",
                 password: 'test2',
                 validationToken: token,
                 role: ['email_not_validated']
             });
-            const res = await client
+            const res = await helper.client
                 .patch('/users/validate?token=' + token)
                 .send({})
                 .expect(200);
             const body = res.body;
             expect(body.id).to.not.empty();
-            const dbUser: User = await userRepo.findById(body.id);
+            const dbUser: User = await helper.userRepository.findById(body.id);
             expect(dbUser.validationToken).to.be.null();
             expect(dbUser.role).containDeep(['user']);
             expect(dbUser.role).not.containDeep(['email_not_validated']);
@@ -347,13 +340,13 @@ describe('/users', () => {
 
         it('Should send 400 on empty token', async () => {
             const token = 'azertyuiopqsdfghjklmwxcv';
-            await userRepo.create({
+            await helper.userRepository.create({
                 email: "test2@test.fr",
                 password: 'test2',
                 validationToken: token,
                 role: ['email_not_validated']
             });
-            const res = await client
+            const res = await helper.client
                 .patch('/users/validate?token=')
                 .send({})
                 .expect(400);
@@ -362,13 +355,13 @@ describe('/users', () => {
         });
         it('Should send 400 on missing token', async () => {
             const token = 'azertyuiopqsdfghjklmwxcv';
-            await userRepo.create({
+            await helper.userRepository.create({
                 email: "test2@test.fr",
                 password: 'test2',
                 validationToken: token,
                 role: ['email_not_validated']
             });
-            const res = await client
+            const res = await helper.client
                 .patch('/users/validate')
                 .send({})
                 .expect(400);
@@ -378,13 +371,13 @@ describe('/users', () => {
 
         it('Should send 404 on invalid token', async () => {
             const token = 'azertyuiopqsdfghjklmwxcv';
-            await userRepo.create({
+            await helper.userRepository.create({
                 email: "test2@test.fr",
                 password: 'test2',
                 validationToken: token,
                 role: ['email_not_validated']
             });
-            const res = await client
+            const res = await helper.client
                 .patch('/users/validate?token=toto')
                 .send({})
                 .expect(404);
@@ -395,7 +388,7 @@ describe('/users', () => {
 
     describe('GET /users/{id}', () => {
         it("Should send 404 User not found.", async () => {
-            const res = await client
+            const res = await helper.client
                 .get('/users/invalidId')
                 .set('Authorization', 'Bearer ' + userToken)
                 .send()
@@ -405,9 +398,9 @@ describe('/users', () => {
         });
 
         it("Should send 401 Access denied", async () => {
-            await createUser('notadmin@notadmin.fr', 'notadmin', false);
-            const currentUserToken = await getJWT('notadmin@notadmin.fr', 'notadmin');
-            const res = await client
+            await helper.createUser('notadmin@notadmin.fr', 'notadmin', false);
+            const currentUserToken = await helper.getJWT('notadmin@notadmin.fr', 'notadmin');
+            const res = await helper.client
                 .get('/users/' + userId)
                 .set('Authorization', 'Bearer ' + currentUserToken)
                 .send()
@@ -417,7 +410,7 @@ describe('/users', () => {
         });
 
         it("Success", async () => {
-            const res = await client
+            const res = await helper.client
                 .get('/users/' + userId)
                 .set('Authorization', 'Bearer ' + userToken)
                 .send()
@@ -432,11 +425,11 @@ describe('/users', () => {
         let createdUser: User;
 
         beforeEach(async () => {
-            createdUser = await createUser('patcher@patcher.fr', 'patcher', false);
+            createdUser = await helper.createUser('patcher@patcher.fr', 'patcher', false);
         });
 
         it("Should send 404 user not found", async () => {
-            const res = await client
+            const res = await helper.client
                 .patch('/users/abcdef')
                 .set('Authorization', 'Bearer ' + userToken)
                 .send({
@@ -448,7 +441,7 @@ describe('/users', () => {
         });
 
         it('Should 409 email already in use', async () => {
-            const res = await client
+            const res = await helper.client
                 .patch('/users/' + createdUser.id)
                 .set('Authorization', 'Bearer ' + userToken)
                 .send({email: "test@test.fr", password: "p@22w0rd"})
@@ -458,7 +451,7 @@ describe('/users', () => {
         });
 
         it('Should send 400 invalid email', async () => {
-            const res = await client
+            const res = await helper.client
                 .patch('/users/' + createdUser.id)
                 .set('Authorization', 'Bearer ' + userToken)
                 .send({email: "testtest.fr", password: "p@22w0rd"})
@@ -468,9 +461,9 @@ describe('/users', () => {
         });
 
         it('Should send 401 Unauthorized (Role is not admin)', async () => {
-            await createUser('notadmin@notadmin.fr', 'notadmin', false);
-            const currentUserToken = await getJWT('notadmin@notadmin.fr', 'notadmin');
-            const res = await client
+            await helper.createUser('notadmin@notadmin.fr', 'notadmin', false);
+            const currentUserToken = await helper.getJWT('notadmin@notadmin.fr', 'notadmin');
+            const res = await helper.client
                 .patch('/users/' + createdUser.id)
                 .set('Authorization', 'Bearer ' + currentUserToken)
                 .send({email: "test@test.fr", password: "p@22w0rd"})
@@ -480,21 +473,21 @@ describe('/users', () => {
         });
 
         it('Should edit the user password', async () => {
-            const res = await client
+            const res = await helper.client
                 .patch('/users/' + createdUser.id)
                 .set('Authorization', 'Bearer ' + userToken)
                 .send({password: "p@22w0rd"})
                 .expect(200);
             const body = res.body;
             expect(body.id).to.not.empty();
-            const dbUser: User = await userRepo.findById(body.id);
+            const dbUser: User = await helper.userRepository.findById(body.id);
             expect(dbUser.role).not.containDeep(['email_not_validated']);
             expect(dbUser.role).containDeep(['user']);
         });
 
         it('Should disable user 2FA', async () => {
-            await userRepo.updateById(createdUser.id, {twoFactorAuthenticationEnabled: true});
-            const res = await client
+            await helper.userRepository.updateById(createdUser.id, {twoFactorAuthenticationEnabled: true});
+            const res = await helper.client
                 .patch('/users/' + createdUser.id)
                 .set('Authorization', 'Bearer ' + userToken)
                 .send({disable2FA: true})
@@ -502,12 +495,12 @@ describe('/users', () => {
             const body = res.body;
             expect(body.id).to.not.empty();
             expect(body.twoFactorAuthenticationEnabled).to.equal(false);
-            const dbUser: User = await userRepo.findById(body.id);
+            const dbUser: User = await helper.userRepository.findById(body.id);
             expect(dbUser.twoFactorAuthenticationEnabled).containDeep(false);
         });
 
         it('Should edit user email', async () => {
-            const res = await client
+            const res = await helper.client
                 .patch('/users/' + createdUser.id)
                 .set('Authorization', 'Bearer ' + userToken)
                 .send({email: 'yolo@yolo.fr'})
@@ -515,21 +508,21 @@ describe('/users', () => {
             const body = res.body;
             expect(body.id).to.not.empty();
             expect(body.email).to.equal('yolo@yolo.fr');
-            const dbUser: User = await userRepo.findById(body.id);
+            const dbUser: User = await helper.userRepository.findById(body.id);
             expect(dbUser.email).to.equal('yolo@yolo.fr');
             expect(dbUser.role).not.containDeep(['email_not_validated']);
             expect(dbUser.role).containDeep(['user']);
         });
 
         it('Should edit user roles', async () => {
-            const res = await client
+            const res = await helper.client
                 .patch('/users/' + createdUser.id)
                 .set('Authorization', 'Bearer ' + userToken)
                 .send({role: ['user', 'admin']})
                 .expect(200);
             const body = res.body;
             expect(body.id).to.not.empty();
-            const dbUser: User = await userRepo.findById(body.id);
+            const dbUser: User = await helper.userRepository.findById(body.id);
             expect(dbUser.role).containDeep(['user', 'admin']);
         });
     });
@@ -538,11 +531,11 @@ describe('/users', () => {
         let createdUser: User;
 
         beforeEach(async () => {
-            createdUser = await createUser('patcher@patcher.fr', 'patcher');
+            createdUser = await helper.createUser('patcher@patcher.fr', 'patcher', false);
         });
 
         it('Should send 409 email already in use', async () => {
-            const res = await client
+            const res = await helper.client
                 .patch('/users/me')
                 .set('Authorization', 'Bearer ' + userToken)
                 .send({email: createdUser.email, password: "p@22w0rd"})
@@ -552,7 +545,7 @@ describe('/users', () => {
         });
 
         it('Should send 400 invalid email', async () => {
-            const res = await client
+            const res = await helper.client
                 .patch('/users/me')
                 .set('Authorization', 'Bearer ' + userToken)
                 .send({email: "testtest.fr", password: "p@22w0rd"})
@@ -562,7 +555,7 @@ describe('/users', () => {
         });
 
         it('Should send 400 missing redirect url', async () => {
-            const res = await client
+            const res = await helper.client
                 .patch('/users/me')
                 .set('Authorization', 'Bearer ' + userToken)
                 .send({email: "moi@moi.fr", password: "p@22w0rd"})
@@ -572,7 +565,7 @@ describe('/users', () => {
         });
 
         it('Should send 401 not allowed to edit your own roles', async () => {
-            const res = await client
+            const res = await helper.client
                 .patch('/users/me')
                 .set('Authorization', 'Bearer ' + userToken)
                 .send({role: ['user']})
@@ -582,21 +575,21 @@ describe('/users', () => {
         });
 
         it('Should edit my password', async () => {
-            const res = await client
+            const res = await helper.client
                 .patch('/users/me')
                 .set('Authorization', 'Bearer ' + userToken)
                 .send({password: "p@22w0rd"})
                 .expect(200);
             const body = res.body;
             expect(body.id).to.not.empty();
-            const dbUser: User = await userRepo.findById(body.id);
+            const dbUser: User = await helper.userRepository.findById(body.id);
             expect(dbUser.role).not.containDeep(['email_not_validated']);
             expect(dbUser.role).containDeep(['user', 'admin']);
         });
 
         it('Should disable 2FA', async () => {
-            await userRepo.updateById(createdUser.id, {twoFactorAuthenticationEnabled: true});
-            const res = await client
+            await helper.userRepository.updateById(createdUser.id, {twoFactorAuthenticationEnabled: true});
+            const res = await helper.client
                 .patch('/users/me')
                 .set('Authorization', 'Bearer ' + userToken)
                 .send({disable2FA: true})
@@ -604,12 +597,12 @@ describe('/users', () => {
             const body = res.body;
             expect(body.id).to.not.empty();
             expect(body.twoFactorAuthenticationEnabled).to.equal(false);
-            const dbUser: User = await userRepo.findById(body.id);
+            const dbUser: User = await helper.userRepository.findById(body.id);
             expect(dbUser.twoFactorAuthenticationEnabled).containDeep(false);
         });
 
         it('Should edit my email', async () => {
-            const res = await client
+            const res = await helper.client
                 .patch('/users/me?redirectURL=http://localhost:8080')
                 .set('Authorization', 'Bearer ' + userToken)
                 .send({email: 'yolo@yolo.fr'})
@@ -617,7 +610,7 @@ describe('/users', () => {
             const body = res.body;
             expect(body.id).to.not.empty();
             expect(body.email).to.equal('yolo@yolo.fr');
-            const dbUser: User = await userRepo.findById(body.id);
+            const dbUser: User = await helper.userRepository.findById(body.id);
             expect(dbUser.email).to.equal('yolo@yolo.fr');
             expect(dbUser.role).containDeep(['email_not_validated', 'admin']);
             expect(dbUser.role).not.containDeep(['user']);
@@ -626,96 +619,71 @@ describe('/users', () => {
 
     describe('DEL /users/{id}', () => {
         it('Should delete the user', async () => {
-            const newUser = await createUser('test@b12.com', 'abcde');
+            const newUser = await helper.createUser('test@b12.com', 'abcde');
 
-            const startCount = (await userRepo.count()).count;
+            const startCount = (await helper.userRepository.count()).count;
 
-            await client
+            await helper.client
                 .del('/users/' + newUser.id)
                 .set('Authorization', 'Bearer ' + userToken)
                 .send()
                 .expect(200);
 
-            const usersCount = (await userRepo.count()).count;
+            const usersCount = (await helper.userRepository.count()).count;
             expect(usersCount).to.be.eql(startCount - 1);
 
-            const userWithIdCount = (await userRepo.count({id: newUser.id})).count;
+            const userWithIdCount = (await helper.userRepository.count({id: newUser.id})).count;
             expect(userWithIdCount).to.be.eql(0);
         });
 
         it("Should send 404 user not found", async () => {
-            const startCount = (await userRepo.count()).count;
+            const startCount = (await helper.userRepository.count()).count;
 
-            const res = await client
+            const res = await helper.client
                 .del('/users/test')
                 .set('Authorization', 'Bearer ' + userToken)
                 .send()
                 .expect(404);
 
-            const usersCount = (await userRepo.count()).count;
+            const usersCount = (await helper.userRepository.count()).count;
             expect(usersCount).to.be.eql(startCount);
             const error = JSON.parse(res.error.text);
             expect(error.error.message).to.be.eql('Entity not found: User with id "test"');
         });
 
         it ('Should send 401 not logged in', async () => {
-            const newUser = await createUser('test@b12.com', 'abcde');
+            const newUser = await helper.createUser('test@b12.com', 'abcde');
 
-            const startCount = (await userRepo.count()).count;
+            const startCount = (await helper.userRepository.count()).count;
 
-            const res = await client
+            const res = await helper.client
                 .del('/users/' + newUser.id)
                 .send()
                 .expect(401);
 
-            const usersCount = (await userRepo.count()).count;
+            const usersCount = (await helper.userRepository.count()).count;
             expect(usersCount).to.be.eql(startCount);
             const error = JSON.parse(res.error.text);
             expect(error.error.message).to.be.eql('Authorization header not found.');
         });
 
         it ('Should send 401 access denied', async () => {
-            const newUser = await createUser('test@b12.com', 'abcde');
-            const token = await getJWT(newUser.email, 'abcde');
+            const newUser = await helper.createUser('test@b12.com', 'abcde');
+            const token = await helper.getJWT(newUser.email, 'abcde');
 
 
-            const startCount = (await userRepo.count()).count;
+            const startCount = (await helper.userRepository.count()).count;
 
-            const res = await client
+            const res = await helper.client
                 .del('/users/' + newUser.id)
                 .set('Authorization', 'Bearer ' + token)
                 .send()
                 .expect(401);
 
-            const usersCount = (await userRepo.count()).count;
+            const usersCount = (await helper.userRepository.count()).count;
             expect(usersCount).to.be.eql(startCount);
             const error = JSON.parse(res.error.text);
             expect(error.error.message).to.be.eql('Access denied');
         });
     });
-
-    async function migrateSchema() {
-        await app.migrateSchema();
-    }
-
-    async function createUser(email: string, password: string, isAdmin = false) {
-        const user = await client
-            .post('/users/register?redirectURL=http://localhost:8081/validate?api=http://localhost:8080')
-            .send({email, password})
-            .expect(200);
-        const roles = ['user'];
-        if (isAdmin)
-            roles.push('admin');
-        await userRepo.updateById(user.body.id, {role: roles});
-        return userRepo.findById(user.body.id);
-    }
-
-    async function getJWT(email: string, password: string) {
-        const res = await client
-            .post('/users/login')
-            .send({email, password})
-            .expect(200);
-        const body = res.body;
-        return body.token;
-    }
 });
