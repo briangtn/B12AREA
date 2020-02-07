@@ -624,6 +624,76 @@ describe('/users', () => {
         });
     });
 
+    describe('DEL /users/{id}', () => {
+        it('Should delete the user', async () => {
+            const newUser = await createUser('test@b12.com', 'abcde');
+
+            const startCount = (await userRepo.count()).count;
+
+            await client
+                .del('/users/' + newUser.id)
+                .set('Authorization', 'Bearer ' + userToken)
+                .send()
+                .expect(200);
+
+            const usersCount = (await userRepo.count()).count;
+            expect(usersCount).to.be.eql(startCount - 1);
+
+            const userWithIdCount = (await userRepo.count({id: newUser.id})).count;
+            expect(userWithIdCount).to.be.eql(0);
+        });
+
+        it("Should send 404 user not found", async () => {
+            const startCount = (await userRepo.count()).count;
+
+            const res = await client
+                .del('/users/test')
+                .set('Authorization', 'Bearer ' + userToken)
+                .send()
+                .expect(404);
+
+            const usersCount = (await userRepo.count()).count;
+            expect(usersCount).to.be.eql(startCount);
+            const error = JSON.parse(res.error.text);
+            expect(error.error.message).to.be.eql('Entity not found: User with id "test"');
+        });
+
+        it ('Should send 401 not logged in', async () => {
+            const newUser = await createUser('test@b12.com', 'abcde');
+
+            const startCount = (await userRepo.count()).count;
+
+            const res = await client
+                .del('/users/' + newUser.id)
+                .send()
+                .expect(401);
+
+            const usersCount = (await userRepo.count()).count;
+            expect(usersCount).to.be.eql(startCount);
+            const error = JSON.parse(res.error.text);
+            expect(error.error.message).to.be.eql('Authorization header not found.');
+        });
+
+        it ('Should send 401 access denied', async () => {
+            const newUser = await createUser('test@b12.com', 'abcde');
+            const token = await getJWT(newUser.email, 'abcde');
+
+
+            const startCount = (await userRepo.count()).count;
+
+            const res = await client
+                .del('/users/' + newUser.id)
+                .set('Authorization', 'Bearer ' + token)
+                .send()
+                .expect(401);
+
+            const usersCount = (await userRepo.count()).count;
+            expect(usersCount).to.be.eql(startCount);
+            const error = JSON.parse(res.error.text);
+            expect(error.error.message).to.be.eql('Access denied');
+        });
+    });
+
     async function migrateSchema() {
         await app.migrateSchema();
     }
