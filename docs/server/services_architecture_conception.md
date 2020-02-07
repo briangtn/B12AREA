@@ -48,13 +48,15 @@ This controller must have a login method and can be used as a [loopback 4 contro
 
 *For this example we gonna use twitter*
 
-This is a service who expose an authentification method and some actions and reactions
+This is a service who expose an authentication method and some actions and reactions
 
 *config.json:*
 ```json
 {
   "displayName": "Twitter",
-  "description": "Twitter is trump's favorite social network"
+  "description": "Twitter is trump's favorite social network",
+  "icon": "https://twitter.com/favicon.ico",
+  "color": "#1da1f2"
 }
 ```
 
