@@ -219,7 +219,19 @@ export class UserController {
     @get('/serviceLogin/{serviceName}', {
         responses: {
             '200': {
-                description: 'The url where you have to redirect'
+                description: 'The url where you have to redirect',
+                content: {
+                    'application/json': {
+                        schema: {
+                            type: 'object',
+                            properties: {
+                                url: {
+                                    type: 'string',
+                                },
+                            },
+                        },
+                    },
+                },
             },
             '400': response400('Missing redirect url'),
             '404': response404('Service not found')
@@ -228,11 +240,12 @@ export class UserController {
     async serviceLogin(
         @param.path.string('serviceName') serviceName: string,
         @param.query.string('redirectURL') redirectURL: string
-    ): Promise<string> {
+    ): Promise<object> {
         try {
             const module = await import('../area-auth-services/' + serviceName + '/controller');
             const controller = module.default;
-            return controller.login(redirectURL, this.ctx);
+            const res = await controller.login(redirectURL, this.ctx);
+            return {url: res};
         } catch (e) {
             throw new HttpErrors.NotFound('Service not found');
         }
