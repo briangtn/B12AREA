@@ -75,7 +75,6 @@ export default class GoogleController {
                             }, true);
                             this.response.redirect(dataWithUrl.url + '?code=' + responseCode);
                         } catch (e) {
-
                             console.log(e);
                             reject(e);
                         }
