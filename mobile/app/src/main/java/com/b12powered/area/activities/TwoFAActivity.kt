@@ -12,8 +12,18 @@ import com.b12powered.area.R
 import com.b12powered.area.api.ApiClient
 import kotlinx.android.synthetic.main.activity_two_fa.*
 
+/**
+ * The activity where the user enter their 2FA code
+ *
+ * This class request the 2FA code and make an api call to validate it
+ */
 class TwoFAActivity : AppCompatActivity() {
 
+    /**
+     * Override method onCreate
+     *
+     * Set listeners to view's buttons and input fields
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_two_fa)
@@ -34,6 +44,9 @@ class TwoFAActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Check code validity. Call [validate2fa] method if code is valid, reset input field if not
+     */
     private fun submitCode() {
         val etAuthenticationCode = findViewById<EditText>(R.id.authentication_code)
 
@@ -48,6 +61,9 @@ class TwoFAActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Make a 2FA request to api, using provided [code]. If the call is successful, redirect the user to the home page, if not display a toast with the error
+     */
     private fun validate2fa(code: String) {
         ApiClient(this)
             .validate2fa(code) { user, _ ->
@@ -58,10 +74,9 @@ class TwoFAActivity : AppCompatActivity() {
                     editor.putString("jwt-token", user.token)
                     editor.apply()
 
-                    //TODO remove comment below
-/*                    val intent = Intent(this, HomePageActivity::class.java)
+                    val intent = Intent(this, HomeActivity::class.java)
                     finish()
-                    startActivity(intent)*/
+                    startActivity(intent)
                 } else {
                     val etAuthenticationCode = findViewById<EditText>(R.id.authentication_code)
 

@@ -37,8 +37,28 @@ sealed class ApiRoute(private var mainContext: Context) {
      * @param context The context of the call
      */
     data class Validate(var token: String, var context: Context) : ApiRoute(context)
+
+    /**
+     * Data class for [Activate2fa] route
+     *
+     * @param context The context of the call
+     */
     data class Activate2fa(var context: Context) : ApiRoute(context)
+
+    /**
+     * Data class for [Confirm2fa] route
+     *
+     * @param token The validation token
+     * @param context The context of the call
+     */
     data class Confirm2fa(var token: String, var context: Context) : ApiRoute(context)
+
+    /**
+     * Data class for [Validate2fa]
+     *
+     * @param token The validation token
+     * @param context The context of the call
+     */
     data class Validate2fa(var token: String, var context: Context) : ApiRoute(context)
 
     /**
@@ -47,6 +67,13 @@ sealed class ApiRoute(private var mainContext: Context) {
      * @param context The context of the call
      */
     data class ReadinessProbe(var context: Context) : ApiRoute(context)
+
+    /**
+     * Data class for [GetUser] route
+     *
+     * @param context The context of the call
+     */
+    data class GetUser(var context: Context) : ApiRoute(context)
 
     /**
      * Timeout of the api call
@@ -100,6 +127,7 @@ sealed class ApiRoute(private var mainContext: Context) {
                 is Confirm2fa -> "users/2fa/activate"
                 is Validate2fa -> "users/2fa/validate"
                 is ReadinessProbe -> "readinessProbe"
+                is GetUser -> "users/me"
                 else -> ""
             }}"
         }
@@ -199,6 +227,9 @@ sealed class ApiRoute(private var mainContext: Context) {
                     hashMapOf(Pair("Authorization", "Bearer $token"))
                 }
                 is Validate2fa -> {
+                    hashMapOf(Pair("Authorization", "Bearer $token"))
+                }
+                is GetUser -> {
                     hashMapOf(Pair("Authorization", "Bearer $token"))
                 }
                 else -> hashMapOf()

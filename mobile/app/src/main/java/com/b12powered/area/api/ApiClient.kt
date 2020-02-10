@@ -1,7 +1,6 @@
 package com.b12powered.area.api
 
 import android.content.Context
-import android.util.Log
 import com.android.volley.*
 import com.android.volley.toolbox.BasicNetwork
 import com.android.volley.toolbox.DiskBasedCache
@@ -157,6 +156,9 @@ class ApiClient(private val context: Context) {
         }
     }
 
+    /**
+     * Build a two factor authentication activation request taking no parameter and perform it, then invoke [completion] with an url used by authenticator
+     */
     fun activate2fa(completion: (url: String?, message: String) -> Unit) {
         val route = ApiRoute.Activate2fa(context)
         this.performRequest(route) { success, response ->
@@ -169,6 +171,9 @@ class ApiClient(private val context: Context) {
         }
     }
 
+    /**
+     * Build a two factor authentication confirmation request with [token] and perform it, then invoke [completion] with a User object
+     */
     fun confirm2fa(token: String, completion: (user: User?, message: String) -> Unit) {
         val route = ApiRoute.Confirm2fa(token, context)
         this.performRequest(route) { success, response ->
@@ -181,6 +186,9 @@ class ApiClient(private val context: Context) {
         }
     }
 
+    /**
+     * Build an two factor authentication validation request with [token] and perform it, then invoke [completion] with a User object
+     */
     fun validate2fa(token: String, completion: (user: User?, message: String) -> Unit) {
         val route = ApiRoute.Validate2fa(token, context)
         this.performRequest(route) { success, response ->
@@ -200,6 +208,21 @@ class ApiClient(private val context: Context) {
         val route = ApiRoute.ReadinessProbe(context)
         this.performRequest(route) { success, _ ->
             completion.invoke(success)
+        }
+    }
+
+    /**
+     * Build a getUser request taking no parameter and perform it, then invoke [completion] with a User object
+     */
+    fun getUser(completion: (user: User?, message: String) -> Unit) {
+        val route = ApiRoute.GetUser(context)
+        this.performRequest(route) { success, response ->
+            if (success) {
+                val user: User = response.json.toObject()
+                completion.invoke(user, "success")
+            } else {
+                completion.invoke(null, response.message)
+            }
         }
     }
 }
