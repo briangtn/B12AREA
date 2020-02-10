@@ -15,16 +15,11 @@ export class AreaAuthServiceService {
     async loginOrRegister(serviceName: string, email: string): Promise<string> {
         const user: User | null = await this.userRepository.findOne({where: {email}});
 
-        console.log("slt0");
         if (!user) {
-            console.log("slt");
             if (!(await this.register(serviceName, email))) {
-                console.log("slt2");
                 return this.exchangeCodeGenerator.generate({error: 'Account already exist with this email.'}, true);
             }
-            console.log("slt3");
         }
-        console.log("slt4");
         return this.exchangeCodeGenerator.generate(await this.login(serviceName, email), true);
     }
 
