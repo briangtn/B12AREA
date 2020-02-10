@@ -35,33 +35,66 @@ export default class GoogleController {
             const redirectURL = baseApiURl + '/auth-services/google/auth';
             const clientID = process.env.GOOGLE_CLIENT_ID;
             const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
-            console.log(state);
 
-            axios.post('https://www.googleapis.com/oauth2/v4/token', {
-                code,
-                // Disabled because this format is required by google api
-                // eslint-disable-next-line @typescript-eslint/camelcase
-                client_id: clientID,
-                // eslint-disable-next-line @typescript-eslint/camelcase
-                client_secret: clientSecret,
-                // eslint-disable-next-line @typescript-eslint/camelcase
-                redirect_uri: redirectURL,
-                // eslint-disable-next-line @typescript-eslint/camelcase
-                grant_type: 'authorization_code',
-            }).then((response) => {
-                this.exchangeCodeGenerator.getData(state, false, true).then((data) => {
-                    if (!data) {
-                        reject('Invalid state code');
-                    }
-                    const dataWithUrl: {url: string} = data! as {url: string};
+            this.exchangeCodeGenerator.getData(state, false, true).then((dataFromCode) => {
+                if (!dataFromCode) {
+                    reject('Invalid state code');
+                }
+                const dataWithUrl: {url: string} = dataFromCode! as {url: string};
+                if (!dataWithUrl) {
+                    reject('Invalid format for data');
+                }
+                axios.post('https://www.googleapis.com/oauth2/v4/token', {
+                    code,
+                    // Disabled because this format is required by google api
+                    // eslint-disable-next-line @typescript-eslint/camelcase
+                    client_id: clientID,
+                    // eslint-disable-next-line @typescript-eslint/camelcase
+                    client_secret: clientSecret,
+                    // eslint-disable-next-line @typescript-eslint/camelcase
+                    redirect_uri: redirectURL,
+                    // eslint-disable-next-line @typescript-eslint/camelcase
+                    grant_type: 'authorization_code',
+                }).then((response) => {
+
                     const googleAuthHeader = response.data.token_type + ' ' + response.data.access_token;
 
                     axios.get('https://openidconnect.googleapis.com/v1/userinfo', {headers: {Authorization: googleAuthHeader}}).then(async (profileReponse) => {
-                        const responseCode = await this.authenticator.loginOrRegister('google', profileReponse.data.email);
+                        try {
+                            const responseCode = await this.authenticator.loginOrRegister('google', profileReponse.data.email);
+                            this.response.redirect(dataWithUrl.url + '?code=' + responseCode);
+                        } catch (e) {
+                            console.log(e);
+                            reject(e);
+                        }
+                    }).catch(async (err) => {
+                        try {
+                            const responseCode = await this.exchangeCodeGenerator.generate({
+                                error: 'Problem when fetching google.com profile',
+                                info: err.config
+                            }, true);
+                            this.response.redirect(dataWithUrl.url + '?code=' + responseCode);
+                        } catch (e) {
+
+                            console.log(e);
+                            reject(e);
+                        }
+                    });
+                }).catch(async (err) => {
+                    try {
+                        console.log(dataFromCode);
+                        const responseCode = await this.exchangeCodeGenerator.generate({
+                            error: 'Problem when fetching google.com',
+                            info: err.config
+                        }, true);
                         this.response.redirect(dataWithUrl.url + '?code=' + responseCode);
-                    }).catch(reject);
-                }).catch(reject);
+                    } catch (e) {
+                        console.log(e);
+                        reject(e);
+                    }
+                });
             }).catch((err) => {
+                console.log(err);
                 reject(err);
             });
         })

@@ -32,6 +32,8 @@ export function ActionFunction(params: TriggerObject) {
 export interface ServiceConfig {
     displayName: string;
     description: string;
+    icon: string;
+    color: string;
 }
 
 export interface ConfigShema {
