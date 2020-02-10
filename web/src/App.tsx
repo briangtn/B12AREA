@@ -12,6 +12,7 @@ import './App.css';
 import NavigationBar from "./components/NavigationBar";
 import OrDivider from "./components/OrDivider";
 import Translator from "./components/Translator";
+import HomeCarousel from "./components/HomeCarousel";
 
 // Material UI components
 import Grid from '@material-ui/core/Grid';
@@ -79,7 +80,7 @@ const styles = (theme: Theme) => createStyles({
     hero: {
         backgroundColor: '#FFBE76',
         width: '100%',
-        minHeight: '250px',
+        minHeight: '350px',
         marginTop: theme.spacing(10),
         position: 'absolute'
     },
@@ -127,16 +128,6 @@ class App extends Component<Props, State> {
 
     render() {
         const { classes } = this.props;
-
-        const services : Array<Services> = [
-            { name: 'Twitter', icon: <TwitterIcon />, xs: 3 },
-            { name: 'Youtube', icon: <YoutubeIcon />, xs: 3 },
-            { name: 'Spotify', icon: <SpotifyIcon />, xs: 3 },
-            { name: 'Github', icon: <GitHubIcon />, xs: 3 },
-            { name: 'Teams', icon: TeamsIcon, xs: 4 },
-            { name: 'Outlook', icon: <OutlookIcon />, xs: 4 },
-            { name: 'Airtable', icon: AirtableIcon, xs: 4 },
-        ];
 
         return (
             <div>
@@ -194,16 +185,9 @@ class App extends Component<Props, State> {
                     </Grid>
                 </Grid>
                 <div className={classes.hero}>
-                    <Grid container spacing={0}>
-                        {services.map(elem => (
-                            <Grid className={classes.heroContent} item xs={elem.xs} key={elem.name}>
-                                { elem.icon }
-                                <Typography gutterBottom>
-                                    { elem.name }
-                                </Typography>
-                            </Grid>
-                        ))}
-                    </Grid>
+                    <br />
+                    <br />
+                    <HomeCarousel />
                 </div>
             </div>
         );

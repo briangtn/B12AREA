@@ -1,4 +1,4 @@
-import {requestBody, get, post, patch, param, api, HttpErrors} from '@loopback/rest';
+import {requestBody, get, post, patch, param, api, HttpErrors, del} from '@loopback/rest';
 import {property, repository, model} from '@loopback/repository';
 import {inject, Context} from '@loopback/context';
 import {User} from '../models';
@@ -19,9 +19,10 @@ import {
 } from '../services';
 import * as url from 'url';
 import {response200, response400, response401, response404, response409, response422} from './specs/doc.specs';
+import { authorize } from '@loopback/authorization';
 
 @model()
-export class NewUserRequest  {
+export class NewUserRequest {
     @property({
         type: 'string',
         required: true,
@@ -94,7 +95,7 @@ export class UpdateUserRequest {
         type: 'boolean',
         required: false
     })
-    disable2FA?: boolean
+    disable2FA?: boolean;
 
     @property({
         type: 'array',
@@ -138,8 +139,11 @@ export class UserController {
             '409': response409('Email already in use')
         }
     })
-    async register(@requestBody() userRequest: NewUserRequest, @param.query.string('redirectURL') redirectURL?: string) {
-        const normalizedUser: User = this.normalizerService.normalize(userRequest, {email: 'toLower', password: 'hash'}) as User;
+    async register(@requestBody(CredentialsRequestBody) userRequest: NewUserRequest, @param.query.string('redirectURL') redirectURL?: string) {
+        const normalizedUser: User = this.normalizerService.normalize(userRequest, {
+            email: 'toLower',
+            password: 'hash'
+        }) as User;
 
         if (!redirectURL) {
             throw new HttpErrors.BadRequest('Missing redirect URL.');
@@ -189,10 +193,13 @@ export class UserController {
     })
     async login(
         @requestBody(CredentialsRequestBody) credentials: Credentials,
-    ): Promise<{token: string, require2fa: boolean}> {
+    ): Promise<{ token: string, require2fa: boolean }> {
         if (credentials.password.length === 0)
             throw new HttpErrors.UnprocessableEntity('Empty password');
-        const normalizeCredentials: Credentials = this.normalizerService.normalize(credentials, {email: 'toLower', password: 'hash'}) as Credentials;
+        const normalizeCredentials: Credentials = this.normalizerService.normalize(credentials, {
+            email: 'toLower',
+            password: 'hash'
+        }) as Credentials;
 
         if (!normalizeCredentials)
             throw new HttpErrors.UnprocessableEntity();
@@ -212,21 +219,33 @@ export class UserController {
     @get('/serviceLogin/{serviceName}', {
         responses: {
             '200': {
-                description: 'The url where you have to redirect'
+                description: 'The url where you have to redirect',
+                content: {
+                    'application/json': {
+                        schema: {
+                            type: 'object',
+                            properties: {
+                                url: {
+                                    type: 'string',
+                                },
+                            },
+                        },
+                    },
+                },
             },
             '400': response400('Missing redirect url'),
             '404': response404('Service not found')
         }
     })
-    async serviceLogin(@param.path.string('serviceName') serviceName: string, @param.query.string('redirectURL') redirectURL?: string): Promise<string> {
-        if (!redirectURL) {
-            throw new HttpErrors.BadRequest('Missing redirect url');
-        }
+    async serviceLogin(
+        @param.path.string('serviceName') serviceName: string,
+        @param.query.string('redirectURL') redirectURL: string
+    ): Promise<object> {
         try {
             const module = await import('../area-auth-services/' + serviceName + '/controller');
             const controller = module.default;
-            const res = await controller.login(redirectURL, this.ctx);;
-            return res;
+            const res = await controller.login(redirectURL, this.ctx);
+            return {url: res};
         } catch (e) {
             throw new HttpErrors.NotFound('Service not found');
         }
@@ -312,14 +331,42 @@ export class UserController {
         }
     })
     @authenticate('jwt-all')
+    @authorize({allowedRoles: ['admin']})
     async getUser(
-        @param.path.string('id') id: string
+        @param.path.string('id') id: string,
+        @inject(SecurityBindings.USER) currentUserProfile: UserProfile,
     ) {
         const user: User | undefined = await this.userRepository.findById(id);
 
         if (!user)
             throw new HttpErrors.NotFound("User not found.");
         return user;
+    }
+
+    @del('/{id}', {
+        security: OPERATION_SECURITY_SPEC,
+        responses: {
+            '200': 'OK',
+            '404': response404('User not found'),
+            '401': {
+                description: 'Unauthorized'
+            }
+        }
+    })
+    @authenticate('jwt-all')
+    @authorize({allowedRoles: ['admin']})
+    async deleteUser(
+        @param.path.string('id') id: string,
+        @inject(SecurityBindings.USER) currentUserProfile: UserProfile
+    ) {
+        const currentUser: User | undefined = await this.userRepository.findById(id);
+
+        if (!currentUser) {
+            throw new HttpErrors.NotFound('User not found')
+        }
+
+        await this.userRepository.deleteById(id);
+        return "OK";
     }
 
     @patch('/{id}', {
@@ -333,9 +380,11 @@ export class UserController {
         }
     })
     @authenticate('jwt-all')
+    @authorize({allowedRoles: ['admin']})
     async updateUser(
         @param.path.string('id') id: string,
         @requestBody() newUser: UpdateUserRequest,
+        @inject(SecurityBindings.USER) currentUserProfile: UserProfile
     ) {
         const updatedUser: User = this.normalizerService.normalize(newUser, {email: 'toLower', password: 'hash'}) as User;
         const currentUser: User | undefined = await this.userRepository.findById(id);

@@ -17,6 +17,9 @@ class Reaction {
 
 class Service {
     name: string;
+    description: string;
+    icon: string;
+    color: string;
     actions: Array<Action>;
     reactions: Array<Reaction>;
 }
@@ -40,6 +43,7 @@ export class AboutController {
                 host: this.request.ip
             },
             server: {
+                //EPITECH MANDATORY
                 // eslint-disable-next-line @typescript-eslint/camelcase
                 current_time: Math.floor(Date.now() / 1000),
                 services: await this.parseServices()
@@ -72,6 +76,9 @@ export class AboutController {
                 }
                 const config = controller.getConfig();
                 newService.name = config.displayName;
+                newService.description = config.description;
+                newService.icon = config.icon;
+                newService.color = config.color;
                 newService.actions = [];
                 newService.reactions = [];
             } catch (e){

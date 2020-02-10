@@ -14,8 +14,19 @@ import com.b12powered.area.api.ApiClient
 import com.b12powered.area.fragments.SettingsFragment
 import kotlinx.android.synthetic.main.activity_register.*
 
+
+/**
+ * The activity where the user can register to application
+ *
+ * This class check and parse registration parameters and request the api for register
+ */
 class RegisterActivity : AppCompatActivity() {
 
+    /**
+     * Override method onCreate
+     *
+     * Set listeners to view's buttons and input fields
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_register)
@@ -49,6 +60,9 @@ class RegisterActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Check register parameters validity. Call [register] method if parameters are valid, reset input fields if they are not
+     */
     private fun submitForm() {
         val etEmail = findViewById<EditText>(R.id.email)
         val etPassword = findViewById<EditText>(R.id.password)
@@ -82,6 +96,9 @@ class RegisterActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Make a login request to api, using [email] and [password]. If the call is successful, redirect the user to the confirmation page, if not display a toast with the error
+     */
     private fun register(email: String, password: String) {
         ApiClient(this)
             .register(email, password, "http://" + (System.getenv("HOST") ?: "dev.area.b12powered.com") + "/email_validation") { user, message ->
