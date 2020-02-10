@@ -33,6 +33,7 @@
                     android:pathPrefix="/email_validation" />
             </intent-filter>
         </activity>
+        <activity android:name=".activities.HomeActivity" />
         <meta-data
             android:name="preloaded_fonts"
             android:resource="@array/preloaded_fonts" />
