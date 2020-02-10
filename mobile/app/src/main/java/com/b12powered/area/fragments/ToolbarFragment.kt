@@ -11,8 +11,11 @@ import android.view.View
 import android.view.LayoutInflater
 import android.widget.ImageButton
 import android.content.Intent
-import com.b12powered.area.activities.HomeActivity
 import kotlinx.android.synthetic.main.fragment_toolbar.*
+
+import com.b12powered.area.activities.HomeActivity
+import com.b12powered.area.activities.SearchActivity
+import com.b12powered.area.activities.UserActivity
 
 class ToolbarFragment : Fragment() {
 
@@ -38,15 +41,18 @@ class ToolbarFragment : Fragment() {
         homebtnToolbar.findViewById<ImageButton>(R.id.homebtnToolbar)
 
         searchbtnToolbar.setOnClickListener {
-            println("search")
+            val intent = Intent(this@ToolbarFragment.context, SearchActivity::class.java)
+            startActivity(intent)
         }
 
         userbtnToolbar.setOnClickListener {
-            println("user")
+            val intent = Intent(this@ToolbarFragment.context, UserActivity::class.java)
+            startActivity(intent)
         }
 
         homebtnToolbar.setOnClickListener {
-            println("home")
+            val intent = Intent(this@ToolbarFragment.context, HomeActivity::class.java)
+            startActivity(intent)
         }
     }
 }

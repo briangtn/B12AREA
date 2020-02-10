@@ -34,6 +34,8 @@
             </intent-filter>
         </activity>
         <activity android:name=".activities.HomeActivity" />
+        <activity android:name=".activities.UserActivity" />
+        <activity android:name=".activities.SearchActivity" />
         <meta-data
             android:name="preloaded_fonts"
             android:resource="@array/preloaded_fonts" />
