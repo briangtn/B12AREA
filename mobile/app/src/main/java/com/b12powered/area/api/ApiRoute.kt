@@ -7,12 +7,12 @@ import com.android.volley.Request
 
 sealed class ApiRoute(var mainContext: Context) {
 
-    data class Login(var email: String, var password: String, var context: Context) : ApiRoute()
-    data class Register(var email: String, var password: String, var redirectUrl: String, var context: Context) : ApiRoute()
-    data class Validate(var token: String, var context: Context) : ApiRoute()
-    data class Activate2fa(var context: Context) : ApiRoute()
-    data class Confirm2fa(var token: String, var context: Context) : ApiRoute()
-    data class Validate2fa(var token: String, var context: Context) : ApiRoute()
+    data class Login(var email: String, var password: String, var context: Context) : ApiRoute(context)
+    data class Register(var email: String, var password: String, var redirectUrl: String, var context: Context) : ApiRoute(context)
+    data class Validate(var token: String, var context: Context) : ApiRoute(context)
+    data class Activate2fa(var context: Context) : ApiRoute(context)
+    data class Confirm2fa(var token: String, var context: Context) : ApiRoute(context)
+    data class Validate2fa(var token: String, var context: Context) : ApiRoute(context)
     data class ReadinessProbe(var context: Context) : ApiRoute(context)
 
     val timeout: Int
@@ -92,11 +92,18 @@ sealed class ApiRoute(var mainContext: Context) {
     val headers: HashMap<String, String>
         get() {
             val map: HashMap<String, String> = hashMapOf()
-            val sharedPreferences =
+            val sharedPreferences = mainContext.getSharedPreferences("com.b12powered.area", Context.MODE_PRIVATE)
+            val token = sharedPreferences.getString("jwt-token", null)
             map["Accept"] = "application/json"
             return when (this) {
                 is Activate2fa -> {
-                    hashMapOf(Pair("Authorization", "Bearer ${}"))
+                    hashMapOf(Pair("Authorization", "Bearer $token"))
+                }
+                is Confirm2fa -> {
+                    hashMapOf(Pair("Authorization", "Bearer $token"))
+                }
+                is Validate2fa -> {
+                    hashMapOf(Pair("Authorization", "Bearer $token"))
                 }
                 else -> hashMapOf()
             }

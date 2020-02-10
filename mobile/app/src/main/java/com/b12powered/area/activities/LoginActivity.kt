@@ -2,7 +2,6 @@ package com.b12powered.area.activities
 
 import android.content.Context
 import android.content.Intent
-import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.KeyEvent
@@ -89,7 +88,10 @@ class LoginActivity : AppCompatActivity() {
                         finish()
                         startActivity(intent)
                     } else {
-                        //TODO redirect to homepage
+                        //TODO remove comment below
+/*                        val intent = Intent(this, HomePageActivity::class.java)
+                        finish()
+                        startActivity(intent)*/
                     }
                 } else {
                     Toast.makeText(

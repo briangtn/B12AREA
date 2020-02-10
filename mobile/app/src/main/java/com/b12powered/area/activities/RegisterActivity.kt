@@ -4,18 +4,15 @@ import android.content.Context
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.provider.Settings
 import android.view.KeyEvent
 import android.view.View
 import android.view.inputmethod.InputMethodManager
-import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
 import com.b12powered.area.R
 import com.b12powered.area.api.ApiClient
 import com.b12powered.area.fragments.SettingsFragment
 import kotlinx.android.synthetic.main.activity_register.*
-import kotlinx.android.synthetic.main.fragment_settings.*
 
 class RegisterActivity : AppCompatActivity() {
 
