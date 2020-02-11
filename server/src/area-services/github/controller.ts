@@ -72,7 +72,7 @@ export default class ServiceController {
                 @param.query.string('error') error?: string
     ): Promise<void> {
         if (error || !code || !state) {
-            console.log('error', error, code, state);
+            console.error('error', error, code, state);
             return;
         }
         const stateData = await this.exchangeCodeGenerator.getData(state, false, true) as {url: string; user: UserProfile;};

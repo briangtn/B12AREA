@@ -16,7 +16,7 @@
         * /reactions
             * /tweet
                 * config.json
-                * tweet.ts
+                * controller.ts
 ---
                 
 ### /auth_services
@@ -67,11 +67,13 @@ This controller can be used as a [loopback 4 controllers](https://loopback.io/do
 It should implement the following static methods:
 ```typescript
 static async start(): Promise<void> {
-    // this function will be called on service start on time per launch
+    // this function will be called on service start on time per API launch
     // it can be used to update existing webhooks of database to current api url for example
+    // WARNING: this will NOT be called on a worker
 }
 
 static async login(params: LoginObject): Promise<string> {
+    // Will automatically be called by /services/login/{service_name}
     // should return the url to redirect to
     // at the end of redirections should redirect to params.redirectUrl with a query param 'code' that can be exchanged
 }
@@ -110,29 +112,32 @@ It should export default a `ServiceController` class.
 }
 ```
 
-*action_name.lb-controller.ts*
+*controller.ts*
 
 This controller can be used as a [loopback 4 controllers](https://loopback.io/doc/en/lb4/Controllers.html).
-It should implement the following static functions:
+It should implement the following static methods:
 ```typescript
-static async createAction(actionConfig: Object): Promise<OperationStatus> {
+static async createAction(actionConfig: Object, ctx: Context): Promise<OperationStatus> {
     // Ask for the creation of an action
     // the result of the creation should be reuturned in OperationStatus
     // actionConfig is the config given by the front end
+    // ctx is the loopback context
     // if OperationStatus.success, OperationStatus.option will be stored in db
 }
 
-static async updateAction(actionConfig: Object): Promise<OperationStatus> {
+static async updateAction(actionConfig: Object, ctx: Context): Promise<OperationStatus> {
     // Ask for the update of an action
     // the result of the update should be reuturned in OperationStatus
     // actionConfig is the config that was in database
+    // ctx is the loopback context
     // if OperationStatus.success, OperationStatus.option will be stored in db
 }
 
-static async deleteAction(actionConfig: Object): Promise<OperationStatus> {
+static async deleteAction(actionConfig: Object, ctx: Context): Promise<OperationStatus> {
     // Ask for the deletion of an action
     // the result of the deletion should be reuturned in OperationStatus
     // actionConfig is the config that was in database
+    // ctx is the loopback context
 }
 
 static async getConfig(): Promise<ActionConfig> {
@@ -156,39 +161,58 @@ It should export default a `ActionController` class.
       "name": "tweet",
       "description": "A tweet id",
       "type": "number",
-      "required": true
+      "required": true,
+      "default": 123456 //not required
     }
   ]
 }
 ```
 
-*reaction_name.ts*
+*controller.ts*
 
-This controller **IS NOT** a loopback 4 controller.
-It should implement the following static functions:
+This controller **IS NOT** a loopback 4 controller as such routes created inside this controller will **NOT** be loaded by loopback.
+It should implement the following static methods:
 ```typescript
-static async trigger(params: TriggerObject): Promise<void> {
+static async trigger(params: WorkableObject): Promise<void> {
     // Trigger this reaction
+    // WARNING: this method unlike the following methods will be called **ONLY** on the worker
+    //        : this leads to loopback not beeing initialized, you can't join the database or retrieve the loopback context
+    //        : if you need to access database data it should be done in prepareData
+    // This function should only process data and make API calls
 }
 
-static async createReaction(reactionConfig: Object): Promise<CreationStatus> {
+static async prepareData(reactionId: string, ctx: Context): Promise<object> {
+    // Fetch the data required to process a reaction of this type
+    // for example user oauth token...
+    // reactionId is the id of the reaction to prepare
+    // ctx is the loopback context
+    // the return of this function will be set in WorkableObject.reactionPreparedData and can be accessed in trigger
+
+    // this function should be as computationaly light as possible
+}
+
+
+static async createReaction(reactionConfig: Object, ctx: Context): Promise<CreationStatus> {
     // Ask for the creation of a reaction
     // the result of the creation should be reuturned in OperationStatus
     // reactionConfig is the config given by the front end
+    // ctx is the loopback context
     // if OperationStatus.success, OperationStatus.option will be stored in db
 }
 
-static async updateReaction(reactionConfig: Object): Promise<OperationStatus> {
+static async updateReaction(reactionConfig: Object, ctx: Context): Promise<OperationStatus> {
     // Ask for the update of a reaction
     // the result of the update should be reuturned in OperationStatus
     // reactionConfig is the config that was in database
+    // ctx is the loopback context
     // if OperationStatus.success, OperationStatus.option will be stored in db
 }
 
-static async deleteReaction(reactionConfig: Object): Promise<OperationStatus> {
+static async deleteReaction(reactionConfig: Object, ctx: Context): Promise<OperationStatus> {
     // Ask for the deletion of a reaction
     // the result of the deletion should be reuturned in OperationStatus
     // reactionConfig is the config that was in database
+    // ctx is the loopback context
 }
 
 static async getConfig(): Promise<ReactionConfig> {

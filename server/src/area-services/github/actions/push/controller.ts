@@ -1,23 +1,26 @@
 import {post} from "@loopback/rest";
 import {ActionConfig, ActionFunction, OperationStatus} from '../../../../services-interfaces'
 import config from './config.json';
+import {Context, inject} from "@loopback/context";
 
 export default class ActionController {
 
-    constructor() {}
+    constructor(@inject.context() private ctx: Context) {}
 
     @post('/webhook')
-    webhook() {
-        ActionFunction({
-            from: "github.push",
+    async webhook() {
+        //todo
+        await ActionFunction({
+            actionId: "TODO",//todo
             placeholders: [{
                 name: "toReplace",
                 value: "Replacement value"
             }]
-        });
+        }, this.ctx);
     }
 
-    static async createAction(actionConfig: Object): Promise<OperationStatus> {
+    static async createAction(actionConfig: Object, ctx: Context): Promise<OperationStatus> {
+        //todo
         return {
             success: true,
             error: undefined,
@@ -25,7 +28,8 @@ export default class ActionController {
         }
     }
 
-    static async updateAction(actionConfig: Object): Promise<OperationStatus> {
+    static async updateAction(actionConfig: Object, ctx: Context): Promise<OperationStatus> {
+        //todo
         return {
             success: true,
             error: undefined,
@@ -33,7 +37,8 @@ export default class ActionController {
         }
     }
 
-    static async deleteAction(actionConfig: Object): Promise<OperationStatus> {
+    static async deleteAction(actionConfig: Object, ctx: Context): Promise<OperationStatus> {
+        //todo
         return {
             success: true,
             error: undefined,

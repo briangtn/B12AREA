@@ -93,7 +93,7 @@ export class AreaApplication extends BootMixin(
     loadAreaServicesControllers() {
         fs.readdir(path.join(__dirname + '/area-services'), (err, dirs) => {
             if (err)
-                return console.log(err);
+                return console.error(err);
             for (const dirIndex in dirs) {
                 const dir = dirs[dirIndex];
                 import('./area-services/' + dir + '/controller').then(async (module) => {
@@ -106,7 +106,7 @@ export class AreaApplication extends BootMixin(
                     await module.default.start();
                     this.loadActionsControllers(dir);
                 }).catch(error => {
-                    return console.log(error);
+                    return console.error(error);
                 });
             }
         });
@@ -117,7 +117,7 @@ export class AreaApplication extends BootMixin(
 
         fs.readdir(path.join(baseDir), (err, dirs) => {
             if (err)
-                return console.log(err);
+                return console.error(err);
             for (const dirIndex in dirs) {
                 const dir = dirs[dirIndex];
                 import(baseDir + dir + '/controller').then(module => {
@@ -128,7 +128,7 @@ export class AreaApplication extends BootMixin(
 
                     this.controller(AreaActions, dir);
                 }).catch(error => {
-                    return console.log(error);
+                    return console.error(error);
                 });
             }
         });
@@ -137,7 +137,7 @@ export class AreaApplication extends BootMixin(
     loadAuthControllers() {
         fs.readdir(path.join(__dirname + '/area-auth-services'), (err, dirs) => {
             if (err)
-                return console.log(err);
+                return console.error(err);
             for (const dirIndex in dirs) {
                 const dir = dirs[dirIndex];
                 import('./area-auth-services/' + dir + '/controller').then(module => {
@@ -148,7 +148,7 @@ export class AreaApplication extends BootMixin(
 
                     this.controller(AuthServices, dir);
                 }).catch(error => {
-                    return console.log(error);
+                    return console.error(error);
                 });
             }
         });

@@ -1,12 +1,20 @@
-import {OperationStatus, ReactionConfig, TriggerObject} from "../../../../services-interfaces";
+import {OperationStatus, ReactionConfig, WorkableObject} from "../../../../services-interfaces";
 import config from './config.json';
+import {Context} from "@loopback/context";
 
 export default class ReactionController {
-    static trigger(params: TriggerObject): void {
-        console.log("Example reaction triggered from ", params.from, " with the following placeholders: ", params.placeholders);
+    static async trigger(params: WorkableObject): Promise<void> {
+        //todo
+
     }
 
-    static async createReaction(actionConfig: Object): Promise<OperationStatus> {
+    static async prepareData(reactionId: string, ctx: Context): Promise<object> {
+        //todo
+        return {};
+    }
+
+    static async createReaction(actionConfig: Object, ctx: Context): Promise<OperationStatus> {
+        //todo
         return {
             success: true,
             error: undefined,
@@ -14,7 +22,8 @@ export default class ReactionController {
         }
     }
 
-    static async updateReaction(actionConfig: Object): Promise<OperationStatus> {
+    static async updateReaction(actionConfig: Object, ctx: Context): Promise<OperationStatus> {
+        //todo
         return {
             success: true,
             error: undefined,
@@ -22,7 +31,8 @@ export default class ReactionController {
         }
     }
 
-    static async deleteReaction(actionConfig: Object): Promise<OperationStatus> {
+    static async deleteReaction(actionConfig: Object, ctx: Context): Promise<OperationStatus> {
+        //todo
         return {
             success: true,
             error: undefined,

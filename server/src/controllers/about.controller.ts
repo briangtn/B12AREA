@@ -74,7 +74,7 @@ export class AboutController {
         try {
             serviceDirs = await readdir(servicesPath);
         } catch (e) {
-            console.log(`Unable to scan directory ${servicesPath}: ${e}`);
+            console.error(`Unable to scan directory ${servicesPath}: ${e}`);
             return services;
         }
         for (const serviceName of serviceDirs) {
@@ -83,11 +83,11 @@ export class AboutController {
             try {
                 const module = await import(serviceControllerPath);
                 if (!module.default) {
-                    console.log("The service controller class is not exported as default in " + serviceName)
+                    console.error("The service controller class is not exported as default in " + serviceName)
                 }
                 const controller = module.default;
                 if (!controller.getConfig) {
-                    console.log("Static method getConfig not found in " + serviceName + " controller");
+                    console.error("Static method getConfig not found in " + serviceName + " controller");
                     continue;
                 }
                 const config = await controller.getConfig();
@@ -98,7 +98,7 @@ export class AboutController {
                 newService.actions = [];
                 newService.reactions = [];
             } catch (e){
-                console.log(`${serviceControllerPath} module not found.`);
+                console.error(`${serviceControllerPath} module not found.`);
             }
 
             const serviceActionsPath = path.join(servicesPath, serviceName, 'actions');
@@ -106,7 +106,7 @@ export class AboutController {
             try {
                 actionDirs = await readdir(serviceActionsPath);
             } catch (e) {
-                console.log(`Unable to scan directory ${serviceActionsPath}: ${e}`);
+                console.error(`Unable to scan directory ${serviceActionsPath}: ${e}`);
                 continue;
             }
             for (const actionName of actionDirs) {
@@ -115,11 +115,11 @@ export class AboutController {
                 try {
                     const module = await import(actionControllerPath);
                     if (!module.default) {
-                        console.log("The service controller class is not exported as default in " + serviceName + ' (action: ' + actionName + ')');
+                        console.error("The service controller class is not exported as default in " + serviceName + ' (action: ' + actionName + ')');
                     }
                     const controller = module.default;
                     if (!controller.getConfig) {
-                        console.log("Static method getConfig not found in " + serviceName + " controller (action: " + actionName + ')');
+                        console.error("Static method getConfig not found in " + serviceName + " controller (action: " + actionName + ')');
                         continue;
                     }
                     const config = await controller.getConfig();
@@ -129,10 +129,10 @@ export class AboutController {
                     newAction.placeholders = config.placeholders;
                 } catch (e) {
                     if (e.code !== 'MODULE_NOT_FOUND') {
-                        console.log('Error ', e.code, ' while loading ', actionControllerPath);
+                        console.error('Error ', e.code, ' while loading ', actionControllerPath);
                         continue;
                     }
-                    console.log(`ActionController could not be found in ${actionControllerPath}`);
+                    console.error(`ActionController could not be found in ${actionControllerPath}`);
                     continue;
                 }
                 newService.actions.push(newAction);
@@ -143,7 +143,7 @@ export class AboutController {
             try {
                 reactionDirs = await readdir(serviceReactionsPath);
             } catch (e) {
-                console.log(`Unable to scan directory ${serviceReactionsPath}: ${e}`);
+                console.error(`Unable to scan directory ${serviceReactionsPath}: ${e}`);
                 continue;
             }
             for (const reactionName of reactionDirs) {
@@ -153,17 +153,17 @@ export class AboutController {
                     const module = await import(reactionControllerPath);
                     const controller = module.default;
                     if (!controller)
-                        console.log("The service controller class is not exported as default in " + serviceName + ' (reaction: ' + reactionName + ')');
+                        console.error("The service controller class is not exported as default in " + serviceName + ' (reaction: ' + reactionName + ')');
                     const config = await controller.getConfig();
                     newReaction.name = config.displayName;
                     newReaction.description = config.description;
                     newReaction.configSchema = config.configSchema;
                 } catch (e) {
                     if (e.code !== 'MODULE_NOT_FOUND') {
-                        console.log('Error ', e.code, ' while loading ', reactionControllerPath);
+                        console.error('Error ', e.code, ' while loading ', reactionControllerPath);
                         continue;
                     }
-                    console.log(`ReactionController could not be found in ${reactionControllerPath}`);
+                    console.error(`ReactionController could not be found in ${reactionControllerPath}`);
                     continue;
                 }
                 newService.reactions.push(newReaction);
