@@ -28,7 +28,7 @@ Then you gonna be redirected to the `redirectURL` with a `code` query params.
 
 You can exchange this code with some data using `GET /data-code/{code}`.
 
-This data has two possible format
+This data can have two possible format
 
 ✅ *In case of success*
 ```json
