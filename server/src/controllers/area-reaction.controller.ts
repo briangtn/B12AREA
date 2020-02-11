@@ -62,7 +62,7 @@ export class AreaReactionController {
     ): Promise<Reaction> {
         const area = await this.areaRepository.findById(id);
         this.areaRepository.checkArea(area, this.user);
-
+        //todo: check if reaction exist and call the reaction create method, also assign config to the returned config / abort if unsuccessful
         return this.areaRepository.reactions(id).create(reaction);
     }
 
@@ -85,7 +85,7 @@ export class AreaReactionController {
     ): Promise<Count> {
         const area = await this.areaRepository.findById(id);
         this.areaRepository.checkArea(area, this.user);
-
+        //todo: check if reaction exist and call the reaction patch method, also assign config to the returned config / abort if unsuccessful
         return this.areaRepository.reactions(id).patch(reaction, where);
     }
 
@@ -100,7 +100,7 @@ export class AreaReactionController {
     ): Promise<Count> {
         const area = await this.areaRepository.findById(id);
         this.areaRepository.checkArea(area, this.user);
-
+        //todo: check if reaction exist and call the reaction delete method, abort if unsuccessful
         return this.areaRepository.reactions(id).delete(where);
     }
 }

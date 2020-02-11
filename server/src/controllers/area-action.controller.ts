@@ -68,6 +68,7 @@ export class AreaActionController {
 
         if (area.action)
             throw new HttpErrors.Conflict("Action already exists for this area");
+        //todo: check if action exist and call the action create method, also assign config to the returned config / abort if unsuccessful
         return this.areaRepository.action(id).create(action);
     }
 
@@ -91,7 +92,7 @@ export class AreaActionController {
     ): Promise<Count> {
         const area = await this.areaRepository.findById(id);
         this.areaRepository.checkArea(area, this.user);
-
+        //todo: check if action exist and call the action patch method, also assign config to the returned config / abort if unsuccessful
         return this.areaRepository.action(id).patch(action, where);
     }
 
@@ -107,7 +108,7 @@ export class AreaActionController {
     ): Promise<Count> {
         const area = await this.areaRepository.findById(id);
         this.areaRepository.checkArea(area, this.user);
-
+        //todo: check if action exist and call the action delete method, abort if unsuccessful
         return this.areaRepository.action(id).delete(where);
     }
 }
