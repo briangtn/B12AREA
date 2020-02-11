@@ -31,6 +31,6 @@ export default class ReactionController {
     }
 
     static getConfig(): ReactionConfig {
-        return config;
+        return config as ReactionConfig;
     }
 }

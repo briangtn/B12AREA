@@ -42,6 +42,6 @@ export default class ActionController {
     }
 
     static getConfig(): ActionConfig {
-        return config;
+        return config as ActionConfig;
     }
 }

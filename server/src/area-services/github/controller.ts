@@ -1,7 +1,7 @@
 import {LoginObject, ServiceConfig} from "../../services-interfaces";
 import config from './config.json';
 import axios from 'axios';
-import {param, post, Response, RestBindings} from "@loopback/rest";
+import {param, get, Response, RestBindings} from "@loopback/rest";
 import {inject} from "@loopback/context";
 import {ExchangeCodeGeneratorManager} from "../../services";
 import {HttpErrors} from "@loopback/rest/dist";
@@ -37,7 +37,7 @@ export default class ServiceController {
             where: {
                 userId: user.id
             }
-        });
+        }, {strictObjectIDCoercion: true});
         if (token != null) {
             const codeParam = await exchangeCodeGenerator.generate({status: 'Authenticated with github'}, true);
             return params.redirectUrl + '?code=' + codeParam;
@@ -60,16 +60,21 @@ export default class ServiceController {
         return config;
     }
 
-    @post('/oauth', {
+    @get('/oauth', {
         responses: {
             '200': {
                 description: 'OAuth received'
             }
         }
     })
-    async oauth(@param.query.string('code') code: string,
-                @param.query.string('state') state: string
+    async oauth(@param.query.string('code') code?: string,
+                @param.query.string('state') state?: string,
+                @param.query.string('error') error?: string
     ): Promise<void> {
+        if (error || !code || !state) {
+            console.log('error', error, code, state);
+            return;
+        }
         const stateData = await this.exchangeCodeGenerator.getData(state, false, true) as {url: string; user: UserProfile;};
         if (!stateData)
             throw new HttpErrors.UnprocessableEntity('State is invalid. Man in the middle?');
@@ -94,10 +99,10 @@ export default class ServiceController {
                 headers: {
                     Accept: 'application/json'
                 }
-            }) as {access_token: string, scope: string, token_type: string};
+            }) as {data: {access_token: string, scope: string, token_type: string}};
             try {
                 await this.githubTokenRepository.create({
-                    token: tokens.access_token,
+                    token: tokens.data.access_token,
                     userId: user.id
                 });
             } catch (e) {
