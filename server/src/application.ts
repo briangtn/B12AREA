@@ -96,13 +96,14 @@ export class AreaApplication extends BootMixin(
                 return console.log(err);
             for (const dirIndex in dirs) {
                 const dir = dirs[dirIndex];
-                import('./area-services/' + dir + '/controller').then(module => {
+                import('./area-services/' + dir + '/controller').then(async (module) => {
                     @api({basePath: '/services/' + dir, paths: {}})
                     class AreaServices extends module.default {
 
                     }
 
                     this.controller(AreaServices, dir);
+                    await module.default.start();
                     this.loadActionsControllers(dir);
                 }).catch(error => {
                     return console.log(error);

@@ -1,0 +1,24 @@
+{
+  "displayName": "push",
+  "description": "Triggered on a push to a repository branch. Branch pushes and repository tag pushes also trigger this action.",
+  "configSchema": [
+    {
+      "name": "owner",
+      "description": "A string that must be the owner of the repository",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "repo",
+      "description": "A string that must be the name of the repository",
+      "type": "string",
+      "required": true
+    }
+  ],
+  "placeholders": [
+    {
+      "name": "toReplace",
+      "description": "A placeholder example"
+    }
+  ]
+}

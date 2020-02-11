@@ -1,4 +1,6 @@
 import Queue from "bull";
+import {Context} from "@loopback/context";
+import {UserProfile} from "@loopback/security";
 
 export interface TriggerObject {
     from: string;
@@ -6,7 +8,9 @@ export interface TriggerObject {
 }
 
 export interface LoginObject {
+    user: UserProfile;
     redirectUrl: string;
+    ctx: Context;
 }
 
 export interface ActionFunctionType {
@@ -38,9 +42,10 @@ export interface ServiceConfig {
 
 export interface ConfigShema {
     name: string;
+    description: string;
     type: string;
     required: boolean;
-    default: number|string|boolean;
+    default?: number|string|boolean;
 }
 
 export interface Placeholder {
@@ -59,4 +64,10 @@ export interface ReactionConfig {
     displayName: string;
     description: string;
     configSchema: ConfigShema[];
+}
+
+export interface OperationStatus {
+    success: boolean;
+    error?: string;
+    options?: Object;
 }

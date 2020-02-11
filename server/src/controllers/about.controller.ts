@@ -5,14 +5,30 @@ import * as path from 'path';
 import * as util from 'util';
 const readdir = util.promisify(fs.readdir);
 
+class ConfigShema {
+    name: string;
+    description: string;
+    type: string;
+    required: boolean;
+    default?: number|string|boolean;
+}
+
+class Placeholder {
+    name: string;
+    description: string;
+}
+
 class Action {
     name: string;
     description: string;
+    configSchema: ConfigShema[];
+    placeholders: Placeholder[];
 }
 
 class Reaction {
     name: string;
     description: string;
+    configSchema: ConfigShema[];
 }
 
 class Service {
@@ -74,7 +90,7 @@ export class AboutController {
                     console.log("Static method getConfig not found in " + serviceName + " controller");
                     continue;
                 }
-                const config = controller.getConfig();
+                const config = await controller.getConfig();
                 newService.name = config.displayName;
                 newService.description = config.description;
                 newService.icon = config.icon;
@@ -106,9 +122,11 @@ export class AboutController {
                         console.log("Static method getConfig not found in " + serviceName + " controller (action: " + actionName + ')');
                         continue;
                     }
-                    const config = controller.getConfig();
+                    const config = await controller.getConfig();
                     newAction.name = config.displayName;
                     newAction.description = config.description;
+                    newAction.configSchema = config.configSchema;
+                    newAction.placeholders = config.placeholders;
                 } catch (e) {
                     if (e.code !== 'MODULE_NOT_FOUND') {
                         console.log('Error ', e.code, ' while loading ', actionControllerPath);
@@ -136,9 +154,10 @@ export class AboutController {
                     const controller = module.default;
                     if (!controller)
                         console.log("The service controller class is not exported as default in " + serviceName + ' (reaction: ' + reactionName + ')');
-                    const config = controller.getConfig();
+                    const config = await controller.getConfig();
                     newReaction.name = config.displayName;
                     newReaction.description = config.description;
+                    newReaction.configSchema = config.configSchema;
                 } catch (e) {
                     if (e.code !== 'MODULE_NOT_FOUND') {
                         console.log('Error ', e.code, ' while loading ', reactionControllerPath);

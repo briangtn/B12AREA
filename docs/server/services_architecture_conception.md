@@ -38,7 +38,7 @@ This is a service who expose an authentication method
 *controller.ts:*
 
 Controller class must be exported as default class
-This controller must have a login method and can be used as a [loopback 4 controllers](https://loopback.io/doc/en/lb4/Controllers.html)
+This controller must have a login static method and can be used as a [loopback 4 controllers](https://loopback.io/doc/en/lb4/Controllers.html)
 
 ### /services
 
@@ -64,8 +64,23 @@ This is a service who expose an authentication method and some actions and react
 
 Controller class must be exported as default class
 This controller can be used as a [loopback 4 controllers](https://loopback.io/doc/en/lb4/Controllers.html).
-It should implement the [ServiceControllerInterface](../../server/src/services-interfaces.ts) interface.
-It should export a `ServiceController` class.
+It should implement the following static methods:
+```typescript
+static async start(): Promise<void> {
+    // this function will be called on service start on time per launch
+    // it can be used to update existing webhooks of database to current api url for example
+}
+
+static async login(params: LoginObject): Promise<string> {
+    // should return the url to redirect to
+    // at the end of redirections should redirect to params.redirectUrl with a query param 'code' that can be exchanged
+}
+
+static async getConfig(): Promise<ActionConfig> {
+    // should return the config of this service
+}
+```
+It should export default a `ServiceController` class.
 
 **/{service_name}/actions/{action_name}:**
 
@@ -77,15 +92,15 @@ It should export a `ServiceController` class.
 {
   "displayName": "On tweet",
   "description": "Triggered when a tweet is posted by X",
-  "configSchema": {
-    "username": "string",
-// You can also use objects
-//  "name": {
-//    "type": "string",
-//    "required": true,
-//    "default": "Champignon"
-//  }
-  },
+  "configSchema": [
+      {
+        "name": "food",
+        "description": "A string that correspond to the type of food",
+        "type": "string",
+        "required": true,
+        "default": "Champignon" //not required
+      }
+  ],
   "placeholders": [
     {
       "name": "tweet",
@@ -98,8 +113,33 @@ It should export a `ServiceController` class.
 *action_name.lb-controller.ts*
 
 This controller can be used as a [loopback 4 controllers](https://loopback.io/doc/en/lb4/Controllers.html).
-It should implement the [ActionControllerInterface](../../server/src/services-interfaces.ts) interface.
-It should export a `ActionController` class.
+It should implement the following static functions:
+```typescript
+static async createAction(actionConfig: Object): Promise<OperationStatus> {
+    // Ask for the creation of an action
+    // the result of the creation should be reuturned in OperationStatus
+    // actionConfig is the config given by the front end
+    // if OperationStatus.success, OperationStatus.option will be stored in db
+}
+
+static async updateAction(actionConfig: Object): Promise<OperationStatus> {
+    // Ask for the update of an action
+    // the result of the update should be reuturned in OperationStatus
+    // actionConfig is the config that was in database
+    // if OperationStatus.success, OperationStatus.option will be stored in db
+}
+
+static async deleteAction(actionConfig: Object): Promise<OperationStatus> {
+    // Ask for the deletion of an action
+    // the result of the deletion should be reuturned in OperationStatus
+    // actionConfig is the config that was in database
+}
+
+static async getConfig(): Promise<ActionConfig> {
+    // Should return the action configuration
+}
+```
+It should export default a `ActionController` class.
 
 **/{service_name}/reactions/{reaction_name}:**
 
@@ -111,20 +151,48 @@ It should export a `ActionController` class.
 {
   "displayName": "Tweet",
   "description": "Tweet something with a content",
-  "configSchema": {
-    "content": "string",
-// You can also use objects
-//  "name": {
-//    "type": "string",
-//    "required": true,
-//    "default": "Champignon"
-//  }
-  }
+  "configSchema": [
+    {
+      "name": "tweet",
+      "description": "A tweet id",
+      "type": "number",
+      "required": true
+    }
+  ]
 }
 ```
 
 *reaction_name.ts*
 
 This controller **IS NOT** a loopback 4 controller.
-It should implement the [ReactionControllerInterface](../../server/src/services-interfaces.ts) interface.
-It should export a `ReactionController` class.
+It should implement the following static functions:
+```typescript
+static async trigger(params: TriggerObject): Promise<void> {
+    // Trigger this reaction
+}
+
+static async createReaction(reactionConfig: Object): Promise<CreationStatus> {
+    // Ask for the creation of a reaction
+    // the result of the creation should be reuturned in OperationStatus
+    // reactionConfig is the config given by the front end
+    // if OperationStatus.success, OperationStatus.option will be stored in db
+}
+
+static async updateReaction(reactionConfig: Object): Promise<OperationStatus> {
+    // Ask for the update of a reaction
+    // the result of the update should be reuturned in OperationStatus
+    // reactionConfig is the config that was in database
+    // if OperationStatus.success, OperationStatus.option will be stored in db
+}
+
+static async deleteReaction(reactionConfig: Object): Promise<OperationStatus> {
+    // Ask for the deletion of a reaction
+    // the result of the deletion should be reuturned in OperationStatus
+    // reactionConfig is the config that was in database
+}
+
+static async getConfig(): Promise<ReactionConfig> {
+    // Should return the reaction configuration
+}
+```
+It should export default a `ReactionController` class.

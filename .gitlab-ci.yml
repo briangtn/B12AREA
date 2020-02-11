@@ -269,6 +269,8 @@ deploy-production-api:
     - sed -i "s/__REDIS_PASSWORD__/`echo -ne ${REDIS_PASSWORD} | base64 -w 0`/" area.api.secrets.yaml
     - sed -i "s/__GOOGLE_CLIENT_ID__/`echo -ne ${PROD_GOOGLE_CLIENT_ID} | base64 -w 0`/" area.api.secrets.yaml
     - sed -i "s/__GOOGLE_CLIENT_SECRET__/`echo -ne ${PROD_GOOGLE_CLIENT_SECRET} | base64 -w 0`/" area.api.secrets.yaml
+    - sed -i "s/__GITHUB_CLIENT_ID__/`echo -ne ${PROD_GITHUB_CLIENT_ID} | base64 -w 0`/" area.api.secrets.yaml
+    - sed -i "s/__GITHUB_CLIENT_SECRET__/`echo -ne ${PROD_GITHUB_CLIENT_SECRET} | base64 -w 0`/" area.api.secrets.yaml
     - sed -i "s/__INGRESS_HOST__/${DEPLOYMENT_HOST}/" area.api.ingress.yaml
     - kubectl apply -f area.api.configmap.yaml -f area.api.secrets.yaml
     - kubectl apply -f area.api.deployment.yaml
@@ -312,6 +314,8 @@ deploy-production-worker:
     - sed -i "s/__REDIS_PASSWORD__/`echo -ne ${REDIS_PASSWORD} | base64 -w 0`/" area.worker.secrets.yaml
     - sed -i "s/__GOOGLE_CLIENT_ID__/`echo -ne ${PROD_GOOGLE_CLIENT_ID} | base64 -w 0`/" area.worker.secrets.yaml
     - sed -i "s/__GOOGLE_CLIENT_SECRET__/`echo -ne ${PROD_GOOGLE_CLIENT_SECRET} | base64 -w 0`/" area.worker.secrets.yaml
+    - sed -i "s/__GITHUB_CLIENT_ID__/`echo -ne ${PROD_GITHUB_CLIENT_ID} | base64 -w 0`/" area.worker.secrets.yaml
+    - sed -i "s/__GITHUB_CLIENT_SECRET__/`echo -ne ${PROD_GITHUB_CLIENT_SECRET} | base64 -w 0`/" area.worker.secrets.yaml
     - kubectl apply -f area.worker.configmap.yaml -f area.worker.secrets.yaml
     - kubectl apply -f area.worker.deployment.yaml
 
@@ -470,6 +474,8 @@ deploy-development-api:
     - sed -i "s/__REDIS_PASSWORD__/`echo -ne ${REDIS_PASSWORD} | base64 -w 0`/" area.api.secrets.yaml
     - sed -i "s/__GOOGLE_CLIENT_ID__/`echo -ne ${DEV_GOOGLE_CLIENT_ID} | base64 -w 0`/" area.api.secrets.yaml
     - sed -i "s/__GOOGLE_CLIENT_SECRET__/`echo -ne ${DEV_GOOGLE_CLIENT_SECRET} | base64 -w 0`/" area.api.secrets.yaml
+    - sed -i "s/__GITHUB_CLIENT_ID__/`echo -ne ${DEV_GITHUB_CLIENT_ID} | base64 -w 0`/" area.api.secrets.yaml
+    - sed -i "s/__GITHUB_CLIENT_SECRET__/`echo -ne ${DEV_GITHUB_CLIENT_SECRET} | base64 -w 0`/" area.api.secrets.yaml
     - sed -i "s/__INGRESS_HOST__/${DEPLOYMENT_HOST}/" area.api.ingress.yaml
     - kubectl apply -f area.api.configmap.yaml -f area.api.secrets.yaml
     - kubectl apply -f area.api.deployment.yaml
@@ -513,6 +519,8 @@ deploy-development-worker:
     - sed -i "s/__REDIS_PASSWORD__/`echo -ne ${REDIS_PASSWORD} | base64 -w 0`/" area.worker.secrets.yaml
     - sed -i "s/__GOOGLE_CLIENT_ID__/`echo -ne ${DEV_GOOGLE_CLIENT_ID} | base64 -w 0`/" area.worker.secrets.yaml
     - sed -i "s/__GOOGLE_CLIENT_SECRET__/`echo -ne ${DEV_GOOGLE_CLIENT_SECRET} | base64 -w 0`/" area.worker.secrets.yaml
+    - sed -i "s/__GITHUB_CLIENT_ID__/`echo -ne ${DEV_GITHUB_CLIENT_ID} | base64 -w 0`/" area.worker.secrets.yaml
+    - sed -i "s/__GITHUB_CLIENT_SECRET__/`echo -ne ${DEV_GITHUB_CLIENT_SECRET} | base64 -w 0`/" area.worker.secrets.yaml
     - kubectl apply -f area.worker.configmap.yaml -f area.worker.secrets.yaml
     - kubectl apply -f area.worker.deployment.yaml
 
