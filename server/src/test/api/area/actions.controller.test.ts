@@ -176,7 +176,8 @@ describe('/areas/{id}/action', () => {
                 .send(postAction)
                 .expect(200);
             const body = res.body;
-            console.log("Body", body);
+            expect(body).to.containDeep({serviceAction: "example.A.example"});
+            expect(body).to.containDeep({areaId: area.id!.toString()});
             expect((await actionRepo.count()).count).to.be.equal(1);
         });
 
