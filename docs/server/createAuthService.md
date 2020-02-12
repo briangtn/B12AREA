@@ -28,15 +28,23 @@ Then you gonna be redirected to the `redirectURL` with a `code` query params.
 
 You can exchange this code with some data using `GET /data-code/{code}`.
 
-This data can have two possible format
+This data can have three possible format
 
-✅ *In case of success*
+✅ *In case of success (If you didn't give a valid JWT in `Authorization` header)*
 ```json
 {
   "token": "JWT TOKEN",
   "require2fa": false
 }
 ```
+✅ *In case of success (If you give a valid JWT in `Authorization` header)*
+```json
+{
+  "message": "User is linked to the service",
+}
+```
+
+
 ❌*In case of error*
 
 🔺 *The data should be formatted like that BUT if the developper does not respect the recommandation that can have any format*
@@ -64,7 +72,10 @@ sequenceDiagram
     Note over Server,Client: If the JWT is valid he is generated
     Note over Server,Client: redirectUrl?code={code}
 
-    alt Login success
+    alt Already LoggedIn
+        Server ->> Client: 200 (An object with a message)
+        Note over Server,Client: The user have a new auth service
+    else Login success
         Server ->> Client: 200 (JWT TOKEN)
     else Login failed
         Server ->> Client: 200 (Object with error message)
