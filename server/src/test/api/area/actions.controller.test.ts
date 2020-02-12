@@ -24,6 +24,13 @@ describe('/areas/{id}/action', () => {
         }
     ];
 
+    async function createAreaAndAction() {
+        area = await helper.userRepository.areas(users[0].email).create({name: "Area1", enabled: true});
+        action = await areaRepo.action(area.id).create({
+            serviceAction: 'example.A.example',
+        });
+    }
+
     before('setupApplication', async() => {
         await helper.initTestHelper();
         actionRepo = await helper.app.get('repositories.ActionRepository');
@@ -45,10 +52,7 @@ describe('/areas/{id}/action', () => {
 
     describe('GET /areas/{id}/action', () => {
         it('Should return 200 with the action if present', async () => {
-            area = await helper.userRepository.areas(users[0].email).create({name: "Area1", enabled: true});
-            action = await areaRepo.action(area.id).create({
-                serviceAction: 'example.A.example',
-            });
+            await createAreaAndAction();
 
             const res = await helper.client
                 .get(`/areas/${area.id}/action`)
@@ -100,10 +104,7 @@ describe('/areas/{id}/action', () => {
 
     describe('DELETE /areas/{id}/action', () => {
         beforeEach(async () => {
-            area = await helper.userRepository.areas(users[0].email).create({name: "Area1", enabled: true});
-            action = await areaRepo.action(area.id).create({
-                serviceAction: 'example.A.example',
-            });
+            await createAreaAndAction();
         });
 
         it('Should return 200 on delete', async () => {
@@ -157,30 +158,87 @@ describe('/areas/{id}/action', () => {
     });
 
     describe('POST /areas/{id}/action', () => {
-        it('Should return 200 with the created action', async () => {
+        const postAction = {
+            serviceAction: "example.A.example"
+        } as Action;
 
+        beforeEach(async () => {
+            await areaRepo.deleteAll();
+            await actionRepo.deleteAll();
+            area = await helper.userRepository.areas(users[0].email).create({name: "Area1", enabled: true});
+        });
+
+        it('Should return 200 with the created action', async () => {
+            expect((await actionRepo.count()).count).to.be.equal(0);
+            const res = await helper.client
+                .post(`/areas/${area.id}/action`)
+                .set('Authorization', 'Bearer ' + users[0].token)
+                .send(postAction)
+                .expect(200);
+            const body = res.body;
+            console.log("Body", body);
+            expect((await actionRepo.count()).count).to.be.equal(1);
         });
 
         //TODO Check invalid actionType / invalid options for this action type
 
         it('Should return 409 Conflict if there is already an action', async () => {
+            action = await areaRepo.action(area.id).create({
+                serviceAction: 'example.A.example',
+            });
 
+            console.log("TEST: Area", area);
+            console.log("TEST: Action", action);
+            expect((await actionRepo.count()).count).to.be.equal(1);
+            const res = await helper.client
+                .post(`/areas/${area.id}/action`)
+                .set('Authorization', 'Bearer ' + users[0].token)
+                .send(postAction)
+                .expect(200);//TODO
+            const body = res.body;
+            console.log("Body", body);
+            expect((await actionRepo.count()).count).to.be.equal(1);
         });
 
         it('Should send 404 Not Found if the id doesn\'t match', async () => {
-
+            const res = await helper.client
+                .post(`/areas/NOT_AN_ID/action`)
+                .set('Authorization', 'Bearer ' + users[0].token)
+                .send(postAction)
+                .expect(404);
+            const error = JSON.parse(res.error.text);
+            expect(error.error.message).to.containEql('Entity not found: Area with id "NOT_AN_ID"');
         });
 
         it('Should send 404 Not Found if the area belongs to another user', async () => {
+            action = await areaRepo.action(area.id).create({
+                serviceAction: 'example.A.example',
+            });
 
+            const res = await helper.client
+                .post(`/areas/${area.id}/action`)
+                .set('Authorization', 'Bearer ' + users[1].token)
+                .send(postAction)
+                .expect(404);
+            const error = JSON.parse(res.error.text);
+            expect(error.error.message).to.containEql('Area not found');
         });
 
         it('Should send 401 Unauthorized for a request without token', async () => {
-
+            const res = await helper.client
+                .post(`/areas/${area.id}/action`)
+                .send({} as Action)
+                .expect(401);
+            const error = JSON.parse(res.error.text);
+            expect(error.error.message).to.equal('Authorization header not found.');
         });
     });
 
     describe('PATCH /areas/{id}/action', () => {
+        beforeEach(async () => {
+            await createAreaAndAction();
+        });
+
         it('Should return 200 with the patched action', async () => {
 
         });
@@ -196,7 +254,12 @@ describe('/areas/{id}/action', () => {
         });
 
         it('Should send 401 Unauthorized for a request without token', async () => {
-
+            const res = await helper.client
+                .patch(`/areas/${area.id}/action`)
+                .send({} as Action)
+                .expect(401);
+            const error = JSON.parse(res.error.text);
+            expect(error.error.message).to.equal('Authorization header not found.');
         });
     });
 });

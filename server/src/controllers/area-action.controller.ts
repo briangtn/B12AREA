@@ -79,6 +79,8 @@ export class AreaActionController {
         const area = await this.areaRepository.findById(id);
         this.areaRepository.checkArea(area, this.user);
 
+        console.log("Controller: Area", area);
+        console.log("Controller: Action", area.action);
         if (area.action)
             throw new HttpErrors.Conflict("Action already exists for this area");
         return this.areaRepository.action(id).create(action);

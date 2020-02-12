@@ -25,7 +25,7 @@ export class AreaRepository extends DefaultCrudRepository<Area,
     ) {
         super(Area, dataSource);
         this.action = this.createHasOneRepositoryFactoryFor('action', actionRepositoryGetter,);
-        this.registerInclusionResolver('actions', this.action.inclusionResolver);
+        this.registerInclusionResolver('action', this.action.inclusionResolver);
         this.reactions = this.createHasManyRepositoryFactoryFor('reactions', reactionRepositoryGetter,);
         this.registerInclusionResolver('reactions', this.reactions.inclusionResolver);
     }
