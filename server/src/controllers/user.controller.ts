@@ -1,4 +1,4 @@
-import {requestBody, get, post, patch, param, api, HttpErrors, getModelSchemaRef, getFilterSchemaFor, del} from '@loopback/rest';
+import {requestBody, get, post, patch, param, api, HttpErrors, getModelSchemaRef, getFilterSchemaFor, del, RestBindings, Request} from '@loopback/rest';
 import {property, repository, model, Filter} from '@loopback/repository';
 import {inject, Context} from '@loopback/context';
 import {User} from '../models';
@@ -125,6 +125,9 @@ export class UserController {
 
         @inject('services.2fa')
         protected twoFactorAuthenticationService: TwoFactorAuthenticationManager,
+
+        @inject(RestBindings.Http.REQUEST)
+        public request: Request,
 
         @inject.context() private ctx: Context
     ) {}
@@ -261,12 +264,31 @@ export class UserController {
     })
     async serviceLogin(
         @param.path.string('serviceName') serviceName: string,
-        @param.query.string('redirectURL') redirectURL: string
+        @param.query.string('redirectURL') redirectURL: string,
     ): Promise<object> {
+        if (!redirectURL) {
+            throw new HttpErrors.BadRequest("Redirect url required.");
+        }
         try {
             const module = await import('../area-auth-services/' + serviceName + '/controller');
             const controller = module.default;
-            const res = await controller.login(redirectURL, this.ctx);
+            let res = null;
+            let currentUserProfile: UserProfile | undefined;
+            try {
+                currentUserProfile = await this.userService.getUserProfile(this.request);
+            } catch (e) {
+                currentUserProfile = undefined;
+            }
+
+            if (currentUserProfile) {
+                const user: User | null = await this.userRepository.getFromUserProfile(currentUserProfile);
+                if (!user) {
+                    throw new HttpErrors.BadRequest("User not found.");
+                }
+                res = await controller.login(redirectURL, this.ctx, user.id);
+            } else {
+                res = await controller.login(redirectURL, this.ctx);
+            }
             return {url: res};
         } catch (e) {
             throw new HttpErrors.NotFound('Service not found');
