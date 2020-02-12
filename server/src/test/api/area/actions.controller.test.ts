@@ -45,7 +45,6 @@ describe('/areas/{id}/action', () => {
 
     describe('GET /areas/{id}/action', () => {
         it('Should return 200 with the action if present', async () => {
-
             area = await helper.userRepository.areas(users[0].email).create({name: "Area1", enabled: true});
             action = await areaRepo.action(area.id).create({
                 serviceAction: 'example.A.example',
@@ -100,24 +99,60 @@ describe('/areas/{id}/action', () => {
     });
 
     describe('DELETE /areas/{id}/action', () => {
-        it('Should return 204 on delete', async () => {
-
+        beforeEach(async () => {
+            area = await helper.userRepository.areas(users[0].email).create({name: "Area1", enabled: true});
+            action = await areaRepo.action(area.id).create({
+                serviceAction: 'example.A.example',
+            });
         });
 
-        it('Should return 404 if there is no action for the area', async () => {
+        it('Should return 200 on delete', async () => {
+            expect((await actionRepo.count()).count).to.be.equal(1);
+            const res = await helper.client
+                .delete(`/areas/${area.id}/action`)
+                .set('Authorization', 'Bearer ' + users[0].token)
+                .expect(200);
+            const body = res.body;
+            expect(body.count).to.be.equal(1);
+            expect((await actionRepo.count()).count).to.be.equal(0);
+        });
 
+        it('Should return 200 if there is no action for the area', async () => {
+            await actionRepo.deleteAll();
+            expect((await actionRepo.count()).count).to.be.equal(0);
+            const res = await helper.client
+                .delete(`/areas/${area.id}/action`)
+                .set('Authorization', 'Bearer ' + users[0].token)
+                .expect(200);
+            const body = res.body;
+            expect(body.count).to.be.equal(0);
+            expect((await actionRepo.count()).count).to.be.equal(0);
         });
 
         it('Should send 404 Not Found if the id doesn\'t match', async () => {
-
+            const res = await helper.client
+                .delete(`/areas/NOT_AN_ID/action`)
+                .set('Authorization', 'Bearer ' + users[0].token)
+                .expect(404);
+            const error = JSON.parse(res.error.text);
+            expect(error.error.message).to.containEql('Entity not found: Area with id "NOT_AN_ID"');
         });
 
         it('Should send 404 Not Found if the area belongs to another user', async () => {
-
+            const res = await helper.client
+                .delete(`/areas/${area.id}/action`)
+                .set('Authorization', 'Bearer ' + users[1].token)
+                .expect(404);
+            const error = JSON.parse(res.error.text);
+            expect(error.error.message).to.containEql('Area not found');
         });
 
         it('Should send 401 Unauthorized for a request without token', async () => {
-
+            const res = await helper.client
+                .delete(`/areas/${area.id}/action`)
+                .expect(401);
+            const error = JSON.parse(res.error.text);
+            expect(error.error.message).to.equal('Authorization header not found.');
         });
     });
 
