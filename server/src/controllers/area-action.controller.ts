@@ -103,11 +103,12 @@ export class AreaActionController {
         })
             action: Partial<Action>,
         @param.query.object('where', getWhereSchemaFor(Action)) where?: Where<Action>,
-    ): Promise<Count> {
+    ): Promise<Action> {
         const area = await this.areaRepository.findById(id);
         this.areaRepository.checkArea(area, this.user);
 
-        return this.areaRepository.action(id).patch(action, where);
+        await this.areaRepository.action(id).patch(action, where);
+        return this.areaRepository.action(id).get();
     }
 
     @del('/{id}/action', {

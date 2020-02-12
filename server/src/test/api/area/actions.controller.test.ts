@@ -237,21 +237,49 @@ describe('/areas/{id}/action', () => {
 
     describe('PATCH /areas/{id}/action', () => {
         beforeEach(async () => {
+            await areaRepo.deleteAll();
+            await actionRepo.deleteAll();
             await createAreaAndAction();
         });
 
-        it('Should return 200 with the patched action', async () => {
+        const patchAction = {
+            serviceAction: "example.A.examplePatched"
+        } as Action;
 
+        it('Should return 200 with the patched action', async () => {
+            expect((await actionRepo.count()).count).to.be.equal(1);
+            const res = await helper.client
+                .patch(`/areas/${area.id}/action`)
+                .set('Authorization', 'Bearer ' + users[0].token)
+                .send(patchAction)
+                .expect(200);
+            const body = res.body;
+            expect(body).to.containDeep({id: action.id!.toString()});
+            expect(body).to.containDeep({serviceAction: "example.A.examplePatched"});
+            expect(body).to.containDeep({areaId: area.id!.toString()});
+            expect((await actionRepo.count()).count).to.be.equal(1);
         });
 
         //TODO Check invalid actionType / invalid options for this action type
 
         it('Should send 404 Not Found if the id doesn\'t match', async () => {
-
+            const res = await helper.client
+                .patch(`/areas/NOT_AN_ID/action`)
+                .set('Authorization', 'Bearer ' + users[0].token)
+                .send(patchAction)
+                .expect(404);
+            const error = JSON.parse(res.error.text);
+            expect(error.error.message).to.containEql('Entity not found: Area with id "NOT_AN_ID"');
         });
 
         it('Should send 404 Not Found if the area belongs to another user', async () => {
-
+            const res = await helper.client
+                .patch(`/areas/${area.id}/action`)
+                .set('Authorization', 'Bearer ' + users[1].token)
+                .send(patchAction)
+                .expect(404);
+            const error = JSON.parse(res.error.text);
+            expect(error.error.message).to.containEql('Area not found');
         });
 
         it('Should send 401 Unauthorized for a request without token', async () => {
