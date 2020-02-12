@@ -1,10 +1,17 @@
-import {post, RequestBody, requestBody} from "@loopback/rest";
+import {param, post, requestBody} from "@loopback/rest";
 import {ActionConfig, ActionFunction, OperationStatus} from '../../../../services-interfaces'
 import config from './config.json';
 import axios from 'axios';
 import {Context, inject} from "@loopback/context";
-import {GithubTokenRepository, GithubWebhookRepository} from "../../../../repositories";
-import {GithubToken} from "../../../../models";
+import {
+    ActionRepository,
+    GithubTokenRepository,
+    GithubWebhookRepository,
+    UserRepository
+} from "../../../../repositories";
+import {Action, GithubToken, GithubWebhook} from "../../../../models";
+import {repository} from "@loopback/repository";
+import {RandomGeneratorManager} from "../../../../services";
 
 interface PushActionConfig {
     owner: string;
@@ -38,6 +45,7 @@ interface GithubCommitBody {
 }
 
 interface GithubPushHookBody {
+    zen: string;
     ref: string;
     head: string;
     before: string;
@@ -48,31 +56,103 @@ interface GithubPushHookBody {
 
 export default class ActionController {
 
-    constructor(@inject.context() private ctx: Context) {}
+    constructor(
+        @inject.context() private ctx: Context,
+        @repository(UserRepository) public userRepository: UserRepository,
+        @repository(ActionRepository) public actionRepository: ActionRepository,
+        @repository(GithubTokenRepository) public githubTokenRepository: GithubTokenRepository,
+        @repository(GithubWebhookRepository) public githubWebhookRepository: GithubWebhookRepository
+    ) {}
 
-    @post('/webhook')
-    async webhook(@requestBody() body : GithubPushHookBody) {
-        //todo
-        console.log(body);
-        /*await ActionFunction({
-            actionId: "TODO",//todo
-            placeholders: [{
-                name: "toReplace",
-                value: "Replacement value"
-            }]
-        }, this.ctx);*/
+    @post('/test/create')
+    async createHook() {
+        return ActionController.createAction('5e42bec9d7e37937ee25ffc6', {owner: 'Eldriann', repo: 'JFECS'}, this.ctx);
+    }
+
+    @post('/webhook/{webhookId}')
+    async webhook(
+        @param.path.string('webhookId') webhookId: string,
+        @requestBody() body : GithubPushHookBody
+    ) {
+        if (body.zen !== undefined) {
+            // this is the initial hook we simply ignore it
+            return;
+        }
+        let webhook : GithubWebhook | null = null;
+        try {
+            webhook = await this.githubWebhookRepository.findOne({
+                where: {
+                    hookUuid: webhookId
+                }
+            });
+        } catch (e) {
+            return { error: `Failed to process event: webhook ${webhookId}`, details: e };
+        }
+        if (!webhook) {
+            return { error: `Failed to process event: webhook ${webhookId} : webhook not found in database` };
+        }
+        let action : Action | null = null;
+        try {
+            action = await this.actionRepository.findOne({
+                where: {
+                    options: {
+                        webhookId: webhook.id
+                    }
+                }
+            }, {strictObjectIDCoercion: true});
+        } catch (e) {
+            return { error: `Failed to process event: webhook ${webhookId}`, details: e };
+        }
+        if (!action) {
+            return { error: `Failed to process event: webhook ${webhookId} : action not found in database` };
+        }
+        return ActionFunction({
+            actionId: action.id!,
+            placeholders: [
+                {
+                    name: "GitRef",
+                    value: body.ref
+                },
+                {
+                    name: "GitHead",
+                    value: body.head
+                },
+                {
+                    name: "GitBefore",
+                    value: body.before
+                },
+                {
+                    name: "GitNbCommit",
+                    value: body.size.toString()
+                },
+                {
+                    name: "GitLastCommitMessage",
+                    value: body.commits[0].message
+                },
+                {
+                    name: "GitLastCommitAuthorName",
+                    value: body.commits[0].author.name
+                },
+                {
+                    name: "GitLastCommitAuthorEmail",
+                    value: body.commits[0].author.email
+                }
+            ]
+        }, this.ctx);
     }
 
     static async createAction(userId: string, actionConfig: Object, ctx: Context): Promise<OperationStatus> {
         let githubTokenRepository : GithubTokenRepository | undefined = undefined;
         let githubWebhookRepository : GithubWebhookRepository | undefined = undefined;
+        let randomGeneratorService: RandomGeneratorManager | undefined = undefined;
         try {
             githubTokenRepository = await ctx.get('repositories.GithubTokenRepository');
             githubWebhookRepository = await ctx.get('repositories.GithubWebhookRepository');
+            randomGeneratorService = await ctx.get('services.randomGenerator');
         } catch (e) {
             return { success: false, error: "Cound not resolve repositories in given context", options: undefined, details: e };
         }
-        if (!githubWebhookRepository || !githubTokenRepository)
+        if (!githubWebhookRepository || !githubTokenRepository || !randomGeneratorService)
             return { success: false, error: "Cound not resolve repositories in given context", options: undefined };
 
         const pushActionConfig : PushActionConfig = actionConfig as PushActionConfig;
@@ -92,11 +172,28 @@ export default class ActionController {
         if (!githubToken)
             return { success: false, error: "Cound not find github token for given user: user not found or not logged to github", options: undefined };
 
+        let generatedUUID = '';
+        let generated = false;
+        while (!generated) {
+            generatedUUID = randomGeneratorService.generateRandomString(16);
+            try {
+                const hook : GithubWebhook | null = await githubWebhookRepository.findOne({
+                    where: {
+                        hookUuid: generatedUUID
+                    }
+                });
+                if (hook === null)
+                    generated = true;
+            } catch (e) {
+                generated = false;
+            }
+        }
+
         try {
             const response : { data: GithubWebhookResponse } = await axios.post('https://api.github.com/repos/' + pushActionConfig.owner + '/' + pushActionConfig.repo + '/hooks', {
                 name: 'web',
                 config: {
-                    url: `${process.env.API_URL}/services/github/actions/push/webhook`,
+                    url: `${process.env.API_URL}/services/github/actions/push/webhook/${generatedUUID}`,
                     // required by github
                     // eslint-disable-next-line @typescript-eslint/camelcase
                     content_type: 'json',
@@ -112,6 +209,7 @@ export default class ActionController {
             });
             try {
                 const githubWebhook = await githubWebhookRepository.create({
+                    hookUuid: generatedUUID,
                     owner: pushActionConfig.owner,
                     repo: pushActionConfig.repo,
                     type: response.data.type,
@@ -131,6 +229,7 @@ export default class ActionController {
                     success: true,
                     options: {
                         webhookId: githubWebhook.id,
+                        hookUuid: generatedUUID,
                         userId: userId,
                         owner: pushActionConfig.owner,
                         repo: pushActionConfig.repo

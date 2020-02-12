@@ -17,8 +17,32 @@
   ],
   "placeholders": [
     {
-      "name": "toReplace",
-      "description": "A placeholder example"
+      "name": "GitRef",
+      "description": "The full git ref that was pushed (example: 'refs/heads/master')"
+    },
+    {
+      "name": "GitHead",
+      "description": "The SHA of the most recent commit on GitRef after the push"
+    },
+    {
+      "name": "GitBefore",
+      "description": "The SHA of the most recent commit on GitRef before the push"
+    },
+    {
+      "name": "GitNbCommit",
+      "description": "The number of commits in the push"
+    },
+    {
+      "name": "GitLastCommitMessage",
+      "description": "The last commit message"
+    },
+    {
+      "name": "GitLastCommitAuthorName",
+      "description": "The last commit author name"
+    },
+    {
+      "name": "GitLastCommitAuthorEmail",
+      "description": "The last commit author email"
     }
   ]
 }
