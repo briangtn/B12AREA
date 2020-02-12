@@ -31,11 +31,8 @@ export class AreaRepository extends DefaultCrudRepository<Area,
     }
 
     checkArea(area: Area | null, user: UserProfile): void {
-        if (area === null) {
+        if (area === null || area?.ownerId !== user.email) {
             throw new HttpErrors.NotFound(`Area not found`);
-        }
-        if (area?.ownerId !== user.email) {
-            throw new HttpErrors.Unauthorized("Invalid user");
         }
     }
 }

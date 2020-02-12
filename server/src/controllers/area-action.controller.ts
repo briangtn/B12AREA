@@ -14,13 +14,13 @@ import {
     param,
     patch,
     post,
-    requestBody, RestBindings,
+    requestBody, Response, RestBindings,
 } from '@loopback/rest';
 import {
     Area,
     Action,
 } from '../models';
-import {AreaRepository} from '../repositories';
+import {ActionRepository, AreaRepository} from '../repositories';
 import {authenticate} from "@loopback/authentication";
 import {OPERATION_SECURITY_SPEC} from "../utils/security-specs";
 import {response200Schema} from "./specs/doc.specs";
@@ -28,13 +28,16 @@ import {inject} from "@loopback/context";
 import {SecurityBindings, UserProfile} from "@loopback/security";
 import {NewActionInArea} from "./specs/area.specs";
 import {HttpErrors} from "@loopback/rest/dist";
+import {constants} from "http2";
 
 @authenticate('jwt-all')
 @api({basePath: '/areas', paths: {}})
 export class AreaActionController {
     constructor(
         @repository(AreaRepository) protected areaRepository: AreaRepository,
+        @repository(ActionRepository) protected actionRepository: ActionRepository,
         @inject(SecurityBindings.USER) private user: UserProfile,
+        @inject(RestBindings.Http.RESPONSE) protected response: Response
     ) {
     }
 
@@ -50,7 +53,17 @@ export class AreaActionController {
     ): Promise<Action> {
         const area = await this.areaRepository.findById(id, filter);
         this.areaRepository.checkArea(area, this.user);
-        return this.areaRepository.action(id).get(filter);
+
+        const action = await this.actionRepository.findOne({
+            where: {
+                areaId: area.id
+            }
+        });
+        if (!action) {
+            this.response.status(constants.HTTP_STATUS_NO_CONTENT);
+            return {} as Action;
+        }
+        return action;
     }
 
     @post('/{id}/action', {
