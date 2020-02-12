@@ -16,6 +16,9 @@ const french = {
     settingsTwoFactor: "Double authentification",
     settingsEnableTwoFactor: "Activer la double authentification",
     settingsChangePassword: "Changer son mot de passe",
+    settingsChangeApi: "Changer l'adresse de l'api",
+    faActivated: "L'authentification à double facteur est déjà activée",
+    disable: "Désactiver",
     troubleToScan: "Vous rencontrez des soucis avec le QR Code ?",
     yourKey: "Votre clé:"
 };

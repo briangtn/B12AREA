@@ -18,7 +18,8 @@ interface State {
     open: boolean,
     fakey: string,
     qrcode: string,
-    fasecret: string | null
+    fasecret: string | null,
+    alreadyActivated: boolean
 }
 
 interface Props {
@@ -45,7 +46,8 @@ class TwoFactorAuthentication extends Component<Props, State> {
         open: false,
         fakey: '',
         qrcode: '',
-        fasecret: ''
+        fasecret: '',
+        alreadyActivated: false
     }
 
     onChange: React.ChangeEventHandler<HTMLInputElement> = (e) => {
@@ -109,9 +111,35 @@ class TwoFactorAuthentication extends Component<Props, State> {
             });
     };
 
+    disableTwoFactorAuthentication = (e: React.FormEvent) => {
+        const { api_url, token } = this.props;
+
+        fetch(`${api_url}/users/me`, {
+            method: 'PATCH',
+            body: JSON.stringify({ disable2FA: true }),
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(res => res.json())
+        .then((data) => {
+            const { email } = data;
+
+            if (email)
+                this.setState({ alreadyActivated: false });
+        })
+    };
+
+    componentDidMount() {
+        const { alreadyActivated } = this.props;
+
+        this.setState({ alreadyActivated: alreadyActivated });
+    }
+
     render() {
-        const { classes, alreadyActivated } = this.props;
-        const { fakey } = this.state;
+        const { classes } = this.props;
+        const { fakey, alreadyActivated } = this.state;
 
         if (!alreadyActivated)
             return (
@@ -164,7 +192,21 @@ class TwoFactorAuthentication extends Component<Props, State> {
                 </div>
             );
         else
-            return (<div>Already activated</div>);
+            return (
+                <div>
+                    <Typography gutterBottom>
+                        <Translator sentence="faActivated" />
+                    </Typography>
+                    <Button
+                        variant="contained"
+                        color="secondary"
+                        className={classes.field}
+                        onClick={this.disableTwoFactorAuthentication}
+                    >
+                        <Translator sentence="disable" />
+                    </Button>
+                </div>
+            );
     }
 }
 
