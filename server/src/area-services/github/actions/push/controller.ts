@@ -16,6 +16,9 @@ import {RandomGeneratorManager} from "../../../../services";
 interface PushActionConfig {
     owner: string;
     repo: string;
+    webhookId: string;
+    hookUuid: string;
+    userId: string;
 }
 
 interface GithubWebhookResponse {
@@ -67,6 +70,31 @@ export default class ActionController {
     @post('/test/create')
     async createHook() {
         return ActionController.createAction('5e42bec9d7e37937ee25ffc6', {owner: 'Eldriann', repo: 'JFECS'}, this.ctx);
+    }
+
+    @post('/test/update')
+    async updateHook() {
+        return ActionController.updateAction("", {
+            owner: 'Eldriann',
+            repo: 'JFECS',
+            webhookId: "5e446b7e79563600323bb2a7",
+            hookUuid: "lft7qtsqp3lqbrix",
+            userId: "5e42bec9d7e37937ee25ffc6",
+        }, {
+            owner: 'Eldriann',
+            repo: 'jfml',
+        }, this.ctx);
+    }
+
+    @post('/test/delete')
+    async deleteHook() {
+        return ActionController.deleteAction('', {
+            owner: 'Eldriann',
+            repo: 'JFECS',
+            webhookId: "5e442324401d2500c698b63e",
+            hookUuid: "afnewqhja8w50peu",
+            userId: "5e42bec9d7e37937ee25ffc6",
+        }, this.ctx);
     }
 
     @post('/webhook/{webhookId}')
@@ -150,14 +178,14 @@ export default class ActionController {
             githubWebhookRepository = await ctx.get('repositories.GithubWebhookRepository');
             randomGeneratorService = await ctx.get('services.randomGenerator');
         } catch (e) {
-            return { success: false, error: "Cound not resolve repositories in given context", options: undefined, details: e };
+            return { success: false, error: "Could not resolve repositories in given context", details: e };
         }
         if (!githubWebhookRepository || !githubTokenRepository || !randomGeneratorService)
-            return { success: false, error: "Cound not resolve repositories in given context", options: undefined };
+            return { success: false, error: "Could not resolve repositories in given context" };
 
         const pushActionConfig : PushActionConfig = actionConfig as PushActionConfig;
         if (pushActionConfig.owner === undefined || pushActionConfig.repo === undefined)
-            return { success: false, error: "Cound not find owner or repo in action config", options: undefined };
+            return { success: false, error: "Could not find owner or repo in action config" };
 
         let githubToken : GithubToken | null = null;
         try {
@@ -167,10 +195,10 @@ export default class ActionController {
                 }
             }, {strictObjectIDCoercion: true});
         } catch (e) {
-            return { success: false, error: "Cound not find github token for given user: user not found or not logged to github", options: undefined };
+            return { success: false, error: "Could not find github token for given user: user not found or not logged to github" };
         }
         if (!githubToken)
-            return { success: false, error: "Cound not find github token for given user: user not found or not logged to github", options: undefined };
+            return { success: false, error: "Could not find github token for given user: user not found or not logged to github" };
 
         let generatedUUID = '';
         let generated = false;
@@ -236,45 +264,109 @@ export default class ActionController {
                     }
                 }
             } catch (e) {
-                return { success: false, error: `Error while inserting webhook in database! You need to manually delete webhook id ${response.data.id} in github`, options: undefined };
+                return { success: false, error: `Error while inserting webhook in database! You need to manually delete webhook id ${response.data.id} in github` };
             }
         } catch (e) {
-            return { success: false, error: 'Error when contacting github api', options: undefined, details: { config: e.config, data: e.response.data } };
+            if (e.response && e.response.data)
+                return { success: false, error: 'Error when contacting github api', details: { config: e.config, data: e.response.data } };
+            else
+                return { success: false, error: 'Error when contacting github api', details: { config: e.config, data: {} } };
         }
     }
 
-    static async updateAction(actionId: string, actionConfig: Object, ctx: Context): Promise<OperationStatus> {
-        //todo
-        const pushActionConfig : PushActionConfig = actionConfig as PushActionConfig;
-        if (pushActionConfig.owner === undefined || pushActionConfig.repo === undefined) {
-            return {
-                success: false,
-                error: "Cound not find owner or repo in action config",
-                options: undefined
-            };
+    static async updateAction(actionId: string, oldActionConfig: Object, newActionConfig: Object, ctx: Context): Promise<OperationStatus> {
+        const oldPushActionConfig : PushActionConfig = oldActionConfig as PushActionConfig;
+        if (oldPushActionConfig.owner === undefined ||
+            oldPushActionConfig.repo === undefined ||
+            oldPushActionConfig.webhookId === undefined ||
+            oldPushActionConfig.userId === undefined ||
+            oldPushActionConfig.hookUuid === undefined) {
+            return { success: false, error: "Invalid oldActionConfig" };
         }
-        return {
-            success: true,
-            error: undefined,
-            options: {}
+        const newPushActionConfig : PushActionConfig = newActionConfig as PushActionConfig;
+        if (newPushActionConfig.owner === undefined || newPushActionConfig.repo === undefined) {
+            return { success: false, error: "Invalid newPushActionConfig" };
         }
+        if (oldPushActionConfig.owner === newPushActionConfig.owner && oldPushActionConfig.repo === newPushActionConfig.repo) {
+            return { success: true, options: oldPushActionConfig };
+        }
+        try {
+            const status = await this.deleteAction(actionId, oldPushActionConfig, ctx);
+            if (!status.success) {
+                return status;
+            }
+        } catch (e) {
+            return { success: false, error: "Failed to remove old webhook", details: e };
+        }
+        return this.createAction(oldPushActionConfig.userId, newActionConfig, ctx);
     }
 
     static async deleteAction(actionId: string, actionConfig: Object, ctx: Context): Promise<OperationStatus> {
-        //todo
+        let githubTokenRepository : GithubTokenRepository | undefined = undefined;
+        let githubWebhookRepository : GithubWebhookRepository | undefined = undefined;
+        try {
+            githubTokenRepository = await ctx.get('repositories.GithubTokenRepository');
+            githubWebhookRepository = await ctx.get('repositories.GithubWebhookRepository');
+        } catch (e) {
+            return { success: false, error: "Could not resolve repositories in given context", details: e };
+        }
+        if (!githubWebhookRepository || !githubTokenRepository)
+            return { success: false, error: "Could not resolve repositories in given context" };
         const pushActionConfig : PushActionConfig = actionConfig as PushActionConfig;
-        if (pushActionConfig.owner === undefined || pushActionConfig.repo === undefined) {
-            return {
-                success: false,
-                error: "Cound not find owner or repo in action config",
-                options: undefined
-            };
+        if (pushActionConfig.owner === undefined ||
+            pushActionConfig.repo === undefined ||
+            pushActionConfig.webhookId === undefined ||
+            pushActionConfig.userId === undefined ||
+            pushActionConfig.hookUuid === undefined) {
+            return { success: false, error: "Invalid actionConfig" };
         }
-        return {
-            success: true,
-            error: undefined,
-            options: {}
+        let webhook : GithubWebhook | null = null;
+        try {
+            webhook = await githubWebhookRepository.findOne({
+                where: {
+                    id: pushActionConfig.webhookId
+                }
+            }, {strictObjectIDCoercion: true});
+        } catch (e) {
+            return { success: false, error: "Failed to retrieve webhook", details: e };
         }
+        if (!webhook)
+            return { success: false, error: "Failed to retrieve webhook" };
+
+        let githubToken : GithubToken | null = null;
+        try {
+            githubToken = await githubTokenRepository.findOne({
+                where: {
+                    userId: pushActionConfig.userId
+                }
+            }, {strictObjectIDCoercion: true});
+        } catch (e) {
+            return { success: false, error: "Could not find github token for given user: user not found or not logged to github" };
+        }
+        if (!githubToken)
+            return { success: false, error: "Could not find github token for given user: user not found or not logged to github" };
+
+        try {
+            await axios.delete(
+                `https://api.github.com/repos/${pushActionConfig.owner}/${pushActionConfig.repo}/hooks/${webhook.githubId}`,
+                {
+                    headers: {
+                        Authorization: `token ${githubToken.token}`
+                    }
+                }
+            );
+            try {
+                await githubWebhookRepository.deleteById(webhook.id);
+            } catch (e) {
+                return { success: false, error: "Failed to delete webhook from database", details: e };
+            }
+        } catch (e) {
+            if (e.response && e.response.data)
+                return { success: false, error: 'Error when contacting github api', details: { config: e.config, data: e.response.data } };
+            else
+                return { success: false, error: 'Error when contacting github api', details: { config: e.config, data: {} } };
+        }
+        return { success: true, options: pushActionConfig }
     }
 
     static getConfig(): ActionConfig {

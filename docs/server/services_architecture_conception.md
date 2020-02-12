@@ -126,11 +126,12 @@ static async createAction(userId: string, actionConfig: Object, ctx: Context): P
     // if OperationStatus.success, OperationStatus.option will be stored in db
 }
 
-static async updateAction(actionId: string, actionConfig: Object, ctx: Context): Promise<OperationStatus> {
+static async updateAction(actionId: string, oldActionConfig: Object, newActionConfig: Object, ctx: Context): Promise<OperationStatus> {
     // Ask for the update of an action
     // the result of the update should be reuturned in OperationStatus
     // actionId is the id of the action that is beeing updated
-    // actionConfig is the config that was in database
+    // oldActionConfig is the config that was in database
+    // newActionConfig is the new config submitted by the user
     // ctx is the loopback context
     // if OperationStatus.success, OperationStatus.option will be stored in db
 }
@@ -204,11 +205,12 @@ static async createReaction(userId: string, reactionConfig: Object, ctx: Context
     // if OperationStatus.success, OperationStatus.option will be stored in db
 }
 
-static async updateReaction(reactionId: string, reactionConfig: Object, ctx: Context): Promise<OperationStatus> {
+static async updateReaction(reactionId: string, oldReactionConfig: Object, newReactionConfig: Object, ctx: Context): Promise<OperationStatus> {
     // Ask for the update of a reaction
     // the result of the update should be reuturned in OperationStatus
     // actionId is the id of the action that is beeing updated
-    // reactionConfig is the config that was in database
+    // oldReactionConfig is the config that was in database
+    // newReactionConfig is the new config submitted by the user
     // ctx is the loopback context
     // if OperationStatus.success, OperationStatus.option will be stored in db
 }

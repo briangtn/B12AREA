@@ -51,17 +51,14 @@ services:
     command: npm run worker
     restart: unless-stopped
     environment:
-      - DB_HOST=db
       - REDIS_HOST=redis
     env_file:
       - .env
     volumes:
       - ./server:/server
     networks:
-      - "db-tier"
       - "redis-tier"
     depends_on:
-      - db
       - redis
 
   db:
