@@ -13,7 +13,7 @@ export default class ReactionController {
         return {};
     }
 
-    static async createReaction(actionConfig: Object, ctx: Context): Promise<OperationStatus> {
+    static async createReaction(userId: string, actionConfig: Object, ctx: Context): Promise<OperationStatus> {
         //todo
         return {
             success: true,
@@ -22,7 +22,7 @@ export default class ReactionController {
         }
     }
 
-    static async updateReaction(actionConfig: Object, ctx: Context): Promise<OperationStatus> {
+    static async updateReaction(reactionId: string, actionConfig: Object, ctx: Context): Promise<OperationStatus> {
         //todo
         return {
             success: true,
@@ -31,7 +31,7 @@ export default class ReactionController {
         }
     }
 
-    static async deleteReaction(actionConfig: Object, ctx: Context): Promise<OperationStatus> {
+    static async deleteReaction(reactionId: string, actionConfig: Object, ctx: Context): Promise<OperationStatus> {
         //todo
         return {
             success: true,

@@ -117,25 +117,28 @@ It should export default a `ServiceController` class.
 This controller can be used as a [loopback 4 controllers](https://loopback.io/doc/en/lb4/Controllers.html).
 It should implement the following static methods:
 ```typescript
-static async createAction(actionConfig: Object, ctx: Context): Promise<OperationStatus> {
+static async createAction(userId: string, actionConfig: Object, ctx: Context): Promise<OperationStatus> {
     // Ask for the creation of an action
     // the result of the creation should be reuturned in OperationStatus
+    // userId is the user performing the request
     // actionConfig is the config given by the front end
     // ctx is the loopback context
     // if OperationStatus.success, OperationStatus.option will be stored in db
 }
 
-static async updateAction(actionConfig: Object, ctx: Context): Promise<OperationStatus> {
+static async updateAction(actionId: string, actionConfig: Object, ctx: Context): Promise<OperationStatus> {
     // Ask for the update of an action
     // the result of the update should be reuturned in OperationStatus
+    // actionId is the id of the action that is beeing updated
     // actionConfig is the config that was in database
     // ctx is the loopback context
     // if OperationStatus.success, OperationStatus.option will be stored in db
 }
 
-static async deleteAction(actionConfig: Object, ctx: Context): Promise<OperationStatus> {
+static async deleteAction(actionId: string, actionConfig: Object, ctx: Context): Promise<OperationStatus> {
     // Ask for the deletion of an action
     // the result of the deletion should be reuturned in OperationStatus
+    // actionId is the id of the action that is beeing deleted
     // actionConfig is the config that was in database
     // ctx is the loopback context
 }
@@ -192,25 +195,28 @@ static async prepareData(reactionId: string, ctx: Context): Promise<object> {
 }
 
 
-static async createReaction(reactionConfig: Object, ctx: Context): Promise<CreationStatus> {
+static async createReaction(userId: string, reactionConfig: Object, ctx: Context): Promise<CreationStatus> {
     // Ask for the creation of a reaction
     // the result of the creation should be reuturned in OperationStatus
+    // userId is the user performing the request
     // reactionConfig is the config given by the front end
     // ctx is the loopback context
     // if OperationStatus.success, OperationStatus.option will be stored in db
 }
 
-static async updateReaction(reactionConfig: Object, ctx: Context): Promise<OperationStatus> {
+static async updateReaction(reactionId: string, reactionConfig: Object, ctx: Context): Promise<OperationStatus> {
     // Ask for the update of a reaction
     // the result of the update should be reuturned in OperationStatus
+    // actionId is the id of the action that is beeing updated
     // reactionConfig is the config that was in database
     // ctx is the loopback context
     // if OperationStatus.success, OperationStatus.option will be stored in db
 }
 
-static async deleteReaction(reactionConfig: Object, ctx: Context): Promise<OperationStatus> {
+static async deleteReaction(reactionId: string, reactionConfig: Object, ctx: Context): Promise<OperationStatus> {
     // Ask for the deletion of a reaction
     // the result of the deletion should be reuturned in OperationStatus
+    // actionId is the id of the action that is beeing deleted
     // reactionConfig is the config that was in database
     // ctx is the loopback context
 }

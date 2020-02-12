@@ -153,6 +153,7 @@ export interface ReactionConfig {
 
 export interface OperationStatus {
     success: boolean;
-    error?: string;
     options?: Object;
+    error?: string;
+    details?: Object;
 }
