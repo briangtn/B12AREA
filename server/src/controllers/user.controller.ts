@@ -1,5 +1,5 @@
-import {requestBody, get, post, patch, param, api, HttpErrors} from '@loopback/rest';
-import {property, repository, model} from '@loopback/repository';
+import {requestBody, get, post, patch, param, api, HttpErrors, getModelSchemaRef, getFilterSchemaFor, del, RestBindings, Request} from '@loopback/rest';
+import {property, repository, model, Filter} from '@loopback/repository';
 import {inject, Context} from '@loopback/context';
 import {User} from '../models';
 import validator from 'validator';
@@ -126,10 +126,35 @@ export class UserController {
         @inject('services.2fa')
         protected twoFactorAuthenticationService: TwoFactorAuthenticationManager,
 
+        @inject(RestBindings.Http.REQUEST)
+        public request: Request,
+
         @inject.context() private ctx: Context
     ) {}
-    @get('/')
-    getUsers() {
+
+    @get('/', {
+        security: OPERATION_SECURITY_SPEC,
+        responses: {
+            '200': {
+                description: 'All users',
+                content: {
+                    'application/json': {
+                        schema: {
+                            type: 'array',
+                            items: getModelSchemaRef(User),
+                        },
+                    },
+                },
+            },
+        }
+    })
+    @authenticate('jwt-all')
+    @authorize({allowedRoles: ['admin']})
+    async getUsers(
+        @inject(SecurityBindings.USER) currentUserProfile: UserProfile,
+        @param.query.object('filter', getFilterSchemaFor(User)) filter?: Filter<User>
+    ) {
+        return this.userRepository.find();
     }
 
     @post('/register', {
@@ -219,21 +244,52 @@ export class UserController {
     @get('/serviceLogin/{serviceName}', {
         responses: {
             '200': {
-                description: 'The url where you have to redirect'
+                description: 'The url where you have to redirect',
+                content: {
+                    'application/json': {
+                        schema: {
+                            type: 'object',
+                            properties: {
+                                url: {
+                                    type: 'string',
+                                },
+                            },
+                        },
+                    },
+                },
             },
             '400': response400('Missing redirect url'),
             '404': response404('Service not found')
         }
     })
-    async serviceLogin(@param.path.string('serviceName') serviceName: string, @param.query.string('redirectURL') redirectURL?: string): Promise<string> {
+    async serviceLogin(
+        @param.path.string('serviceName') serviceName: string,
+        @param.query.string('redirectURL') redirectURL: string,
+    ): Promise<object> {
         if (!redirectURL) {
-            throw new HttpErrors.BadRequest('Missing redirect url');
+            throw new HttpErrors.BadRequest("Redirect url required.");
         }
         try {
             const module = await import('../area-auth-services/' + serviceName + '/controller');
             const controller = module.default;
-            const res = await controller.login(redirectURL, this.ctx);
-            return res;
+            let res = null;
+            let currentUserProfile: UserProfile | undefined;
+            try {
+                currentUserProfile = await this.userService.getUserProfile(this.request);
+            } catch (e) {
+                currentUserProfile = undefined;
+            }
+
+            if (currentUserProfile) {
+                const user: User | null = await this.userRepository.getFromUserProfile(currentUserProfile);
+                if (!user) {
+                    throw new HttpErrors.BadRequest("User not found.");
+                }
+                res = await controller.login(redirectURL, this.ctx, user.id);
+            } else {
+                res = await controller.login(redirectURL, this.ctx);
+            }
+            return {url: res};
         } catch (e) {
             throw new HttpErrors.NotFound('Service not found');
         }
@@ -313,13 +369,14 @@ export class UserController {
     }
 
     @get('/{id}', {
+        security: OPERATION_SECURITY_SPEC,
         responses: {
             '200': response200(User, "Return a user"),
             '404': response404('User not found')
         }
     })
-    @authenticate('jwt-all')
     @authorize({allowedRoles: ['admin']})
+    @authenticate('jwt-all')
     async getUser(
         @param.path.string('id') id: string,
         @inject(SecurityBindings.USER) currentUserProfile: UserProfile,
@@ -329,6 +386,32 @@ export class UserController {
         if (!user)
             throw new HttpErrors.NotFound("User not found.");
         return user;
+    }
+
+    @del('/{id}', {
+        security: OPERATION_SECURITY_SPEC,
+        responses: {
+            '200': 'OK',
+            '404': response404('User not found'),
+            '401': {
+                description: 'Unauthorized'
+            }
+        }
+    })
+    @authenticate('jwt-all')
+    @authorize({allowedRoles: ['admin']})
+    async deleteUser(
+        @param.path.string('id') id: string,
+        @inject(SecurityBindings.USER) currentUserProfile: UserProfile
+    ) {
+        const currentUser: User | undefined = await this.userRepository.findById(id);
+
+        if (!currentUser) {
+            throw new HttpErrors.NotFound('User not found')
+        }
+
+        await this.userRepository.deleteById(id);
+        return "OK";
     }
 
     @patch('/{id}', {

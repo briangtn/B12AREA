@@ -60,6 +60,7 @@
     "@types/jsonwebtoken": "^8.3.6",
     "@types/nodemailer": "^6.4.0",
     "@types/nodemailer-smtp-transport": "^2.7.4",
+    "@types/oauth": "^0.9.1",
     "@types/sha256": "^0.2.0",
     "@types/speakeasy": "^2.0.5",
     "@types/validator": "^12.0.1",
@@ -69,6 +70,7 @@
     "jsonwebtoken": "^8.5.1",
     "loopback-connector-mongodb": "^4.2.0",
     "nodemailer": "^6.4.2",
+    "oauth": "^0.9.15",
     "sha256": "^0.2.0",
     "speakeasy": "^2.0.0",
     "validator": "^12.1.0"

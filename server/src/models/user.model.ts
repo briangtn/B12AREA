@@ -74,11 +74,11 @@ export class User extends Entity {
 
     @property({
         type: 'array',
-        itemType: 'string',
+        itemType: 'object',
         required: false,
         default: []
     })
-    authServices?: string[];
+    authServices?: object[];
 
     @hasMany(() => Area, {keyTo: 'ownerId'})
     areas: Area[];

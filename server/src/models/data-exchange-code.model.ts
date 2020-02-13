@@ -5,6 +5,7 @@ export class DataExchangeCode extends Entity {
     @property({
         type: 'string',
         id: true,
+        index: true,
         generated: true,
     })
     id?: string;

@@ -260,7 +260,7 @@ deploy-production-api:
     - sed -i "s/__TWO_FACTOR_AUTHENTICATION_ISSUER_NAME__/${TWO_FACTOR_AUTHENTICATION_ISSUER_NAME}/" area.api.configmap.yaml
     - sed -i "s/__AREA_JWT_TTL__/${AREA_JWT_TTL}/" area.api.configmap.yaml
     - sed -i "s/__BULL_QUEUE_NAME__/${BULL_QUEUE_NAME}/" area.api.configmap.yaml
-    - sed -i "s/__API_URL__/${DEPLOYMENT_HOST}/" area.api.configmap.yaml
+    - sed -i "s/__API_URL__/https:\/\/${DEPLOYMENT_HOST}/" area.api.configmap.yaml
     - sed -i "s/__DB_USER__/`echo -ne ${DB_USER} | base64 -w 0`/" area.api.secrets.yaml
     - sed -i "s/__DB_PASSWORD__/`echo -ne ${DB_PASSWORD} | base64 -w 0`/" area.api.secrets.yaml
     - sed -i "s/__SMTP_USER__/`echo -ne ${SMTP_USER} | base64 -w 0`/" area.api.secrets.yaml
@@ -269,6 +269,8 @@ deploy-production-api:
     - sed -i "s/__REDIS_PASSWORD__/`echo -ne ${REDIS_PASSWORD} | base64 -w 0`/" area.api.secrets.yaml
     - sed -i "s/__GOOGLE_CLIENT_ID__/`echo -ne ${PROD_GOOGLE_CLIENT_ID} | base64 -w 0`/" area.api.secrets.yaml
     - sed -i "s/__GOOGLE_CLIENT_SECRET__/`echo -ne ${PROD_GOOGLE_CLIENT_SECRET} | base64 -w 0`/" area.api.secrets.yaml
+    - sed -i "s/__TWITTER_CONSUMER_KEY__/`echo -ne ${PROD_TWITTER_CONSUMER_KEY} | base64 -w 0`/" area.api.secrets.yaml
+    - sed -i "s/__TWITTER_CONSUMER_SECRET__/`echo -ne ${PROD_TWITTER_CONSUMER_SECRET} | base64 -w 0`/" area.api.secrets.yaml
     - sed -i "s/__INGRESS_HOST__/${DEPLOYMENT_HOST}/" area.api.ingress.yaml
     - kubectl apply -f area.api.configmap.yaml -f area.api.secrets.yaml
     - kubectl apply -f area.api.deployment.yaml
@@ -303,7 +305,7 @@ deploy-production-worker:
     - sed -i "s/__TWO_FACTOR_AUTHENTICATION_ISSUER_NAME__/${TWO_FACTOR_AUTHENTICATION_ISSUER_NAME}/" area.worker.configmap.yaml
     - sed -i "s/__AREA_JWT_TTL__/${AREA_JWT_TTL}/" area.worker.configmap.yaml
     - sed -i "s/__BULL_QUEUE_NAME__/${BULL_QUEUE_NAME}/" area.worker.configmap.yaml
-    - sed -i "s/__API_URL__/${DEPLOYMENT_HOST}/" area.worker.configmap.yaml
+    - sed -i "s/__API_URL__/https:\/\/${DEPLOYMENT_HOST}/" area.worker.configmap.yaml
     - sed -i "s/__DB_USER__/`echo -ne ${DB_USER} | base64 -w 0`/" area.worker.secrets.yaml
     - sed -i "s/__DB_PASSWORD__/`echo -ne ${DB_PASSWORD} | base64 -w 0`/" area.worker.secrets.yaml
     - sed -i "s/__SMTP_USER__/`echo -ne ${SMTP_USER} | base64 -w 0`/" area.worker.secrets.yaml
@@ -312,6 +314,8 @@ deploy-production-worker:
     - sed -i "s/__REDIS_PASSWORD__/`echo -ne ${REDIS_PASSWORD} | base64 -w 0`/" area.worker.secrets.yaml
     - sed -i "s/__GOOGLE_CLIENT_ID__/`echo -ne ${PROD_GOOGLE_CLIENT_ID} | base64 -w 0`/" area.worker.secrets.yaml
     - sed -i "s/__GOOGLE_CLIENT_SECRET__/`echo -ne ${PROD_GOOGLE_CLIENT_SECRET} | base64 -w 0`/" area.worker.secrets.yaml
+    - sed -i "s/__TWITTER_CONSUMER_KEY__/`echo -ne ${PROD_TWITTER_CONSUMER_KEY} | base64 -w 0`/" area.worker.secrets.yaml
+    - sed -i "s/__TWITTER_CONSUMER_SECRET__/`echo -ne ${PROD_TWITTER_CONSUMER_SECRET} | base64 -w 0`/" area.worker.secrets.yaml
     - kubectl apply -f area.worker.configmap.yaml -f area.worker.secrets.yaml
     - kubectl apply -f area.worker.deployment.yaml
 
@@ -461,7 +465,7 @@ deploy-development-api:
     - sed -i "s/__TWO_FACTOR_AUTHENTICATION_ISSUER_NAME__/${TWO_FACTOR_AUTHENTICATION_ISSUER_NAME}/" area.api.configmap.yaml
     - sed -i "s/__AREA_JWT_TTL__/${AREA_JWT_TTL}/" area.api.configmap.yaml
     - sed -i "s/__BULL_QUEUE_NAME__/${BULL_QUEUE_NAME}/" area.api.configmap.yaml
-    - sed -i "s/__API_URL__/${DEPLOYMENT_HOST}/" area.api.configmap.yaml
+    - sed -i "s/__API_URL__/https:\/\/${DEPLOYMENT_HOST}/" area.api.configmap.yaml
     - sed -i "s/__DB_USER__/`echo -ne ${DB_USER} | base64 -w 0`/" area.api.secrets.yaml
     - sed -i "s/__DB_PASSWORD__/`echo -ne ${DB_PASSWORD} | base64 -w 0`/" area.api.secrets.yaml
     - sed -i "s/__SMTP_USER__/`echo -ne ${SMTP_USER} | base64 -w 0`/" area.api.secrets.yaml
@@ -470,6 +474,8 @@ deploy-development-api:
     - sed -i "s/__REDIS_PASSWORD__/`echo -ne ${REDIS_PASSWORD} | base64 -w 0`/" area.api.secrets.yaml
     - sed -i "s/__GOOGLE_CLIENT_ID__/`echo -ne ${DEV_GOOGLE_CLIENT_ID} | base64 -w 0`/" area.api.secrets.yaml
     - sed -i "s/__GOOGLE_CLIENT_SECRET__/`echo -ne ${DEV_GOOGLE_CLIENT_SECRET} | base64 -w 0`/" area.api.secrets.yaml
+    - sed -i "s/__TWITTER_CONSUMER_KEY__/`echo -ne ${DEV_TWITTER_CONSUMER_KEY} | base64 -w 0`/" area.api.secrets.yaml
+    - sed -i "s/__TWITTER_CONSUMER_SECRET__/`echo -ne ${DEV_TWITTER_CONSUMER_SECRET} | base64 -w 0`/" area.api.secrets.yaml
     - sed -i "s/__INGRESS_HOST__/${DEPLOYMENT_HOST}/" area.api.ingress.yaml
     - kubectl apply -f area.api.configmap.yaml -f area.api.secrets.yaml
     - kubectl apply -f area.api.deployment.yaml
@@ -504,7 +510,7 @@ deploy-development-worker:
     - sed -i "s/__TWO_FACTOR_AUTHENTICATION_ISSUER_NAME__/${TWO_FACTOR_AUTHENTICATION_ISSUER_NAME}/" area.worker.configmap.yaml
     - sed -i "s/__AREA_JWT_TTL__/${AREA_JWT_TTL}/" area.worker.configmap.yaml
     - sed -i "s/__BULL_QUEUE_NAME__/${BULL_QUEUE_NAME}/" area.worker.configmap.yaml
-    - sed -i "s/__API_URL__/${DEPLOYMENT_HOST}/" area.worker.configmap.yaml
+    - sed -i "s/__API_URL__/https:\/\/${DEPLOYMENT_HOST}/" area.worker.configmap.yaml
     - sed -i "s/__DB_USER__/`echo -ne ${DB_USER} | base64 -w 0`/" area.worker.secrets.yaml
     - sed -i "s/__DB_PASSWORD__/`echo -ne ${DB_PASSWORD} | base64 -w 0`/" area.worker.secrets.yaml
     - sed -i "s/__SMTP_USER__/`echo -ne ${SMTP_USER} | base64 -w 0`/" area.worker.secrets.yaml
@@ -513,6 +519,8 @@ deploy-development-worker:
     - sed -i "s/__REDIS_PASSWORD__/`echo -ne ${REDIS_PASSWORD} | base64 -w 0`/" area.worker.secrets.yaml
     - sed -i "s/__GOOGLE_CLIENT_ID__/`echo -ne ${DEV_GOOGLE_CLIENT_ID} | base64 -w 0`/" area.worker.secrets.yaml
     - sed -i "s/__GOOGLE_CLIENT_SECRET__/`echo -ne ${DEV_GOOGLE_CLIENT_SECRET} | base64 -w 0`/" area.worker.secrets.yaml
+    - sed -i "s/__TWITTER_CONSUMER_KEY__/`echo -ne ${DEV_TWITTER_CONSUMER_KEY} | base64 -w 0`/" area.worker.secrets.yaml
+    - sed -i "s/__TWITTER_CONSUMER_SECRET__/`echo -ne ${DEV_TWITTER_CONSUMER_SECRET} | base64 -w 0`/" area.worker.secrets.yaml
     - kubectl apply -f area.worker.configmap.yaml -f area.worker.secrets.yaml
     - kubectl apply -f area.worker.deployment.yaml
 

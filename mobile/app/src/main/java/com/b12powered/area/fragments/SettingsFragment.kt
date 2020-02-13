@@ -5,7 +5,6 @@ import android.app.Dialog
 import android.content.Context
 import android.content.SharedPreferences
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -15,11 +14,22 @@ import com.b12powered.area.api.ApiClient
 import kotlinx.android.synthetic.main.fragment_settings.*
 import java.lang.IllegalStateException
 
+
+/**
+ * Fragment class for api settings, used in both login and register view before any api call
+ *
+ * This class parse the api url entered by the user and request the api to check its validity
+ */
 class SettingsFragment : DialogFragment() {
 
 
     private var root: View? = null
 
+    /**
+     * Override method onCreateView
+     *
+     * Get the root view of the fragment for context purposes
+     */
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -29,6 +39,11 @@ class SettingsFragment : DialogFragment() {
         return root
     }
 
+    /**
+     * Override method onCreateDialog
+     *
+     * Set a new dialog with input field and set listener to check and return api url to parent view
+     */
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         return activity?.let {
             val builder = AlertDialog.Builder(it)
