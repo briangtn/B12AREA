@@ -17,6 +17,11 @@ export class GithubWebhook extends Entity {
     @property({
         type: 'string',
     })
+    userId?: string;
+
+    @property({
+        type: 'string',
+    })
     owner?: string;
 
     @property({

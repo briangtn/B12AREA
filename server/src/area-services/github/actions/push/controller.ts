@@ -12,6 +12,9 @@ import {
 import {Action, GithubToken, GithubWebhook} from "../../../../models";
 import {repository} from "@loopback/repository";
 import {RandomGeneratorManager} from "../../../../services";
+import {GithubPushHookBody, GithubWebhookResponse} from "../../interfaces";
+
+const API_URL : string = process.env.API_URL ?? "http://localhost:8080";
 
 interface PushActionConfig {
     owner: string;
@@ -19,42 +22,6 @@ interface PushActionConfig {
     webhookId: string;
     hookUuid: string;
     userId: string;
-}
-
-interface GithubWebhookResponse {
-    type: string;
-    id: number;
-    name: string;
-    active: boolean;
-    events: string[];
-    config: object;
-    updated_at: string;
-    created_at: string;
-    url: string;
-    test_url: string;
-    ping_url: string;
-    last_response: object;
-}
-
-interface GithubCommitBody {
-    sha: string;
-    message: string;
-    author: {
-        name: string;
-        email: string;
-    }
-    url: string;
-    distinct: boolean;
-}
-
-interface GithubPushHookBody {
-    zen: string;
-    ref: string;
-    head: string;
-    before: string;
-    size: number;
-    distinct_size: number;
-    commits: GithubCommitBody[];
 }
 
 export default class ActionController {
@@ -66,36 +33,6 @@ export default class ActionController {
         @repository(GithubTokenRepository) public githubTokenRepository: GithubTokenRepository,
         @repository(GithubWebhookRepository) public githubWebhookRepository: GithubWebhookRepository
     ) {}
-
-    @post('/test/create')
-    async createHook() {
-        return ActionController.createAction('5e42bec9d7e37937ee25ffc6', {owner: 'Eldriann', repo: 'JFECS'}, this.ctx);
-    }
-
-    @post('/test/update')
-    async updateHook() {
-        return ActionController.updateAction("", {
-            owner: 'Eldriann',
-            repo: 'JFECS',
-            webhookId: "5e446b7e79563600323bb2a7",
-            hookUuid: "lft7qtsqp3lqbrix",
-            userId: "5e42bec9d7e37937ee25ffc6",
-        }, {
-            owner: 'Eldriann',
-            repo: 'jfml',
-        }, this.ctx);
-    }
-
-    @post('/test/delete')
-    async deleteHook() {
-        return ActionController.deleteAction('', {
-            owner: 'Eldriann',
-            repo: 'JFECS',
-            webhookId: "5e442324401d2500c698b63e",
-            hookUuid: "afnewqhja8w50peu",
-            userId: "5e42bec9d7e37937ee25ffc6",
-        }, this.ctx);
-    }
 
     @post('/webhook/{webhookId}')
     async webhook(
@@ -123,6 +60,7 @@ export default class ActionController {
         try {
             action = await this.actionRepository.findOne({
                 where: {
+                    serviceAction: 'github.A.push',
                     options: {
                         webhookId: webhook.id
                     }
@@ -221,7 +159,7 @@ export default class ActionController {
             const response : { data: GithubWebhookResponse } = await axios.post('https://api.github.com/repos/' + pushActionConfig.owner + '/' + pushActionConfig.repo + '/hooks', {
                 name: 'web',
                 config: {
-                    url: `${process.env.API_URL}/services/github/actions/push/webhook/${generatedUUID}`,
+                    url: `${API_URL}/services/github/actions/push/webhook/${generatedUUID}`,
                     // required by github
                     // eslint-disable-next-line @typescript-eslint/camelcase
                     content_type: 'json',
@@ -238,6 +176,7 @@ export default class ActionController {
             try {
                 const githubWebhook = await githubWebhookRepository.create({
                     hookUuid: generatedUUID,
+                    userId: userId,
                     owner: pushActionConfig.owner,
                     repo: pushActionConfig.repo,
                     type: response.data.type,

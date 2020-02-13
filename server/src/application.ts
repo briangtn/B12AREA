@@ -28,6 +28,9 @@ export const PackageKey = BindingKey.create<PackageInfo>('application.package');
 export class AreaApplication extends BootMixin(
     ServiceMixin(RepositoryMixin(RestApplication)),
 ) {
+    // use to store loaded modules
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    private areaServicesControllers : any;
     constructor(options: ApplicationConfig = {}) {
         if (options.rest)
             options.rest.port = process.env.API_PORT ? process.env.API_PORT : 3000;
@@ -60,6 +63,7 @@ export class AreaApplication extends BootMixin(
 
         this.projectRoot = __dirname;
         this.loadAuthControllers();
+        this.areaServicesControllers = [];
         this.loadAreaServicesControllers();
         // Customize @loopback/boot Booter Conventions here
         this.bootOptions = {
@@ -103,7 +107,7 @@ export class AreaApplication extends BootMixin(
                     }
 
                     this.controller(AreaServices, dir);
-                    await module.default.start();
+                    this.areaServicesControllers.push(AreaServices);
                     this.loadActionsControllers(dir);
                 }).catch(error => {
                     return console.error(error);
@@ -153,5 +157,11 @@ export class AreaApplication extends BootMixin(
             }
         });
 
+    }
+
+    public async beforeStart() {
+        for (const Class of this.areaServicesControllers) {
+            await Class.start(this);
+        }
     }
 }
