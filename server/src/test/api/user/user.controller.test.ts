@@ -409,6 +409,15 @@ describe('/users', () => {
             expect(error.error.message).to.equal('Access denied');
         });
 
+        it('Should send 401 not logged in', async () => {
+            const res = await helper.client
+                .get('/users/' + userId)
+                .send()
+                .expect(401);
+            const error = JSON.parse(res.error.text);
+            expect(error.error.message).to.equal('Authorization header not found.');
+        });
+
         it("Success", async () => {
             const res = await helper.client
                 .get('/users/' + userId)
@@ -483,6 +492,15 @@ describe('/users', () => {
             const dbUser: User = await helper.userRepository.findById(body.id);
             expect(dbUser.role).not.containDeep(['email_not_validated']);
             expect(dbUser.role).containDeep(['user']);
+        });
+
+        it ('Should send 401 not logged in', async () => {
+            const res = await helper.client
+                .patch('/users/' + createdUser.id)
+                .send({role: ['user', 'admin']})
+                .expect(401);
+            const error = JSON.parse(res.error.text);
+            expect(error.error.message).to.equal('Authorization header not found.');
         });
 
         it('Should disable user 2FA', async () => {
@@ -574,6 +592,15 @@ describe('/users', () => {
             expect(error.error.message).to.equal('You\'re not authorized to edit your own roles');
         });
 
+        it ('Should send 401 not logged in', async () => {
+            const res = await helper.client
+                .patch('/users/me?redirectURL=http://localhost:8080')
+                .send({email: 'yolo@yolo.fr'})
+                .expect(401);
+            const error = JSON.parse(res.error.text);
+            expect(error.error.message).to.equal('Authorization header not found.');
+        });
+
         it('Should edit my password', async () => {
             const res = await helper.client
                 .patch('/users/me')
@@ -614,6 +641,75 @@ describe('/users', () => {
             expect(dbUser.email).to.equal('yolo@yolo.fr');
             expect(dbUser.role).containDeep(['email_not_validated', 'admin']);
             expect(dbUser.role).not.containDeep(['user']);
+        });
+    });
+
+    describe('GET /users', () => {
+        it('Should return all users', async () => {
+            const newUser = await helper.createUser('test@admin.fr', 'abcd', false);
+            const res = await helper.client
+                .get('/users')
+                .set('Authorization', 'Bearer ' + userToken)
+                .expect(200);
+            const data = res.body;
+            expect(data.length).to.be.eql(2);
+            expect(data).containEql({
+                id: JSON.parse(JSON.stringify(userId)),
+                email: userData.email,
+                role: ['user', 'admin'],
+                services: [],
+                twoFactorAuthenticationEnabled: false,
+                authServices: []
+            });
+            expect(data).containEql({
+                id: JSON.parse(JSON.stringify(newUser.id)),
+                email: newUser.email,
+                role: newUser.role,
+                services: newUser.services,
+                twoFactorAuthenticationEnabled: newUser.twoFactorAuthenticationEnabled,
+                authServices: newUser.authServices
+            });
+        });
+
+        it ('Should send 401 not logged in', async () => {
+            const res = await helper.client
+                .get('/users')
+                .expect(401);
+            const error = JSON.parse(res.error.text);
+            expect(error.error.message).to.equal('Authorization header not found.');
+        });
+
+        it("Should send 401 Access denied", async () => {
+            await helper.createUser('notadmin@notadmin.fr', 'notadmin', false);
+            const currentUserToken = await helper.getJWT('notadmin@notadmin.fr', 'notadmin');
+            const res = await helper.client
+                .get('/users/')
+                .set('Authorization', 'Bearer ' + currentUserToken)
+                .send()
+                .expect(401);
+            const error = JSON.parse(res.error.text);
+            expect(error.error.message).to.equal('Access denied');
+        });
+    });
+
+    describe('GET /users/me', () => {
+        it('Should return my profile', async () => {
+            const res = await helper.client
+                .get('/users/me')
+                .set('Authorization', 'Bearer ' + userToken)
+                .expect(200);
+            const body = res.body;
+            expect(body.id).to.equal(JSON.parse(JSON.stringify(userId)));
+            expect(body.email).to.equal(userData.email);
+            expect(body.role).containDeep(['user', 'admin']);
+        });
+
+        it ('Should send 401 not logged in', async () => {
+            const res = await helper.client
+                .get('/users/me')
+                .expect(401);
+            const error = JSON.parse(res.error.text);
+            expect(error.error.message).to.equal('Authorization header not found.');
         });
     });
 

@@ -3,6 +3,11 @@ package com.b12powered.area.api
 import org.json.JSONObject
 import java.lang.Exception
 
+/**
+ * The class handling api responses and parse it to json object or return an error message if the response returned an error
+ *
+ * @param response The api response, string formatted
+ */
 class ApiResponse(response: String) {
 
     var success: Boolean = false

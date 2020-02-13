@@ -1,6 +1,7 @@
-import {Entity, model, property} from '@loopback/repository';
+import {Entity, model, property, hasMany} from '@loopback/repository';
+import {AreaOption} from './area-option.model';
 
-@model({settings: {strict: false}})
+@model({settings: {strict: false, strictObjectIDCoercion: true}})
 export class Reaction extends Entity {
     @property({
         type: 'string',
@@ -13,18 +14,14 @@ export class Reaction extends Entity {
         type: 'string',
         required: true,
     })
-    serviceAction: string;
-
-    @property({
-        type: 'object',
-        required: true,
-    })
-    options: object;
-
+    serviceReaction: string;
     @property({
         type: 'string',
     })
     areaId?: string;
+
+    @hasMany(() => AreaOption)
+    options: AreaOption[];
     // Define well-known properties here
 
     // Indexer property to allow additional data

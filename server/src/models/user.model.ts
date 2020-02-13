@@ -3,6 +3,7 @@ import {Area} from './area.model';
 
 @model({
     settings: {
+        strictObjectIDCoercion: true,
         hiddenProperties: ['password', 'validationToken', 'resetToken', 'twoFactorAuthenticationSecret'],
         indexes: {
             uniqueEmail: {
@@ -73,11 +74,11 @@ export class User extends Entity {
 
     @property({
         type: 'array',
-        itemType: 'string',
+        itemType: 'object',
         required: false,
         default: []
     })
-    authServices?: string[];
+    authServices?: object[];
 
     @hasMany(() => Area, {keyTo: 'ownerId'})
     areas: Area[];

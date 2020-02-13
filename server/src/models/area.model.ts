@@ -2,7 +2,7 @@ import {Entity, model, property, hasMany, hasOne} from '@loopback/repository';
 import {Reaction} from './reaction.model';
 import {Action} from "./action.model";
 
-@model()
+@model({settings: {strictObjectIDCoercion: true}})
 export class Area extends Entity {
     @property({
         type: 'string',
@@ -28,11 +28,11 @@ export class Area extends Entity {
     })
     ownerId?: string;
 
-    @hasMany(() => Reaction)
+    @hasMany(() => Reaction, {keyTo: 'areaId'})
     reactions: Reaction[];
 
-    @hasOne(() => Action)
-    action: Action;
+    @hasOne(() => Action, {keyTo: 'areaID'})
+    action?: Action;
     // Define well-known properties here
 
     // Indexer property to allow additional data

@@ -87,6 +87,10 @@ export class AreaApplication extends BootMixin(
             TokenServiceConstants.TOKEN_SECRET_VALUE,
         );
 
+        this.bind('auth.jwt-all').toClass(
+            JWTAllAuthenticationStrategy
+        );
+
         this.bind(TokenServiceBindings.TOKEN_EXPIRES_IN).to(
             TokenServiceConstants.TOKEN_EXPIRES_IN_VALUE,
         );
