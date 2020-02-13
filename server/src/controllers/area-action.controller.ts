@@ -1,7 +1,6 @@
 import {
     Count,
     CountSchema,
-    Filter,
     repository,
     Where,
 } from '@loopback/repository';
@@ -49,21 +48,19 @@ export class AreaActionController {
     })
     async find(
         @param.path.string('id') id: string,
-        @param.query.object('filter') filter?: Filter<Action>,
     ): Promise<Action> {
-        const area = await this.areaRepository.findById(id, filter);
+        const area = await this.areaRepository.findById(id, {
+            include: [{
+                relation: 'action'
+            }]
+        });
         this.areaRepository.checkArea(area, this.user);
 
-        const action = await this.actionRepository.findOne({
-            where: {
-                areaId: area.id
-            }
-        });
-        if (!action) {
+        if (!area.action) {
             this.response.status(constants.HTTP_STATUS_NO_CONTENT);
             return {} as Action;
         }
-        return action;
+        return area.action;
     }
 
     @post('/{id}/action', {
