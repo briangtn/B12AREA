@@ -181,8 +181,6 @@ describe('/areas/{id}/action', () => {
             expect((await actionRepo.count()).count).to.be.equal(1);
         });
 
-        //TODO Check invalid actionType / invalid options for this action type
-
         it('Should return 409 Conflict if there is already an action', async () => {
             action = await areaRepo.action(area.id).create({
                 serviceAction: 'example.A.example',
@@ -193,7 +191,7 @@ describe('/areas/{id}/action', () => {
                 .post(`/areas/${area.id}/action`)
                 .set('Authorization', 'Bearer ' + users[0].token)
                 .send(postAction)
-                .expect(409);//TODO
+                .expect(409);
             const error = JSON.parse(res.error.text);
             expect(error.error.message).to.containEql('Action already exists for this area');
             expect((await actionRepo.count()).count).to.be.equal(1);
