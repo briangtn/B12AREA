@@ -10,7 +10,7 @@ export default class TwitterController {
                 @inject('services.areaAuthService') public authenticator: AreaAuthServiceService) {
     }
 
-    static async login(finalRedirect: string, ctx: Context) {
+    static async login(finalRedirect: string, ctx: Context, userID?: string) {
         // eslint-disable-next-line @typescript-eslint/no-misused-promises,no-async-promise-executor
         return new Promise<string | null>(async (resolve, reject) => {
             const baseApiURl = process.env.API_URL;
@@ -31,7 +31,7 @@ export default class TwitterController {
                     console.log("Error", err);
                     reject(err);
                 } else {
-                    await exchangeCodeGenerator.updateData(state, {url: finalRedirect, token, secret});
+                    await exchangeCodeGenerator.updateData(state, {url: finalRedirect, token, secret, userID});
 
                     resolve("https://twitter.com/oauth/authorize?oauth_token=" + token);
                 }
@@ -66,7 +66,7 @@ export default class TwitterController {
                     reject('Invalid state code');
                     return;
                 }
-                const dataTyped: {url: string, token: string, secret: string} = dataFromCode! as {url: string, token: string, secret: string};
+                const dataTyped: {url: string, token: string, secret: string, userID: string} = dataFromCode! as {url: string, token: string, secret: string, userID: string};
                 if (!consumer) {
                     reject("Invalid consumer");
                     return;
@@ -107,21 +107,13 @@ export default class TwitterController {
                         }
                         const dataParsed = JSON.parse(data as string);
 
-                        if (!dataParsed.email) {
-                            try {
-                                const responseCode = await this.exchangeCodeGenerator.generate({
-                                    error: 'This app accept only account with email.',
-                                }, true);
-                                this.response.redirect(dataTyped.url + '?code=' + responseCode);
-                            } catch (e) {
-                                console.log(e);
-                                reject(e);
-                            }
-                            return;
-                        }
-
                         try {
-                            const responseCode = await this.authenticator.loginOrRegister('twitter', dataParsed.email);
+                            const responseCode = await this.authenticator.loginOrRegister({
+                                serviceName: 'twitter',
+                                email: dataParsed.email,
+                                userID: dataTyped.userID,
+                                serviceAccountId: dataParsed.id
+                            });
                             this.response.redirect(dataTyped.url + '?code=' + responseCode);
                         } catch (e) {
                             console.log(e);
