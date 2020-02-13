@@ -14,7 +14,7 @@ import {
     param,
     patch,
     post,
-    requestBody, RestHttpErrors,
+    requestBody,
 } from '@loopback/rest';
 import {
     Area,
