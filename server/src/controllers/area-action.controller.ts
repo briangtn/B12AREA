@@ -76,11 +76,12 @@ export class AreaActionController {
         @param.path.string('id') id: typeof Area.prototype.id,
         @requestBody(NewActionInArea) action: Omit<Action, 'id'>,
     ): Promise<Action> {
-        const area = await this.areaRepository.findById(id);
+        const area = await this.areaRepository.findById(id, {
+            include: [{
+                relation: 'action'
+            }],
+        });
         this.areaRepository.checkArea(area, this.user);
-
-        console.log("Controller: Area", area);
-        console.log("Controller: Action", area.action);
         if (area.action)
             throw new HttpErrors.Conflict("Action already exists for this area");
         return this.areaRepository.action(id).create(action);

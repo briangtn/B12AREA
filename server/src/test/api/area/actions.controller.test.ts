@@ -188,16 +188,14 @@ describe('/areas/{id}/action', () => {
                 serviceAction: 'example.A.example',
             });
 
-            console.log("TEST: Area", area);
-            console.log("TEST: Action", action);
             expect((await actionRepo.count()).count).to.be.equal(1);
             const res = await helper.client
                 .post(`/areas/${area.id}/action`)
                 .set('Authorization', 'Bearer ' + users[0].token)
                 .send(postAction)
-                .expect(200);//TODO
-            const body = res.body;
-            console.log("Body", body);
+                .expect(409);//TODO
+            const error = JSON.parse(res.error.text);
+            expect(error.error.message).to.containEql('');
             expect((await actionRepo.count()).count).to.be.equal(1);
         });
 
