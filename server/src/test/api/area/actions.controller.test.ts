@@ -195,7 +195,7 @@ describe('/areas/{id}/action', () => {
                 .send(postAction)
                 .expect(409);//TODO
             const error = JSON.parse(res.error.text);
-            expect(error.error.message).to.containEql('');
+            expect(error.error.message).to.containEql('Action already exists for this area');
             expect((await actionRepo.count()).count).to.be.equal(1);
         });
 
