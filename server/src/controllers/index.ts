@@ -7,4 +7,3 @@ export * from './area-reaction.controller';
 export * from './area-action.controller';
 export * from './areas.controller';
 export * from './data-code.controller';
-export * from './reaction-area-option.controller';
