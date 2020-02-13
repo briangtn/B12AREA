@@ -72,7 +72,11 @@ export async function ActionFunction(params: TriggerObject, ctx: Context) {
     }
     let area : Area | null = null;
     try {
-        area = await areaRepository.findById(action.areaId);
+        area = await areaRepository.findById(action.areaId, {
+            include: [{
+                relation: 'reactions'
+            }],
+        });
     } catch (e) {
         console.error(`[AreaResolve]Failed to enqueue job for action id ${params.actionId}: ${e}`);
         return;
@@ -98,6 +102,13 @@ export async function ActionFunction(params: TriggerObject, ctx: Context) {
         try {
             const module = await import('./area-services/' + serviceName + '/reactions/' + reactionName + '/controller');
             const controller = module.default;
+            let reactionPreparedData = null;
+            try {
+                reactionPreparedData = controller.prepareData(reaction.id!, ctx);
+            } catch (e) {
+                console.error(`Failed to enqueue job for action id ${params.actionId}, reaction id ${reaction.id}: ${e}`);
+                continue;
+            }
             const preparedData: WorkableObject = {
                 actionId: action.id!,
                 actionType: action.serviceAction,
@@ -108,7 +119,7 @@ export async function ActionFunction(params: TriggerObject, ctx: Context) {
                 ownerId: owner.id!,
                 reactionId: reaction.id!,
                 reactionOptions: reaction.options,
-                reactionPreparedData: controller.prepareData(reaction.id!, ctx),
+                reactionPreparedData: reactionPreparedData,
                 reactionType: reaction.serviceAction
             };
             workerQueue.add(preparedData).catch(e => console.error(`Failed to enqueue job for action id ${params.actionId}, reaction id ${reaction.id}: ${e}`));
