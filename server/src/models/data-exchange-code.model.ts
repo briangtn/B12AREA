@@ -1,6 +1,6 @@
 import {Entity, model, property} from '@loopback/repository';
 
-@model()
+@model({settings: {strict: false, strictObjectIDCoercion: true}})
 export class DataExchangeCode extends Entity {
     @property({
         type: 'string',

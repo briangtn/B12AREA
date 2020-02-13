@@ -3,6 +3,7 @@ import {Area} from './area.model';
 
 @model({
     settings: {
+        strictObjectIDCoercion: true,
         hiddenProperties: ['password', 'validationToken', 'resetToken', 'twoFactorAuthenticationSecret'],
         indexes: {
             uniqueEmail: {
