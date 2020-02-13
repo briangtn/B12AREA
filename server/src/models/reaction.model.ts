@@ -14,7 +14,7 @@ export class Reaction extends Entity {
         type: 'string',
         required: true,
     })
-    serviceAction: string;
+    serviceReaction: string;
     @property({
         type: 'string',
     })
