@@ -74,6 +74,7 @@ tests-docker-compose:
     - echo -ne "AREA_JWT_SECRET_VALUE=verySecretEnv\n" >> .env
     - echo -ne "DB_NAME=$DB_NAME\nDB_USER=$DB_USER\nDB_PASS=$DB_PASS\nDB_PORT=27017\n" >> .env
     - echo -ne "REDIS_PORT=6379\nREDIS_PASSWORD=$REDIS_PASSWORD\nBULL_QUEUE_NAME=$BULL_QUEUE_NAME\n" >> .env
+    - cat .env
     - docker-compose build
     - docker-compose up
     - sleep 10
