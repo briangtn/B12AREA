@@ -111,6 +111,11 @@ It should export default a `ServiceController` class.
   ]
 }
 ```
+Warning if any of your placeholders have the following name:
+```typescript
+[ "actionId", "actionType", "reactionId", "reactionType", "areaId", "areaName", "ownerId", "ownerEmail" ]
+```
+it will be discarded by the application as those as reserved and will be added by the area core functions.
 
 *controller.ts*
 
@@ -149,6 +154,7 @@ static async getConfig(): Promise<ActionConfig> {
 }
 ```
 It should export default a `ActionController` class.
+The function that 'trigger' the action (whether with a webhook or with pooling) should call the `ActionFunction` function from [services-interfaces](../../server/src/services-interfaces.ts) to enqueue the job.
 
 **/{service_name}/reactions/{reaction_name}:**
 
@@ -183,6 +189,8 @@ static async trigger(params: WorkableObject): Promise<void> {
     //        : this leads to loopback not beeing initialized, you can't join the database or retrieve the loopback context
     //        : if you need to access database data it should be done in prepareData
     // This function should only process data and make API calls
+    // to apply the placeholders values to an element use the 'applyPlaceholders' function from 'services-interfaces' with the element as first param and placeholders as second.
+    // it will return the element with the placeholders applied.
 }
 
 static async prepareData(reactionId: string, ctx: Context): Promise<object> {

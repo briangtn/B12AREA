@@ -1,4 +1,4 @@
-import {OperationStatus, ReactionConfig, WorkableObject} from "../../../../services-interfaces";
+import {applyPlaceholders, OperationStatus, ReactionConfig, WorkableObject} from "../../../../services-interfaces";
 import config from './config.json';
 import {Context} from "@loopback/context";
 import {GithubTokenRepository, ReactionRepository} from "../../../../repositories";
@@ -13,6 +13,11 @@ interface StarReactionConfig {
 export default class ReactionController {
     static async trigger(params: WorkableObject): Promise<void> {
         console.log('github.R.star', params); //todo
+        const starReactionConfig : StarReactionConfig = params.reactionOptions as StarReactionConfig;
+        const owner = applyPlaceholders(starReactionConfig.owner, params.actionPlaceholders);
+        const repo = applyPlaceholders(starReactionConfig.repo, params.actionPlaceholders);
+        const githubToken = (params.reactionPreparedData as {githubToken:string}).githubToken;
+        console.log(`Parsed data: owner: ${owner} repo: ${repo} token: ${githubToken}`);
     }
 
     static async prepareData(reactionId: string, ctx: Context): Promise<object> {

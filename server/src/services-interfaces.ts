@@ -113,10 +113,28 @@ export async function ActionFunction(params: TriggerObject, ctx: Context) {
                 console.error(`Failed to enqueue job for action id ${params.actionId}, reaction id ${reaction.id}: ${e}`);
                 continue;
             }
+            const dataPlaceholders = [
+                {name: "actionId", value: action.id!},
+                {name: "actionType", value: action.serviceAction},
+                {name: "reactionId", value: reaction.id!},
+                {name: "reactionType", value: reaction.serviceReaction},
+                {name: "areaId", value: area.id!},
+                {name: "areaName", value: area.name},
+                {name: "ownerId", value: owner.id!},
+                {name: "ownerEmail", value: owner.email},
+            ];
+            const finalPlaceholders = params.placeholders.filter((elem) => {
+                for (const dataPlaceHolder of dataPlaceholders) {
+                    if (dataPlaceHolder.name === elem.name) {
+                        return false;
+                    }
+                }
+                return true;
+            }).concat(dataPlaceholders);
             const preparedData: WorkableObject = {
                 actionId: action.id!,
                 actionType: action.serviceAction,
-                actionPlaceholders: params.placeholders,
+                actionPlaceholders: finalPlaceholders,
                 areaId: area.id!,
                 areaName: area.name,
                 ownerEmail: owner.email,
@@ -131,6 +149,13 @@ export async function ActionFunction(params: TriggerObject, ctx: Context) {
             console.error(`[ServiceResolve]Failed to enqueue job for action id ${params.actionId}: could not find reaction ${reactionName} in service ${serviceName}`);
         }
     }
+}
+
+export function applyPlaceholders(element: string, placeholders: Array<{name: string, value: string}>): string {
+    for (const placeholder of placeholders) {
+        element = element.replace(`{${placeholder.name}}`, placeholder.value);
+    }
+    return element;
 }
 
 export interface ServiceConfig {

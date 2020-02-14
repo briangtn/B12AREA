@@ -68,6 +68,11 @@ export default class ServiceController {
                     const response : { data: GithubWebhookResponse } = await axios.patch(`${GITHUB_API_BASE_URL}/repos/${webhook.owner}/${webhook.repo}/hooks/${webhook.githubId}`, {
                         config: {
                             url: `${API_URL}/services/github/actions/push/webhook/${webhook.hookUuid}`,
+                            // required by github
+                            // eslint-disable-next-line @typescript-eslint/camelcase
+                            content_type: 'json',
+                            // eslint-disable-next-line @typescript-eslint/camelcase
+                            insecure_ssl: '0'
                         }
                     }, {
                         headers: {

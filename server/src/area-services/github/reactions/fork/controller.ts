@@ -1,4 +1,4 @@
-import {OperationStatus, ReactionConfig, WorkableObject} from "../../../../services-interfaces";
+import {applyPlaceholders, OperationStatus, ReactionConfig, WorkableObject} from "../../../../services-interfaces";
 import config from './config.json';
 import {Context} from "@loopback/context";
 import {GithubTokenRepository, ReactionRepository} from "../../../../repositories";
@@ -14,6 +14,10 @@ export default class ReactionController {
 
     static async trigger(params: WorkableObject): Promise<void> {
         console.log('github.R.fork', params); //todo
+        const forkReactionConfig : ForkReactionConfig = params.reactionOptions as ForkReactionConfig;
+        const owner = applyPlaceholders(forkReactionConfig.owner, params.actionPlaceholders);
+        const repo = applyPlaceholders(forkReactionConfig.repo, params.actionPlaceholders);
+        const githubToken = (params.reactionPreparedData as {githubToken:string}).githubToken;
     }
 
     static async prepareData(reactionId: string, ctx: Context): Promise<object> {
