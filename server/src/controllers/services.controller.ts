@@ -1,10 +1,8 @@
-import {RestBindings, post, param, api, HttpErrors} from '@loopback/rest';
+import {post, param, api, HttpErrors} from '@loopback/rest';
 import {Context, inject} from "@loopback/context";
 import {LoginObject} from "../services-interfaces";
 import {authenticate} from "@loopback/authentication";
 import {OPERATION_SECURITY_SPEC} from "../utils/security-specs";
-import {response200} from "./specs/doc.specs";
-import {User} from "../models";
 import {SecurityBindings, UserProfile} from "@loopback/security";
 
 @api({basePath: '/services', paths: {}})

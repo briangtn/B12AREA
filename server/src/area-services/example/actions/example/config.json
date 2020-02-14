@@ -1,0 +1,18 @@
+{
+  "displayName": "example",
+  "description": "This should be the description of the action",
+  "configSchema": [
+    {
+      "name": "nothing",
+      "description": "This should be the description of the config option",
+      "type": "string|number|boolean",
+      "required": true
+    }
+  ],
+  "placeholders": [
+    {
+      "name": "PlaceholderName",
+      "description": "This should be the description of what this placeholder is and does"
+    }
+  ]
+}

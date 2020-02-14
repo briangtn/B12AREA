@@ -78,6 +78,8 @@ export class AboutController {
             return services;
         }
         for (const serviceName of serviceDirs) {
+            if (serviceName === "example")
+                continue;
             const newService = new Service;
             const serviceControllerPath = path.join(servicesPath, serviceName, 'controller.js');
             try {
