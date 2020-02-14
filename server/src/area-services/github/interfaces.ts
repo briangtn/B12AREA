@@ -15,22 +15,17 @@ export interface GithubWebhookResponse {
 }
 
 export interface GithubCommitBody {
-    sha: string;
     message: string;
     author: {
         name: string;
         email: string;
     }
-    url: string;
-    distinct: boolean;
 }
 
 export interface GithubPushHookBody {
     zen: string;
     ref: string;
-    head: string;
+    after: string;
     before: string;
-    size: number;
-    distinct_size: number;
     commits: GithubCommitBody[];
 }

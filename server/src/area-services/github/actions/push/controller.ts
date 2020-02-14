@@ -60,10 +60,14 @@ export default class ActionController {
         try {
             action = await this.actionRepository.findOne({
                 where: {
-                    serviceAction: 'github.A.push',
-                    options: {
-                        webhookId: webhook.id
-                    }
+                    and: [
+                        {
+                            serviceAction: 'github.A.push'
+                        },
+                        {
+                            "options.webhookId": webhook.id
+                        }
+                    ]
                 }
             }, {strictObjectIDCoercion: true});
         } catch (e) {
@@ -81,15 +85,11 @@ export default class ActionController {
                 },
                 {
                     name: "GitHead",
-                    value: body.head
+                    value: body.after
                 },
                 {
                     name: "GitBefore",
                     value: body.before
-                },
-                {
-                    name: "GitNbCommit",
-                    value: body.size.toString()
                 },
                 {
                     name: "GitLastCommitMessage",

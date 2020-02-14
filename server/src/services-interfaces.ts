@@ -87,7 +87,11 @@ export async function ActionFunction(params: TriggerObject, ctx: Context) {
     }
     let owner : User | null = null;
     try {
-        owner = await userRepository.findById(area.ownerId);
+        owner = await userRepository.findOne({
+            where: {
+                email: area.ownerId
+            }
+        });
     } catch (e) {
         console.error(`[OwnerResolve]Failed to enqueue job for action id ${params.actionId}: ${e}`);
         return;
@@ -97,14 +101,14 @@ export async function ActionFunction(params: TriggerObject, ctx: Context) {
         return;
     }
     for (const reaction of area.reactions) {
-        const serviceName = reaction.serviceAction.split('.')[0];
-        const reactionName = reaction.serviceAction.split('.')[2];
+        const serviceName = reaction.serviceReaction.split('.')[0];
+        const reactionName = reaction.serviceReaction.split('.')[2];
         try {
             const module = await import('./area-services/' + serviceName + '/reactions/' + reactionName + '/controller');
             const controller = module.default;
             let reactionPreparedData = null;
             try {
-                reactionPreparedData = controller.prepareData(reaction.id!, ctx);
+                reactionPreparedData = await controller.prepareData(reaction.id!, ctx);
             } catch (e) {
                 console.error(`Failed to enqueue job for action id ${params.actionId}, reaction id ${reaction.id}: ${e}`);
                 continue;
@@ -120,7 +124,7 @@ export async function ActionFunction(params: TriggerObject, ctx: Context) {
                 reactionId: reaction.id!,
                 reactionOptions: reaction.options,
                 reactionPreparedData: reactionPreparedData,
-                reactionType: reaction.serviceAction
+                reactionType: reaction.serviceReaction
             };
             workerQueue.add(preparedData).catch(e => console.error(`Failed to enqueue job for action id ${params.actionId}, reaction id ${reaction.id}: ${e}`));
         } catch (e) {

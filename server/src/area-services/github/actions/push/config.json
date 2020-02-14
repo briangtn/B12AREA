@@ -29,10 +29,6 @@
       "description": "The SHA of the most recent commit on GitRef before the push"
     },
     {
-      "name": "GitNbCommit",
-      "description": "The number of commits in the push"
-    },
-    {
       "name": "GitLastCommitMessage",
       "description": "The last commit message"
     },
