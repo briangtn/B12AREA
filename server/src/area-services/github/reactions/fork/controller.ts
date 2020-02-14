@@ -1,8 +1,11 @@
 import {applyPlaceholders, OperationStatus, ReactionConfig, WorkableObject} from "../../../../services-interfaces";
 import config from './config.json';
+import axios from 'axios';
 import {Context} from "@loopback/context";
 import {GithubTokenRepository, ReactionRepository} from "../../../../repositories";
 import {GithubToken, Reaction} from "../../../../models";
+
+const GITHUB_API_BASE_URL = 'https://api.github.com';
 
 interface ForkReactionConfig {
     userId: string;
@@ -13,11 +16,20 @@ interface ForkReactionConfig {
 export default class ReactionController {
 
     static async trigger(params: WorkableObject): Promise<void> {
-        console.log('github.R.fork', params); //todo
         const forkReactionConfig : ForkReactionConfig = params.reactionOptions as ForkReactionConfig;
         const owner = applyPlaceholders(forkReactionConfig.owner, params.actionPlaceholders);
         const repo = applyPlaceholders(forkReactionConfig.repo, params.actionPlaceholders);
         const githubToken = (params.reactionPreparedData as {githubToken:string}).githubToken;
+        try {
+            await axios.post(`${GITHUB_API_BASE_URL}/repos/${owner}/${repo}/forks`, {}, {
+                headers: {
+                    Authorization: `token ${githubToken}`
+                }
+            });
+        } catch (e) {
+            console.debug(`Failed to fork repository ${owner} ${repo}`, e);
+            return;
+        }
     }
 
     static async prepareData(reactionId: string, ctx: Context): Promise<object> {
@@ -103,7 +115,7 @@ export default class ReactionController {
         }
     }
 
-    static getConfig(): ReactionConfig {
+    static async getConfig(): Promise<ReactionConfig> {
         return config as ReactionConfig;
     }
 }

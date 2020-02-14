@@ -66,7 +66,7 @@ Controller class must be exported as default class
 This controller can be used as a [loopback 4 controllers](https://loopback.io/doc/en/lb4/Controllers.html).
 It should implement the following static methods:
 ```typescript
-static async start(): Promise<void> {
+static async start(ctx: Context): Promise<void> {
     // this function will be called on service start on time per API launch
     // it can be used to update existing webhooks of database to current api url for example
     // WARNING: this will NOT be called on a worker
@@ -78,7 +78,7 @@ static async login(params: LoginObject): Promise<string> {
     // at the end of redirections should redirect to params.redirectUrl with a query param 'code' that can be exchanged
 }
 
-static async getConfig(): Promise<ActionConfig> {
+static async getConfig(): Promise<ServiceConfig> {
     // should return the config of this service
 }
 ```
@@ -106,7 +106,7 @@ It should export default a `ServiceController` class.
   "placeholders": [
     {
       "name": "tweet",
-      "description": "this action is triggered when a tweet from @username is published"
+      "description": "this will contain the tweet"
     }
   ]
 }

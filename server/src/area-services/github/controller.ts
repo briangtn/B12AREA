@@ -137,7 +137,7 @@ export default class ServiceController {
         return githubRedirectUrl;
     }
 
-    static getConfig(): ServiceConfig {
+    static async getConfig(): Promise<ServiceConfig> {
         return config;
     }
 

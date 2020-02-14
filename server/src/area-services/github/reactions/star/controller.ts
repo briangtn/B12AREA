@@ -3,6 +3,9 @@ import config from './config.json';
 import {Context} from "@loopback/context";
 import {GithubTokenRepository, ReactionRepository} from "../../../../repositories";
 import {GithubToken, Reaction} from "../../../../models";
+import axios from "axios";
+
+const GITHUB_API_BASE_URL = 'https://api.github.com';
 
 interface StarReactionConfig {
     userId: string;
@@ -12,12 +15,21 @@ interface StarReactionConfig {
 
 export default class ReactionController {
     static async trigger(params: WorkableObject): Promise<void> {
-        console.log('github.R.star', params); //todo
         const starReactionConfig : StarReactionConfig = params.reactionOptions as StarReactionConfig;
         const owner = applyPlaceholders(starReactionConfig.owner, params.actionPlaceholders);
         const repo = applyPlaceholders(starReactionConfig.repo, params.actionPlaceholders);
         const githubToken = (params.reactionPreparedData as {githubToken:string}).githubToken;
-        console.log(`Parsed data: owner: ${owner} repo: ${repo} token: ${githubToken}`);
+        try {
+            await axios.put(`${GITHUB_API_BASE_URL}/user/starred/${owner}/${repo}`, {}, {
+                headers: {
+                    'Content-Length': '0',
+                    Authorization: `token ${githubToken}`
+                }
+            });
+        } catch (e) {
+            console.debug(`Failed to star repository ${owner} ${repo}`, e);
+            return;
+        }
     }
 
     static async prepareData(reactionId: string, ctx: Context): Promise<object> {
@@ -103,7 +115,7 @@ export default class ReactionController {
         }
     }
 
-    static getConfig(): ReactionConfig {
+    static async getConfig(): Promise<ReactionConfig> {
         return config as ReactionConfig;
     }
 }

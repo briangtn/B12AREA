@@ -308,7 +308,7 @@ export default class ActionController {
         return { success: true, options: pushActionConfig }
     }
 
-    static getConfig(): ActionConfig {
+    static async getConfig(): Promise<ActionConfig> {
         return config as ActionConfig;
     }
 }
