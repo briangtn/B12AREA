@@ -2,7 +2,6 @@ package com.b12powered.area.activities
 
 import android.content.Context
 import android.content.Intent
-import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.KeyEvent
@@ -14,7 +13,6 @@ import com.b12powered.area.R
 import com.b12powered.area.api.ApiClient
 import com.b12powered.area.fragments.SettingsFragment
 import kotlinx.android.synthetic.main.activity_login.*
-import com.b12powered.area.activities.HomeActivity
 
 /**
  * The activity where the user can login to application
@@ -92,16 +90,23 @@ class LoginActivity : AppCompatActivity() {
      * Make a login request to api, using [email] and [password]. If the call is successful, redirect the user to the appropriate page, if not display a toast with the error
      */
     private fun login(email: String, password: String) {
-        val intent = Intent(this, HomeActivity::class.java)
-        finish()
-        startActivity(intent)
         ApiClient(this)
             .login(email, password) { user, message ->
                 if (user != null) {
+                    val sharedPreferences = getSharedPreferences("com.b12powered.area", Context.MODE_PRIVATE)
+                    val editor = sharedPreferences.edit()
+
+                    editor.putString("jwt-token", user.token)
+                    editor.apply()
+
                     if (user.require2fa) {
-                        //TODO redirect tot 2fa page
+                        val intent = Intent(this, TwoFAActivity::class.java)
+                        finish()
+                        startActivity(intent)
                     } else {
-                        //TODO redirect to homepage
+                        val intent = Intent(this, HomeActivity::class.java)
+                        finish()
+                        startActivity(intent)
                     }
                 } else {
                     Toast.makeText(
