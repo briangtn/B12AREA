@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  namespace: __ENVIRONMENT_SLUG__-area
+  name: __ENVIRONMENT_SLUG__-area-db
+  labels:
+    app: __ENVIRONMENT_SLUG__-area-db
+    ref: __ENVIRONMENT_SLUG__
+data:
+  MONGO_INITDB_DATABASE: "__DB_NAME__"

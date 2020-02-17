@@ -1,0 +1,581 @@
+image: docker:19.03.0
+
+services:
+  - docker:19.03.0-dind
+
+stages:
+  - tests
+  - build
+  - deploy-namespace
+  - deploy-database
+  - deploy-backend
+  - deploy-apk
+  - deploy-web
+
+variables:
+  # MANDATORY
+  DOCKER_HOST: tcp://localhost:2375
+  # MANDATORY
+  DOCKER_TLS_CERTDIR: ""
+
+# ------------------------------------------------------TESTS----------------------------------------------------------
+
+tests-api:
+  stage: tests
+  only:
+    - merge_requests
+    - master
+    - develop
+  script:
+    - apk add --update nodejs npm
+    - docker run --name db -p 27017:27017 -d mongo:4.0.14
+    - docker start db
+    - cd server
+    - npm install
+    - npm test
+
+tests-web:
+  stage: tests
+  only:
+    - merge_requests
+    - master
+    - develop
+  script:
+    - apk add --update nodejs npm
+    - cd web
+    - npm install
+    - npm test
+
+tests-mobile:
+  image: openjdk:8
+  stage: tests
+  only:
+    - merge_requests
+    - master
+    - develop
+  script:
+    - export ANDROID_HOME=/opt/android-sdk-linux
+    - mkdir -p ${ANDROID_HOME} && cd ${ANDROID_HOME} && wget -q https://dl.google.com/android/repository/sdk-tools-linux-3859397.zip -O android_tools.zip && unzip android_tools.zip && rm android_tools.zip && cd -
+    - export PATH=${PATH}:${ANDROID_HOME}/tools:${ANDROID_HOME}/tools/bin:${ANDROID_HOME}/platform-tools
+    - yes | sdkmanager --licenses && echo willNotRun
+    - cd mobile
+    - ./gradlew test
+
+tests-docker-compose:
+  stage: tests
+  only:
+    - merge_requests
+    - master
+    - develop
+  script:
+    - apk update && apk add --no-cache py-pip curl python-dev libffi-dev openssl-dev gcc libc-dev make
+    - pip install docker-compose
+    - touch .env
+    - echo -ne "AREA_JWT_SECRET_VALUE=verySecretEnv\n" >> .env
+    - echo -ne "DB_NAME=$DB_NAME\nDB_USER=$DB_USER\nDB_PASS=$DB_PASS\nDB_PORT=27017\n" >> .env
+    - echo -ne "REDIS_PORT=6379\nREDIS_PASSWORD=$REDIS_PASSWORD\nBULL_QUEUE_NAME=$BULL_QUEUE_NAME\n" >> .env
+    - cat .env
+    - docker-compose build
+    - docker-compose up -d
+    - sleep 10
+    - "curl --GET --silent --output /dev/null --write-out \"API code: %{http_code}\n\" 127.0.0.1:8080/readinessProbe"
+    - "curl --GET --silent --output /dev/null --write-out \"WEB code: %{http_code}\n\" 127.0.0.1:8081/readinessProbe"
+    - "curl --GET --silent --output /dev/null --write-out \"APK code: %{http_code}\nDownloaded %{size_download} bytes\n\" 127.0.0.1:8081/readinessProbe"
+
+# ------------------------------------------------------BUILD----------------------------------------------------------
+
+# PROD
+build-production-backend:
+  stage: build
+  only:
+    refs:
+      - master
+  script:
+    - docker login -u ${DOCKER_USER} -p ${DOCKER_PASSWORD}
+    - docker build -t ${DOCKER_REGISTRY_IMAGE_NAME_AREA_API}:${CI_COMMIT_SHORT_SHA} ./server
+    - docker tag ${DOCKER_REGISTRY_IMAGE_NAME_AREA_API}:${CI_COMMIT_SHORT_SHA} ${DOCKER_REGISTRY_IMAGE_NAME_AREA_API}:latest
+    - docker push ${DOCKER_REGISTRY_IMAGE_NAME_AREA_API}:${CI_COMMIT_SHORT_SHA}
+    - docker push ${DOCKER_REGISTRY_IMAGE_NAME_AREA_API}:latest
+
+build-production-web-client:
+  stage: build
+  only:
+    refs:
+      - master
+  script:
+    - docker login -u ${DOCKER_USER} -p ${DOCKER_PASSWORD}
+    - docker build -t ${DOCKER_REGISTRY_IMAGE_NAME_AREA_WEB_CLIENT}:${CI_COMMIT_SHORT_SHA} ./web
+    - docker tag ${DOCKER_REGISTRY_IMAGE_NAME_AREA_WEB_CLIENT}:${CI_COMMIT_SHORT_SHA} ${DOCKER_REGISTRY_IMAGE_NAME_AREA_WEB_CLIENT}:latest
+    - docker push ${DOCKER_REGISTRY_IMAGE_NAME_AREA_WEB_CLIENT}:${CI_COMMIT_SHORT_SHA}
+    - docker push ${DOCKER_REGISTRY_IMAGE_NAME_AREA_WEB_CLIENT}:latest
+
+
+build-production-apk-builder:
+  stage: build
+  only:
+    refs:
+      - master
+  script:
+    - docker login -u ${DOCKER_USER} -p ${DOCKER_PASSWORD}
+    - docker build -t ${DOCKER_REGISTRY_IMAGE_NAME_AREA_APK_BUILDER}:${CI_COMMIT_SHORT_SHA} ./mobile
+    - docker tag ${DOCKER_REGISTRY_IMAGE_NAME_AREA_APK_BUILDER}:${CI_COMMIT_SHORT_SHA} ${DOCKER_REGISTRY_IMAGE_NAME_AREA_APK_BUILDER}:latest
+    - docker push ${DOCKER_REGISTRY_IMAGE_NAME_AREA_APK_BUILDER}:${CI_COMMIT_SHORT_SHA}
+    - docker push ${DOCKER_REGISTRY_IMAGE_NAME_AREA_APK_BUILDER}:latest
+
+# DEV
+
+build-development-backend:
+  stage: build
+  only:
+    refs:
+      - develop
+  script:
+    - docker login -u ${DOCKER_USER} -p ${DOCKER_PASSWORD}
+    - docker build -t ${DEV_DOCKER_REGISTRY_IMAGE_NAME_AREA_API}:${CI_COMMIT_SHORT_SHA} ./server
+    - docker tag ${DEV_DOCKER_REGISTRY_IMAGE_NAME_AREA_API}:${CI_COMMIT_SHORT_SHA} ${DEV_DOCKER_REGISTRY_IMAGE_NAME_AREA_API}:latest
+    - docker push ${DEV_DOCKER_REGISTRY_IMAGE_NAME_AREA_API}:${CI_COMMIT_SHORT_SHA}
+    - docker push ${DEV_DOCKER_REGISTRY_IMAGE_NAME_AREA_API}:latest
+
+build-development-web-client:
+  stage: build
+  only:
+    refs:
+      - develop
+  script:
+    - docker login -u ${DOCKER_USER} -p ${DOCKER_PASSWORD}
+    - docker build -t ${DEV_DOCKER_REGISTRY_IMAGE_NAME_AREA_WEB_CLIENT}:${CI_COMMIT_SHORT_SHA} ./web
+    - docker tag ${DEV_DOCKER_REGISTRY_IMAGE_NAME_AREA_WEB_CLIENT}:${CI_COMMIT_SHORT_SHA} ${DEV_DOCKER_REGISTRY_IMAGE_NAME_AREA_WEB_CLIENT}:latest
+    - docker push ${DEV_DOCKER_REGISTRY_IMAGE_NAME_AREA_WEB_CLIENT}:${CI_COMMIT_SHORT_SHA}
+    - docker push ${DEV_DOCKER_REGISTRY_IMAGE_NAME_AREA_WEB_CLIENT}:latest
+
+build-development-apk-builder:
+  stage: build
+  only:
+    refs:
+      - develop
+  script:
+    - docker login -u ${DOCKER_USER} -p ${DOCKER_PASSWORD}
+    - docker build -t ${DEV_DOCKER_REGISTRY_IMAGE_NAME_AREA_APK_BUILDER}:${CI_COMMIT_SHORT_SHA} ./mobile
+    - docker tag ${DEV_DOCKER_REGISTRY_IMAGE_NAME_AREA_APK_BUILDER}:${CI_COMMIT_SHORT_SHA} ${DEV_DOCKER_REGISTRY_IMAGE_NAME_AREA_APK_BUILDER}:latest
+    - docker push ${DEV_DOCKER_REGISTRY_IMAGE_NAME_AREA_APK_BUILDER}:${CI_COMMIT_SHORT_SHA}
+    - docker push ${DEV_DOCKER_REGISTRY_IMAGE_NAME_AREA_APK_BUILDER}:latest
+
+# ------------------------------------------------------DEPLOY---------------------------------------------------------
+
+# PROD
+
+deploy-production-namespace:
+  stage: deploy-namespace
+  only:
+    refs:
+      - master
+  variables:
+    DEPLOYMENT_ENV: "production"
+  script:
+    - apk add --update coreutils
+    - apk update && apk add --no-cache curl
+    - curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
+    - chmod +x ./kubectl && mv ./kubectl /usr/local/bin/kubectl
+    - mkdir -p $HOME/.kube
+    - echo -n ${KUBE_CONFIG} | base64 -d > $HOME/.kube/config
+    - kubectl config view
+    - cd k8s
+    - sed -i "s/__ENVIRONMENT_SLUG__/${DEPLOYMENT_ENV}/" area.namespace.yaml
+    - kubectl apply -f area.namespace.yaml
+
+deploy-production-database:
+  stage: deploy-database
+  only:
+    refs:
+      - master
+  variables:
+    DEPLOYMENT_ENV: "production"
+  script:
+    - apk add --update coreutils
+    - apk update && apk add --no-cache curl
+    - curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
+    - chmod +x ./kubectl && mv ./kubectl /usr/local/bin/kubectl
+    - mkdir -p $HOME/.kube
+    - echo -n ${KUBE_CONFIG} | base64 -d > $HOME/.kube/config
+    - kubectl config view
+    - cd k8s/db
+    - sed -i "s/__ENVIRONMENT_SLUG__/${DEPLOYMENT_ENV}/" area.db.configmap.yaml area.db.secrets.yaml area.db.volume.yaml area.db.deployment.yaml area.db.service.yaml
+    - sed -i "s/__DB_NAME__/${DB_NAME}/" area.db.configmap.yaml
+    - sed -i "s/__DB_USER__/`echo -ne ${DB_USER} | base64 -w 0`/" area.db.secrets.yaml
+    - sed -i "s/__DB_PASSWORD__/`echo -ne ${DB_PASSWORD} | base64 -w 0`/" area.db.secrets.yaml
+    - kubectl apply -f area.db.configmap.yaml -f area.db.secrets.yaml
+    - kubectl apply -f area.db.volume.yaml
+    - kubectl apply -f area.db.deployment.yaml
+    - kubectl apply -f area.db.service.yaml
+
+deploy-production-redis:
+  stage: deploy-database
+  only:
+    refs:
+      - master
+  variables:
+    DEPLOYMENT_ENV: "production"
+  script:
+    - apk add --update coreutils
+    - apk update && apk add --no-cache curl
+    - curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
+    - chmod +x ./kubectl && mv ./kubectl /usr/local/bin/kubectl
+    - mkdir -p $HOME/.kube
+    - echo -n ${KUBE_CONFIG} | base64 -d > $HOME/.kube/config
+    - kubectl config view
+    - cd k8s/redis
+    - sed -i "s/__ENVIRONMENT_SLUG__/${DEPLOYMENT_ENV}/" area.redis.volume.yaml area.redis.deployment.yaml area.redis.service.yaml
+    - sed -i "s/__REDIS_PASSWORD__/${REDIS_PASSWORD}/" area.redis.deployment.yaml
+    - kubectl apply -f area.redis.volume.yaml
+    - kubectl apply -f area.redis.deployment.yaml
+    - kubectl apply -f area.redis.service.yaml
+
+deploy-production-api:
+  stage: deploy-backend
+  only:
+    refs:
+      - master
+  environment:
+    name: production-api
+    url: https://api.area.b12powered.com
+  variables:
+    DEPLOYMENT_ENV: "production"
+    DEPLOYMENT_HOST: "api.area.b12powered.com"
+  script:
+    - apk add --update coreutils
+    - apk update && apk add --no-cache curl
+    - curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
+    - chmod +x ./kubectl && mv ./kubectl /usr/local/bin/kubectl
+    - mkdir -p $HOME/.kube
+    - echo -n ${KUBE_CONFIG} | base64 -d > $HOME/.kube/config
+    - kubectl config view
+    - cd k8s/api
+    - sed -i "s/__ENVIRONMENT_SLUG__/${DEPLOYMENT_ENV}/" area.api.configmap.yaml area.api.deployment.yaml area.api.ingress.yaml area.api.secrets.yaml area.api.service.yaml
+    - sed -i "s~__REGISTRY_IMAGE__~${DOCKER_REGISTRY_IMAGE_NAME_AREA_API}~" area.api.deployment.yaml
+    - sed -i "s/__REGISTRY_VERSION__/${CI_COMMIT_SHORT_SHA}/" area.api.deployment.yaml
+    - sed -i "s/__DB_NAME__/${DB_NAME}/" area.api.configmap.yaml
+    - sed -i "s/__SMTP_HOST__/${SMTP_HOST}/" area.api.configmap.yaml
+    - sed -i "s/__SMTP_SECURE__/${SMTP_SECURE}/" area.api.configmap.yaml
+    - sed -i "s/__SMTP_PORT__/${SMTP_PORT}/" area.api.configmap.yaml
+    - sed -i "s/__SMTP_REJECT_UNAUTHORIZED__/${SMTP_REJECT_UNAUTHORIZED}/" area.api.configmap.yaml
+    - sed -i "s/__TWO_FACTOR_AUTHENTICATION_ISSUER_NAME__/${TWO_FACTOR_AUTHENTICATION_ISSUER_NAME}/" area.api.configmap.yaml
+    - sed -i "s/__AREA_JWT_TTL__/${AREA_JWT_TTL}/" area.api.configmap.yaml
+    - sed -i "s/__BULL_QUEUE_NAME__/${BULL_QUEUE_NAME}/" area.api.configmap.yaml
+    - sed -i "s/__API_URL__/https:\/\/${DEPLOYMENT_HOST}/" area.api.configmap.yaml
+    - sed -i "s/__DB_USER__/`echo -ne ${DB_USER} | base64 -w 0`/" area.api.secrets.yaml
+    - sed -i "s/__DB_PASSWORD__/`echo -ne ${DB_PASSWORD} | base64 -w 0`/" area.api.secrets.yaml
+    - sed -i "s/__SMTP_USER__/`echo -ne ${SMTP_USER} | base64 -w 0`/" area.api.secrets.yaml
+    - sed -i "s/__SMTP_PASS__/`echo -ne ${SMTP_PASS} | base64 -w 0`/" area.api.secrets.yaml
+    - sed -i "s/__AREA_JWT_SECRET_VALUE__/`echo -ne ${AREA_JWT_SECRET_VALUE} | base64 -w 0`/" area.api.secrets.yaml
+    - sed -i "s/__REDIS_PASSWORD__/`echo -ne ${REDIS_PASSWORD} | base64 -w 0`/" area.api.secrets.yaml
+    - sed -i "s/__GOOGLE_CLIENT_ID__/`echo -ne ${PROD_GOOGLE_CLIENT_ID} | base64 -w 0`/" area.api.secrets.yaml
+    - sed -i "s/__GOOGLE_CLIENT_SECRET__/`echo -ne ${PROD_GOOGLE_CLIENT_SECRET} | base64 -w 0`/" area.api.secrets.yaml
+    - sed -i "s/__TWITTER_CONSUMER_KEY__/`echo -ne ${PROD_TWITTER_CONSUMER_KEY} | base64 -w 0`/" area.api.secrets.yaml
+    - sed -i "s/__TWITTER_CONSUMER_SECRET__/`echo -ne ${PROD_TWITTER_CONSUMER_SECRET} | base64 -w 0`/" area.api.secrets.yaml
+    - sed -i "s/__GITHUB_CLIENT_ID__/`echo -ne ${PROD_GITHUB_CLIENT_ID} | base64 -w 0`/" area.api.secrets.yaml
+    - sed -i "s/__GITHUB_CLIENT_SECRET__/`echo -ne ${PROD_GITHUB_CLIENT_SECRET} | base64 -w 0`/" area.api.secrets.yaml
+    - sed -i "s/__INGRESS_HOST__/${DEPLOYMENT_HOST}/" area.api.ingress.yaml
+    - kubectl apply -f area.api.configmap.yaml -f area.api.secrets.yaml
+    - kubectl apply -f area.api.deployment.yaml
+    - kubectl apply -f area.api.service.yaml
+    - kubectl apply -f area.api.ingress.yaml
+
+deploy-production-worker:
+  stage: deploy-backend
+  only:
+    refs:
+      - master
+  variables:
+    DEPLOYMENT_ENV: "production"
+    DEPLOYMENT_HOST: "api.area.b12powered.com"
+  script:
+    - apk add --update coreutils
+    - apk update && apk add --no-cache curl
+    - curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
+    - chmod +x ./kubectl && mv ./kubectl /usr/local/bin/kubectl
+    - mkdir -p $HOME/.kube
+    - echo -n ${KUBE_CONFIG} | base64 -d > $HOME/.kube/config
+    - kubectl config view
+    - cd k8s/worker
+    - sed -i "s/__ENVIRONMENT_SLUG__/${DEPLOYMENT_ENV}/" area.worker.configmap.yaml area.worker.deployment.yaml area.worker.secrets.yaml
+    - sed -i "s~__REGISTRY_IMAGE__~${DOCKER_REGISTRY_IMAGE_NAME_AREA_API}~" area.worker.deployment.yaml
+    - sed -i "s/__REGISTRY_VERSION__/${CI_COMMIT_SHORT_SHA}/" area.worker.deployment.yaml
+    - sed -i "s/__DB_NAME__/${DB_NAME}/" area.worker.configmap.yaml
+    - sed -i "s/__SMTP_HOST__/${SMTP_HOST}/" area.worker.configmap.yaml
+    - sed -i "s/__SMTP_SECURE__/${SMTP_SECURE}/" area.worker.configmap.yaml
+    - sed -i "s/__SMTP_PORT__/${SMTP_PORT}/" area.worker.configmap.yaml
+    - sed -i "s/__SMTP_REJECT_UNAUTHORIZED__/${SMTP_REJECT_UNAUTHORIZED}/" area.worker.configmap.yaml
+    - sed -i "s/__TWO_FACTOR_AUTHENTICATION_ISSUER_NAME__/${TWO_FACTOR_AUTHENTICATION_ISSUER_NAME}/" area.worker.configmap.yaml
+    - sed -i "s/__AREA_JWT_TTL__/${AREA_JWT_TTL}/" area.worker.configmap.yaml
+    - sed -i "s/__BULL_QUEUE_NAME__/${BULL_QUEUE_NAME}/" area.worker.configmap.yaml
+    - sed -i "s/__API_URL__/https:\/\/${DEPLOYMENT_HOST}/" area.worker.configmap.yaml
+    - sed -i "s/__DB_USER__/`echo -ne ${DB_USER} | base64 -w 0`/" area.worker.secrets.yaml
+    - sed -i "s/__DB_PASSWORD__/`echo -ne ${DB_PASSWORD} | base64 -w 0`/" area.worker.secrets.yaml
+    - sed -i "s/__SMTP_USER__/`echo -ne ${SMTP_USER} | base64 -w 0`/" area.worker.secrets.yaml
+    - sed -i "s/__SMTP_PASS__/`echo -ne ${SMTP_PASS} | base64 -w 0`/" area.worker.secrets.yaml
+    - sed -i "s/__AREA_JWT_SECRET_VALUE__/`echo -ne ${AREA_JWT_SECRET_VALUE} | base64 -w 0`/" area.worker.secrets.yaml
+    - sed -i "s/__REDIS_PASSWORD__/`echo -ne ${REDIS_PASSWORD} | base64 -w 0`/" area.worker.secrets.yaml
+    - sed -i "s/__GOOGLE_CLIENT_ID__/`echo -ne ${PROD_GOOGLE_CLIENT_ID} | base64 -w 0`/" area.worker.secrets.yaml
+    - sed -i "s/__GOOGLE_CLIENT_SECRET__/`echo -ne ${PROD_GOOGLE_CLIENT_SECRET} | base64 -w 0`/" area.worker.secrets.yaml
+    - sed -i "s/__TWITTER_CONSUMER_KEY__/`echo -ne ${PROD_TWITTER_CONSUMER_KEY} | base64 -w 0`/" area.worker.secrets.yaml
+    - sed -i "s/__TWITTER_CONSUMER_SECRET__/`echo -ne ${PROD_TWITTER_CONSUMER_SECRET} | base64 -w 0`/" area.worker.secrets.yaml
+    - sed -i "s/__GITHUB_CLIENT_ID__/`echo -ne ${PROD_GITHUB_CLIENT_ID} | base64 -w 0`/" area.worker.secrets.yaml
+    - sed -i "s/__GITHUB_CLIENT_SECRET__/`echo -ne ${PROD_GITHUB_CLIENT_SECRET} | base64 -w 0`/" area.worker.secrets.yaml
+    - kubectl apply -f area.worker.configmap.yaml -f area.worker.secrets.yaml
+    - kubectl apply -f area.worker.deployment.yaml
+
+deploy-production-apk:
+  stage: deploy-apk
+  only:
+    refs:
+      - master
+  script:
+    - apk add --update coreutils
+    - apk update && apk add --no-cache openssh
+    - docker login -u ${DOCKER_USER} -p ${DOCKER_PASSWORD}
+    - docker pull ${DOCKER_REGISTRY_IMAGE_NAME_AREA_APK_BUILDER}:${CI_COMMIT_SHORT_SHA}
+    - mkdir apk
+    - docker run --name apkbuilder -v $(pwd)/apk/:/data/apk ${DOCKER_REGISTRY_IMAGE_NAME_AREA_APK_BUILDER}:${CI_COMMIT_SHORT_SHA}
+    - mkdir ~/.ssh
+    - echo -ne ${SSH_KEY} | base64 -d >> ~/.ssh/id_rsa
+    - chmod 400 ~/.ssh/id_rsa
+    - ssh-keyscan -H 62.210.152.215 >> ~/.ssh/known_hosts
+    - scp -i ~/.ssh/id_rsa apk/area.apk root@62.210.152.215:/home/develop/kubernetes/area/volumes/productionAPKData/area.apk
+
+deploy-production-web:
+  stage: deploy-web
+  only:
+    refs:
+      - master
+  environment:
+    name: production-web
+    url: https://area.b12powered.com
+  variables:
+    DEPLOYMENT_ENV: "production"
+    DEPLOYMENT_HOST: "area.b12powered.com"
+  script:
+    - apk add --update coreutils
+    - apk update && apk add --no-cache curl
+    - curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
+    - chmod +x ./kubectl && mv ./kubectl /usr/local/bin/kubectl
+    - mkdir -p $HOME/.kube
+    - echo -n ${KUBE_CONFIG} | base64 -d > $HOME/.kube/config
+    - kubectl config view
+    - cd k8s/web
+    - sed -i "s/__ENVIRONMENT_SLUG__/${DEPLOYMENT_ENV}/" area.web.deployment.yaml area.web.ingress.yaml area.web.service.yaml area.web.volume.yaml
+    - sed -i "s~__REGISTRY_IMAGE__~${DOCKER_REGISTRY_IMAGE_NAME_AREA_WEB_CLIENT}~" area.web.deployment.yaml
+    - sed -i "s/__REGISTRY_VERSION__/${CI_COMMIT_SHORT_SHA}/" area.web.deployment.yaml
+    - sed -i "s/__INGRESS_HOST__/${DEPLOYMENT_HOST}/" area.web.ingress.yaml
+    - kubectl apply -f area.web.volume.yaml
+    - kubectl apply -f area.web.deployment.yaml
+    - kubectl apply -f area.web.service.yaml
+    - kubectl apply -f area.web.ingress.yaml
+
+# DEV
+
+deploy-development-namespace:
+  stage: deploy-namespace
+  only:
+    refs:
+      - develop
+  variables:
+    DEPLOYMENT_ENV: "development"
+  script:
+    - apk add --update coreutils
+    - apk update && apk add --no-cache curl
+    - curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
+    - chmod +x ./kubectl && mv ./kubectl /usr/local/bin/kubectl
+    - mkdir -p $HOME/.kube
+    - echo -n ${KUBE_CONFIG} | base64 -d > $HOME/.kube/config
+    - kubectl config view
+    - cd k8s
+    - sed -i "s/__ENVIRONMENT_SLUG__/${DEPLOYMENT_ENV}/" area.namespace.yaml
+    - kubectl apply -f area.namespace.yaml
+
+deploy-development-database:
+  stage: deploy-database
+  only:
+    refs:
+      - develop
+  variables:
+    DEPLOYMENT_ENV: "development"
+  script:
+    - apk add --update coreutils
+    - apk update && apk add --no-cache curl
+    - curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
+    - chmod +x ./kubectl && mv ./kubectl /usr/local/bin/kubectl
+    - mkdir -p $HOME/.kube
+    - echo -n ${KUBE_CONFIG} | base64 -d > $HOME/.kube/config
+    - kubectl config view
+    - cd k8s/db
+    - sed -i "s/__ENVIRONMENT_SLUG__/${DEPLOYMENT_ENV}/" area.db.configmap.yaml area.db.secrets.yaml area.db.volume.yaml area.db.deployment.yaml area.db.service.yaml
+    - sed -i "s/__DB_NAME__/${DB_NAME}/" area.db.configmap.yaml
+    - sed -i "s/__DB_USER__/`echo -ne ${DB_USER} | base64 -w 0`/" area.db.secrets.yaml
+    - sed -i "s/__DB_PASSWORD__/`echo -ne ${DB_PASSWORD} | base64 -w 0`/" area.db.secrets.yaml
+    - kubectl apply -f area.db.configmap.yaml -f area.db.secrets.yaml
+    - kubectl apply -f area.db.volume.yaml
+    - kubectl apply -f area.db.deployment.yaml
+    - kubectl apply -f area.db.service.yaml
+
+deploy-development-redis:
+  stage: deploy-database
+  only:
+    refs:
+      - develop
+  variables:
+    DEPLOYMENT_ENV: "development"
+  script:
+    - apk add --update coreutils
+    - apk update && apk add --no-cache curl
+    - curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
+    - chmod +x ./kubectl && mv ./kubectl /usr/local/bin/kubectl
+    - mkdir -p $HOME/.kube
+    - echo -n ${KUBE_CONFIG} | base64 -d > $HOME/.kube/config
+    - kubectl config view
+    - cd k8s/redis
+    - sed -i "s/__ENVIRONMENT_SLUG__/${DEPLOYMENT_ENV}/" area.redis.volume.yaml area.redis.deployment.yaml area.redis.service.yaml
+    - sed -i "s/__REDIS_PASSWORD__/${REDIS_PASSWORD}/" area.redis.deployment.yaml
+    - kubectl apply -f area.redis.volume.yaml
+    - kubectl apply -f area.redis.deployment.yaml
+    - kubectl apply -f area.redis.service.yaml
+
+deploy-development-api:
+  stage: deploy-backend
+  only:
+    refs:
+      - develop
+  environment:
+    name: development-api
+    url: https://dev.api.area.b12powered.com
+  variables:
+    DEPLOYMENT_ENV: "development"
+    DEPLOYMENT_HOST: "dev.api.area.b12powered.com"
+  script:
+    - apk add --update coreutils
+    - apk update && apk add --no-cache curl
+    - curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
+    - chmod +x ./kubectl && mv ./kubectl /usr/local/bin/kubectl
+    - mkdir -p $HOME/.kube
+    - echo -n ${KUBE_CONFIG} | base64 -d > $HOME/.kube/config
+    - kubectl config view
+    - cd k8s/api
+    - sed -i "s/__ENVIRONMENT_SLUG__/${DEPLOYMENT_ENV}/" area.api.configmap.yaml area.api.deployment.yaml area.api.ingress.yaml area.api.secrets.yaml area.api.service.yaml
+    - sed -i "s~__REGISTRY_IMAGE__~${DEV_DOCKER_REGISTRY_IMAGE_NAME_AREA_API}~" area.api.deployment.yaml
+    - sed -i "s/__REGISTRY_VERSION__/${CI_COMMIT_SHORT_SHA}/" area.api.deployment.yaml
+    - sed -i "s/__DB_NAME__/${DB_NAME}/" area.api.configmap.yaml
+    - sed -i "s/__SMTP_HOST__/${SMTP_HOST}/" area.api.configmap.yaml
+    - sed -i "s/__SMTP_SECURE__/${SMTP_SECURE}/" area.api.configmap.yaml
+    - sed -i "s/__SMTP_PORT__/${SMTP_PORT}/" area.api.configmap.yaml
+    - sed -i "s/__SMTP_REJECT_UNAUTHORIZED__/${SMTP_REJECT_UNAUTHORIZED}/" area.api.configmap.yaml
+    - sed -i "s/__TWO_FACTOR_AUTHENTICATION_ISSUER_NAME__/${TWO_FACTOR_AUTHENTICATION_ISSUER_NAME}/" area.api.configmap.yaml
+    - sed -i "s/__AREA_JWT_TTL__/${AREA_JWT_TTL}/" area.api.configmap.yaml
+    - sed -i "s/__BULL_QUEUE_NAME__/${BULL_QUEUE_NAME}/" area.api.configmap.yaml
+    - sed -i "s/__API_URL__/https:\/\/${DEPLOYMENT_HOST}/" area.api.configmap.yaml
+    - sed -i "s/__DB_USER__/`echo -ne ${DB_USER} | base64 -w 0`/" area.api.secrets.yaml
+    - sed -i "s/__DB_PASSWORD__/`echo -ne ${DB_PASSWORD} | base64 -w 0`/" area.api.secrets.yaml
+    - sed -i "s/__SMTP_USER__/`echo -ne ${SMTP_USER} | base64 -w 0`/" area.api.secrets.yaml
+    - sed -i "s/__SMTP_PASS__/`echo -ne ${SMTP_PASS} | base64 -w 0`/" area.api.secrets.yaml
+    - sed -i "s/__AREA_JWT_SECRET_VALUE__/`echo -ne ${AREA_JWT_SECRET_VALUE} | base64 -w 0`/" area.api.secrets.yaml
+    - sed -i "s/__REDIS_PASSWORD__/`echo -ne ${REDIS_PASSWORD} | base64 -w 0`/" area.api.secrets.yaml
+    - sed -i "s/__GOOGLE_CLIENT_ID__/`echo -ne ${DEV_GOOGLE_CLIENT_ID} | base64 -w 0`/" area.api.secrets.yaml
+    - sed -i "s/__GOOGLE_CLIENT_SECRET__/`echo -ne ${DEV_GOOGLE_CLIENT_SECRET} | base64 -w 0`/" area.api.secrets.yaml
+    - sed -i "s/__TWITTER_CONSUMER_KEY__/`echo -ne ${DEV_TWITTER_CONSUMER_KEY} | base64 -w 0`/" area.api.secrets.yaml
+    - sed -i "s/__TWITTER_CONSUMER_SECRET__/`echo -ne ${DEV_TWITTER_CONSUMER_SECRET} | base64 -w 0`/" area.api.secrets.yaml
+    - sed -i "s/__GITHUB_CLIENT_ID__/`echo -ne ${DEV_GITHUB_CLIENT_ID} | base64 -w 0`/" area.api.secrets.yaml
+    - sed -i "s/__GITHUB_CLIENT_SECRET__/`echo -ne ${DEV_GITHUB_CLIENT_SECRET} | base64 -w 0`/" area.api.secrets.yaml
+    - sed -i "s/__INGRESS_HOST__/${DEPLOYMENT_HOST}/" area.api.ingress.yaml
+    - kubectl apply -f area.api.configmap.yaml -f area.api.secrets.yaml
+    - kubectl apply -f area.api.deployment.yaml
+    - kubectl apply -f area.api.service.yaml
+    - kubectl apply -f area.api.ingress.yaml
+
+deploy-development-worker:
+  stage: deploy-backend
+  only:
+    refs:
+      - develop
+  variables:
+    DEPLOYMENT_ENV: "development"
+    DEPLOYMENT_HOST: "dev.api.area.b12powered.com"
+  script:
+    - apk add --update coreutils
+    - apk update && apk add --no-cache curl
+    - curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
+    - chmod +x ./kubectl && mv ./kubectl /usr/local/bin/kubectl
+    - mkdir -p $HOME/.kube
+    - echo -n ${KUBE_CONFIG} | base64 -d > $HOME/.kube/config
+    - kubectl config view
+    - cd k8s/worker
+    - sed -i "s/__ENVIRONMENT_SLUG__/${DEPLOYMENT_ENV}/" area.worker.configmap.yaml area.worker.deployment.yaml area.worker.secrets.yaml
+    - sed -i "s~__REGISTRY_IMAGE__~${DEV_DOCKER_REGISTRY_IMAGE_NAME_AREA_API}~" area.worker.deployment.yaml
+    - sed -i "s/__REGISTRY_VERSION__/${CI_COMMIT_SHORT_SHA}/" area.worker.deployment.yaml
+    - sed -i "s/__DB_NAME__/${DB_NAME}/" area.worker.configmap.yaml
+    - sed -i "s/__SMTP_HOST__/${SMTP_HOST}/" area.worker.configmap.yaml
+    - sed -i "s/__SMTP_SECURE__/${SMTP_SECURE}/" area.worker.configmap.yaml
+    - sed -i "s/__SMTP_PORT__/${SMTP_PORT}/" area.worker.configmap.yaml
+    - sed -i "s/__SMTP_REJECT_UNAUTHORIZED__/${SMTP_REJECT_UNAUTHORIZED}/" area.worker.configmap.yaml
+    - sed -i "s/__TWO_FACTOR_AUTHENTICATION_ISSUER_NAME__/${TWO_FACTOR_AUTHENTICATION_ISSUER_NAME}/" area.worker.configmap.yaml
+    - sed -i "s/__AREA_JWT_TTL__/${AREA_JWT_TTL}/" area.worker.configmap.yaml
+    - sed -i "s/__BULL_QUEUE_NAME__/${BULL_QUEUE_NAME}/" area.worker.configmap.yaml
+    - sed -i "s/__API_URL__/https:\/\/${DEPLOYMENT_HOST}/" area.worker.configmap.yaml
+    - sed -i "s/__DB_USER__/`echo -ne ${DB_USER} | base64 -w 0`/" area.worker.secrets.yaml
+    - sed -i "s/__DB_PASSWORD__/`echo -ne ${DB_PASSWORD} | base64 -w 0`/" area.worker.secrets.yaml
+    - sed -i "s/__SMTP_USER__/`echo -ne ${SMTP_USER} | base64 -w 0`/" area.worker.secrets.yaml
+    - sed -i "s/__SMTP_PASS__/`echo -ne ${SMTP_PASS} | base64 -w 0`/" area.worker.secrets.yaml
+    - sed -i "s/__AREA_JWT_SECRET_VALUE__/`echo -ne ${AREA_JWT_SECRET_VALUE} | base64 -w 0`/" area.worker.secrets.yaml
+    - sed -i "s/__REDIS_PASSWORD__/`echo -ne ${REDIS_PASSWORD} | base64 -w 0`/" area.worker.secrets.yaml
+    - sed -i "s/__GOOGLE_CLIENT_ID__/`echo -ne ${DEV_GOOGLE_CLIENT_ID} | base64 -w 0`/" area.worker.secrets.yaml
+    - sed -i "s/__GOOGLE_CLIENT_SECRET__/`echo -ne ${DEV_GOOGLE_CLIENT_SECRET} | base64 -w 0`/" area.worker.secrets.yaml
+    - sed -i "s/__TWITTER_CONSUMER_KEY__/`echo -ne ${DEV_TWITTER_CONSUMER_KEY} | base64 -w 0`/" area.worker.secrets.yaml
+    - sed -i "s/__TWITTER_CONSUMER_SECRET__/`echo -ne ${DEV_TWITTER_CONSUMER_SECRET} | base64 -w 0`/" area.worker.secrets.yaml
+    - sed -i "s/__GITHUB_CLIENT_ID__/`echo -ne ${DEV_GITHUB_CLIENT_ID} | base64 -w 0`/" area.worker.secrets.yaml
+    - sed -i "s/__GITHUB_CLIENT_SECRET__/`echo -ne ${DEV_GITHUB_CLIENT_SECRET} | base64 -w 0`/" area.worker.secrets.yaml
+    - kubectl apply -f area.worker.configmap.yaml -f area.worker.secrets.yaml
+    - kubectl apply -f area.worker.deployment.yaml
+
+deploy-development-apk:
+  stage: deploy-apk
+  only:
+    refs:
+      - develop
+  script:
+    - apk add --update coreutils
+    - apk update && apk add --no-cache openssh
+    - docker login -u ${DOCKER_USER} -p ${DOCKER_PASSWORD}
+    - docker pull ${DEV_DOCKER_REGISTRY_IMAGE_NAME_AREA_APK_BUILDER}:${CI_COMMIT_SHORT_SHA}
+    - mkdir apk
+    - docker run --name apkbuilder -v $(pwd)/apk/:/data/apk ${DEV_DOCKER_REGISTRY_IMAGE_NAME_AREA_APK_BUILDER}:${CI_COMMIT_SHORT_SHA}
+    - mkdir ~/.ssh
+    - echo -ne ${SSH_KEY} | base64 -d >> ~/.ssh/id_rsa
+    - chmod 400 ~/.ssh/id_rsa
+    - ssh-keyscan -H 62.210.152.215 >> ~/.ssh/known_hosts
+    - scp -i ~/.ssh/id_rsa apk/area.apk root@62.210.152.215:/home/develop/kubernetes/area/volumes/developmentAPKData/area.apk
+
+deploy-development-web:
+  stage: deploy-web
+  only:
+    refs:
+      - develop
+  environment:
+    name: development-web
+    url: https://dev.area.b12powered.com
+  variables:
+    DEPLOYMENT_ENV: "development"
+    DEPLOYMENT_HOST: "dev.area.b12powered.com"
+  script:
+    - apk add --update coreutils
+    - apk update && apk add --no-cache curl
+    - curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
+    - chmod +x ./kubectl && mv ./kubectl /usr/local/bin/kubectl
+    - mkdir -p $HOME/.kube
+    - echo -n ${KUBE_CONFIG} | base64 -d > $HOME/.kube/config
+    - kubectl config view
+    - cd k8s/web
+    - sed -i "s/__ENVIRONMENT_SLUG__/${DEPLOYMENT_ENV}/" area.web.deployment.yaml area.web.ingress.yaml area.web.service.yaml area.web.volume.yaml
+    - sed -i "s~__REGISTRY_IMAGE__~${DEV_DOCKER_REGISTRY_IMAGE_NAME_AREA_WEB_CLIENT}~" area.web.deployment.yaml
+    - sed -i "s/__REGISTRY_VERSION__/${CI_COMMIT_SHORT_SHA}/" area.web.deployment.yaml
+    - sed -i "s/__INGRESS_HOST__/${DEPLOYMENT_HOST}/" area.web.ingress.yaml
+    - kubectl apply -f area.web.volume.yaml
+    - kubectl apply -f area.web.deployment.yaml
+    - kubectl apply -f area.web.service.yaml
+    - kubectl apply -f area.web.ingress.yaml

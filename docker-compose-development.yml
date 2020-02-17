@@ -1,0 +1,102 @@
+version: '3'
+
+services:
+  client_web:
+    build: ./web
+    command: npm start
+    restart: unless-stopped
+    environment:
+      - DB_HOST=db
+      - API_HOST=server
+    env_file:
+      - .env
+    volumes:
+      - ./web:/web
+      - apk-vol:/data/apk
+    ports:
+      - "${DEV_APP_EXTERNAL_PORT}:3000"
+    depends_on:
+      - client_mobile
+      - server
+
+  client_mobile:
+    build: ./mobile
+    volumes:
+      - apk-vol:/data/apk
+    env_file:
+      - .env
+
+  server:
+    build: ./server
+    command: npm run dev
+    restart: unless-stopped
+    environment:
+      - DB_HOST=db
+      - REDIS_HOST=redis
+    env_file:
+      - .env
+    volumes:
+      - ./server:/server
+    networks:
+      - "db-tier"
+      - "redis-tier"
+    depends_on:
+      - db
+      - redis
+    ports:
+      - "${DEV_API_EXTERNAL_PORT}:80"
+
+  worker:
+    build: ./server
+    command: npm run worker
+    restart: unless-stopped
+    environment:
+      - REDIS_HOST=redis
+    env_file:
+      - .env
+    volumes:
+      - ./server:/server
+    networks:
+      - "redis-tier"
+    depends_on:
+      - redis
+
+  db:
+    image: "mongo:4.0.14"
+    command: mongod
+    restart: unless-stopped
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=$DB_USER
+      - MONGO_INITDB_ROOT_PASSWORD=$DB_PASS
+      - MONGO_INITDB_DATABASE=$DB_NAME
+    env_file:
+      - .env
+    ports:
+      - '${DB_PORT}:27017'
+    networks:
+      - "db-tier"
+    volumes:
+      - db-vol:/data/db
+      - ./scripts/initdb.sh:/docker-entrypoint-initdb.d/initdb.sh
+
+  redis:
+    image: "redis:buster"
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
+    restart: unless-stopped
+    ports:
+      - '${REDIS_PORT}:6379'
+    env_file:
+      - .env
+    volumes:
+      - redis-vol:/data
+    networks:
+      - "redis-tier"
+
+networks:
+  db-tier:
+  redis-tier:
+
+volumes:
+  apk-vol:
+  db-vol:
+  redis-vol:

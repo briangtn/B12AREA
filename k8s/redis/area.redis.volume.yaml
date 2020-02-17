@@ -1,0 +1,37 @@
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  namespace: __ENVIRONMENT_SLUG__-area
+  name: __ENVIRONMENT_SLUG__-area-redis-pv-volume
+  labels:
+    type: local
+    app: __ENVIRONMENT_SLUG__-area-redis
+    ref: __ENVIRONMENT_SLUG__
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteOnce
+  claimRef:
+    namespace: __ENVIRONMENT_SLUG__-area
+    name: __ENVIRONMENT_SLUG__-area-redis-pv-claim
+  hostPath:
+    path: "/home/develop/kubernetes/area/volumes/__ENVIRONMENT_SLUG__RedisData"
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  namespace: __ENVIRONMENT_SLUG__-area
+  name: __ENVIRONMENT_SLUG__-area-redis-pv-claim
+  labels:
+    app: __ENVIRONMENT_SLUG__-area-redis
+    ref: __ENVIRONMENT_SLUG__
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+  volumeName: __ENVIRONMENT_SLUG__-area-redis-pv-volume

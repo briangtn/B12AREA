@@ -1,0 +1,44 @@
+{
+  "displayName": "push",
+  "description": "Triggered on a push to a repository branch. Branch pushes and repository tag pushes also trigger this action.",
+  "configSchema": [
+    {
+      "name": "owner",
+      "description": "A string that must be the owner of the repository",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "repo",
+      "description": "A string that must be the name of the repository",
+      "type": "string",
+      "required": true
+    }
+  ],
+  "placeholders": [
+    {
+      "name": "GitRef",
+      "description": "The full git ref that was pushed (example: 'refs/heads/master')"
+    },
+    {
+      "name": "GitHead",
+      "description": "The SHA of the most recent commit on GitRef after the push"
+    },
+    {
+      "name": "GitBefore",
+      "description": "The SHA of the most recent commit on GitRef before the push"
+    },
+    {
+      "name": "GitLastCommitMessage",
+      "description": "The last commit message"
+    },
+    {
+      "name": "GitLastCommitAuthorName",
+      "description": "The last commit author name"
+    },
+    {
+      "name": "GitLastCommitAuthorEmail",
+      "description": "The last commit author email"
+    }
+  ]
+}

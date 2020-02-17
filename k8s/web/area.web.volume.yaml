@@ -1,0 +1,37 @@
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  namespace: __ENVIRONMENT_SLUG__-area
+  name: __ENVIRONMENT_SLUG__-area-apk-pv-volume
+  labels:
+    type: local
+    app: __ENVIRONMENT_SLUG__-area-apk
+    ref: __ENVIRONMENT_SLUG__
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadOnlyMany
+  claimRef:
+    namespace: __ENVIRONMENT_SLUG__-area
+    name: __ENVIRONMENT_SLUG__-area-apk-pv-claim
+  hostPath:
+    path: "/home/develop/kubernetes/area/volumes/__ENVIRONMENT_SLUG__APKData"
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  namespace: __ENVIRONMENT_SLUG__-area
+  name: __ENVIRONMENT_SLUG__-area-apk-pv-claim
+  labels:
+    app: __ENVIRONMENT_SLUG__-area-apk
+    ref: __ENVIRONMENT_SLUG__
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadOnlyMany
+  resources:
+    requests:
+      storage: 1Gi
+  volumeName: __ENVIRONMENT_SLUG__-area-apk-pv-volume

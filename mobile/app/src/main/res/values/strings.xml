@@ -1,0 +1,37 @@
+<resources>
+    <string name="app_name">AREA</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="confirm_password">Confirm password</string>
+    <string name="register">Sign Up</string>
+    <string name="or">or</string>
+    <string name="already_registered">Already registered ?</string>
+    <string name="click">Click</string>
+    <string name="here">here</string>
+    <string name="google_registration">Start with Google</string>
+    <string name="twitter_registration">Start with Twitter</string>
+    <string name="different_password">Those passwords didn\'t match. Try again.</string>
+    <string name="no_confirm_password">Confirm your password.</string>
+    <string name="no_email">Enter your email address.</string>
+    <string name="no_password">Enter a password.</string>
+    <string name="not_registered">Not registered yet ?</string>
+    <string name="login">Sign In</string>
+    <string name="validation_password">Confirm</string>
+    <string name="new_password">New password</string>
+    <string name="confirm_new_password">Confirm new password</string>
+    <string name="error">Error</string>
+    <string name="success">Success</string>
+    <string name="successful_registration">Registration successful !</string>
+    <string name="email_confirmation_message">We\'ve sent you an email in order to validate your account. Check your spams if you don\'t see it !</string>
+    <string name="verified_email">Email verification successful !</string>
+    <string name="verified_email_message">You can login right now.</string>
+    <string name="security_code">Security code</string>
+    <string name="change_api_url">Change api url</string>
+    <string name="confirm">Confirm</string>
+    <string name="cancel">Cancel</string>
+    <string name="api_url">Api url</string>
+    <string name="change_url_success">Api url successfully modified</string>
+    <string name="change_url_fail">Url is invalid</string>
+    <string name="invalid_2fa_code">The code must be 6-digits long</string>
+    <string name="invalid_token">Invalid token</string>
+</resources>

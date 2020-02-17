@@ -1,0 +1,19 @@
+{
+  "name": "area",
+  "version": "1.0.0",
+  "description": "This is the repository of the area project.",
+  "main": " ",
+  "scripts": {
+    "start": "docker-compose up --build",
+    "dev": "docker-compose -f docker-compose-development.yml up --build",
+    "install": "cd web && npm install && cd ../server && npm install",
+    "test": "cd web && npm test && cd ../server && AREA_JWT_SECRET_VALUE=verySecretSecret npm test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "[git@ssh-git.b12powered.com:30500]:Eldriann/area.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {}
+}

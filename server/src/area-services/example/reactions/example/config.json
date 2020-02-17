@@ -1,0 +1,12 @@
+{
+  "displayName": "example",
+  "description": "This should be the reaction description",
+  "configSchema": [
+    {
+      "name": "ConfigName",
+      "description": "This should be the description of this config",
+      "type": "string|number|boolean",
+      "required": true
+    }
+  ]
+}
