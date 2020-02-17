@@ -19,6 +19,7 @@ const english = {
     settingsChangeApi: "Change Api Url",
     faActivated: 'Two Factor Authentication is already activated',
     disable: "Disable",
+    linkAccount: "Link account",
     troubleToScan: "You have trouble to scan the QR Code ?",
     yourKey: "Your key:"
 };
