@@ -64,10 +64,10 @@ export class AreaAuthServiceService {
         }
         const token = await this.tokenService.generateToken({
             email: user.email,
-            require2fa: user.twoFactorAuthenticationEnabled,
+            require2fa: false,
             validated2fa: false
         } as CustomUserProfile);
-        return {token, require2fa: user.twoFactorAuthenticationEnabled};
+        return {token, require2fa: false};
     }
 
     async register(data: LoginOrRegisterData): Promise<boolean> {
