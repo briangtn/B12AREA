@@ -19,6 +19,7 @@ const french = {
     settingsChangeApi: "Changer l'adresse de l'api",
     faActivated: "L'authentification à double facteur est déjà activée",
     disable: "Désactiver",
+    linkAccount: "Lier son compte",
     troubleToScan: "Vous rencontrez des soucis avec le QR Code ?",
     yourKey: "Votre clé:"
 };

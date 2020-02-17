@@ -139,7 +139,8 @@ class TwoFactorAuthentication extends Component<Props, State> {
 
     render() {
         const { classes } = this.props;
-        const { fakey, alreadyActivated } = this.state;
+        const { fakey } = this.state;
+        const { alreadyActivated } = this.props;
 
         if (!alreadyActivated)
             return (

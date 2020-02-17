@@ -10,6 +10,7 @@ import { connect } from 'react-redux';
 import './App.css';
 
 import NavigationBar from "./components/NavigationBar";
+import AuthButton from "./components/AuthButton";
 import OrDivider from "./components/OrDivider";
 import Translator from "./components/Translator";
 import HomeCarousel from "./components/HomeCarousel";
@@ -182,24 +183,10 @@ class App extends Component<Props, State> {
                         <OrDivider />
                         <Grid container spacing={3}>
                             <Grid item xs={6}>
-                                <Button
-                                    variant="contained"
-                                    className={classes.imageButton}
-                                    startIcon={<GoogleIcon />}
-                                    disableElevation={true}
-                                >
-                                    <Translator sentence="connectGoogle" />
-                                </Button>
+                                <AuthButton token={null} history={this.props.history} apiUrl={this.props.api_url} serviceName="Google" serviceIcon={<GoogleIcon />} />
                             </Grid>
                             <Grid item xs={6}>
-                                <Button
-                                    variant="contained"
-                                    className={classes.imageButton}
-                                    startIcon={<TwitterIcon />}
-                                    disableElevation={true}
-                                >
-                                    <Translator sentence="connectTwitter" />
-                                </Button>
+                                <AuthButton token={null} history={this.props.history} apiUrl={this.props.api_url} serviceName="Twitter" serviceIcon={<TwitterIcon />} />
                             </Grid>
                         </Grid>
                     </Grid>

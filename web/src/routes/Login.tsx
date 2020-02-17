@@ -24,6 +24,8 @@ import DialogContent from "@material-ui/core/DialogContent";
 import DialogActions from "@material-ui/core/DialogActions";
 import Dialog from "@material-ui/core/Dialog";
 
+import AuthButton from "../components/AuthButton";
+
 const cookies = new Cookies();
 
 const mapStateToProps = (state: any) => {
@@ -220,22 +222,10 @@ class Login extends Component<Props, State> {
                         <br />
                         <Grid container spacing={3}>
                             <Grid item xs={6}>
-                                <Button
-                                    variant="contained"
-                                    className={classes.imageButton}
-                                    startIcon={<GoogleIcon />}
-                                >
-                                    <Translator sentence="connectGoogle" />
-                                </Button>
+                                <AuthButton token={null} history={this.props.history} apiUrl={this.props.api_url} serviceName="Google" serviceIcon={<GoogleIcon />} />
                             </Grid>
                             <Grid item xs={6}>
-                                <Button
-                                    variant="contained"
-                                    className={classes.imageButton}
-                                    startIcon={<TwitterIcon />}
-                                >
-                                    <Translator sentence="connectTwitter" />
-                                </Button>
+                                <AuthButton token={null} history={this.props.history} apiUrl={this.props.api_url} serviceName="Twitter" serviceIcon={<TwitterIcon />} />
                             </Grid>
                         </Grid>
                     </Grid>

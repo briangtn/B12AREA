@@ -12,6 +12,12 @@ import Translator from "../components/Translator";
 
 import TwoFactorAuthentication from "../components/profile/TwoFactorAuthentication";
 import ChangePassword from "../components/profile/ChangePassword";
+import GoogleIcon from "../components/icons/GoogleIcon";
+import TwitterIcon from '@material-ui/icons/Twitter';
+
+import Grid from '@material-ui/core/Grid';
+
+import AuthButton from "../components/AuthButton";
 
 const mapStateToProps = (state: any) => {
     return { api_url: state.api_url, token: state.token };
@@ -35,7 +41,8 @@ interface State {
     qrcode: string,
     fasecret: string | null,
     open: boolean,
-    fakey: string
+    fakey: string,
+    authServices: any
 }
 
 const styles = (theme: Theme) => createStyles({
@@ -55,7 +62,8 @@ class Profile extends Component<Props, State> {
         qrcode: '',
         fasecret: '',
         open: false,
-        fakey: ''
+        fakey: '',
+        authServices: []
     };
 
     onChange: React.ChangeEventHandler<HTMLInputElement> = (e) => {
@@ -72,9 +80,14 @@ class Profile extends Component<Props, State> {
         fetch(`${api_url}/users/me`, { headers: { 'Authorization': `Bearer ${token}` } })
         .then(res => res.json())
         .then(data => {
+            let tmp = [];
+            for (let i of data.authServices) {
+                tmp.push(i.name);
+            }
             this.setState({
                 email: data.email,
-                twoFactorAuthenticationEnabled: data.twoFactorAuthenticationEnabled
+                twoFactorAuthenticationEnabled: data.twoFactorAuthenticationEnabled,
+                authServices: tmp
             });
         });
     }
@@ -115,6 +128,26 @@ class Profile extends Component<Props, State> {
                         <Typography variant="h4" gutterBottom><b><Translator sentence="settingsTwoFactor" /></b></Typography>
                         <br />
                         <TwoFactorAuthentication alreadyActivated={twoFactorAuthenticationEnabled} />
+                    </div>
+                    <div className={classes.section} style={{ textAlign: 'left' }}>
+                        <Typography variant="h4" gutterBottom><b><Translator sentence="linkAccount"/></b></Typography>
+                        <br />
+                        <Grid container spacing={3}>
+                            { (!this.state.authServices.includes('google')) ?
+                                <Grid item xs={6}>
+                                    <AuthButton token={this.props.token} history={this.props.history} apiUrl={this.props.api_url} serviceName="Google" serviceIcon={<GoogleIcon />} />
+                                </Grid>
+                            :
+                                <div></div>
+                            }
+                            { (!this.state.authServices.includes('twitter')) ?
+                                <Grid item xs={6}>
+                                    <AuthButton token={this.props.token} history={this.props.history} apiUrl={this.props.api_url} serviceName="Twitter" serviceIcon={<TwitterIcon />} />
+                                </Grid>
+                            :
+                                <div></div>
+                            }
+                        </Grid>
                     </div>
                 </div>
             </div>
