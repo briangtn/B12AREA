@@ -31,4 +31,5 @@
     <string name="api_url">Api url</string>
     <string name="change_url_success">Api url successfully modified</string>
     <string name="change_url_fail">Url is invalid</string>
+    <string name="user_text">Parameter of your account</string>
 </resources>

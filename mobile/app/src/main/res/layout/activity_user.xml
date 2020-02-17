@@ -12,7 +12,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:textSize="50sp"
-        android:text="User Page" />
+        android:text="@string/user_text" />
 
     <fragment
         android:id="@+id/details_fragment"
