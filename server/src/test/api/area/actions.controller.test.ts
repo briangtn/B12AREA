@@ -118,16 +118,13 @@ describe('/areas/{id}/action', () => {
             expect((await actionRepo.count()).count).to.be.equal(0);
         });
 
-        it('Should return 200 if there is no action for the area', async () => {
+        it('Should return 400 if there is no action for the area', async () => {
             await actionRepo.deleteAll();
             expect((await actionRepo.count()).count).to.be.equal(0);
-            const res = await helper.client
+            await helper.client
                 .delete(`/areas/${area.id}/action`)
                 .set('Authorization', 'Bearer ' + users[0].token)
-                .expect(200);
-            const body = res.body;
-            expect(body.count).to.be.equal(0);
-            expect((await actionRepo.count()).count).to.be.equal(0);
+                .expect(400);
         });
 
         it('Should send 404 Not Found if the id doesn\'t match', async () => {

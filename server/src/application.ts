@@ -28,6 +28,9 @@ export const PackageKey = BindingKey.create<PackageInfo>('application.package');
 export class AreaApplication extends BootMixin(
     ServiceMixin(RepositoryMixin(RestApplication)),
 ) {
+    // use to store loaded modules
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    private areaServicesControllers : any;
     constructor(options: ApplicationConfig = {}) {
         if (options.rest)
             options.rest.port = process.env.API_PORT ? process.env.API_PORT : 3000;
@@ -60,6 +63,7 @@ export class AreaApplication extends BootMixin(
 
         this.projectRoot = __dirname;
         this.loadAuthControllers();
+        this.areaServicesControllers = [];
         this.loadAreaServicesControllers();
         // Customize @loopback/boot Booter Conventions here
         this.bootOptions = {
@@ -97,19 +101,20 @@ export class AreaApplication extends BootMixin(
     loadAreaServicesControllers() {
         fs.readdir(path.join(__dirname + '/area-services'), (err, dirs) => {
             if (err)
-                return console.log(err);
+                return console.error(err);
             for (const dirIndex in dirs) {
                 const dir = dirs[dirIndex];
-                import('./area-services/' + dir + '/controller').then(module => {
+                import('./area-services/' + dir + '/controller').then(async (module) => {
                     @api({basePath: '/services/' + dir, paths: {}})
                     class AreaServices extends module.default {
 
                     }
 
                     this.controller(AreaServices, dir);
+                    this.areaServicesControllers.push(AreaServices);
                     this.loadActionsControllers(dir);
                 }).catch(error => {
-                    return console.log(error);
+                    return console.error(error);
                 });
             }
         });
@@ -120,7 +125,7 @@ export class AreaApplication extends BootMixin(
 
         fs.readdir(path.join(baseDir), (err, dirs) => {
             if (err)
-                return console.log(err);
+                return console.error(err);
             for (const dirIndex in dirs) {
                 const dir = dirs[dirIndex];
                 import(baseDir + dir + '/controller').then(module => {
@@ -131,7 +136,7 @@ export class AreaApplication extends BootMixin(
 
                     this.controller(AreaActions, dir);
                 }).catch(error => {
-                    return console.log(error);
+                    return console.error(error);
                 });
             }
         });
@@ -140,7 +145,7 @@ export class AreaApplication extends BootMixin(
     loadAuthControllers() {
         fs.readdir(path.join(__dirname + '/area-auth-services'), (err, dirs) => {
             if (err)
-                return console.log(err);
+                return console.error(err);
             for (const dirIndex in dirs) {
                 const dir = dirs[dirIndex];
                 import('./area-auth-services/' + dir + '/controller').then(module => {
@@ -151,10 +156,16 @@ export class AreaApplication extends BootMixin(
 
                     this.controller(AuthServices, dir);
                 }).catch(error => {
-                    return console.log(error);
+                    return console.error(error);
                 });
             }
         });
 
+    }
+
+    public async beforeStart() {
+        for (const Class of this.areaServicesControllers) {
+            await Class.start(this);
+        }
     }
 }

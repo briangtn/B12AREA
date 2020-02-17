@@ -1,6 +1,6 @@
 {
-  "displayName": "Example Service",
-  "description": "Example service for Proof of Concept",
-  "icon": "https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/i/968c2871-3923-4dcb-9af4-d9c65057514a/d5eebo1-d3dac5c2-91c2-4634-8ad3-a05aa98f7cdf.png",
-  "color": "#e21212"
+  "displayName": "example",
+  "description": "This should be the service description",
+  "icon": "This should be an url to the service image",
+  "color": "#ffffff"
 }

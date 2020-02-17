@@ -1,12 +1,12 @@
 {
-  "displayName": "Do something",
-  "description": "Do something",
+  "displayName": "example",
+  "description": "This should be the reaction description",
   "configSchema": [
     {
-      "name": "todo",
-      "type": "string",
-      "required": true,
-      "default": "Cuire les champignons"
+      "name": "ConfigName",
+      "description": "This should be the description of this config",
+      "type": "string|number|boolean",
+      "required": true
     }
   ]
 }

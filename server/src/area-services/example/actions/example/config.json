@@ -1,18 +1,18 @@
 {
-  "displayName": "On something",
-  "description": "Triggered when something",
+  "displayName": "example",
+  "description": "This should be the description of the action",
   "configSchema": [
     {
-      "name": "resource",
-      "type": "string",
-      "required": true,
-      "default": "Champignon"
+      "name": "nothing",
+      "description": "This should be the description of the config option",
+      "type": "string|number|boolean",
+      "required": true
     }
   ],
   "placeholders": [
     {
-      "name": "toReplace",
-      "description": "A placeholder example"
+      "name": "PlaceholderName",
+      "description": "This should be the description of what this placeholder is and does"
     }
   ]
 }

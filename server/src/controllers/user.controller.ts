@@ -501,7 +501,7 @@ export class UserController {
                 subject: "Reset password instructions",
                 html: htmlData,
                 text: textData
-            }).catch(e => console.log("Failed to deliver password reset email: ", e));
+            }).catch(e => console.error("Failed to deliver password reset email: ", e));
         }
 
         return {};

@@ -18,27 +18,48 @@ import {
 } from '@loopback/rest';
 import {
     Area,
-    Reaction,
+    Reaction, User,
 } from '../models';
-import {AreaRepository, ReactionRepository} from '../repositories';
-import {inject} from "@loopback/context";
+import {AreaRepository, ReactionRepository, UserRepository} from '../repositories';
+import {Context, inject} from "@loopback/context";
 import {SecurityBindings, UserProfile} from "@loopback/security";
 import {authenticate} from "@loopback/authentication";
 import {response200Schema} from "./specs/doc.specs";
 import {NewReactionInArea} from "./specs/area.specs";
 import {HttpErrors} from "@loopback/rest/dist";
+import {OperationStatus} from "../services-interfaces";
+import {OPERATION_SECURITY_SPEC} from "../utils/security-specs";
 
 @authenticate('jwt-all')
 @api({basePath: '/areas', paths: {}})
 export class AreaReactionController {
     constructor(
+        @repository(UserRepository) protected userRepository: UserRepository,
         @repository(AreaRepository) protected areaRepository: AreaRepository,
         @repository(ReactionRepository) protected reactionRepository: ReactionRepository,
         @inject(SecurityBindings.USER) private user: UserProfile,
+        @inject.context() private ctx: Context,
     ) {
     }
 
+    private async resolveUserFromUserProfile(user: UserProfile) : Promise<User | null> {
+        try {
+            return await this.userRepository.getFromUserProfile(user);
+        } catch (e) {
+            return null;
+        }
+    }
+
+    private async resolveReactionController(reactionType: string) {
+        const serviceName = reactionType.split('.')[0];
+        const reactionName = reactionType.split('.')[2];
+
+        const module = await import(`../area-services/${serviceName}/reactions/${reactionName}/controller`);
+        return module.default;
+    }
+
     @get('/{id}/reactions', {
+        security: OPERATION_SECURITY_SPEC,
         responses: {
             '200': response200Schema({
                 type: 'array',
@@ -57,6 +78,7 @@ export class AreaReactionController {
     }
 
     @get('/{areaId}/reactions/{reactionId}', {
+        security: OPERATION_SECURITY_SPEC,
         responses: {
             '200': response200Schema({
                 type: 'array',
@@ -80,6 +102,7 @@ export class AreaReactionController {
     }
 
     @post('/{id}/reactions', {
+        security: OPERATION_SECURITY_SPEC,
         responses: {
             '200': response200Schema(getModelSchemaRef(Reaction), 'Area model instance'),
         },
@@ -91,10 +114,36 @@ export class AreaReactionController {
         const area = await this.areaRepository.findById(id);
         this.areaRepository.checkArea(area, this.user);
 
+        let user : User | null = null;
+        try {
+            user = await this.resolveUserFromUserProfile(this.user);
+        } catch (e) {
+            throw new HttpErrors.InternalServerError('Failed to resolve user');
+        }
+        if (!user)
+            throw new HttpErrors.InternalServerError('Failed to resolve user');
+        let controller;
+        try {
+            controller = await this.resolveReactionController(reaction.serviceReaction);
+        } catch (e) {
+            throw new HttpErrors.BadRequest('Reaction not found');
+        }
+        let result : OperationStatus;
+        try {
+            result = await controller.createReaction(user.id!, reaction.options, this.ctx);
+        } catch (e) {
+            throw new HttpErrors.BadRequest('Failed to create reaction in service');
+        }
+        if (!result.success) {
+            throw new HttpErrors.BadRequest(result.error);
+        }
+        reaction.options = result.options;
+
         return this.areaRepository.reactions(id).create(reaction);
     }
 
     @patch('/{id}/reactions/{reactionId}', {
+        security: OPERATION_SECURITY_SPEC,
         responses: {
             '200': response200Schema(CountSchema, 'Area.Reaction PATCH success count'),
         },
@@ -115,6 +164,26 @@ export class AreaReactionController {
         const area = await this.areaRepository.findById(id);
         this.areaRepository.checkArea(area, this.user);
 
+        const dbReaction = await this.reactionRepository.findById(reactionId);
+
+        let controller;
+        try {
+            controller = await this.resolveReactionController(dbReaction.serviceReaction);
+        } catch (e) {
+            throw new HttpErrors.BadRequest('Reaction not found');
+        }
+
+        let result : OperationStatus;
+        try {
+            result = await controller.updateReaction(dbReaction.id!, dbReaction.options, reaction.options, this.ctx);
+        } catch (e) {
+            throw new HttpErrors.BadRequest('Failed to update action in service');
+        }
+        if (!result.success) {
+            throw new HttpErrors.BadRequest(result.error);
+        }
+        reaction.options = result.options;
+
         await this.areaRepository.reactions(id).patch(reaction, {
             id: reactionId,
             and: where
@@ -123,6 +192,7 @@ export class AreaReactionController {
     }
 
     @del('/{id}/reactions/{reactionId}', {
+        security: OPERATION_SECURITY_SPEC,
         responses: {
             '200': response200Schema(CountSchema, 'Area.Reaction DELETE success count'),
         },
@@ -142,6 +212,26 @@ export class AreaReactionController {
         });
         if (count.count <= 0)
             throw new HttpErrors.NotFound("Reaction not found");
+
+        const dbReaction = await this.reactionRepository.findById(reactionId);
+
+        let controller;
+        try {
+            controller = await this.resolveReactionController(dbReaction.serviceReaction);
+        } catch (e) {
+            throw new HttpErrors.BadRequest('Reaction not found');
+        }
+
+        let result : OperationStatus;
+        try {
+            result = await controller.deleteReaction(dbReaction.id!, dbReaction.options, this.ctx);
+        } catch (e) {
+            throw new HttpErrors.BadRequest('Failed to update action in service');
+        }
+        if (!result.success) {
+            throw new HttpErrors.BadRequest(result.error);
+        }
+
         return this.areaRepository.reactions(id).delete({
             id: reactionId,
             and: where
