@@ -6,6 +6,7 @@ import {inject} from '@loopback/core';
 export class ReactionRepository extends DefaultCrudRepository<Reaction,
     typeof Reaction.prototype.id,
     ReactionRelations> {
+
     constructor(
         @inject('datasources.mongo') dataSource: MongoDataSource,
     ) {

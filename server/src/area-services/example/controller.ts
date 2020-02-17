@@ -1,12 +1,23 @@
 import {LoginObject, ServiceConfig} from "../../services-interfaces";
-import config from './config.json'
+import config from './config.json';
+import {Context} from "@loopback/context";
+import {ExchangeCodeGeneratorManager} from "../../services";
 
 export default class ServiceController {
-    static login(params: LoginObject): void {
-        console.log('Login method of example service ', params);
+
+    constructor() {}
+
+    static async start(ctx: Context): Promise<void> {
+
     }
 
-    static getConfig(): ServiceConfig {
+    static async login(params: LoginObject): Promise<string> {
+        const exchangeCodeGenerator: ExchangeCodeGeneratorManager = await params.ctx.get('services.exchangeCodeGenerator');
+        const codeParam = await exchangeCodeGenerator.generate({status: 'Authenticated with github'}, true);
+        return params.redirectUrl + '?code=' + codeParam;
+    }
+
+    static async getConfig(): Promise<ServiceConfig> {
         return config;
     }
 }

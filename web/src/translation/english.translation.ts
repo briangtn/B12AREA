@@ -15,6 +15,10 @@ const english = {
     settingsAccountTitle: "Account",
     settingsTwoFactor: "Two Factor Authentication",
     settingsEnableTwoFactor: "Enable Two-Factor Authentication",
+    settingsChangePassword: "Change password",
+    settingsChangeApi: "Change Api Url",
+    faActivated: 'Two Factor Authentication is already activated',
+    disable: "Disable",
     troubleToScan: "You have trouble to scan the QR Code ?",
     yourKey: "Your key:"
 };

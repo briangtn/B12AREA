@@ -1,6 +1,6 @@
 import {Entity, model, property} from '@loopback/repository';
 
-@model({settings: {strict: false}})
+@model({settings: {strict: false, strictObjectIDCoercion: true}})
 export class Action extends Entity {
     @property({
         type: 'string',
@@ -16,15 +16,14 @@ export class Action extends Entity {
     serviceAction: string;
 
     @property({
-        type: 'object',
-        required: true,
-    })
-    options: object;
-
-    @property({
         type: 'string',
     })
     areaId?: string;
+
+    @property({
+        type: 'object',
+    })
+    options: object;
     // Define well-known properties here
 
     // Indexer property to allow additional data

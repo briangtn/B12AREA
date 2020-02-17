@@ -1,7 +1,6 @@
 package com.b12powered.area.api
 
 import android.content.Context
-import android.util.Log
 import com.android.volley.*
 import com.android.volley.toolbox.BasicNetwork
 import com.android.volley.toolbox.DiskBasedCache
@@ -10,6 +9,7 @@ import com.android.volley.toolbox.StringRequest
 import com.b12powered.area.User
 import com.b12powered.area.toObject
 import com.google.gson.Gson
+import org.json.JSONObject
 
 /**
  * The class handling calls
@@ -157,12 +157,72 @@ class ApiClient(private val context: Context) {
     }
 
     /**
+     * Build a two factor authentication activation request taking no parameter and perform it, then invoke [completion] with an url used by authenticator
+     */
+    fun activate2fa(completion: (url: String?, message: String) -> Unit) {
+        val route = ApiRoute.Activate2fa(context)
+        this.performRequest(route) { success, response ->
+            if (success) {
+                val url = JSONObject(response.json).getString("otpauthUrl")
+                completion.invoke(url, "success")
+            } else {
+                completion.invoke(null, response.message)
+            }
+        }
+    }
+
+    /**
+     * Build a two factor authentication confirmation request with [token] and perform it, then invoke [completion] with a User object
+     */
+    fun confirm2fa(token: String, completion: (user: User?, message: String) -> Unit) {
+        val route = ApiRoute.Confirm2fa(token, context)
+        this.performRequest(route) { success, response ->
+            if (success) {
+                val user: User = response.json.toObject()
+                completion.invoke(user, "success")
+            } else {
+                completion.invoke(null, response.message)
+            }
+        }
+    }
+
+    /**
+     * Build an two factor authentication validation request with [token] and perform it, then invoke [completion] with a User object
+     */
+    fun validate2fa(token: String, completion: (user: User?, message: String) -> Unit) {
+        val route = ApiRoute.Validate2fa(token, context)
+        this.performRequest(route) { success, response ->
+            if (success) {
+                val user: User = response.json.toObject()
+                completion.invoke(user, "success")
+            } else {
+                completion.invoke(null, response.message)
+            }
+        }
+    }
+
+    /**
      * Build a readinessProbe request taking no parameter and perform it, then invoke [completion] with a boolean corresponding to the result of the call
      */
     fun readinessProbe(completion: (isUp: Boolean) -> Unit) {
         val route = ApiRoute.ReadinessProbe(context)
         this.performRequest(route) { success, _ ->
             completion.invoke(success)
+        }
+    }
+
+    /**
+     * Build a getUser request taking no parameter and perform it, then invoke [completion] with a User object
+     */
+    fun getUser(completion: (user: User?, message: String) -> Unit) {
+        val route = ApiRoute.GetUser(context)
+        this.performRequest(route) { success, response ->
+            if (success) {
+                val user: User = response.json.toObject()
+                completion.invoke(user, "success")
+            } else {
+                completion.invoke(null, response.message)
+            }
         }
     }
 }

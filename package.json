@@ -14,5 +14,6 @@
     "url": "[git@ssh-git.b12powered.com:30500]:Eldriann/area.git"
   },
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {}
 }

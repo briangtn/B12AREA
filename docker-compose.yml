@@ -47,15 +47,12 @@ services:
     command: node . worker
     restart: unless-stopped
     environment:
-      - DB_HOST=db
       - REDIS_HOST=redis
     env_file:
       - .env
     networks:
-      - "db-tier"
       - "redis-tier"
     depends_on:
-      - db
       - redis
 
   db:

@@ -6,8 +6,6 @@ describe('/areas', () => {
     const helper: TestHelper = new TestHelper();
     let areaRepo: AreaRepository;
 
-    //let userId: string | undefined;
-    //let userToken: string;
     const users = [
         {
             email: "user@mail.fr",
@@ -34,6 +32,8 @@ describe('/areas', () => {
     });
 
     after(async () => {
+        await areaRepo.deleteAll();
+        await helper.userRepository.deleteAll();
         await helper.stop();
     });
 

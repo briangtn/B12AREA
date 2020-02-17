@@ -26,6 +26,7 @@
     <string name="email_confirmation_message">Nous vous avons envoyé un email afin de valider votre compte. Vérifiez vos spams si vous ne le voyez pas !</string>
     <string name="verified_email">Email vérifié !</string>
     <string name="verified_email_message">Vous pouvez dès à présent vous connecter.</string>
+    <string name="security_code">Code de sécurité</string>
     <string name="change_api_url">Modifier l\'url de l\'api</string>
     <string name="confirm">Confirmer</string>
     <string name="cancel">Annuler</string>
@@ -33,4 +34,6 @@
     <string name="change_url_success">L\'url de l\'api a été modifiée avec succès</string>
     <string name="change_url_fail">L\'url est invalide</string>
     <string name="user_text">Paramètre de mon compte</string>
+    <string name="invalid_2fa_code">Le code doit comporter 6 chiffres</string>
+    <string name="invalid_token">Token invalide</string>
 </resources>

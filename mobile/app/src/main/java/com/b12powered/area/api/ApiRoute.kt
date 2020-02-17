@@ -39,11 +39,41 @@ sealed class ApiRoute(private var mainContext: Context) {
     data class Validate(var token: String, var context: Context) : ApiRoute(context)
 
     /**
+     * Data class for [Activate2fa] route
+     *
+     * @param context The context of the call
+     */
+    data class Activate2fa(var context: Context) : ApiRoute(context)
+
+    /**
+     * Data class for [Confirm2fa] route
+     *
+     * @param token The validation token
+     * @param context The context of the call
+     */
+    data class Confirm2fa(var token: String, var context: Context) : ApiRoute(context)
+
+    /**
+     * Data class for [Validate2fa]
+     *
+     * @param token The validation token
+     * @param context The context of the call
+     */
+    data class Validate2fa(var token: String, var context: Context) : ApiRoute(context)
+
+    /**
      * Data class for [ReadinessProbe] route
      *
      * @param context The context of the call
      */
     data class ReadinessProbe(var context: Context) : ApiRoute(context)
+
+    /**
+     * Data class for [GetUser] route
+     *
+     * @param context The context of the call
+     */
+    data class GetUser(var context: Context) : ApiRoute(context)
 
     /**
      * Timeout of the api call
@@ -93,7 +123,11 @@ sealed class ApiRoute(private var mainContext: Context) {
                 is Login -> "users/login"
                 is Register -> "users/register"
                 is Validate -> "users/validate"
+                is Activate2fa -> "users/2fa/activate"
+                is Confirm2fa -> "users/2fa/activate"
+                is Validate2fa -> "users/2fa/validate"
                 is ReadinessProbe -> "readinessProbe"
+                is GetUser -> "users/me"
                 else -> ""
             }}"
         }
@@ -113,7 +147,9 @@ sealed class ApiRoute(private var mainContext: Context) {
                 is Login -> Request.Method.POST
                 is Register -> Request.Method.POST
                 is Validate -> Request.Method.PATCH
-                is ReadinessProbe -> Request.Method.GET
+                is Activate2fa -> Request.Method.POST
+                is Confirm2fa -> Request.Method.PATCH
+                is Validate2fa -> Request.Method.POST
                 else -> Request.Method.GET
             }
         }
@@ -135,6 +171,12 @@ sealed class ApiRoute(private var mainContext: Context) {
                 }
                 is Register -> {
                     hashMapOf(Pair("email", this.email), Pair("password", this.password))
+                }
+                is Confirm2fa -> {
+                    hashMapOf(Pair("token", this.token))
+                }
+                is Validate2fa -> {
+                    hashMapOf(Pair("token", this.token))
                 }
                 else -> hashMapOf()
             }
@@ -174,8 +216,22 @@ sealed class ApiRoute(private var mainContext: Context) {
          */
         get() {
             val map: HashMap<String, String> = hashMapOf()
+            val sharedPreferences = mainContext.getSharedPreferences("com.b12powered.area", Context.MODE_PRIVATE)
+            val token = sharedPreferences.getString("jwt-token", null)
             map["Accept"] = "application/json"
             return when (this) {
+                is Activate2fa -> {
+                    hashMapOf(Pair("Authorization", "Bearer $token"))
+                }
+                is Confirm2fa -> {
+                    hashMapOf(Pair("Authorization", "Bearer $token"))
+                }
+                is Validate2fa -> {
+                    hashMapOf(Pair("Authorization", "Bearer $token"))
+                }
+                is GetUser -> {
+                    hashMapOf(Pair("Authorization", "Bearer $token"))
+                }
                 else -> hashMapOf()
             }
         }

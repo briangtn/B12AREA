@@ -13,6 +13,7 @@ import NavigationBar from "./components/NavigationBar";
 import OrDivider from "./components/OrDivider";
 import Translator from "./components/Translator";
 import HomeCarousel from "./components/HomeCarousel";
+import Footer from "./components/Footer";
 
 // Material UI components
 import Grid from '@material-ui/core/Grid';
@@ -21,12 +22,6 @@ import Button from '@material-ui/core/Button';
 
 import GoogleIcon from './components/icons/GoogleIcon';
 import TwitterIcon from '@material-ui/icons/Twitter';
-import YoutubeIcon from '@material-ui/icons/YouTube';
-import GitHubIcon from '@material-ui/icons/GitHub';
-import SpotifyIcon from "./components/icons/SpotifyIcon";
-import TeamsIcon from "./components/icons/TeamsIcon";
-import OutlookIcon from "./components/icons/OutlookIcon";
-import AirtableIcon from "./components/icons/AirtableIcon";
 import InputBase from "@material-ui/core/InputBase";
 import Divider from "@material-ui/core/Divider";
 import Paper from "@material-ui/core/Paper";
@@ -47,11 +42,13 @@ interface Props {
         push: any
     },
     language: string,
-    token: string
+    token: string,
+    api_url: string
 }
 
 interface State {
-    email: string
+    email: string,
+    services: any
 }
 
 interface Services {
@@ -81,8 +78,7 @@ const styles = (theme: Theme) => createStyles({
         backgroundColor: '#FFBE76',
         width: '100%',
         minHeight: '350px',
-        marginTop: theme.spacing(10),
-        position: 'absolute'
+        marginTop: theme.spacing(10)
     },
     heroContent: {
         textAlign: 'center',
@@ -107,12 +103,13 @@ const styles = (theme: Theme) => createStyles({
 });
 
 const mapStateToProps = (state: any) => {
-    return { language: state.language, token : state.token };
+    return { language: state.language, token : state.token, api_url: state.api_url };
 };
 
 class App extends Component<Props, State> {
     state: State = {
         email: '',
+        services: []
     };
 
     onEmailEnter: React.ChangeEventHandler<HTMLInputElement> = (e) => {
@@ -124,6 +121,29 @@ class App extends Component<Props, State> {
 
         if (token)
             this.props.history.push('/services');
+        else
+            this.fetchServices(this.props.api_url);
+    }
+
+    fetchServices(api_url: string): void {
+        this.setState({ services: [] });
+        fetch(`${api_url}/about.json`)
+            .then(res => res.json())
+            .then(data => {
+                const servicesArray = data['server']['services'];
+                const tmp: {name: string, description: string, icon: string, color: string}[] = [];
+
+                for (let service of servicesArray) {
+                    const tmpObject: {name: string, description: string, icon: string, color: string} = {
+                        name: service['name'],
+                        description: service['description'],
+                        icon: service['icon'],
+                        color: service['string']
+                    };
+                    tmp.push(tmpObject);
+                }
+                this.setState({ services: tmp });
+            });
     }
 
     render() {
@@ -187,8 +207,10 @@ class App extends Component<Props, State> {
                 <div className={classes.hero}>
                     <br />
                     <br />
-                    <HomeCarousel />
+                    <HomeCarousel services={this.state.services} />
                 </div>
+                <br />
+                <Footer apiUrl={this.props.api_url} reloadFunction={this.fetchServices.bind(this)} isConnected={this.props.token !== null} />
             </div>
         );
     }

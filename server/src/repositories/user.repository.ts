@@ -65,7 +65,7 @@ export class UserRepository extends DefaultCrudRepository<User,
             subject: "Welcome to AREA",
             html: htmlData,
             text: textData
-        }).catch(e => console.log("Failed to deliver email validation email: ", e));
+        }).catch(e => console.error("Failed to deliver email validation email: ", e));
         return validationToken;
     }
 
@@ -87,7 +87,7 @@ export class UserRepository extends DefaultCrudRepository<User,
             subject: "Password changed",
             html: htmlData,
             text: textData
-        }).catch(e => console.log("Failed to deliver password reset validation email: ", e));
+        }).catch(e => console.error("Failed to deliver password reset validation email: ", e));
         return this.findById(userId);
     }
 
