@@ -35,4 +35,4 @@
     <string name="user_text">Parameter of your account</string>
     <string name="invalid_2fa_code">The code must be 6-digits long</string>
     <string name="invalid_token">Invalid token</string>
-
+</resources>
