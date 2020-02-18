@@ -148,6 +148,9 @@ class ApiClient(private val context: Context) {
         }
     }
 
+    /**
+     * Build a oauth request with [service] name and perform it, then invoke [completion] with a Uri object
+     */
     fun oauth2(service: String, redirectUrl: String, completion: (uri: Uri?, message: String) -> Unit) {
         val route = ApiRoute.OAuth2(service, redirectUrl, context)
         this.performRequest(route) { success, response ->
@@ -159,6 +162,9 @@ class ApiClient(private val context: Context) {
         }
     }
 
+    /**
+     * Build a dataCode request with [code] and perform it, then invoke [completion] with a User object
+     */
     fun dataCode(code: String, completion: (user: User?, message: String) -> Unit) {
         val route = ApiRoute.DataCode(code, context)
         this.performRequest(route) { success, response ->

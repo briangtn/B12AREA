@@ -127,6 +127,9 @@ class LoginActivity : AppCompatActivity() {
             }
     }
 
+    /**
+     * Make a oauth request to api, using [service] name. If the call is successful, redirect the user to the service's oauth page, if not display a toast with the error
+     */
     private fun oauth(service: String) {
         ApiClient(this)
             .oauth2(service, "area://home") { uri, message ->
