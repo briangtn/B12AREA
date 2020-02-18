@@ -19,7 +19,9 @@ interface State {
     fakey: string,
     qrcode: string,
     fasecret: string | null,
-    alreadyActivated: boolean
+    alreadyActivated: boolean,
+    error: boolean,
+    errorMessage: string
 }
 
 interface Props {
@@ -47,7 +49,9 @@ class TwoFactorAuthentication extends Component<Props, State> {
         fakey: '',
         qrcode: '',
         fasecret: '',
-        alreadyActivated: false
+        alreadyActivated: false,
+        error: false,
+        errorMessage: ''
     }
 
     onChange: React.ChangeEventHandler<HTMLInputElement> = (e) => {
@@ -76,10 +80,25 @@ class TwoFactorAuthentication extends Component<Props, State> {
             })
             .then(res => res.json())
             .then((data) => {
-                this.setState({
-                    open: false
-                });
+                const { error } = data;
+
+                if (!error) {
+                    this.setState({
+                        open: false
+                    });
+                } else {
+                    this.setState({ error: true, errorMessage: `${error["message"]}`});
+                }
             })
+        }
+    };
+
+    keyPress = (e: any) => {
+        if (e.keyCode === 13) {
+            const toClick: HTMLElement | null = document.getElementById('fa-submit');
+
+            if (toClick)
+                toClick.click();
         }
     };
 
@@ -171,14 +190,17 @@ class TwoFactorAuthentication extends Component<Props, State> {
                                     </Typography>
                                 </Grid>
                             </Grid>
+                            <p style={{color: '#e74c3c'}}>{ this.state.errorMessage }</p>
                             <TextField
                                 id="fakey"
-                                label="Your Key"
+                                label="Your Code"
                                 variant="outlined"
                                 className={classes.field}
                                 value={fakey}
                                 onChange={this.onChange}
+                                onKeyDown={this.keyPress}
                                 fullWidth
+                                error={this.state.error}
                             />
                         </DialogContent>
                         <DialogActions>

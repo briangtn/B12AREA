@@ -51,7 +51,7 @@ class ChangeApi extends Component<Props, State> {
         apiUrl: ''
     }
 
-    onSubmit = (e: React.FormEvent) => {
+    onSubmit = () => {
         const { changeApiUrl } = this.props;
         const { apiUrl } = this.state;
 
@@ -65,6 +65,15 @@ class ChangeApi extends Component<Props, State> {
         const { id, value } = e.currentTarget;
 
         this.setState({[id]: value} as unknown as Pick<State, keyof State>);
+    };
+
+    keyPress = (e: any) => {
+        if (e.keyCode === 13) {
+            const toClick: HTMLElement | null = document.getElementById('changeApi')
+
+            if (toClick)
+                toClick.click();
+        }
     };
 
     componentDidMount() {
@@ -83,13 +92,14 @@ class ChangeApi extends Component<Props, State> {
                     id="apiUrl"
                     label="API URL"
                     variant="outlined"
+                    onKeyDown={this.keyPress}
                     className={classes.field}
                     value={apiUrl}
                     onChange={this.onChange}
                     fullWidth
                 />
                 <Button
-                    id="signin"
+                    id="changeApi"
                     variant="contained"
                     color="secondary"
                     className={classes.changeApiButton}

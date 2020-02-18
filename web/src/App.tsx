@@ -147,6 +147,15 @@ class App extends Component<Props, State> {
             });
     }
 
+    keyPress = (e: any) => {
+        if (e.keyCode === 13) {
+            const toClick: HTMLElement | null = document.getElementById('getStarted');
+
+            if (toClick)
+                toClick.click();
+        }
+    };
+
     render() {
         const { classes } = this.props;
 
@@ -172,12 +181,13 @@ class App extends Component<Props, State> {
                                 inputProps={{ 'aria-label': 'enter your email' }}
                                 value={this.state.email}
                                 onChange={this.onEmailEnter}
+                                onKeyDown={this.keyPress}
                             />
                             <Divider className={classes.divider} orientation="vertical" />
                             <Link
                                 to={{pathname: '/join', state: { email: this.state.email }}}
                                 style={{ textDecoration: 'none', color: '#FFFFFF' }}>
-                                <Button color="primary"><Translator sentence="getStarted" /></Button>
+                                <Button id="getStarted" color="primary"><Translator sentence="getStarted" /></Button>
                             </Link>
                         </Paper>
                         <OrDivider />
