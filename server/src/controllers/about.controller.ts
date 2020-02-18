@@ -5,18 +5,37 @@ import * as path from 'path';
 import * as util from 'util';
 const readdir = util.promisify(fs.readdir);
 
+class ConfigShema {
+    name: string;
+    description: string;
+    type: string;
+    required: boolean;
+    default?: number|string|boolean;
+}
+
+class Placeholder {
+    name: string;
+    description: string;
+}
+
 class Action {
     name: string;
     description: string;
+    configSchema: ConfigShema[];
+    placeholders: Placeholder[];
 }
 
 class Reaction {
     name: string;
     description: string;
+    configSchema: ConfigShema[];
 }
 
 class Service {
     name: string;
+    description: string;
+    icon: string;
+    color: string;
     actions: Array<Action>;
     reactions: Array<Reaction>;
 }
@@ -40,6 +59,7 @@ export class AboutController {
                 host: this.request.ip
             },
             server: {
+                //EPITECH MANDATORY
                 // eslint-disable-next-line @typescript-eslint/camelcase
                 current_time: Math.floor(Date.now() / 1000),
                 services: await this.parseServices()
@@ -54,28 +74,33 @@ export class AboutController {
         try {
             serviceDirs = await readdir(servicesPath);
         } catch (e) {
-            console.log(`Unable to scan directory ${servicesPath}: ${e}`);
+            console.error(`Unable to scan directory ${servicesPath}: ${e}`);
             return services;
         }
         for (const serviceName of serviceDirs) {
+            if (serviceName === "example")
+                continue;
             const newService = new Service;
             const serviceControllerPath = path.join(servicesPath, serviceName, 'controller.js');
             try {
                 const module = await import(serviceControllerPath);
                 if (!module.default) {
-                    console.log("The service controller class is not exported as default in " + serviceName)
+                    console.error("The service controller class is not exported as default in " + serviceName)
                 }
                 const controller = module.default;
                 if (!controller.getConfig) {
-                    console.log("Static method getConfig not found in " + serviceName + " controller");
+                    console.error("Static method getConfig not found in " + serviceName + " controller");
                     continue;
                 }
-                const config = controller.getConfig();
+                const config = await controller.getConfig();
                 newService.name = config.displayName;
+                newService.description = config.description;
+                newService.icon = config.icon;
+                newService.color = config.color;
                 newService.actions = [];
                 newService.reactions = [];
             } catch (e){
-                console.log(`${serviceControllerPath} module not found.`);
+                console.error(`${serviceControllerPath} module not found.`);
             }
 
             const serviceActionsPath = path.join(servicesPath, serviceName, 'actions');
@@ -83,7 +108,7 @@ export class AboutController {
             try {
                 actionDirs = await readdir(serviceActionsPath);
             } catch (e) {
-                console.log(`Unable to scan directory ${serviceActionsPath}: ${e}`);
+                console.error(`Unable to scan directory ${serviceActionsPath}: ${e}`);
                 continue;
             }
             for (const actionName of actionDirs) {
@@ -92,22 +117,24 @@ export class AboutController {
                 try {
                     const module = await import(actionControllerPath);
                     if (!module.default) {
-                        console.log("The service controller class is not exported as default in " + serviceName + ' (action: ' + actionName + ')');
+                        console.error("The service controller class is not exported as default in " + serviceName + ' (action: ' + actionName + ')');
                     }
                     const controller = module.default;
                     if (!controller.getConfig) {
-                        console.log("Static method getConfig not found in " + serviceName + " controller (action: " + actionName + ')');
+                        console.error("Static method getConfig not found in " + serviceName + " controller (action: " + actionName + ')');
                         continue;
                     }
-                    const config = controller.getConfig();
+                    const config = await controller.getConfig();
                     newAction.name = config.displayName;
                     newAction.description = config.description;
+                    newAction.configSchema = config.configSchema;
+                    newAction.placeholders = config.placeholders;
                 } catch (e) {
                     if (e.code !== 'MODULE_NOT_FOUND') {
-                        console.log('Error ', e.code, ' while loading ', actionControllerPath);
+                        console.error('Error ', e.code, ' while loading ', actionControllerPath);
                         continue;
                     }
-                    console.log(`ActionController could not be found in ${actionControllerPath}`);
+                    console.error(`ActionController could not be found in ${actionControllerPath}`);
                     continue;
                 }
                 newService.actions.push(newAction);
@@ -118,7 +145,7 @@ export class AboutController {
             try {
                 reactionDirs = await readdir(serviceReactionsPath);
             } catch (e) {
-                console.log(`Unable to scan directory ${serviceReactionsPath}: ${e}`);
+                console.error(`Unable to scan directory ${serviceReactionsPath}: ${e}`);
                 continue;
             }
             for (const reactionName of reactionDirs) {
@@ -128,16 +155,17 @@ export class AboutController {
                     const module = await import(reactionControllerPath);
                     const controller = module.default;
                     if (!controller)
-                        console.log("The service controller class is not exported as default in " + serviceName + ' (reaction: ' + reactionName + ')');
-                    const config = controller.getConfig();
+                        console.error("The service controller class is not exported as default in " + serviceName + ' (reaction: ' + reactionName + ')');
+                    const config = await controller.getConfig();
                     newReaction.name = config.displayName;
                     newReaction.description = config.description;
+                    newReaction.configSchema = config.configSchema;
                 } catch (e) {
                     if (e.code !== 'MODULE_NOT_FOUND') {
-                        console.log('Error ', e.code, ' while loading ', reactionControllerPath);
+                        console.error('Error ', e.code, ' while loading ', reactionControllerPath);
                         continue;
                     }
-                    console.log(`ReactionController could not be found in ${reactionControllerPath}`);
+                    console.error(`ReactionController could not be found in ${reactionControllerPath}`);
                     continue;
                 }
                 newService.reactions.push(newReaction);

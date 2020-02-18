@@ -1,4 +1,6 @@
 {
-  "displayName": "Example Service",
-  "description": "Example service for Proof of Concept"
+  "displayName": "example",
+  "description": "This should be the service description",
+  "icon": "This should be an url to the service image",
+  "color": "#ffffff"
 }

@@ -14,8 +14,18 @@ import com.b12powered.area.api.ApiClient
 import com.b12powered.area.fragments.SettingsFragment
 import kotlinx.android.synthetic.main.activity_login.*
 
+/**
+ * The activity where the user can login to application
+ *
+ * This class check and parse login parameters and request the api for login
+ */
 class LoginActivity : AppCompatActivity() {
 
+    /**
+     * Override method onCreate
+     *
+     * Set listeners to view's buttons and input fields
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
@@ -58,6 +68,9 @@ class LoginActivity : AppCompatActivity() {
 
     }
 
+    /**
+     * Check login parameters validity. Call [login] method if parameters are valid, reset input fields if they are not
+     */
     private fun submitLogin() {
         val etEmail = findViewById<EditText>(R.id.email)
         val etPassword = findViewById<EditText>(R.id.password)
@@ -82,14 +95,27 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Make a login request to api, using [email] and [password]. If the call is successful, redirect the user to the appropriate page, if not display a toast with the error
+     */
     private fun login(email: String, password: String) {
         ApiClient(this)
             .login(email, password) { user, message ->
                 if (user != null) {
+                    val sharedPreferences = getSharedPreferences("com.b12powered.area", Context.MODE_PRIVATE)
+                    val editor = sharedPreferences.edit()
+
+                    editor.putString("jwt-token", user.token)
+                    editor.apply()
+
                     if (user.require2fa) {
-                        //TODO redirect tot 2fa page
+                        val intent = Intent(this, TwoFAActivity::class.java)
+                        finish()
+                        startActivity(intent)
                     } else {
-                        //TODO redirect to homepage
+                        val intent = Intent(this, HomeActivity::class.java)
+                        finish()
+                        startActivity(intent)
                     }
                 } else {
                     Toast.makeText(

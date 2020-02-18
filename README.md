@@ -7,7 +7,9 @@ This is the repository of the area project.
 # How to use
 
 ## Install
-You first need to copy the `.env.example` file to a `.env` file and modify the variables as you need.
+You need to install ngrok and run it to create a proxy that expose your local server on the internet.
+You need to copy the `.env.example` file to a `.env` file and modify the variables as you need.
+The `API_URL` value should be the url given by ngrok.
 
 ## Run
 
@@ -15,6 +17,7 @@ You first need to copy the `.env.example` file to a `.env` file and modify the v
 
 ```bash
 cp .env.example .env
+// update .env
 npm run install
 npm run dev
 ```
@@ -22,6 +25,8 @@ npm run dev
 **prod mode:**
 
 ```bash
+cp .env.example .env
+// update .env
 npm start
 ```
 

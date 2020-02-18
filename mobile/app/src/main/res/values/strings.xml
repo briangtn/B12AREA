@@ -25,10 +25,13 @@
     <string name="email_confirmation_message">We\'ve sent you an email in order to validate your account. Check your spams if you don\'t see it !</string>
     <string name="verified_email">Email verification successful !</string>
     <string name="verified_email_message">You can login right now.</string>
+    <string name="security_code">Security code</string>
     <string name="change_api_url">Change api url</string>
     <string name="confirm">Confirm</string>
     <string name="cancel">Cancel</string>
     <string name="api_url">Api url</string>
     <string name="change_url_success">Api url successfully modified</string>
     <string name="change_url_fail">Url is invalid</string>
+    <string name="invalid_2fa_code">The code must be 6-digits long</string>
+    <string name="invalid_token">Invalid token</string>
 </resources>

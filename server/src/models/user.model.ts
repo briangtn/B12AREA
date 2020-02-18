@@ -1,7 +1,9 @@
-import {Entity, model, property} from '@loopback/repository';
+import {Entity, model, property, hasMany} from '@loopback/repository';
+import {Area} from './area.model';
 
 @model({
     settings: {
+        strictObjectIDCoercion: true,
         hiddenProperties: ['password', 'validationToken', 'resetToken', 'twoFactorAuthenticationSecret'],
         indexes: {
             uniqueEmail: {
@@ -72,12 +74,14 @@ export class User extends Entity {
 
     @property({
         type: 'array',
-        itemType: 'string',
+        itemType: 'object',
         required: false,
         default: []
     })
-    authServices?: string[];
+    authServices?: object[];
 
+    @hasMany(() => Area, {keyTo: 'ownerId'})
+    areas: Area[];
     // Define well-known properties here
 
     // Indexer property to allow additional data

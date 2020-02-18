@@ -8,6 +8,7 @@ async function startAsAPI(options: ApplicationConfig)
 {
     const app = new AreaApplication(options);
     await app.boot();
+    await app.beforeStart();
     await app.start();
 
     const url = app.restServer.url;

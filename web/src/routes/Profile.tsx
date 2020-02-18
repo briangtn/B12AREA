@@ -7,14 +7,17 @@ import { withStyles, createStyles, Theme } from "@material-ui/core";
 import NavigationBar from "../components/NavigationBar";
 import Typography from "@material-ui/core/Typography";
 import TextField from "@material-ui/core/TextField";
-import Button from "@material-ui/core/Button";
 
-import QRCode from 'qrcode';
-import Dialog from "@material-ui/core/Dialog";
-import Grid from "@material-ui/core/Grid";
-import DialogContent from "@material-ui/core/DialogContent";
-import DialogActions from "@material-ui/core/DialogActions";
 import Translator from "../components/Translator";
+
+import TwoFactorAuthentication from "../components/profile/TwoFactorAuthentication";
+import ChangePassword from "../components/profile/ChangePassword";
+import GoogleIcon from "../components/icons/GoogleIcon";
+import TwitterIcon from '@material-ui/icons/Twitter';
+
+import Grid from '@material-ui/core/Grid';
+
+import AuthButton from "../components/AuthButton";
 
 const mapStateToProps = (state: any) => {
     return { api_url: state.api_url, token: state.token };
@@ -38,7 +41,8 @@ interface State {
     qrcode: string,
     fasecret: string | null,
     open: boolean,
-    fakey: string
+    fakey: string,
+    authServices: any
 }
 
 const styles = (theme: Theme) => createStyles({
@@ -58,7 +62,8 @@ class Profile extends Component<Props, State> {
         qrcode: '',
         fasecret: '',
         open: false,
-        fakey: ''
+        fakey: '',
+        authServices: []
     };
 
     onChange: React.ChangeEventHandler<HTMLInputElement> = (e) => {
@@ -69,136 +74,27 @@ class Profile extends Component<Props, State> {
         this.setState({[id]: value} as unknown as Pick<State, keyof State>);
     };
 
-    onClose = (e: any) => {
-        this.setState({ open: false });
-    };
-
-    onSubmit = (e: React.FormEvent) => {
-        const { id } = e.currentTarget;
-        const { api_url, token } = this.props;
-
-        if (id === "fa-submit") {
-            const { fakey } = this.state;
-
-            fetch(`${api_url}/users/2fa/activate`, {
-                method: 'PATCH',
-                headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json'},
-                body: JSON.stringify({ "token": fakey }),
-            })
-            .then(res => res.json())
-            .then((data) => {
-                this.setState({
-                    twoFactorAuthenticationEnabled: data.twoFactorAuthenticationEnabled,
-                    open: false
-                });
-            })
-        }
-    };
-
-    onClick = (e: React.FormEvent) => {
-        const { api_url, token } = this.props;
-
-        const getUrlParameter = (url : string, name : string) : string | null => {
-            name = name.replace(/[\]]/g, '\\$&');
-            let regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
-                results = regex.exec(url);
-            if (!results) return null;
-            if (!results[2]) return '';
-            return decodeURIComponent(results[2].replace(/\+/g, ' '));
-        };
-
-        fetch(`${api_url}/users/2fa/activate`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
-        })
-            .then(res => res.json())
-            .then((data) => {
-                const otpUrl : string = data.otpauthUrl;
-
-                QRCode.toDataURL(otpUrl).then(url => {
-                    this.setState({ qrcode: url, open: true, fasecret: getUrlParameter(otpUrl, 'secret') });
-                });
-            });
-    };
-
     componentDidMount(): void {
         const { api_url, token } = this.props;
 
         fetch(`${api_url}/users/me`, { headers: { 'Authorization': `Bearer ${token}` } })
         .then(res => res.json())
         .then(data => {
+            let tmp = [];
+            for (let i of data.authServices) {
+                tmp.push(i.name);
+            }
             this.setState({
                 email: data.email,
-                twoFactorAuthenticationEnabled: data.twoFactorAuthenticationEnabled
+                twoFactorAuthenticationEnabled: data.twoFactorAuthenticationEnabled,
+                authServices: tmp
             });
         });
     }
 
     render() {
         const { classes } = this.props;
-        const { email, twoFactorAuthenticationEnabled, fakey } = this.state;
-
-        let twoFactorAuth = {};
-
-        if (twoFactorAuthenticationEnabled) {
-            twoFactorAuth = (
-                <div>
-                    two factor is enabled
-                </div>
-            );
-        } else {
-            twoFactorAuth = (
-                <div>
-                    <Button
-                        variant="contained"
-                        color="secondary"
-                        onClick={this.onClick}
-                    >
-                        <Translator sentence="settingsEnableTwoFactor" />
-                    </Button>
-                    <Dialog
-                        open={this.state.open}
-                        onClose={this.onClose}
-                    >
-                        <DialogContent>
-                            <Grid container spacing={1}>
-                                <Grid item xs={6}>
-                                    <img alt='two-fa-qrcode' src={this.state.qrcode} />
-                                </Grid>
-                                <Grid item xs={6} style={{ overflowWrap: 'break-word' }}>
-                                    <br />
-                                    <Typography gutterBottom>
-                                        <Translator sentence="troubleToScan" />
-                                    </Typography>
-                                    <Typography gutterBottom>
-                                        <b><Translator sentence="yourKey" /></b> {this.state.fasecret}
-                                    </Typography>
-                                </Grid>
-                            </Grid>
-                            <TextField
-                                id="fakey"
-                                label="Your Key"
-                                variant="outlined"
-                                className={classes.field}
-                                value={fakey}
-                                onChange={this.onChange}
-                                fullWidth
-                            />
-                        </DialogContent>
-                        <DialogActions>
-                            <Button onClick={this.onClose} color="primary">
-                                <Translator sentence="cancel" />
-                            </Button>
-                            <Button id="fa-submit" onClick={this.onSubmit} color="primary" autoFocus>
-                                <Translator sentence="save" />
-                            </Button>
-                        </DialogActions>
-                    </Dialog>
-                </div>
-            );
-        }
+        const { email, twoFactorAuthenticationEnabled } = this.state;
 
         return (
             <div>
@@ -225,9 +121,33 @@ class Profile extends Component<Props, State> {
                         />
                     </div>
                     <div className={classes.section} style={{ textAlign: 'left' }}>
+                        <Typography variant="h4" gutterBottom><b><Translator sentence="settingsChangePassword" /></b></Typography>
+                        <ChangePassword />
+                    </div>
+                    <div className={classes.section} style={{ textAlign: 'left' }}>
                         <Typography variant="h4" gutterBottom><b><Translator sentence="settingsTwoFactor" /></b></Typography>
                         <br />
-                        { twoFactorAuth }
+                        <TwoFactorAuthentication alreadyActivated={twoFactorAuthenticationEnabled} />
+                    </div>
+                    <div className={classes.section} style={{ textAlign: 'left' }}>
+                        <Typography variant="h4" gutterBottom><b><Translator sentence="linkAccount"/></b></Typography>
+                        <br />
+                        <Grid container spacing={3}>
+                            { (!this.state.authServices.includes('google')) ?
+                                <Grid item xs={6}>
+                                    <AuthButton token={this.props.token} history={this.props.history} apiUrl={this.props.api_url} serviceName="Google" serviceIcon={<GoogleIcon />} />
+                                </Grid>
+                            :
+                                <div></div>
+                            }
+                            { (!this.state.authServices.includes('twitter')) ?
+                                <Grid item xs={6}>
+                                    <AuthButton token={this.props.token} history={this.props.history} apiUrl={this.props.api_url} serviceName="Twitter" serviceIcon={<TwitterIcon />} />
+                                </Grid>
+                            :
+                                <div></div>
+                            }
+                        </Grid>
                     </div>
                 </div>
             </div>

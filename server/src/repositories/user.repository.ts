@@ -1,9 +1,8 @@
-import {
-    DefaultCrudRepository,
-    juggler,
-} from '@loopback/repository';
-import {User} from '../models';
-import {inject} from '@loopback/core';
+import {DefaultCrudRepository, repository, HasManyRepositoryFactory} from '@loopback/repository';
+import {User, UserRelations, Area} from '../models';
+import {MongoDataSource} from '../datasources';
+import {inject, Getter} from '@loopback/core';
+import {AreaRepository} from './area.repository';
 import {EmailManager, RandomGeneratorManager} from '../services';
 import {UserProfile} from "@loopback/security";
 import * as url from 'url';
@@ -13,23 +12,29 @@ export type Credentials = {
     password: string;
 };
 
-export class UserRepository extends DefaultCrudRepository<
-    User,
-    typeof User.prototype.id
-    > {
+export class UserRepository extends DefaultCrudRepository<User,
+    typeof User.prototype.id,
+    UserRelations> {
+
+    public readonly areas: HasManyRepositoryFactory<Area, typeof User.prototype.id>;
+
     constructor(
-        @inject('datasources.mongo') protected datasource: juggler.DataSource,
+        @inject('datasources.mongo') dataSource: MongoDataSource, @repository.getter('AreaRepository') protected areaRepositoryGetter: Getter<AreaRepository>,
         @inject('services.email') protected emailService: EmailManager,
         @inject('services.randomGenerator') protected randomGeneratorService: RandomGeneratorManager
     ) {
-        super(User, datasource);
+        super(User, dataSource);
+        this.areas = this.createHasManyRepositoryFactoryFor('areas', areaRepositoryGetter,);
+        this.registerInclusionResolver('areas', this.areas.inclusionResolver);
     }
 
-    async validateEmail(userId: string): Promise<User|null> {
-        const user: User|null = await this.findById(userId);
+    async validateEmail(userId: string): Promise<User | null> {
+        const user: User | null = await this.findById(userId);
         if (!user)
             return null;
-        const newRoles = user.role?.filter((role: string) => {return role !== 'email_not_validated' && role !== 'user'});
+        const newRoles = user.role?.filter((role: string) => {
+            return role !== 'email_not_validated' && role !== 'user'
+        });
         if (newRoles)
             newRoles.push('user');
         await this.updateById(userId, {
@@ -60,12 +65,12 @@ export class UserRepository extends DefaultCrudRepository<
             subject: "Welcome to AREA",
             html: htmlData,
             text: textData
-        }).catch(e => console.log("Failed to deliver email validation email: ", e));
+        }).catch(e => console.error("Failed to deliver email validation email: ", e));
         return validationToken;
     }
 
-    async updatePassword(userId: string, password: string): Promise<User|null> {
-        const user: User|null = await this.findById(userId);
+    async updatePassword(userId: string, password: string): Promise<User | null> {
+        const user: User | null = await this.findById(userId);
         if (!user)
             return null;
 
@@ -82,7 +87,7 @@ export class UserRepository extends DefaultCrudRepository<
             subject: "Password changed",
             html: htmlData,
             text: textData
-        }).catch(e => console.log("Failed to deliver password reset validation email: ", e));
+        }).catch(e => console.error("Failed to deliver password reset validation email: ", e));
         return this.findById(userId);
     }
 
@@ -92,5 +97,9 @@ export class UserRepository extends DefaultCrudRepository<
                 email: userProfile.email
             }
         });
+    }
+
+    async createArea(userId: typeof User.prototype.id, area: Omit<Area, 'id'>) : Promise<Area> {
+        return this.areas(userId).create(area);
     }
 }

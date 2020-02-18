@@ -2,9 +2,11 @@ import Cookies from "universal-cookie";
 
 const cookies = new Cookies();
 
+const defaultAPI: string = (process.env.NODE_ENV === "production") ? 'https://api.area.b12powered.com' : 'https://dev.api.area.b12powered.com';
+
 const initialState = {
     language: (cookies.get('language')) ? cookies.get('language') : 'fr',
-    api_url: (cookies.get('api_url')) ? cookies.get('api_url') : 'https://dev.api.area.b12powered.com',
+    api_url: (cookies.get('api_url')) ? cookies.get('api_url') : defaultAPI,
     token: (cookies.get('token')) ? cookies.get('token') : ''
 };
 

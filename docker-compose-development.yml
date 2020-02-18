@@ -36,7 +36,7 @@ services:
     env_file:
       - .env
     volumes:
-    - ./server:/server
+      - ./server:/server
     networks:
       - "db-tier"
       - "redis-tier"
@@ -51,17 +51,14 @@ services:
     command: npm run worker
     restart: unless-stopped
     environment:
-      - DB_HOST=db
       - REDIS_HOST=redis
     env_file:
       - .env
     volumes:
       - ./server:/server
     networks:
-      - "db-tier"
       - "redis-tier"
     depends_on:
-      - db
       - redis
 
   db:
@@ -69,9 +66,9 @@ services:
     command: mongod
     restart: unless-stopped
     environment:
-        - MONGO_INITDB_ROOT_USERNAME=$DB_USER
-        - MONGO_INITDB_ROOT_PASSWORD=$DB_PASS
-        - MONGO_INITDB_DATABASE=$DB_NAME
+      - MONGO_INITDB_ROOT_USERNAME=$DB_USER
+      - MONGO_INITDB_ROOT_PASSWORD=$DB_PASS
+      - MONGO_INITDB_DATABASE=$DB_NAME
     env_file:
       - .env
     ports:

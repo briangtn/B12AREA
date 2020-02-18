@@ -1,11 +1,12 @@
 import {bind, inject} from '@loopback/core';
 import {DataExchangeCodeRepository} from '../repositories';
-import { repository } from '@loopback/repository';
+import { repository, Where } from '@loopback/repository';
 import {RandomGeneratorManager} from './random-generator.service';
 import {DataExchangeCode} from '../models';
 
 export interface ExchangeCodeGeneratorManager {
     generate(data: object, isPublic: boolean): Promise<string>;
+    updateData(code: string, data: object): Promise<void>;
     getData(code: string, onlyPublic: boolean, shouldDelete: boolean): Promise<object | null>;
 }
 
@@ -19,12 +20,26 @@ export class ExchangeCodeGeneratorService implements ExchangeCodeGeneratorManage
             const code = this.randomGeneratorService.generateRandomString(16);
             this.exchangeCodeRepository.create({code, data, public: isPublic}).then((result) => {
                 resolve(code);
-            }).catch(reject)
+            }).catch((err) => {
+                reject(err);
+            })
         });
     }
 
+    async updateData(code: string, data: object): Promise<void> {
+        const current = await this.exchangeCodeRepository.findOne({where: {code}});
+        if (!current) {
+            return;
+        }
+        current.data = data;
+        await this.exchangeCodeRepository.updateById(current.id, current);
+    };
+
     async getData(code: string, onlyPublic = true, shouldDelete = true): Promise<object | null> {
-        const dataExchangeCode: DataExchangeCode | null = await this.exchangeCodeRepository.findOne({where: {code, public: onlyPublic}});
+        const where: Where<DataExchangeCode> = {code};
+        if (onlyPublic)
+            where.public = true;
+        const dataExchangeCode: DataExchangeCode | null = await this.exchangeCodeRepository.findOne({where: where});
 
         if (!dataExchangeCode) {
             return null;
