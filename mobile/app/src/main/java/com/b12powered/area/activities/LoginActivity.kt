@@ -129,7 +129,7 @@ class LoginActivity : AppCompatActivity() {
 
     private fun oauth(service: String) {
         ApiClient(this)
-            .oauth2(service, "http://" + (System.getenv("HOST") ?: "dev.area.b12powered.com")) { uri, message ->
+            .oauth2(service, "area://home") { uri, message ->
                 if (uri != null) {
                     val intent = Intent(Intent.ACTION_VIEW, uri)
                     finish()

@@ -42,8 +42,8 @@
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <data
-                    android:scheme="http"
-                    android:host="${HOST}" />
+                    android:scheme="area"
+                    android:host="home" />
             </intent-filter>
         </activity>
         <activity android:name=".activities.UserActivity" />
