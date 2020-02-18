@@ -163,6 +163,15 @@ class Join extends Component<Props, State> {
         this.setState({ error: 'false' });
     };
 
+    keyPress = (e: any) => {
+        if (e.keyCode === 13) {
+            const toClick: HTMLElement | null = document.getElementById('signup')
+
+            if (toClick)
+                toClick.click();
+        }
+    }
+
     render() {
         const { email, password, confirm_password, email_error} = this.state;
         const { classes } = this.props;
@@ -188,6 +197,7 @@ class Join extends Component<Props, State> {
                             className={classes.field}
                             value={email}
                             onChange={this.onChange}
+                            onKeyDown={this.keyPress}
                             error={ (email_error !== 'false') }
                             required
                         />
@@ -197,6 +207,7 @@ class Join extends Component<Props, State> {
                             label="Password"
                             variant="outlined"
                             type="password"
+                            onKeyDown={this.keyPress}
                             className={classes.field}
                             value={password}
                             onChange={this.onChange}
@@ -208,6 +219,7 @@ class Join extends Component<Props, State> {
                             label="Confirm Password"
                             variant="outlined"
                             type="password"
+                            onKeyDown={this.keyPress}
                             className={classes.field}
                             value={confirm_password}
                             onChange={this.onChange}
@@ -215,6 +227,7 @@ class Join extends Component<Props, State> {
                         />
                         <br />
                         <Button
+                            id="signup"
                             variant="contained"
                             color="secondary"
                             className={classes.signupButton}
