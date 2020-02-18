@@ -29,7 +29,22 @@ sealed class ApiRoute(private var mainContext: Context) {
      * @param context The context of the call
      */
     data class Register(var email: String, var password: String, var redirectUrl: String, var context: Context) : ApiRoute(context)
+
+    /**
+     * Data class for [OAuth2] route
+     *
+     * @param service The required service ("google" or "twitter"
+     * @param redirectUrl The url where the OAuth service should redirect the user
+     * @param context The context of the call
+     */
     data class OAuth2(var service: String, var redirectUrl: String, var context: Context) : ApiRoute(context)
+
+    /**
+     * Data class for [DataCode] route
+     *
+     * @param code The code brought by the OAuth service
+     * @param context The context of the call
+     */
     data class DataCode(var code: String, var context: Context) : ApiRoute(context)
 
     /**
