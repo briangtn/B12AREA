@@ -169,6 +169,24 @@ class Login extends Component<Props, State> {
         });
     };
 
+    loginKeyPress = (e: any) => {
+        if (e.keyCode === 13) {
+            const toClick: HTMLElement | null = document.getElementById('signin')
+
+            if (toClick)
+                toClick.click();
+        }
+    }
+
+    faKeyPress = (e: any) => {
+        if (e.keyCode === 13) {
+            const toClick: HTMLElement | null = document.getElementById('fa-submit')
+
+            if (toClick)
+                toClick.click();
+        }
+    }
+
     render() {
         const { email, password } = this.state;
         const { classes } = this.props;
@@ -194,6 +212,7 @@ class Login extends Component<Props, State> {
                             className={classes.field}
                             value={email}
                             onChange={this.onChange}
+                            onKeyDown={this.loginKeyPress}
                             required
                         />
                         <br />
@@ -205,6 +224,7 @@ class Login extends Component<Props, State> {
                             className={classes.field}
                             value={password}
                             onChange={this.onChange}
+                            onKeyDown={this.loginKeyPress}
                             required
                         />
                         <br />
@@ -239,11 +259,12 @@ class Login extends Component<Props, State> {
                         <Typography variant="body1"><Translator sentence="twoFactorEnabledSub" /></Typography>
                         <TextField
                             id="fakey"
-                            label="Your Key"
+                            label="Your Code"
                             variant="outlined"
                             className={classes.field}
                             value={this.state.fakey}
                             onChange={this.onChange}
+                            onKeyDown={this.faKeyPress}
                             fullWidth
                             style={{ left: '15%' }}
                         />
@@ -253,7 +274,7 @@ class Login extends Component<Props, State> {
                             <Translator sentence="cancel" />
                         </Button>
                         <Button id="fa-submit" onClick={this.dialogSubmit} color="primary" autoFocus>
-                            <Translator sentence="save" />
+                            <Translator sentence="signin" />
                         </Button>
                     </DialogActions>
                 </Dialog>
