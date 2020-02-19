@@ -36,4 +36,9 @@
     <string name="user_text">Paramètre de mon compte</string>
     <string name="invalid_2fa_code">Le code doit comporter 6 chiffres</string>
     <string name="invalid_token">Token invalide</string>
+    <string name="user_account">Mon compte</string>
+    <string name="user_change_password">Changer mon mot de passe</string>
+    <string name="activate_two_fa">Activer la double authentification</string>
+    <string name="double_authentication">Double authentification</string>
+    <string name="copy">copier le lien</string>
 </resources>
