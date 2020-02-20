@@ -9,7 +9,9 @@ import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.EditText
+import android.widget.Toast
 import com.b12powered.area.R
+import com.b12powered.area.api.ApiClient
 import kotlinx.android.synthetic.main.activity_login.*
 
 class PasswordActivity : AppCompatActivity() {
@@ -17,6 +19,8 @@ class PasswordActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_password)
+
+        val token: String = intent!!.data!!.getQueryParameter("token")!!
 
         val btnValidationPassword = findViewById<Button>(R.id.validation_password_button)
 
@@ -34,12 +38,12 @@ class PasswordActivity : AppCompatActivity() {
         })
 
         btnValidationPassword.setOnClickListener {
-            submitValidationPassword()
+            submitValidationPassword(token)
         }
 
     }
 
-    private fun submitValidationPassword() {
+    private fun submitValidationPassword(token: String) {
         val etPassword = findViewById<EditText>(R.id.new_password)
         val etConfirmPassword = findViewById<EditText>(R.id.confirm_new_password)
 
@@ -63,12 +67,25 @@ class PasswordActivity : AppCompatActivity() {
             etConfirmPassword.error = getString(R.string.different_password)
         }
         if (password.isNotEmpty() && confirmPassword.isNotEmpty() && password == confirmPassword) {
-            changePassword()
+            changePassword(token, password.toString())
         }
     }
 
-    private fun changePassword() {
-
+    private fun changePassword(token: String, password: String) {
+        ApiClient(this)
+            .resetPassword(token, password) { user, message ->
+                if (user != null) {
+/*                    val intent = Intent()
+                    finish()
+                    startActivity(intent)*/
+                } else {
+                    Toast.makeText(
+                        this,
+                        message,
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
     }
 
 }

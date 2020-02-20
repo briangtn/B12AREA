@@ -91,13 +91,13 @@ class RegisterActivity : AppCompatActivity() {
         if (email.isEmpty()) {
             etEmail.error = getString(R.string.no_email)
         }
-        if (password.isEmpty()) {
-            etPassword.error = getString(R.string.no_password)
-        } else if (confirmPassword.isEmpty()) {
-            etConfirmPassword.error = getString(R.string.no_confirm_password)
-        } else if (password.toString() != confirmPassword.toString()) {
-            etConfirmPassword.setText("")
-            etConfirmPassword.error = getString(R.string.different_password)
+        when {
+            password.isEmpty() -> etPassword.error = getString(R.string.no_password)
+            confirmPassword.isEmpty() -> etConfirmPassword.error = getString(R.string.no_confirm_password)
+            password.toString() != confirmPassword.toString() -> {
+                etConfirmPassword.setText("")
+                etConfirmPassword.error = getString(R.string.different_password)
+            }
         }
         if (email.isNotEmpty() && password.isNotEmpty() && confirmPassword.isNotEmpty() && password.toString() == confirmPassword.toString()) {
             register(email.toString(), password.toString())

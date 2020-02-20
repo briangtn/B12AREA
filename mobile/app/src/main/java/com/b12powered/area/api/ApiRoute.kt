@@ -1,8 +1,6 @@
 package com.b12powered.area.api
 
 import android.content.Context
-import android.content.SharedPreferences
-import android.util.Log
 import com.android.volley.Request
 
 /**
@@ -26,6 +24,7 @@ sealed class ApiRoute(private var mainContext: Context) {
      *
      * @param email The email of the user
      * @param password The password of the user
+     * @param redirectUrl The url where the validation link should redirect the user
      * @param context The context of the call
      */
     data class Register(var email: String, var password: String, var redirectUrl: String, var context: Context) : ApiRoute(context)
@@ -84,6 +83,24 @@ sealed class ApiRoute(private var mainContext: Context) {
      * @param context The context of the call
      */
     data class ReadinessProbe(var context: Context) : ApiRoute(context)
+
+    /**
+     * Data class for [RequestResetPassword] route
+     *
+     * @param email The email of the user
+     * @param redirectUrl The url where the validation link should redirect the user
+     * @param context The context of the call
+     */
+    data class RequestResetPassword(var email: String, var redirectUrl: String, var context: Context) : ApiRoute(context)
+
+    /**
+     * Data class for [ResetPassword] route
+     *
+     * @param token The reset token
+     * @param password The user's new password
+     * @param context The context of the call
+     */
+    data class ResetPassword(var token: String, var password: String, var context: Context) : ApiRoute(context)
 
     /**
      * Data class for [GetUser] route
@@ -146,6 +163,8 @@ sealed class ApiRoute(private var mainContext: Context) {
                 is Confirm2fa -> "users/2fa/activate"
                 is Validate2fa -> "users/2fa/validate"
                 is ReadinessProbe -> "readinessProbe"
+                is RequestResetPassword -> "users/resetPassword"
+                is ResetPassword -> "/users/resetPassword"
                 is GetUser -> "users/me"
                 else -> ""
             }}"
@@ -169,6 +188,8 @@ sealed class ApiRoute(private var mainContext: Context) {
                 is Activate2fa -> Request.Method.POST
                 is Confirm2fa -> Request.Method.PATCH
                 is Validate2fa -> Request.Method.POST
+                is RequestResetPassword -> Request.Method.POST
+                is ResetPassword -> Request.Method.PATCH
                 else -> Request.Method.GET
             }
         }
@@ -192,10 +213,16 @@ sealed class ApiRoute(private var mainContext: Context) {
                     hashMapOf(Pair("email", email), Pair("password", password))
                 }
                 is Confirm2fa -> {
-                    hashMapOf(Pair("token", this.token))
+                    hashMapOf(Pair("token", token))
                 }
                 is Validate2fa -> {
-                    hashMapOf(Pair("token", this.token))
+                    hashMapOf(Pair("token", token))
+                }
+                is RequestResetPassword -> {
+                    hashMapOf(Pair("email", email), Pair("redirectUrl", redirectUrl))
+                }
+                is ResetPassword -> {
+                    hashMapOf(Pair("token", token), Pair("password", password))
                 }
                 else -> hashMapOf()
             }

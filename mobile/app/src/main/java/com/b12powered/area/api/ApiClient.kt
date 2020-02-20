@@ -243,6 +243,31 @@ class ApiClient(private val context: Context) {
     }
 
     /**
+     * Build a request for reset password request with [email] and [redirectUrl] and perform it, then invoke [completion] with a boolean corresponding to the result of the call
+     */
+    fun requestResetPassword(email: String, redirectUrl: String, completion: (success: Boolean, message: String) -> Unit) {
+        val route = ApiRoute.RequestResetPassword(email, redirectUrl, context)
+        this.performRequest(route) { success, response ->
+            completion.invoke(success, response.message)
+        }
+    }
+
+    /**
+     * Build a request for reset password with [token] and [password] and perform it, then invoke [completion] with a User object
+     */
+    fun resetPassword(token: String, password: String, completion: (user: User?, message: String) -> Unit) {
+        val route = ApiRoute.ResetPassword(token, password, context)
+        this.performRequest(route) { success, response ->
+            if (success) {
+                val user: User = response.json.toObject()
+                completion.invoke(user, "success")
+            } else {
+                completion.invoke(null, response.message)
+            }
+        }
+    }
+
+    /**
      * Build a getUser request taking no parameter and perform it, then invoke [completion] with a User object
      */
     fun getUser(completion: (user: User?, message: String) -> Unit) {
