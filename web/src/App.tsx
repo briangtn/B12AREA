@@ -191,7 +191,7 @@ class App extends Component<Props, State> {
                             </Link>
                         </Paper>
                         <OrDivider />
-                        <Grid container spacing={3}>
+                        <Grid container spacing={3} direction="row" alignItems="center" justify="center">
                             <Grid item xs={6}>
                                 <AuthButton token={null} history={this.props.history} apiUrl={this.props.api_url} serviceName="Google" serviceIcon={<GoogleIcon />} />
                             </Grid>
