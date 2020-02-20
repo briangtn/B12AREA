@@ -28,6 +28,13 @@ export class Area extends Entity {
     })
     ownerId?: string;
 
+    @property({
+        type: 'object',
+        default: {},
+        required: false
+    })
+    data?: object;
+
     @hasMany(() => Reaction, {keyTo: 'areaId'})
     reactions: Reaction[];
 
