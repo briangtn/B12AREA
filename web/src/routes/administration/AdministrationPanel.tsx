@@ -5,7 +5,6 @@ import { connect } from 'react-redux';
 import { withStyles, createStyles, Theme } from "@material-ui/core";
 
 import Drawer from '@material-ui/core/Drawer';
-import CssBaseline from '@material-ui/core/CssBaseline';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import List from '@material-ui/core/List';
@@ -14,12 +13,16 @@ import Divider from '@material-ui/core/Divider';
 import IconButton from '@material-ui/core/IconButton';
 import MenuIcon from '@material-ui/icons/Menu';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
-import ChevronRightIcon from '@material-ui/icons/ChevronRight';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
-import InboxIcon from '@material-ui/icons/MoveToInbox';
-import MailIcon from '@material-ui/icons/Mail';
+
+import HomeIcon from '@material-ui/icons/Home';
+import AccountCircleIcon from '@material-ui/icons/AccountCircle';
+import ExitToAppIcon from '@material-ui/icons/ExitToApp';
+
+import Summary from "../../components/administration/Summary";
+import Users from "../../components/administration/Users";
 
 import { setToken } from "../../actions/api.action";
 
@@ -165,8 +168,9 @@ class AdministrationPanel extends Component<Props, State> {
         const { open } = this.state;
 
         const routes: Route[] = [
-            { name: 'Home', icon: <InboxIcon />, component: <div>bite</div> },
-            { name: 'Users', icon: <MailIcon />, component: <div>Users</div> }
+            { name: 'Home', icon: <HomeIcon />, component: <Summary apiUrl={this.props.api_url} token={this.props.token} /> },
+            { name: 'Users', icon: <AccountCircleIcon />, component: <Users apiUrl={this.props.api_url} token={this.props.token} /> },
+            { name: 'Exit', icon: <ExitToAppIcon />, component: <div></div>}
         ]
         return (
             <div className={classes.root}>
