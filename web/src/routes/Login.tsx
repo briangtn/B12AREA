@@ -4,6 +4,7 @@ import { connect } from 'react-redux';
 
 import { withStyles, createStyles, Theme } from "@material-ui/core";
 
+import { Link } from 'react-router-dom';
 import NavigationBar from "../components/NavigationBar";
 import OrDivider from "../components/OrDivider";
 import Translator from "../components/Translator";
@@ -228,6 +229,10 @@ class Login extends Component<Props, State> {
                             required
                         />
                         <br />
+                        <br />
+                        <Link to={{ pathname: '/forgot' }} style={{ textDecoration: 'none', color: '#212121' }}>
+                            <Translator sentence="forgotPasswordLink" />
+                        </Link>
                         <Button
                             id="signin"
                             variant="contained"

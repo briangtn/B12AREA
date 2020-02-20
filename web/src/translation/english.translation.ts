@@ -5,8 +5,8 @@ const english = {
     signup: "Sign up",
     enterEmail: "Enter your email",
     getStarted: "Get Started",
-    connectGoogle: "Connect with google",
-    connectTwitter: "Connect with Twitter",
+    connectGoogle: "Connect Google",
+    connectTwitter: "Connect Twitter",
     confirmEmail: "Please confirm your email to continue.",
     emailValidated: "Your email has been confirmed, please sign in to continue.",
     twoFactorEnabled: "Two factor authentication is enabled",
@@ -21,7 +21,11 @@ const english = {
     disable: "Disable",
     linkAccount: "Link account",
     troubleToScan: "You have trouble to scan the QR Code ?",
-    yourKey: "Your key:"
+    yourKey: "Your key:",
+    forgotPasswordLink: "Forgot your password?",
+    resetPassword: "Reset password",
+    resetPasswordEmailSent: "To continue, please follow the steps in your email",
+    resetPasswordConfirmation: "Your password has been reset, please connect."
 };
 
 export default english;
