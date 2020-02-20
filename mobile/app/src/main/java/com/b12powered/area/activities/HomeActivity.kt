@@ -35,7 +35,6 @@ class HomeActivity : AppCompatActivity() {
         if (data !== null) {
             val code: String? = data.getQueryParameter("code")
             if (code !== null) {
-                Log.d("data code", code)
                 ApiClient(this)
                     .dataCode(code) { user, message ->
                         if (user !== null) {
