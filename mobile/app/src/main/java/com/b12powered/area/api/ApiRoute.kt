@@ -31,6 +31,23 @@ sealed class ApiRoute(private var mainContext: Context) {
     data class Register(var email: String, var password: String, var redirectUrl: String, var context: Context) : ApiRoute(context)
 
     /**
+     * Data class for [OAuth2] route
+     *
+     * @param service The required service ("google" or "twitter"
+     * @param redirectUrl The url where the OAuth service should redirect the user
+     * @param context The context of the call
+     */
+    data class OAuth2(var service: String, var redirectUrl: String, var context: Context) : ApiRoute(context)
+
+    /**
+     * Data class for [DataCode] route
+     *
+     * @param code The code brought by the OAuth service
+     * @param context The context of the call
+     */
+    data class DataCode(var code: String, var context: Context) : ApiRoute(context)
+
+    /**
      * Data class for [Validate] route
      *
      * @param token The validation token
@@ -122,6 +139,8 @@ sealed class ApiRoute(private var mainContext: Context) {
             return "$baseUrl/${when (this@ApiRoute) {
                 is Login -> "users/login"
                 is Register -> "users/register"
+                is OAuth2 -> "users/serviceLogin/${service}"
+                is DataCode -> "data-code/${code}"
                 is Validate -> "users/validate"
                 is Activate2fa -> "users/2fa/activate"
                 is Confirm2fa -> "users/2fa/activate"
@@ -167,10 +186,10 @@ sealed class ApiRoute(private var mainContext: Context) {
         get() {
             return when (this) {
                 is Login -> {
-                    hashMapOf(Pair("email", this.email), Pair("password", this.password))
+                    hashMapOf(Pair("email", email), Pair("password", password))
                 }
                 is Register -> {
-                    hashMapOf(Pair("email", this.email), Pair("password", this.password))
+                    hashMapOf(Pair("email", email), Pair("password", password))
                 }
                 is Confirm2fa -> {
                     hashMapOf(Pair("token", this.token))
@@ -195,10 +214,13 @@ sealed class ApiRoute(private var mainContext: Context) {
         get() {
             return when (this) {
                 is Register -> {
-                    hashMapOf(Pair("redirectURL", this.redirectUrl))
+                    hashMapOf(Pair("redirectURL", redirectUrl))
+                }
+                is OAuth2 -> {
+                    hashMapOf(Pair("redirectURL", redirectUrl))
                 }
                 is Validate -> {
-                    hashMapOf(Pair("token", this.token))
+                    hashMapOf(Pair("token", token))
                 }
                 else -> hashMapOf()
             }
