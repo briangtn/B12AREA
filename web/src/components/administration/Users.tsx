@@ -119,7 +119,7 @@ class Users extends Component<Props, State> {
     }
 
     onClickDetail(index: any, event: any) {
-        this.setState({ userDetail: true, userDetailIndex: index });
+        this.setState({ userDetail: true, userDetailIndex: index + (this.state.page * this.state.rowsPerPage) });
     }
 
     onClickBackDetail = (e: any) => {
@@ -178,7 +178,7 @@ class Users extends Component<Props, State> {
     }
 
     alertDetailClose = (e: any) => {
-        this.setState({ alertList: false });
+        this.setState({ alertDetail: false });
     }
 
     render() {
