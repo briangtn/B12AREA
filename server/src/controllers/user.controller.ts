@@ -241,6 +241,32 @@ export class UserController {
         return {token, require2fa: user.twoFactorAuthenticationEnabled};
     }
 
+    @authenticate('jwt-all')
+    @post('/refreshToken', {
+        responses: {
+            '200': {
+                description: 'Gives a new JWT to a user',
+                content: {
+                    'application/json': {
+                        schema: {
+                            type: 'object',
+                            properties: {
+                                token: {
+                                    type: 'string',
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        },
+    })
+    async refresh(
+        @inject(SecurityBindings.USER) currentUserProfile: CustomUserProfile
+    ) : Promise<string> {
+        return this.tokenService.generateToken(currentUserProfile)
+    }
+
     @get('/serviceLogin/{serviceName}', {
         responses: {
             '200': {
