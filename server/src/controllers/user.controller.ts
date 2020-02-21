@@ -242,7 +242,7 @@ export class UserController {
     }
 
     @authenticate('jwt-all')
-    @post('/refreshToken', {
+    @get('/refreshToken', {
         responses: {
             '200': {
                 description: 'Gives a new JWT to a user',
@@ -263,8 +263,8 @@ export class UserController {
     })
     async refresh(
         @inject(SecurityBindings.USER) currentUserProfile: CustomUserProfile
-    ) : Promise<string> {
-        return this.tokenService.generateToken(currentUserProfile)
+    ) : Promise<{token: string}> {
+        return {token: await this.tokenService.generateToken(currentUserProfile)};
     }
 
     @get('/serviceLogin/{serviceName}', {
