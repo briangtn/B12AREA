@@ -13,7 +13,7 @@ import com.b12powered.area.User
 import com.b12powered.area.api.ApiClient
 
 /**
- * The activity where the user can have all activities
+ * The activity where the user can have all services
  *
  * This class show the home page of the user connected
  */
