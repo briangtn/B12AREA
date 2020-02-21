@@ -1,6 +1,8 @@
 package com.b12powered.area.api
 
 import android.content.Context
+import android.net.Uri
+import androidx.core.net.toUri
 import com.android.volley.*
 import com.android.volley.toolbox.BasicNetwork
 import com.android.volley.toolbox.DiskBasedCache
@@ -147,6 +149,35 @@ class ApiClient(private val context: Context) {
     }
 
     /**
+     * Build a oauth request with [service] name and perform it, then invoke [completion] with a Uri object
+     */
+    fun oauth2(service: String, redirectUrl: String, completion: (uri: Uri?, message: String) -> Unit) {
+        val route = ApiRoute.OAuth2(service, redirectUrl, context)
+        this.performRequest(route) { success, response ->
+            if (success) {
+                completion.invoke(JSONObject(response.json).getString("url").toUri(), "success")
+            } else {
+                completion.invoke(null, response.message)
+            }
+        }
+    }
+
+    /**
+     * Build a dataCode request with [code] and perform it, then invoke [completion] with a User object
+     */
+    fun dataCode(code: String, completion: (user: User?, message: String) -> Unit) {
+        val route = ApiRoute.DataCode(code, context)
+        this.performRequest(route) { success, response ->
+            if (success) {
+                val user: User = response.json.toObject()
+                completion.invoke(user, "success")
+            } else {
+                completion.invoke(null, response.message)
+            }
+        }
+    }
+
+    /**
      * Build an account validation request with [token] and perform it, then invoke [completion] with the response's message
      */
     fun validate(token: String, completion: (message: String) -> Unit) {
@@ -208,6 +239,31 @@ class ApiClient(private val context: Context) {
         val route = ApiRoute.ReadinessProbe(context)
         this.performRequest(route) { success, _ ->
             completion.invoke(success)
+        }
+    }
+
+    /**
+     * Build a request for reset password request with [email] and [redirectUrl] and perform it, then invoke [completion] with a boolean corresponding to the result of the call
+     */
+    fun requestResetPassword(email: String, redirectUrl: String, completion: (success: Boolean, message: String) -> Unit) {
+        val route = ApiRoute.RequestResetPassword(email, redirectUrl, context)
+        this.performRequest(route) { success, response ->
+            completion.invoke(success, response.message)
+        }
+    }
+
+    /**
+     * Build a request for reset password with [token] and [password] and perform it, then invoke [completion] with a User object
+     */
+    fun resetPassword(token: String, password: String, completion: (user: User?, message: String) -> Unit) {
+        val route = ApiRoute.ResetPassword(token, password, context)
+        this.performRequest(route) { success, response ->
+            if (success) {
+                val user: User = response.json.toObject()
+                completion.invoke(user, "success")
+            } else {
+                completion.invoke(null, response.message)
+            }
         }
     }
 

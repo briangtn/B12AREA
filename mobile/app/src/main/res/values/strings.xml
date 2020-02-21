@@ -42,4 +42,8 @@
     <string name="copy">copy the link</string>
     <string name="disable_two_fa">Disable double authentication</string>
     <string name="log_out">Log out</string>
+    <string name="forgot_password">Forgot your password</string>
+    <string name="successful_password_reset">Password reset successful !</string>
+    <string name="password_reset_confirmation_message">We\'ve sent you an email in order to set your new password. Check your spams if you don\'t see it !</string>
+    <string name="success_new_password">New password successfully set !</string>
 </resources>

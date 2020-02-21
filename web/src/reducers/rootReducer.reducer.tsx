@@ -2,9 +2,13 @@ import Cookies from "universal-cookie";
 
 const cookies = new Cookies();
 
+let defaultAPI: string = '';
+
+defaultAPI = (process.env.REACT_APP_API_URL !== undefined) ? process.env.REACT_APP_API_URL : 'http://localhost:8080';
+
 const initialState = {
     language: (cookies.get('language')) ? cookies.get('language') : 'fr',
-    api_url: (cookies.get('api_url')) ? cookies.get('api_url') : 'https://dev.api.area.b12powered.com',
+    api_url: (cookies.get('api_url')) ? cookies.get('api_url') : defaultAPI,
     token: (cookies.get('token')) ? cookies.get('token') : ''
 };
 

@@ -57,6 +57,21 @@ class LoginActivity : AppCompatActivity() {
             finish()
             startActivity(intent)
         }
+
+        forgot_password_button.setOnClickListener {
+            val intent = Intent(this, ForgotPasswordActivity::class.java)
+            finish()
+            startActivity(intent)
+        }
+
+        google_button.setOnClickListener {
+            oauth("google")
+        }
+
+        twitter_button.setOnClickListener {
+            oauth("twitter")
+        }
+
     }
 
     /**
@@ -108,6 +123,26 @@ class LoginActivity : AppCompatActivity() {
                         finish()
                         startActivity(intent)
                     }
+                } else {
+                    Toast.makeText(
+                        this,
+                        message,
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+    }
+
+    /**
+     * Make a oauth request to api, using [service] name. If the call is successful, redirect the user to the service's oauth page, if not display a toast with the error
+     */
+    private fun oauth(service: String) {
+        ApiClient(this)
+            .oauth2(service, "area://home") { uri, message ->
+                if (uri != null) {
+                    val intent = Intent(Intent.ACTION_VIEW, uri)
+                    finish()
+                    startActivity(intent)
                 } else {
                     Toast.makeText(
                         this,

@@ -241,6 +241,32 @@ export class UserController {
         return {token, require2fa: user.twoFactorAuthenticationEnabled};
     }
 
+    @authenticate('jwt-all')
+    @get('/refreshToken', {
+        responses: {
+            '200': {
+                description: 'Gives a new JWT to a user',
+                content: {
+                    'application/json': {
+                        schema: {
+                            type: 'object',
+                            properties: {
+                                token: {
+                                    type: 'string',
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        },
+    })
+    async refresh(
+        @inject(SecurityBindings.USER) currentUserProfile: CustomUserProfile
+    ) : Promise<{token: string}> {
+        return {token: await this.tokenService.generateToken(currentUserProfile)};
+    }
+
     @get('/serviceLogin/{serviceName}', {
         responses: {
             '200': {
@@ -321,7 +347,8 @@ export class UserController {
             '404': response404('User not found'),
             '401': {
                 description: 'Unauthorized'
-            }
+            },
+            '422': response422('Invalid params format')
         }
     })
     @authenticate('jwt-all')
@@ -346,6 +373,9 @@ export class UserController {
         if (updatedUser.disable2FA) {
             updatedUser.twoFactorAuthenticationEnabled = false;
         }
+        if (updatedUser.disable2FA !== undefined) {
+            delete updatedUser.disable2FA;
+        }
         if (updatedUser.email) {
             if (!validator.isEmail(updatedUser.email)) {
                 throw new HttpErrors.BadRequest('Invalid email.');
@@ -366,6 +396,29 @@ export class UserController {
         }
         await this.userRepository.updateById(currentUser.id, updatedUser);
         return this.userRepository.findById(currentUser.id);
+    }
+
+    @get('/availableRoles', {
+        responses: {
+            '200': {
+                description: 'The url where you have to redirect',
+                content: {
+                    'application/json': {
+                        schema: {
+                            type: 'object',
+                            properties: {
+                                url: {
+                                    type: 'string',
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        }
+    })
+    getAvailableRoles() {
+        return this.userService.getAvailableRoles();
     }
 
     @get('/{id}', {

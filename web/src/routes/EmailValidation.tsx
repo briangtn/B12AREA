@@ -8,22 +8,35 @@ import Grid from "@material-ui/core/Grid";
 import Typography from "@material-ui/core/Typography";
 import Translator from "../components/Translator";
 
+import { changeApiUrl } from "../actions/api.action";
+
+import Cookies from "universal-cookie";
+
+const cookies = new Cookies();
+
 const mapStateToProps = (state: any) => {
-    return { api_url: state.api_url };
+    return { api_url: state.api_url, token: state.token };
 };
+
+function mapDispatchToProps(dispatch: any) {
+    return { changeApiUrl: (token: object) => dispatch(changeApiUrl(token)) };
+}
 
 interface Props {
     api_url: string,
     history: {
         push: any
     },
+    token: string,
+    changeApiUrl: any
 }
 
 interface State {}
 
 class EmailValidation extends Component<Props, State> {
     componentDidMount(): void {
-        const { api_url } = this.props;
+        if (this.props.token)
+            return;
         const getUrlParameter = (name : string) : string | null => {
             const url = window.location.href;
             name = name.replace(/[\]]/g, '\\$&');
@@ -34,8 +47,10 @@ class EmailValidation extends Component<Props, State> {
             return decodeURIComponent(results[2].replace(/\+/g, ' '));
         };
         let token : string | null = getUrlParameter('token');
-
-        fetch(`${api_url}/users/validate?token=${token}`, {
+        const newApiUrl: string | null = getUrlParameter('api_url');
+        this.props.changeApiUrl(newApiUrl);
+        cookies.set('api_url', newApiUrl);
+        fetch(`${newApiUrl}/users/validate?token=${token}`, {
             method: 'PATCH',
         }).then((res) => {
             return res.json();
@@ -67,4 +82,4 @@ class EmailValidation extends Component<Props, State> {
     }
 }
 
-export default connect(mapStateToProps)(EmailValidation);
+export default connect(mapStateToProps, mapDispatchToProps)(EmailValidation);

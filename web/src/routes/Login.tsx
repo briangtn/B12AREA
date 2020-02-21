@@ -4,6 +4,7 @@ import { connect } from 'react-redux';
 
 import { withStyles, createStyles, Theme } from "@material-ui/core";
 
+import { Link } from 'react-router-dom';
 import NavigationBar from "../components/NavigationBar";
 import OrDivider from "../components/OrDivider";
 import Translator from "../components/Translator";
@@ -23,6 +24,8 @@ import Cookies from "universal-cookie";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogActions from "@material-ui/core/DialogActions";
 import Dialog from "@material-ui/core/Dialog";
+
+import AuthButton from "../components/AuthButton";
 
 const cookies = new Cookies();
 
@@ -167,6 +170,24 @@ class Login extends Component<Props, State> {
         });
     };
 
+    loginKeyPress = (e: any) => {
+        if (e.keyCode === 13) {
+            const toClick: HTMLElement | null = document.getElementById('signin')
+
+            if (toClick)
+                toClick.click();
+        }
+    }
+
+    faKeyPress = (e: any) => {
+        if (e.keyCode === 13) {
+            const toClick: HTMLElement | null = document.getElementById('fa-submit')
+
+            if (toClick)
+                toClick.click();
+        }
+    }
+
     render() {
         const { email, password } = this.state;
         const { classes } = this.props;
@@ -192,6 +213,7 @@ class Login extends Component<Props, State> {
                             className={classes.field}
                             value={email}
                             onChange={this.onChange}
+                            onKeyDown={this.loginKeyPress}
                             required
                         />
                         <br />
@@ -203,8 +225,14 @@ class Login extends Component<Props, State> {
                             className={classes.field}
                             value={password}
                             onChange={this.onChange}
+                            onKeyDown={this.loginKeyPress}
                             required
                         />
+                        <br />
+                        <br />
+                        <Link to={{ pathname: '/forgot' }} style={{ textDecoration: 'none', color: '#212121' }}>
+                            <Translator sentence="forgotPasswordLink" />
+                        </Link>
                         <br />
                         <Button
                             id="signin"
@@ -220,22 +248,10 @@ class Login extends Component<Props, State> {
                         <br />
                         <Grid container spacing={3}>
                             <Grid item xs={6}>
-                                <Button
-                                    variant="contained"
-                                    className={classes.imageButton}
-                                    startIcon={<GoogleIcon />}
-                                >
-                                    <Translator sentence="connectGoogle" />
-                                </Button>
+                                <AuthButton token={null} history={this.props.history} apiUrl={this.props.api_url} serviceName="Google" serviceIcon={<GoogleIcon />} />
                             </Grid>
                             <Grid item xs={6}>
-                                <Button
-                                    variant="contained"
-                                    className={classes.imageButton}
-                                    startIcon={<TwitterIcon />}
-                                >
-                                    <Translator sentence="connectTwitter" />
-                                </Button>
+                                <AuthButton token={null} history={this.props.history} apiUrl={this.props.api_url} serviceName="Twitter" serviceIcon={<TwitterIcon />} />
                             </Grid>
                         </Grid>
                     </Grid>
@@ -249,11 +265,12 @@ class Login extends Component<Props, State> {
                         <Typography variant="body1"><Translator sentence="twoFactorEnabledSub" /></Typography>
                         <TextField
                             id="fakey"
-                            label="Your Key"
+                            label="Your Code"
                             variant="outlined"
                             className={classes.field}
                             value={this.state.fakey}
                             onChange={this.onChange}
+                            onKeyDown={this.faKeyPress}
                             fullWidth
                             style={{ left: '15%' }}
                         />
@@ -263,7 +280,7 @@ class Login extends Component<Props, State> {
                             <Translator sentence="cancel" />
                         </Button>
                         <Button id="fa-submit" onClick={this.dialogSubmit} color="primary" autoFocus>
-                            <Translator sentence="save" />
+                            <Translator sentence="signin" />
                         </Button>
                     </DialogActions>
                 </Dialog>

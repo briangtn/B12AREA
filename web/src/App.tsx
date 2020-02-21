@@ -10,6 +10,7 @@ import { connect } from 'react-redux';
 import './App.css';
 
 import NavigationBar from "./components/NavigationBar";
+import AuthButton from "./components/AuthButton";
 import OrDivider from "./components/OrDivider";
 import Translator from "./components/Translator";
 import HomeCarousel from "./components/HomeCarousel";
@@ -146,6 +147,15 @@ class App extends Component<Props, State> {
             });
     }
 
+    keyPress = (e: any) => {
+        if (e.keyCode === 13) {
+            const toClick: HTMLElement | null = document.getElementById('getStarted');
+
+            if (toClick)
+                toClick.click();
+        }
+    };
+
     render() {
         const { classes } = this.props;
 
@@ -171,35 +181,22 @@ class App extends Component<Props, State> {
                                 inputProps={{ 'aria-label': 'enter your email' }}
                                 value={this.state.email}
                                 onChange={this.onEmailEnter}
+                                onKeyDown={this.keyPress}
                             />
                             <Divider className={classes.divider} orientation="vertical" />
                             <Link
                                 to={{pathname: '/join', state: { email: this.state.email }}}
                                 style={{ textDecoration: 'none', color: '#FFFFFF' }}>
-                                <Button color="primary"><Translator sentence="getStarted" /></Button>
+                                <Button id="getStarted" color="primary"><Translator sentence="getStarted" /></Button>
                             </Link>
                         </Paper>
                         <OrDivider />
-                        <Grid container spacing={3}>
+                        <Grid container spacing={3} direction="row" alignItems="center" justify="center">
                             <Grid item xs={6}>
-                                <Button
-                                    variant="contained"
-                                    className={classes.imageButton}
-                                    startIcon={<GoogleIcon />}
-                                    disableElevation={true}
-                                >
-                                    <Translator sentence="connectGoogle" />
-                                </Button>
+                                <AuthButton token={null} history={this.props.history} apiUrl={this.props.api_url} serviceName="Google" serviceIcon={<GoogleIcon />} />
                             </Grid>
                             <Grid item xs={6}>
-                                <Button
-                                    variant="contained"
-                                    className={classes.imageButton}
-                                    startIcon={<TwitterIcon />}
-                                    disableElevation={true}
-                                >
-                                    <Translator sentence="connectTwitter" />
-                                </Button>
+                                <AuthButton token={null} history={this.props.history} apiUrl={this.props.api_url} serviceName="Twitter" serviceIcon={<TwitterIcon />} />
                             </Grid>
                         </Grid>
                     </Grid>

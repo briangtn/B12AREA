@@ -24,6 +24,14 @@ export class Action extends Entity {
         type: 'object',
     })
     options: object;
+
+    @property({
+        type: 'object',
+        default: {},
+        required: false
+    })
+    data?: object;
+
     // Define well-known properties here
 
     // Indexer property to allow additional data

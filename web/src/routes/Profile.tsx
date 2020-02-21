@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 
 import { connect } from 'react-redux';
 
-import { withStyles, createStyles, Theme } from "@material-ui/core";
+import { withStyles, createStyles, Theme, Button } from "@material-ui/core";
 
 import NavigationBar from "../components/NavigationBar";
 import Typography from "@material-ui/core/Typography";
@@ -12,6 +12,14 @@ import Translator from "../components/Translator";
 
 import TwoFactorAuthentication from "../components/profile/TwoFactorAuthentication";
 import ChangePassword from "../components/profile/ChangePassword";
+import GoogleIcon from "../components/icons/GoogleIcon";
+import TwitterIcon from '@material-ui/icons/Twitter';
+
+import Grid from '@material-ui/core/Grid';
+
+import AuthButton from "../components/AuthButton";
+
+import { Link } from 'react-router-dom';
 
 const mapStateToProps = (state: any) => {
     return { api_url: state.api_url, token: state.token };
@@ -35,7 +43,9 @@ interface State {
     qrcode: string,
     fasecret: string | null,
     open: boolean,
-    fakey: string
+    fakey: string,
+    authServices: any,
+    roles: string[]
 }
 
 const styles = (theme: Theme) => createStyles({
@@ -55,7 +65,9 @@ class Profile extends Component<Props, State> {
         qrcode: '',
         fasecret: '',
         open: false,
-        fakey: ''
+        fakey: '',
+        authServices: [],
+        roles: []
     };
 
     onChange: React.ChangeEventHandler<HTMLInputElement> = (e) => {
@@ -72,9 +84,16 @@ class Profile extends Component<Props, State> {
         fetch(`${api_url}/users/me`, { headers: { 'Authorization': `Bearer ${token}` } })
         .then(res => res.json())
         .then(data => {
+            let tmp = [];
+            if (data.authServices)
+                for (let i of data.authServices) {
+                    tmp.push(i.name);
+                }
             this.setState({
                 email: data.email,
-                twoFactorAuthenticationEnabled: data.twoFactorAuthenticationEnabled
+                twoFactorAuthenticationEnabled: data.twoFactorAuthenticationEnabled,
+                authServices: tmp,
+                roles: data.role
             });
         });
     }
@@ -116,6 +135,35 @@ class Profile extends Component<Props, State> {
                         <br />
                         <TwoFactorAuthentication alreadyActivated={twoFactorAuthenticationEnabled} />
                     </div>
+                    <div className={classes.section} style={{ textAlign: 'left' }}>
+                        <Typography variant="h4" gutterBottom><b><Translator sentence="linkAccount"/></b></Typography>
+                        <br />
+                        <Grid container spacing={3}>
+                            { (!this.state.authServices.includes('google')) ?
+                                <Grid item xs={6}>
+                                    <AuthButton token={this.props.token} history={this.props.history} apiUrl={this.props.api_url} serviceName="Google" serviceIcon={<GoogleIcon />} />
+                                </Grid>
+                            :
+                                <div></div>
+                            }
+                            { (!this.state.authServices.includes('twitter')) ?
+                                <Grid item xs={6}>
+                                    <AuthButton token={this.props.token} history={this.props.history} apiUrl={this.props.api_url} serviceName="Twitter" serviceIcon={<TwitterIcon />} />
+                                </Grid>
+                            :
+                                <div></div>
+                            }
+                        </Grid>
+                    </div>
+                    { (this.state.roles.includes('admin')) ?
+                        <Link
+                            to={{pathname: '/admin'}}
+                        >
+                            <Button id="getStarted" color="primary"><Translator sentence="goToAdmin" /></Button>
+                        </Link>
+                        :
+                        <div></div>
+                    }
                 </div>
             </div>
         );

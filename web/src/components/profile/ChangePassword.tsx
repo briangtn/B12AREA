@@ -7,7 +7,6 @@ import { withStyles, createStyles, Theme } from "@material-ui/core";
 import TextField from "@material-ui/core/TextField";
 import Button from "@material-ui/core/Button";
 
-import MuiAlert from "@material-ui/lab/Alert/Alert";
 import Translator from "../Translator";
 
 interface Props {
@@ -84,6 +83,15 @@ class ChangePassword extends Component<Props, State> {
         });
     };
 
+    keyPress = (e: any) => {
+        if (e.keyCode === 13) {
+            const toClick: HTMLElement | null = document.getElementById('signin')
+
+            if (toClick)
+                toClick.click();
+        }
+    };
+
     render() {
         const { classes } = this.props;
         const { newPassword, newPasswordConfirmation, newPasswordDontMatch, validationMessage } = this.state;
@@ -100,6 +108,7 @@ class ChangePassword extends Component<Props, State> {
                     value={newPassword}
                     onChange={this.onChange}
                     error={newPasswordDontMatch}
+                    onKeyDown={this.keyPress}
                     fullWidth
                 />
                 <TextField
@@ -111,6 +120,7 @@ class ChangePassword extends Component<Props, State> {
                     value={newPasswordConfirmation}
                     onChange={this.onChange}
                     error={newPasswordDontMatch}
+                    onKeyDown={this.keyPress}
                     fullWidth
                 />
                 <Button

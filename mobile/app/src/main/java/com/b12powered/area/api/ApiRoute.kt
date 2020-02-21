@@ -1,8 +1,6 @@
 package com.b12powered.area.api
 
 import android.content.Context
-import android.content.SharedPreferences
-import android.util.Log
 import com.android.volley.Request
 import com.b12powered.area.User
 import java.nio.file.Path
@@ -28,9 +26,27 @@ sealed class ApiRoute(private var mainContext: Context) {
      *
      * @param email The email of the user
      * @param password The password of the user
+     * @param redirectUrl The url where the validation link should redirect the user
      * @param context The context of the call
      */
     data class Register(var email: String, var password: String, var redirectUrl: String, var context: Context) : ApiRoute(context)
+
+    /**
+     * Data class for [OAuth2] route
+     *
+     * @param service The required service ("google" or "twitter"
+     * @param redirectUrl The url where the OAuth service should redirect the user
+     * @param context The context of the call
+     */
+    data class OAuth2(var service: String, var redirectUrl: String, var context: Context) : ApiRoute(context)
+
+    /**
+     * Data class for [DataCode] route
+     *
+     * @param code The code brought by the OAuth service
+     * @param context The context of the call
+     */
+    data class DataCode(var code: String, var context: Context) : ApiRoute(context)
 
     /**
      * Data class for [Validate] route
@@ -69,6 +85,24 @@ sealed class ApiRoute(private var mainContext: Context) {
      * @param context The context of the call
      */
     data class ReadinessProbe(var context: Context) : ApiRoute(context)
+
+    /**
+     * Data class for [RequestResetPassword] route
+     *
+     * @param email The email of the user
+     * @param redirectUrl The url where the validation link should redirect the user
+     * @param context The context of the call
+     */
+    data class RequestResetPassword(var email: String, var redirectUrl: String, var context: Context) : ApiRoute(context)
+
+    /**
+     * Data class for [ResetPassword] route
+     *
+     * @param token The reset token
+     * @param password The user's new password
+     * @param context The context of the call
+     */
+    data class ResetPassword(var token: String, var password: String, var context: Context) : ApiRoute(context)
 
     /**
      * Data class for [GetUser] route
@@ -132,11 +166,15 @@ sealed class ApiRoute(private var mainContext: Context) {
             return "$baseUrl/${when (this@ApiRoute) {
                 is Login -> "users/login"
                 is Register -> "users/register"
+                is OAuth2 -> "users/serviceLogin/${service}"
+                is DataCode -> "data-code/${code}"
                 is Validate -> "users/validate"
                 is Activate2fa -> "users/2fa/activate"
                 is Confirm2fa -> "users/2fa/activate"
                 is Validate2fa -> "users/2fa/validate"
                 is ReadinessProbe -> "readinessProbe"
+                is RequestResetPassword -> "users/resetPassword"
+                is ResetPassword -> "/users/resetPassword"
                 is GetUser -> "users/me"
                 is PatchUser -> "users/me"
                 else -> ""
@@ -162,6 +200,8 @@ sealed class ApiRoute(private var mainContext: Context) {
                 is Confirm2fa -> Request.Method.PATCH
                 is Validate2fa -> Request.Method.POST
                 is PatchUser -> Request.Method.PATCH
+                is RequestResetPassword -> Request.Method.POST
+                is ResetPassword -> Request.Method.PATCH
                 else -> Request.Method.GET
             }
         }
@@ -179,16 +219,22 @@ sealed class ApiRoute(private var mainContext: Context) {
         get() {
             return when (this) {
                 is Login -> {
-                    hashMapOf(Pair("email", this.email), Pair("password", this.password))
+                    hashMapOf(Pair("email", email), Pair("password", password))
                 }
                 is Register -> {
-                    hashMapOf(Pair("email", this.email), Pair("password", this.password))
+                    hashMapOf(Pair("email", email), Pair("password", password))
                 }
                 is Confirm2fa -> {
-                    hashMapOf(Pair("token", this.token))
+                    hashMapOf(Pair("token", token))
                 }
                 is Validate2fa -> {
-                    hashMapOf(Pair("token", this.token))
+                    hashMapOf(Pair("token", token))
+                }
+                is RequestResetPassword -> {
+                    hashMapOf(Pair("email", email), Pair("redirectURL", redirectUrl))
+                }
+                is ResetPassword -> {
+                    hashMapOf(Pair("token", token), Pair("password", password))
                 }
                 is PatchUser -> {
                     hashMapOf(Pair("password", this.user.password), Pair("disable2FA", (!this.user.twoFactorAuthenticationEnabled)))
@@ -210,10 +256,13 @@ sealed class ApiRoute(private var mainContext: Context) {
         get() {
             return when (this) {
                 is Register -> {
-                    hashMapOf(Pair("redirectURL", this.redirectUrl))
+                    hashMapOf(Pair("redirectURL", redirectUrl))
+                }
+                is OAuth2 -> {
+                    hashMapOf(Pair("redirectURL", redirectUrl))
                 }
                 is Validate -> {
-                    hashMapOf(Pair("token", this.token))
+                    hashMapOf(Pair("token", token))
                 }
                 else -> hashMapOf()
             }
