@@ -19,6 +19,10 @@ import Login from "./routes/Login";
 import ConfirmEmail from "./routes/ConfirmEmail";
 import Profile from "./routes/Profile";
 
+// Administration Routes
+
+import AdministrationPanel from "./routes/administration/AdministrationPanel";
+
 // React Redux
 
 import { Provider } from 'react-redux';
@@ -65,6 +69,9 @@ class RouterComponent extends React.Component<Props, State> {
                         <Route path='/profile' component={Profile} />
                         <Route path='/email_validation' component={EmailValidation} />
                         <Route path='/services' component={Services} />
+
+                        <Route path='/admin' component={AdministrationPanel} />
+
                         <Route path='/readinessProbe' component={ReadinessProbe} />
                         <Route path='/client.apk' component={ClientAPK} />
                     </Router>

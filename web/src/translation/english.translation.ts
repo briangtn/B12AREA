@@ -25,7 +25,8 @@ const english = {
     forgotPasswordLink: "Forgot your password?",
     resetPassword: "Reset password",
     resetPasswordEmailSent: "To continue, please follow the steps in your email",
-    resetPasswordConfirmation: "Your password has been reset, please connect."
+    resetPasswordConfirmation: "Your password has been reset, please connect.",
+    goToAdmin: "Administration panel"
 };
 
 export default english;
