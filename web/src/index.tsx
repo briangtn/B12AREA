@@ -18,10 +18,6 @@ import Join from "./routes/Join";
 import Login from "./routes/Login";
 import ConfirmEmail from "./routes/ConfirmEmail";
 import Profile from "./routes/Profile";
-import EmailValidation from "./routes/EmailValidation";
-import Services from "./routes/Services";
-import ForgotPassword from './routes/ForgotPassword';
-import ResetPassword from './routes/ResetPassword';
 
 // Administration Routes
 
@@ -31,7 +27,11 @@ import AdministrationPanel from "./routes/administration/AdministrationPanel";
 
 import { Provider } from 'react-redux';
 import rootStore from "./store/rootStore.store";
-
+import EmailValidation from "./routes/EmailValidation";
+import Services from "./routes/Services";
+import ForgotPassword from './routes/ForgotPassword';
+import ResetPassword from './routes/ResetPassword';
+import TokenRefresher from './components/TokenRefresher';
 
 interface Props {}
 
@@ -75,6 +75,7 @@ class RouterComponent extends React.Component<Props, State> {
                         <Route path='/readinessProbe' component={ReadinessProbe} />
                         <Route path='/client.apk' component={ClientAPK} />
                     </Router>
+                    <TokenRefresher />
                 </MuiThemeProvider>
             </Provider>
         );
