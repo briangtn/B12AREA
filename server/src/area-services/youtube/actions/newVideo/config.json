@@ -1,0 +1,14 @@
+{
+  "displayName": "newVideo",
+  "description": "Triggered on a new Video upload by a specific channel.",
+  "configSchema": [
+    {
+      "name": "channel",
+      "description": "The id of the channel to be notified of new video",
+      "type": "string",
+      "required": true
+    }
+  ],
+  "placeholders": [
+  ]
+}

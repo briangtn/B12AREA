@@ -1,0 +1,12 @@
+{
+  "displayName": "like",
+  "description": "Like a video",
+  "configSchema": [
+    {
+      "name": "video",
+      "description": "The url of the video",
+      "type": "string",
+      "required": true
+    }
+  ]
+}
