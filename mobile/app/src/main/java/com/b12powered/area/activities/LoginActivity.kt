@@ -58,6 +58,12 @@ class LoginActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
+        forgot_password_button.setOnClickListener {
+            val intent = Intent(this, ForgotPasswordActivity::class.java)
+            finish()
+            startActivity(intent)
+        }
+
         google_button.setOnClickListener {
             oauth("google")
         }
