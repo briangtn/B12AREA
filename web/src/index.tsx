@@ -27,6 +27,7 @@ import EmailValidation from "./routes/EmailValidation";
 import Services from "./routes/Services";
 import ForgotPassword from './routes/ForgotPassword';
 import ResetPassword from './routes/ResetPassword';
+import TokenRefresher from './components/TokenRefresher';
 
 interface Props {}
 
@@ -67,6 +68,7 @@ class RouterComponent extends React.Component<Props, State> {
                         <Route path='/readinessProbe' component={ReadinessProbe} />
                         <Route path='/client.apk' component={ClientAPK} />
                     </Router>
+                    <TokenRefresher />
                 </MuiThemeProvider>
             </Provider>
         );
