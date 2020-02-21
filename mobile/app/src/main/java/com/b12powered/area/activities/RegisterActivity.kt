@@ -105,11 +105,11 @@ class RegisterActivity : AppCompatActivity() {
     }
 
     /**
-     * Make a login request to api, using [email] and [password]. If the call is successful, redirect the user to the confirmation page, if not display a toast with the error
+     * Make a register request to api, using [email] and [password]. If the call is successful, redirect the user to the confirmation page, if not display a toast with the error
      */
     private fun register(email: String, password: String) {
         ApiClient(this)
-            .register(email, password, "http://" + (System.getenv("HOST") ?: "dev.area.b12powered.com") + "/email_validation") { user, message ->
+            .register(email, password, "https://" + (System.getenv("HOST") ?: "dev.area.b12powered.com") + "/email_validation") { user, message ->
                 if (user != null) {
                     val intent = Intent(this, RegistrationValidationActivity::class.java)
                     finish()

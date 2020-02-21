@@ -29,7 +29,7 @@
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <data
-                    android:scheme="http"
+                    android:scheme="https"
                     android:host="${HOST}"
                     android:pathPrefix="/email_validation" />
             </intent-filter>
@@ -58,11 +58,12 @@
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <data
-                    android:scheme="http"
+                    android:scheme="https"
                     android:host="${HOST}"
                     android:pathPrefix="/reset_password" />
             </intent-filter>
         </activity>
+        <activity android:name=".activities.PasswordValidationActivity" />
         <meta-data
             android:name="preloaded_fonts"
             android:resource="@array/preloaded_fonts" />

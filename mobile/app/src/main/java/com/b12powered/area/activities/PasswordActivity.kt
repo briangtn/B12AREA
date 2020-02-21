@@ -32,7 +32,7 @@ class PasswordActivity : AppCompatActivity() {
                     getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
                 inputMethodManager.hideSoftInputFromWindow(currentFocus!!.windowToken, 0)
 
-                submitValidationPassword()
+                submitValidationPassword(token)
             }
             return@OnKeyListener true
         })
@@ -43,6 +43,9 @@ class PasswordActivity : AppCompatActivity() {
 
     }
 
+    /**
+     * Check password parameters validity. Call [changePassword] method if parameters are valid, reset input fields if they are not
+     */
     private fun submitValidationPassword(token: String) {
         val etPassword = findViewById<EditText>(R.id.new_password)
         val etConfirmPassword = findViewById<EditText>(R.id.confirm_new_password)
@@ -56,28 +59,29 @@ class PasswordActivity : AppCompatActivity() {
         etPassword.error = null
         etConfirmPassword.error = null
 
-        if (password.isEmpty()) {
-            etPassword.error = getString(R.string.no_password)
+        when {
+            password.isEmpty() -> etPassword.error = getString(R.string.no_password)
+            confirmPassword.isEmpty() -> etConfirmPassword.error = getString(R.string.no_password)
+            password.toString() != confirmPassword.toString() -> {
+                etConfirmPassword.setText("")
+                etConfirmPassword.error = getString(R.string.different_password)
+            }
         }
-        else if (confirmPassword.isEmpty()) {
-            etConfirmPassword.error = getString(R.string.no_password)
-        }
-        else if (password != confirmPassword) {
-            etConfirmPassword.setText("")
-            etConfirmPassword.error = getString(R.string.different_password)
-        }
-        if (password.isNotEmpty() && confirmPassword.isNotEmpty() && password == confirmPassword) {
+        if (password.isNotEmpty() && confirmPassword.isNotEmpty() && password.toString() == confirmPassword.toString()) {
             changePassword(token, password.toString())
         }
     }
 
+    /**
+     * Make a reset password request to api, using [token] and [password]. If the call is successful, redirect the user to the confirmation page, if not display a toast with the error
+     */
     private fun changePassword(token: String, password: String) {
         ApiClient(this)
             .resetPassword(token, password) { user, message ->
                 if (user != null) {
-/*                    val intent = Intent()
+                    val intent = Intent(this, PasswordValidationActivity::class.java)
                     finish()
-                    startActivity(intent)*/
+                    startActivity(intent)
                 } else {
                     Toast.makeText(
                         this,

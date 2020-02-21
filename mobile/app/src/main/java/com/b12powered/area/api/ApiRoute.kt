@@ -219,7 +219,7 @@ sealed class ApiRoute(private var mainContext: Context) {
                     hashMapOf(Pair("token", token))
                 }
                 is RequestResetPassword -> {
-                    hashMapOf(Pair("email", email), Pair("redirectUrl", redirectUrl))
+                    hashMapOf(Pair("email", email), Pair("redirectURL", redirectUrl))
                 }
                 is ResetPassword -> {
                     hashMapOf(Pair("token", token), Pair("password", password))
