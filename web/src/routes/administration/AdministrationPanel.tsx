@@ -23,6 +23,7 @@ import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 
 import Summary from "../../components/administration/Summary";
 import Users from "../../components/administration/Users";
+import Exit from "../../components/administration/Exit";
 
 import { setToken } from "../../actions/api.action";
 
@@ -170,7 +171,7 @@ class AdministrationPanel extends Component<Props, State> {
         const routes: Route[] = [
             { name: 'Home', icon: <HomeIcon />, component: <Summary apiUrl={this.props.api_url} token={this.props.token} /> },
             { name: 'Users', icon: <AccountCircleIcon />, component: <Users apiUrl={this.props.api_url} token={this.props.token} /> },
-            { name: 'Exit', icon: <ExitToAppIcon />, component: <div></div>}
+            { name: 'Exit', icon: <ExitToAppIcon />, component: <Exit history={this.props.history} />}
         ]
         return (
             <div className={classes.root}>

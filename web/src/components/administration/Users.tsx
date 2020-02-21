@@ -18,12 +18,16 @@ import ChipRole from '../ChipRole';
 import DetailsIcon from '@material-ui/icons/Details';
 import ArrowBackIosIcon from '@material-ui/icons/ArrowBackIos';
 import DeleteIcon from '@material-ui/icons/Delete';
+import SaveIcon from '@material-ui/icons/Save';
 
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
+
+import MenuItem from '@material-ui/core/MenuItem';
+import Select from '@material-ui/core/Select';
 
 import Grid from '@material-ui/core/Grid';
 
@@ -44,8 +48,11 @@ interface State {
     userDetail: boolean,
     userDetailIndex: number,
     validationOpen: boolean,
-    error: boolean,
-    errorMessage: string
+    alertList: boolean,
+    alertListMessage: string,
+    alertDetail: boolean,
+    alertDetailMessage: string,
+    availableRoles: string[]
 }
 
 interface AuthService {
@@ -59,7 +66,7 @@ interface User {
     role: string[],
     services: any,
     twoFactorAuthenticationEnabled: boolean,
-    authServices: AuthService[]
+    authServices: AuthService[],
 }
 
 const styles = (theme: Theme) => createStyles({
@@ -76,8 +83,11 @@ class Users extends Component<Props, State> {
         userDetail: false,
         userDetailIndex: 0,
         validationOpen: false,
-        error: false,
-        errorMessage: ''
+        alertList: false,
+        alertListMessage: '',
+        alertDetail: false,
+        alertDetailMessage: '',
+        availableRoles: []
     };
 
     componentDidMount() {
@@ -89,6 +99,14 @@ class Users extends Component<Props, State> {
         .then(res => res.json())
         .then((data) => {
             this.setState({ users: data });
+        })
+
+        fetch(`${apiUrl}/users/availableRoles`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        })
+        .then(res => res.json())
+        .then((data) => {
+            this.setState({ availableRoles: data });
         })
     }
 
@@ -123,18 +141,44 @@ class Users extends Component<Props, State> {
 
         fetch(`${apiUrl}/users/${idToDelete}`, {
             method: 'DELETE',
-            headers: {'Authorization': `Bearer ${this.props.token}`}
+            headers: {'Authorization': `Bearer ${token}`}
         })
         .then((data) => {
             let userArray = this.state.users;
 
             delete userArray[this.state.userDetailIndex];
-            this.setState({ validationOpen: false, users: userArray, userDetailIndex: 0, userDetail: false, error: true, errorMessage: 'User deleted' });
+            this.setState({ validationOpen: false, users: userArray, userDetailIndex: 0, userDetail: false, alertList: true, alertListMessage: 'User deleted' });
         })
+    };
+
+    patchUser = (e: any) => {
+        const { apiUrl, token } = this.props;
+        const currentUser = this.state.users[this.state.userDetailIndex];
+        const idToDelete = currentUser.id;
+
+        fetch(`${apiUrl}/users/${idToDelete}`, {
+            method: 'PATCH',
+            headers: {'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ role: currentUser.role })
+        })
+        .then((data) => {
+            this.setState({ alertDetail: true, alertDetailMessage: 'User updated' });
+        })
+    };
+
+    selectChange = (e: any) => {
+        let users: User[] = this.state.users;
+        users[this.state.userDetailIndex].role = e.target.value;
+
+        this.setState({ users: users });
     }
 
-    alertClose = (e: any) => {
-        this.setState({ error: false });
+    alertListClose = (e: any) => {
+        this.setState({ alertList: false });
+    }
+
+    alertDetailClose = (e: any) => {
+        this.setState({ alertList: false });
     }
 
     render() {
@@ -188,9 +232,9 @@ class Users extends Component<Props, State> {
                         onChangePage={this.onChangePage}
                         onChangeRowsPerPage={this.onRowPerPageChange}
                     />
-                    <Snackbar open={this.state.error} autoHideDuration={6000} onClose={this.alertClose}>
-                        <Alert onClose={this.alertClose} severity="success">
-                            { this.state.errorMessage }
+                    <Snackbar open={this.state.alertList} autoHideDuration={6000} onClose={this.alertListClose}>
+                        <Alert onClose={this.alertListClose} severity="success">
+                            { this.state.alertListMessage }
                         </Alert>
                     </Snackbar>
                 </div>
@@ -231,11 +275,37 @@ class Users extends Component<Props, State> {
                             <Typography variant="h6" gutterBottom>
                                 Roles
                             </Typography>
-                            {currentUser.role.map((role) => (
-                                <ChipRole key={currentUser.role.indexOf(role)} role={role} size="medium" />
-                            ))}
+                            <Select
+                                id="chip-role-select"
+                                multiple
+                                value={currentUser.role}
+                                renderValue={selected => (
+                                    <div>
+                                        {(selected as string[]).map(elem => (
+                                            <ChipRole key={currentUser.role.indexOf(elem as any)} role={elem as any} size="medium" />
+                                        ))}
+                                    </div>
+                                )}
+                                onChange={this.selectChange}
+                            >
+                                {this.state.availableRoles.map(name => (
+                                    <MenuItem key={name} value={name}>
+                                        { name }
+                                    </MenuItem>
+                                ))}
+                            </Select>
                             <br />
                             <br />
+                            <Button
+                                variant="contained"
+                                color="secondary"
+                                size="small"
+                                startIcon={<SaveIcon />}
+                                onClick={this.patchUser}
+                            >
+                                Save
+                            </Button>
+                            &nbsp;
                             <Button
                                 variant="contained"
                                 color="primary"
@@ -247,6 +317,11 @@ class Users extends Component<Props, State> {
                             </Button>
                         </Grid>
                     </Grid>
+                    <Snackbar open={this.state.alertDetail} autoHideDuration={6000} onClose={this.alertDetailClose}>
+                        <Alert onClose={this.alertDetailClose} severity="success">
+                            { this.state.alertDetailMessage }
+                        </Alert>
+                    </Snackbar>
                     <Dialog
                         open={this.state.validationOpen}
                         onClose={this.closeValidationDelete}

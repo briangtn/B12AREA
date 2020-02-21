@@ -25,7 +25,8 @@ const french = {
     forgotPasswordLink: "Mot de passe oublié",
     resetPassword: "Réinitialiser mon mot de passe",
     resetPasswordEmailSent: "Pour continuer, veuillez suivre les instructions envoyées par mail",
-    resetPasswordConfirmation: "Votre mot de passe a été réinitialiser, veuillez vous connecter."
+    resetPasswordConfirmation: "Votre mot de passe a été réinitialiser, veuillez vous connecter.",
+    goToAdmin: "Panneau d'administration"
 };
 
 export default french;
