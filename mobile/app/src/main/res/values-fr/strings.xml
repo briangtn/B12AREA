@@ -41,4 +41,6 @@
     <string name="activate_two_fa">Activer la double authentification</string>
     <string name="double_authentication">Double authentification</string>
     <string name="copy">copier le lien</string>
+    <string name="disable_two_fa">Désactiver la double authentification</string>
+    <string name="log_out">Se Déconnecter</string>
 </resources>

@@ -1,16 +1,18 @@
 package com.b12powered.area.activities
 
+import android.content.Context
 import android.os.Bundle
 import com.b12powered.area.R
 import com.b12powered.area.api.ApiClient
 import android.widget.Toast
 import android.content.Intent
-import android.content.ClipboardManager
-import android.os.PersistableBundle
 import android.widget.Button
 import android.widget.EditText
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import kotlinx.android.synthetic.main.activity_register.*
+import com.b12powered.area.User
+import com.b12powered.area.activities.LoginActivity
+import kotlinx.android.synthetic.main.activity_user.*
 
 /**
  * The activity where th user can modified is password or activate 2fa
@@ -19,26 +21,80 @@ import kotlinx.android.synthetic.main.activity_register.*
  */
 class UserActivity : AppCompatActivity() {
 
+    private var _faActivated: Boolean = false
+    private var _user: User = User("", "", "", "", listOf(""), listOf(""), !false, !false)
+    private var _userRole: List<String> = emptyList()
+
     /**
      * Override method onCreate
      *
      * Set listeners to view's buttons modified password and activate 2fa
+     *
+     * Set listeners to editText for log out
+     *
+     * Print all role of the current user
      */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_user)
 
-        val btnChangePassword = findViewById<Button>(R.id.change_password_button)
+        var disable2fa: String = getString(R.string.disable_two_fa)
 
-        val btnActivate2fa = findViewById<Button>(R.id.activate_two_fa_button)
+        var activate2fa: String = getString(R.string.activate_two_fa)
 
-        btnActivate2fa.setOnClickListener {
-            activate2fa()
+        emailUser()
+
+        if (_faActivated) {
+            activate_two_fa_button.text = disable2fa
+            activate_two_fa_button.setOnClickListener {
+                disable2fa()
+            }
+        } else {
+            activate_two_fa_button.text = activate2fa
+            activate_two_fa_button.setOnClickListener {
+                activate2fa()
+            }
         }
 
-        btnChangePassword.setOnClickListener {
+        log_out.setOnClickListener {
+            logout()
+        }
+
+        change_password_button.setOnClickListener {
             submitChangePassword()
         }
+    }
+
+    /**
+     * Print the email of the user currently connected
+     */
+    private fun emailUser() {
+        val etUserRole = findViewById<TextView>(R.id.role_account)
+
+        ApiClient(this)
+            .getUser { user, message ->
+                if (user != null) {
+                    val etEmail = findViewById<EditText>(R.id.email)
+                    _user = user
+                    etEmail.hint = _user.email
+                    _faActivated = _user.require2fa
+                    for (i in user.role) {
+                        if (etUserRole.text == null) {
+                            etUserRole.text = i
+                        } else {
+                            etUserRole.text = etUserRole.text.toString() + " " + i
+                        }
+                    }
+
+                        _userRole = user.role
+                } else {
+                    Toast.makeText(
+                        this,
+                        message,
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
     }
 
     /**
@@ -51,6 +107,29 @@ class UserActivity : AppCompatActivity() {
                     val secret = url.substringAfter("secret=")
                     val intent = Intent(this, ConfirmTwoFAActivity::class.java)
                     intent.putExtra("secret", secret)
+                    finish()
+                    startActivity(intent)
+                } else {
+                    Toast.makeText(
+                        this,
+                        message,
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+    }
+
+    /**
+     * Disable the 2fa
+     */
+    private fun disable2fa() {
+        var newUser = User(_user.id, _user.email, "", "", _user.role, _user.services, false, _user.twoFactorAuthenticationEnabled)
+
+        ApiClient(this)
+            .patchUser(newUser) { user, message ->
+                if (user != null) {
+                    _user = user
+                    val intent = Intent(this, UserActivity::class.java)
                     finish()
                     startActivity(intent)
                 } else {
@@ -88,14 +167,42 @@ class UserActivity : AppCompatActivity() {
             etConfirmNewPassword.error = getString(R.string.different_password)
         }
         if (newPassword.isNotEmpty() && newConfirmPassword.isNotEmpty() && newPassword.toString() == newConfirmPassword.toString()) {
-//            changePassword(newPassword.toString())
+            changePassword(newPassword.toString())
         }
     }
 
-    /*
-    private fun changePassword(newPassword: String) {
+    /**
+     * Log out the current user
+     */
+    private fun logout() {
+        val sharedPreferences = getSharedPreferences("com.b12powered.area", Context.MODE_PRIVATE)
+        val editor = sharedPreferences.edit()
 
-    }*/
+        editor.remove("jwt-token")
+        editor.apply()
+        val intent = Intent(this, LoginActivity::class.java)
+        finish()
+        startActivity(intent)
+    }
 
+    /**
+     * Change the password of the current user with a [patch] request
+     */
+    private fun changePassword(password: String) {
+        var newUser = User(_user.id, _user.email, password, "", _user.role, _user.services, _user.require2fa, _user.twoFactorAuthenticationEnabled)
+
+        ApiClient(this)
+            .patchUser(newUser) { user, message ->
+                if (user != null) {
+                    _user = user
+                } else {
+                    Toast.makeText(
+                        this,
+                        message,
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+    }
 
 }

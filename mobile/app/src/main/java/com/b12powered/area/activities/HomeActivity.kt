@@ -30,6 +30,7 @@ class HomeActivity : AppCompatActivity() {
         ApiClient(this)
             .getUser { user, message ->
                 if (user != null) {
+                    user.email
                     currentUser = user
                 } else {
                     Toast.makeText(

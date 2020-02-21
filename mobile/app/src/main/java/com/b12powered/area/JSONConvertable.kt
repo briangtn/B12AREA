@@ -12,6 +12,7 @@ inline fun <reified T: JSONConvertable> String.toObject(): T = Gson().fromJson(t
 data class User(
     @SerializedName("id") val id: String,
     @SerializedName("email") val email: String,
+    @SerializedName("password") val password: String,
     @SerializedName("token") val token: String,
     @SerializedName("role") val role: List<String>,
     @SerializedName("services") val services: List<String>,

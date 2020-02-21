@@ -42,17 +42,29 @@
         android:layout_marginEnd="99dp"
         android:layout_marginBottom="500dp"
         android:background="@drawable/edit_text_style"
+        android:clickable="false"
+        android:cursorVisible="false"
+        android:focusable="false"
+        android:focusableInTouchMode="false"
         android:ems="10"
         android:fontFamily="@font/roboto_light"
-        android:hint="@string/email"
         android:inputType="textEmailAddress"
         android:textColor="@color/colorPrimary" />
+
+    <TextView
+        android:id="@+id/role_account"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="10dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="260dp"
+        android:textSize="20sp" />
 
     <View
         android:id="@+id/divider2"
         android:layout_width="380dp"
         android:layout_height="1dp"
-        android:layout_marginTop="290dp"
+        android:layout_marginTop="295dp"
         android:layout_gravity="center_horizontal"
         android:background="@color/colorLightGrey"/>
 
@@ -61,7 +73,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="10dp"
-        android:layout_marginTop="295dp"
+        android:layout_marginTop="305dp"
         android:textStyle="bold"
         android:textSize="30sp"
         android:text="@string/user_change_password" />
@@ -71,7 +83,7 @@
         android:layout_width="340dp"
         android:layout_height="44dp"
         android:layout_marginStart="30dp"
-        android:layout_marginTop="350dp"
+        android:layout_marginTop="360dp"
         android:layout_marginEnd="99dp"
         android:layout_marginBottom="500dp"
         android:background="@drawable/edit_text_style"
@@ -86,7 +98,7 @@
         android:layout_width="340dp"
         android:layout_height="44dp"
         android:layout_marginStart="30dp"
-        android:layout_marginTop="400dp"
+        android:layout_marginTop="405dp"
         android:layout_marginEnd="99dp"
         android:layout_marginBottom="500dp"
         android:background="@drawable/edit_text_style"
@@ -100,7 +112,7 @@
         android:id="@+id/change_password_button"
         android:layout_width="250dp"
         android:layout_height="60dp"
-        android:layout_marginTop="460dp"
+        android:layout_marginTop="465dp"
         android:layout_marginHorizontal="20dp"
         android:backgroundTint="@color/colorSecondary"
         android:fontFamily="@font/roboto_medium"
@@ -129,17 +141,27 @@
         android:id="@+id/activate_two_fa_button"
         android:layout_width="300dp"
         android:layout_height="60dp"
-        android:layout_marginTop="600dp"
+        android:layout_marginTop="590dp"
         android:layout_marginHorizontal="20dp"
         android:backgroundTint="@color/colorSecondary"
         android:fontFamily="@font/roboto_medium"
-        android:text="@string/activate_two_fa"
         android:textSize="16sp" />
+
+    <TextView
+        android:id="@+id/log_out"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="650dp"
+        android:layout_gravity="center_horizontal"
+        android:fontFamily="@font/roboto_bold"
+        android:textSize="20dp"
+        android:clickable="true"
+        android:text="@string/log_out" />
 
     <fragment
         android:id="@+id/details_fragment"
         class="com.b12powered.area.fragments.ToolbarFragment"
         android:layout_width="match_parent"
-        android:layout_height="40dp"/>
+        android:layout_height="50dp"/>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
