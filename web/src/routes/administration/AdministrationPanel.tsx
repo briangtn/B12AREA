@@ -160,7 +160,7 @@ class AdministrationPanel extends Component<Props, State> {
     }
 
     onClick(index: any, event: any) {
-        this.setState({ currentComponentIndex: index });
+        this.setState({ currentComponentIndex: index, open: false });
     }
 
     render() {
