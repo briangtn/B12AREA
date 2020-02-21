@@ -49,4 +49,20 @@ export class UserService {
 
         return user !== undefined && user !== null;
     }
+
+    getServiceLoginData(user: User, serviceName: string) {
+        const services = user.services;
+        if (!services) {
+            return null;
+        }
+
+        for (const service of services) {
+            const serviceTyped: {name:string} = service as {name: string};
+
+            if (serviceTyped.name === serviceName) {
+                return service;
+            }
+        }
+        return null;
+    }
 }
