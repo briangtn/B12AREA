@@ -368,6 +368,29 @@ export class UserController {
         return this.userRepository.findById(currentUser.id);
     }
 
+    @get('/availableRoles', {
+        responses: {
+            '200': {
+                description: 'The url where you have to redirect',
+                content: {
+                    'application/json': {
+                        schema: {
+                            type: 'object',
+                            properties: {
+                                url: {
+                                    type: 'string',
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        }
+    })
+    getAvailableRoles() {
+        return this.userService.getAvailableRoles();
+    }
+
     @get('/{id}', {
         security: OPERATION_SECURITY_SPEC,
         responses: {
