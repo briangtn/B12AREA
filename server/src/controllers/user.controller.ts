@@ -321,7 +321,8 @@ export class UserController {
             '404': response404('User not found'),
             '401': {
                 description: 'Unauthorized'
-            }
+            },
+            '422': response422('Invalid params format')
         }
     })
     @authenticate('jwt-all')
@@ -345,6 +346,9 @@ export class UserController {
         }
         if (updatedUser.disable2FA) {
             updatedUser.twoFactorAuthenticationEnabled = false;
+        }
+        if (updatedUser.disable2FA !== undefined) {
+            delete updatedUser.disable2FA;
         }
         if (updatedUser.email) {
             if (!validator.isEmail(updatedUser.email)) {
