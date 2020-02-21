@@ -23,7 +23,6 @@ class UserActivity : AppCompatActivity() {
 
     private var _faActivated: Boolean = false
     private var _user: User = User("", "", "", "", listOf(""), listOf(""), !false, !false)
-    private var _userRole: List<String> = emptyList()
 
     /**
      * Override method onCreate
@@ -85,8 +84,6 @@ class UserActivity : AppCompatActivity() {
                             etUserRole.text = etUserRole.text.toString() + " " + i
                         }
                     }
-
-                        _userRole = user.role
                 } else {
                     Toast.makeText(
                         this,
