@@ -34,4 +34,8 @@
     <string name="change_url_fail">Url is invalid</string>
     <string name="invalid_2fa_code">The code must be 6-digits long</string>
     <string name="invalid_token">Invalid token</string>
+    <string name="forgot_password">Forgot your password</string>
+    <string name="successful_password_reset">Password reset successful !</string>
+    <string name="password_reset_confirmation_message">We\'ve sent you an email in order to set your new password. Check your spams if you don\'t see it !</string>
+    <string name="success_new_password">New password successfully set !</string>
 </resources>

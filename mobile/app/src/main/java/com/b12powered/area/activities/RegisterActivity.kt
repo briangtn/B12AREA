@@ -58,6 +58,14 @@ class RegisterActivity : AppCompatActivity() {
             finish()
             startActivity(intent)
         }
+
+        google_button.setOnClickListener {
+            oauth("google")
+        }
+
+        twitter_button.setOnClickListener {
+            oauth("twitter")
+        }
     }
 
     /**
@@ -83,13 +91,13 @@ class RegisterActivity : AppCompatActivity() {
         if (email.isEmpty()) {
             etEmail.error = getString(R.string.no_email)
         }
-        if (password.isEmpty()) {
-            etPassword.error = getString(R.string.no_password)
-        } else if (confirmPassword.isEmpty()) {
-            etConfirmPassword.error = getString(R.string.no_confirm_password)
-        } else if (password.toString() != confirmPassword.toString()) {
-            etConfirmPassword.setText("")
-            etConfirmPassword.error = getString(R.string.different_password)
+        when {
+            password.isEmpty() -> etPassword.error = getString(R.string.no_password)
+            confirmPassword.isEmpty() -> etConfirmPassword.error = getString(R.string.no_confirm_password)
+            password.toString() != confirmPassword.toString() -> {
+                etConfirmPassword.setText("")
+                etConfirmPassword.error = getString(R.string.different_password)
+            }
         }
         if (email.isNotEmpty() && password.isNotEmpty() && confirmPassword.isNotEmpty() && password.toString() == confirmPassword.toString()) {
             register(email.toString(), password.toString())
@@ -97,13 +105,33 @@ class RegisterActivity : AppCompatActivity() {
     }
 
     /**
-     * Make a login request to api, using [email] and [password]. If the call is successful, redirect the user to the confirmation page, if not display a toast with the error
+     * Make a register request to api, using [email] and [password]. If the call is successful, redirect the user to the confirmation page, if not display a toast with the error
      */
     private fun register(email: String, password: String) {
         ApiClient(this)
-            .register(email, password, "http://" + (System.getenv("HOST") ?: "dev.area.b12powered.com") + "/email_validation") { user, message ->
+            .register(email, password, "https://" + (System.getenv("HOST") ?: "dev.area.b12powered.com") + "/email_validation") { user, message ->
                 if (user != null) {
                     val intent = Intent(this, RegistrationValidationActivity::class.java)
+                    finish()
+                    startActivity(intent)
+                } else {
+                    Toast.makeText(
+                        this,
+                        message,
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+    }
+
+    /**
+     * Make a oauth request to api, using [service] name. If the call is successful, redirect the user to the service's oauth page, if not display a toast with the error
+     */
+    private fun oauth(service: String) {
+        ApiClient(this)
+            .oauth2(service, "area://home") { uri, message ->
+                if (uri != null) {
+                    val intent = Intent(Intent.ACTION_VIEW, uri)
                     finish()
                     startActivity(intent)
                 } else {

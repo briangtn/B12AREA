@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 
 import { connect } from 'react-redux';
 
-import { withStyles, createStyles, Theme } from "@material-ui/core";
+import { withStyles, createStyles, Theme, Button } from "@material-ui/core";
 
 import NavigationBar from "../components/NavigationBar";
 import Typography from "@material-ui/core/Typography";
@@ -18,6 +18,8 @@ import TwitterIcon from '@material-ui/icons/Twitter';
 import Grid from '@material-ui/core/Grid';
 
 import AuthButton from "../components/AuthButton";
+
+import { Link } from 'react-router-dom';
 
 const mapStateToProps = (state: any) => {
     return { api_url: state.api_url, token: state.token };
@@ -42,7 +44,8 @@ interface State {
     fasecret: string | null,
     open: boolean,
     fakey: string,
-    authServices: any
+    authServices: any,
+    roles: string[]
 }
 
 const styles = (theme: Theme) => createStyles({
@@ -63,7 +66,8 @@ class Profile extends Component<Props, State> {
         fasecret: '',
         open: false,
         fakey: '',
-        authServices: []
+        authServices: [],
+        roles: []
     };
 
     onChange: React.ChangeEventHandler<HTMLInputElement> = (e) => {
@@ -81,13 +85,15 @@ class Profile extends Component<Props, State> {
         .then(res => res.json())
         .then(data => {
             let tmp = [];
-            for (let i of data.authServices) {
-                tmp.push(i.name);
-            }
+            if (data.authServices)
+                for (let i of data.authServices) {
+                    tmp.push(i.name);
+                }
             this.setState({
                 email: data.email,
                 twoFactorAuthenticationEnabled: data.twoFactorAuthenticationEnabled,
-                authServices: tmp
+                authServices: tmp,
+                roles: data.role
             });
         });
     }
@@ -149,6 +155,15 @@ class Profile extends Component<Props, State> {
                             }
                         </Grid>
                     </div>
+                    { (this.state.roles.includes('admin')) ?
+                        <Link
+                            to={{pathname: '/admin'}}
+                        >
+                            <Button id="getStarted" color="primary"><Translator sentence="goToAdmin" /></Button>
+                        </Link>
+                        :
+                        <div></div>
+                    }
                 </div>
             </div>
         );

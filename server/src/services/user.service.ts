@@ -65,4 +65,12 @@ export class UserService {
         }
         return null;
     }
+
+    getAvailableRoles(): string[] {
+        return [
+            "user",
+            "admin",
+            "email_not_validated"
+        ]
+    }
 }
