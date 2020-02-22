@@ -1,4 +1,4 @@
-import {param, post, requestBody} from "@loopback/rest";
+import {param, post} from "@loopback/rest";
 import {ActionConfig, OperationStatus} from '../../../../services-interfaces'
 import config from './config.json';
 import {Context, inject} from "@loopback/context";
@@ -6,14 +6,6 @@ import {
     UserRepository
 } from "../../../../repositories";
 import {repository} from "@loopback/repository";
-
-interface PushActionConfig {
-    owner: string;
-    repo: string;
-    webhookId: string;
-    hookUuid: string;
-    userId: string;
-}
 
 export default class ActionController {
 
