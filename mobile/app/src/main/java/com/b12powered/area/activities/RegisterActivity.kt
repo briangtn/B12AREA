@@ -91,13 +91,13 @@ class RegisterActivity : AppCompatActivity() {
         if (email.isEmpty()) {
             etEmail.error = getString(R.string.no_email)
         }
-        if (password.isEmpty()) {
-            etPassword.error = getString(R.string.no_password)
-        } else if (confirmPassword.isEmpty()) {
-            etConfirmPassword.error = getString(R.string.no_confirm_password)
-        } else if (password.toString() != confirmPassword.toString()) {
-            etConfirmPassword.setText("")
-            etConfirmPassword.error = getString(R.string.different_password)
+        when {
+            password.isEmpty() -> etPassword.error = getString(R.string.no_password)
+            confirmPassword.isEmpty() -> etConfirmPassword.error = getString(R.string.no_confirm_password)
+            password.toString() != confirmPassword.toString() -> {
+                etConfirmPassword.setText("")
+                etConfirmPassword.error = getString(R.string.different_password)
+            }
         }
         if (email.isNotEmpty() && password.isNotEmpty() && confirmPassword.isNotEmpty() && password.toString() == confirmPassword.toString()) {
             register(email.toString(), password.toString())
@@ -105,11 +105,11 @@ class RegisterActivity : AppCompatActivity() {
     }
 
     /**
-     * Make a login request to api, using [email] and [password]. If the call is successful, redirect the user to the confirmation page, if not display a toast with the error
+     * Make a register request to api, using [email] and [password]. If the call is successful, redirect the user to the confirmation page, if not display a toast with the error
      */
     private fun register(email: String, password: String) {
         ApiClient(this)
-            .register(email, password, "http://" + (System.getenv("HOST") ?: "dev.area.b12powered.com") + "/email_validation") { user, message ->
+            .register(email, password, "https://" + (System.getenv("HOST") ?: "dev.area.b12powered.com") + "/email_validation") { user, message ->
                 if (user != null) {
                     val intent = Intent(this, RegistrationValidationActivity::class.java)
                     finish()
