@@ -69,7 +69,7 @@ tests-docker-compose:
     - develop
   script:
     - apk update && apk add --no-cache py-pip curl python-dev libffi-dev openssl-dev gcc libc-dev make
-    - pip install docker-compose
+    - pip install enum34 docker-compose
     - touch .env
     - echo -ne "AREA_JWT_SECRET_VALUE=verySecretEnv\n" >> .env
     - echo -ne "DB_NAME=$DB_NAME\nDB_USER=$DB_USER\nDB_PASS=$DB_PASS\nDB_PORT=27017\n" >> .env
