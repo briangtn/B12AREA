@@ -99,6 +99,12 @@ export class UserRepository extends DefaultCrudRepository<User,
         });
     }
 
+    async addService(userId: typeof User.prototype.id, data: object) {
+        const user: User = await this.findById(userId)!;
+        user.services!.push(data);
+        await this.update(user);
+    }
+
     async createArea(userId: typeof User.prototype.id, area: Omit<Area, 'id'>) : Promise<Area> {
         return this.areas(userId).create(area);
     }
