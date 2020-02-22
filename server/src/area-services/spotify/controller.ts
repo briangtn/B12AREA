@@ -4,7 +4,7 @@ import axios from 'axios';
 import base64 from 'base-64'
 import {param, get, Response, RestBindings} from "@loopback/rest";
 import {Context, inject} from "@loopback/context";
-import {ExchangeCodeGeneratorManager, UserService} from "../../services";
+import {ExchangeCodeGeneratorManager} from "../../services";
 import {HttpErrors} from "@loopback/rest/dist";
 import {repository} from "@loopback/repository";
 import {UserRepository} from "../../repositories";
@@ -32,11 +32,10 @@ export default class ServiceController {
 
     static async login(params: LoginObject): Promise<string> {
         const userRepository: UserRepository = await params.ctx.get('repositories.UserRepository');
-        const userService: UserService = await params.ctx.get('services.user');
         const exchangeCodeGenerator: ExchangeCodeGeneratorManager = await params.ctx.get('services.exchangeCodeGenerator');
         const user : User = (await userRepository.findOne({where: {email: params.user.email}}))!;
 
-        if (userService.getServiceLoginData(user, 'spotify')) {
+        if (await userRepository.getServiceInformation(user.id, 'spotify')) {
             const codeParam = await exchangeCodeGenerator.generate({status: 'Authenticated with spotify'}, true);
             return params.redirectUrl + '?code=' + codeParam;
         }
@@ -94,7 +93,6 @@ export default class ServiceController {
             const codeParam = await this.exchangeCodeGenerator.generate({error: 'User not found', info: {cause: 'database could probably not be reached'}}, true);
             return this.response.redirect(stateData.url + '?code=' + codeParam);
         }
-        console.log(code, state, error);
         try {
             const tokens = await axios.post(SPOTIFY_TOKEN_EXCHANGE_BASE_URL, qs.stringify({
                 code: code,
@@ -113,7 +111,7 @@ export default class ServiceController {
                     token: tokens.data.access_token,
                     expiresIn: tokens.data.expires_in,
                     refreshToken: tokens.data.refresh_token
-                })
+                }, 'spotify')
             } catch (e) {
                 const codeParam = await this.exchangeCodeGenerator.generate({error: 'Failed to store spotify token', info: e}, true);
                 return this.response.redirect(stateData.url + '?code=' + codeParam);

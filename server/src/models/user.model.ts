@@ -44,11 +44,10 @@ export class User extends Entity {
     role?: string[];
 
     @property({
-        type: 'array',
-        itemType: 'object',
-        default: [],
+        type: 'object',
+        default: {},
     })
-    services?: object[];
+    services?: object;
 
     @property({
         type: 'string',
