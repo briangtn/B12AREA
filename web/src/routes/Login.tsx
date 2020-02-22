@@ -233,6 +233,7 @@ class Login extends Component<Props, State> {
                         <Link to={{ pathname: '/forgot' }} style={{ textDecoration: 'none', color: '#212121' }}>
                             <Translator sentence="forgotPasswordLink" />
                         </Link>
+                        <br />
                         <Button
                             id="signin"
                             variant="contained"
