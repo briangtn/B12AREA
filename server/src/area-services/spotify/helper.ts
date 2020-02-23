@@ -127,7 +127,6 @@ export class SpotifyHelper {
                 const actionData = (await actionRepository.getActionData(actionID))! as {lastDate: string};
 
                 for (const track of tracks) {
-                    console.log(actionData + "-" + track.added_at + "-" + track.track.name);
                     if (new Date(track.added_at) > new Date(actionData.lastDate)) {
                         diff.push(this.parseSpotifyTrack(track));
                     }
