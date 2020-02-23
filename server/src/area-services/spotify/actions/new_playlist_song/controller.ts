@@ -2,7 +2,7 @@ import { Context } from "@loopback/core";
 import config from './config.json';
 import axios from 'axios';
 import {ActionConfig, OperationStatus} from '../../../../services-interfaces';
-import {UserRepository} from '../../../../repositories';
+import {ActionRepository, UserRepository} from '../../../../repositories';
 import {SpotifyHelper} from '../../helper';
 
 export default class ActionController {
@@ -16,7 +16,7 @@ export default class ActionController {
             const serviceData: {token: string} = await userRepository.getServiceInformation(userID, 'spotify') as {token: string};
 
             axios.get(`https://api.spotify.com/v1/playlists/${configTyped.id}/tracks`, {headers: {Authorization: 'Bearer ' + serviceData.token}}).then((res) => {
-                resolve({ success: true, options: {id: configTyped.id}, data: {lastDate: new Date().valueOf()}});
+                resolve({ success: true, options: {id: configTyped.id}, data: {lastDate: new Date().toISOString()}});
             }).catch((e) => {
                 console.log(e);
                 resolve({ success: false, error: "This playlist does not exist", details: e });
@@ -29,11 +29,16 @@ export default class ActionController {
         return {success: true}
     }
 
-    static async updateAction(actionId: string, oldActionConfig: Object, newActionConfig: Object, ctx: Context): Promise<OperationStatus> {
+    static async updateAction(actionID: string, oldActionConfig: Object, newActionConfig: Object, ctx: Context): Promise<OperationStatus> {
+        const actionRepository: ActionRepository = await ctx.get('repositories.ActionRepository');
+
+        await SpotifyHelper.stopNewPlaylistSongPulling(actionID, ctx);
+        await SpotifyHelper.startNewPlaylistSongPulling(actionID, (await actionRepository.getActionOwnerID(actionID))!, ctx);
         return {success: true};
     }
 
     static async deleteAction(actionID: string, actionConfig: Object, ctx: Context): Promise<OperationStatus> {
+        await SpotifyHelper.stopNewPlaylistSongPulling(actionID, ctx);
         return {success: true};
     }
 

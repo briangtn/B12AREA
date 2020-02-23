@@ -7,10 +7,11 @@ import {Context, inject} from "@loopback/context";
 import {ExchangeCodeGeneratorManager} from "../../services";
 import {HttpErrors} from "@loopback/rest/dist";
 import {repository} from "@loopback/repository";
-import {UserRepository} from "../../repositories";
+import {ActionRepository, UserRepository} from '../../repositories';
 import {User} from "../../models";
 import {UserProfile} from "@loopback/security";
 import * as qs from 'querystring'
+import {SpotifyHelper} from './helper';
 
 const SPOTIFY_AUTHORIZE_BASE_URL = 'https://accounts.spotify.com/authorize';
 const SPOTIFY_TOKEN_EXCHANGE_BASE_URL = 'https://accounts.spotify.com/api/token';
@@ -28,12 +29,47 @@ export default class ServiceController {
     }
 
     static async start(ctx: Context): Promise<void> {
+        const actionRepository: ActionRepository = await ctx.get('repositories.ActionRepository');
+        const userRepository: UserRepository = await ctx.get('repositories.UserRepository');
+
+        const actions = await actionRepository.find({where: {serviceAction: 'spotify.A.new_playlist_song'}});
+
+        // Start pulling's for new playlist song actions
+        for (const action of actions) {
+            console.log(action.id);
+            const ownerId  = await actionRepository.getActionOwnerID(action.id?.toString()!);
+            if (!ownerId)
+                continue;
+            await SpotifyHelper.startNewPlaylistSongPulling(action.id!, ownerId, ctx);
+        }
+
+        // Run first refresh for spotify tokens
+        for (const user of (await userRepository.find())) {
+            if (user.services && user.services["spotify" as keyof typeof user.services]) {
+                await SpotifyHelper.refreshSpotifyUser(user, ctx);
+            }
+        }
+
+        // Users refresh spotify tokens
+        setInterval(() => {
+            userRepository.find().then((users) => {
+                for (const user of users) {
+                    if (user.services && user.services["spotify" as keyof typeof user.services]) {
+                        SpotifyHelper.refreshSpotifyUser(user, ctx).then().catch(() => {});
+                    }
+                }
+            }).catch(() => {});
+        }, 60 * 5 *  1000) // Refresh every 5 minutes
     }
 
     static async login(params: LoginObject): Promise<string> {
         const userRepository: UserRepository = await params.ctx.get('repositories.UserRepository');
         const exchangeCodeGenerator: ExchangeCodeGeneratorManager = await params.ctx.get('services.exchangeCodeGenerator');
         const user : User = (await userRepository.findOne({where: {email: params.user.email}}))!;
+
+        if (user.services && user.services["spotify" as keyof typeof user.services]) {
+            await SpotifyHelper.refreshSpotifyUser(user, params.ctx);
+        }
 
         if (await userRepository.getServiceInformation(user.id, 'spotify')) {
             const codeParam = await exchangeCodeGenerator.generate({status: 'Authenticated with spotify'}, true);
@@ -109,7 +145,7 @@ export default class ServiceController {
             try {
                 await this.userRepository.addService(user.id, {
                     token: tokens.data.access_token,
-                    expiresIn: tokens.data.expires_in,
+                    expiresAt: new Date().valueOf() + tokens.data.expires_in,
                     refreshToken: tokens.data.refresh_token
                 }, 'spotify')
             } catch (e) {

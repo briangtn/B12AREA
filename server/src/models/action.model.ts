@@ -1,4 +1,5 @@
-import {Entity, model, property} from '@loopback/repository';
+import {Entity, model, property, hasOne, belongsTo} from '@loopback/repository';
+import {Area} from './area.model';
 
 @model({settings: {strict: false, strictObjectIDCoercion: true}})
 export class Action extends Entity {
@@ -15,9 +16,7 @@ export class Action extends Entity {
     })
     serviceAction: string;
 
-    @property({
-        type: 'string',
-    })
+    @belongsTo(() => Area, {name: 'area'})
     areaId?: string;
 
     @property({

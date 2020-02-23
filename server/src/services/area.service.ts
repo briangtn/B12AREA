@@ -9,13 +9,13 @@ export class AreaService {
     constructor() {}
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    startPulling(url: string, params: object, diffFunction: (data: any) => Promise<any[] | null>, onDiff: (diff: any[]) => void, interval: number, name: string): NodeJS.Timeout {
+    startPulling(url: string, params: object, diffFunction: (data: any) => Promise<any[] | null>, onDiff: (diff: any[]) => Promise<void>, interval: number, name: string): NodeJS.Timeout {
         const id = setInterval(() => {
             axios.get(url, params).then((res) => {
-                diffFunction(res.data).then((diff) => {
+                diffFunction(res.data).then(async (diff) => {
                     if (diff == null || diff.length <= 0)
                         return;
-                    onDiff(diff);
+                    await onDiff(diff);
                 }).catch((err) => {});
             }).catch((err) => {
             });
