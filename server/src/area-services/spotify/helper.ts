@@ -77,7 +77,7 @@ export class SpotifyHelper {
                         return resolve(services);
                     } else if (services.spotify.expiresAt < new Date().valueOf() && user.services && user.services[spotifyKey]) {
                         axios.post(SPOTIFY_TOKEN_EXCHANGE_BASE_URL, qs.stringify({
-                            // eslint-disable-next-line @typescript-eslint/camelcasec
+                            // eslint-disable-next-line @typescript-eslint/camelcase
                             refresh_token: services.spotify.refreshToken,
                             // eslint-disable-next-line @typescript-eslint/camelcase
                             grant_type: 'refresh_token'

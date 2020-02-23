@@ -1,4 +1,4 @@
-import {Entity, model, property, hasOne, belongsTo} from '@loopback/repository';
+import {Entity, model, property, belongsTo} from '@loopback/repository';
 import {Area} from './area.model';
 
 @model({settings: {strict: false, strictObjectIDCoercion: true}})
