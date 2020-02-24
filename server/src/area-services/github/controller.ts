@@ -6,10 +6,10 @@ import {Context, inject} from "@loopback/context";
 import {ExchangeCodeGeneratorManager} from "../../services";
 import {HttpErrors} from "@loopback/rest/dist";
 import {repository} from "@loopback/repository";
-import {GithubTokenRepository, GithubWebhookRepository, UserRepository} from "../../repositories";
-import {GithubToken, GithubWebhook, User} from "../../models";
+import {ActionRepository, UserRepository} from "../../repositories";
+import {Action, User} from "../../models";
 import {UserProfile} from "@loopback/security";
-import {GithubWebhookResponse} from "./interfaces";
+import {GithubTokenModel, GithubWebhookModel, GithubWebhookResponse} from "./interfaces";
 
 const GITHUB_AUTHORIZE_BASE_URL = 'https://github.com/login/oauth/authorize';
 const GITHUB_TOKEN_EXCHANGE_BASE_URL = 'https://github.com/login/oauth/access_token';
@@ -23,39 +23,39 @@ export default class ServiceController {
     constructor(
         @inject('services.exchangeCodeGenerator') protected exchangeCodeGenerator: ExchangeCodeGeneratorManager,
         @inject(RestBindings.Http.RESPONSE) public response: Response,
-        @repository(GithubTokenRepository) public githubTokenRepository: GithubTokenRepository,
-        @repository(GithubWebhookRepository) public githubWebhookRepository: GithubWebhookRepository,
+        @repository(ActionRepository) public actionRepository: ActionRepository,
         @repository(UserRepository) public userRepository: UserRepository,
     ) {
     }
 
     static async start(ctx: Context): Promise<void> {
         console.log('Starting github service');
-        let githubTokenRepository : GithubTokenRepository | undefined = undefined;
-        let githubWebhookRepository : GithubWebhookRepository | undefined = undefined;
+        let actionRepository : ActionRepository | undefined = undefined;
+        let userRepository : UserRepository | undefined = undefined;
         try {
-            githubTokenRepository = await ctx.get('repositories.GithubTokenRepository');
-            githubWebhookRepository = await ctx.get('repositories.GithubWebhookRepository');
+            actionRepository = await ctx.get('repositories.ActionRepository');
+            userRepository = await ctx.get('repositories.UserRepository');
         } catch (e) {
-            console.error('Failed to resolve github repositories on start', e);
+            console.error('Failed to resolve github required repositories on start', e);
             return;
         }
-        if (!githubWebhookRepository || !githubTokenRepository) {
-            console.error('Failed to resolve github repositories on start');
+        if (!actionRepository || !userRepository) {
+            console.error('Failed to resolve github required repositories on start');
             return;
         }
-        const webhooks : GithubWebhook[] = await githubWebhookRepository.find();
-        for (const webhook of webhooks) {
+        const githubPushActions : Action[] = await actionRepository.find({
+            where: {
+                serviceAction: 'github.A.push'
+            }
+        });
+        for (const githubPushAction of githubPushActions) {
+            const webhook: GithubWebhookModel = githubPushAction.data as GithubWebhookModel;
             const webhookConfig : {content_type: string; insecure_ssl: string, url: string;} = webhook.config! as {content_type: string; insecure_ssl: string, url: string;};
             if (!webhookConfig.url.startsWith(API_URL)) {
                 console.log(`Webhook ${webhook.id} invalid, updating!`);
-                let githubToken : GithubToken | null = null;
+                let githubToken : GithubTokenModel | null = null;
                 try {
-                    githubToken = await githubTokenRepository.findOne({
-                        where: {
-                            userId: webhook.userId
-                        }
-                    }, {strictObjectIDCoercion: true});
+                    githubToken = await userRepository.getServiceInformation(webhook.userId, 'github') as GithubTokenModel;
                 } catch (e) {
                     console.error(`Failed to find github token for user ${webhook.userId}`, e);
                     continue;
@@ -79,7 +79,7 @@ export default class ServiceController {
                             Authorization: `token ${githubToken.token}`
                         }
                     });
-                    const updateData = {
+                    const updateData: GithubWebhookModel = {
                         hookUuid: webhook.hookUuid,
                         userId: webhook.userId,
                         owner: webhook.owner,
@@ -98,9 +98,9 @@ export default class ServiceController {
                         lastResponse: response.data.last_response
                     };
                     try {
-                        await githubWebhookRepository.updateById(webhook.id, updateData);
+                        await actionRepository.setActionData(githubPushAction.id!, updateData);
                     } catch (e) {
-                        console.error(`Error while updating database. This is realy bad you need to update database manually. Data is the following: ${JSON.stringify(updateData)}`);
+                        console.error(`Error while updating database. This is really bad you need to update database manually. Data is the following: ${JSON.stringify(updateData)}, actionId: ${githubPushAction.id}`);
                     }
                 } catch (e) {
                     console.error(`Failed to contact github api`);
@@ -111,15 +111,10 @@ export default class ServiceController {
 
     static async login(params: LoginObject): Promise<string> {
         const userRepository: UserRepository = await params.ctx.get('repositories.UserRepository');
-        const githubTokenRepository: GithubTokenRepository = await params.ctx.get('repositories.GithubTokenRepository');
         const exchangeCodeGenerator: ExchangeCodeGeneratorManager = await params.ctx.get('services.exchangeCodeGenerator');
         const user : User = (await userRepository.findOne({where: {email: params.user.email}}))!;
-        const token: GithubToken | null = await githubTokenRepository.findOne({
-            where: {
-                userId: user.id
-            }
-        }, {strictObjectIDCoercion: true});
-        if (token != null) {
+        const token: GithubTokenModel | undefined = await userRepository.getServiceInformation(user.id, 'github') as GithubTokenModel;
+        if (token !== undefined) {
             const codeParam = await exchangeCodeGenerator.generate({status: 'Authenticated with github'}, true);
             return params.redirectUrl + '?code=' + codeParam;
         }
@@ -182,10 +177,10 @@ export default class ServiceController {
                 }
             }) as {data: {access_token: string, scope: string, token_type: string}};
             try {
-                await this.githubTokenRepository.create({
+                await this.userRepository.addService(user.id, {
                     token: tokens.data.access_token,
                     userId: user.id
-                });
+                }, 'github');
             } catch (e) {
                 const codeParam = await this.exchangeCodeGenerator.generate({error: 'Failed to store github token', info: e}, true);
                 return this.response.redirect(stateData.url + '?code=' + codeParam);

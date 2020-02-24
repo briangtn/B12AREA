@@ -1,4 +1,3 @@
-
 export interface GithubWebhookResponse {
     type: string;
     id: number;
@@ -28,4 +27,29 @@ export interface GithubPushHookBody {
     after: string;
     before: string;
     commits: GithubCommitBody[];
+}
+
+export interface GithubWebhookModel {
+    id?: string;
+    hookUuid?: string;
+    userId?: string;
+    owner?: string;
+    repo?: string;
+    type?: string;
+    githubId?: number;
+    name?: string;
+    active?: boolean;
+    events?: string[];
+    config?: object;
+    updatedAt?: string;
+    createdAt?: string;
+    url?: string;
+    testUrl?: string;
+    pingUrl?: string;
+    lastResponse?: object;
+}
+
+export interface GithubTokenModel {
+    token: string;
+    userId: string;
 }

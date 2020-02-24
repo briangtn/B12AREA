@@ -2,8 +2,9 @@ import {applyPlaceholders, OperationStatus, ReactionConfig, WorkableObject} from
 import config from './config.json';
 import axios from 'axios';
 import {Context} from "@loopback/context";
-import {GithubTokenRepository, ReactionRepository} from "../../../../repositories";
-import {GithubToken, Reaction} from "../../../../models";
+import {ReactionRepository, UserRepository} from "../../../../repositories";
+import {Reaction} from "../../../../models";
+import {GithubTokenModel} from "../../interfaces";
 
 const GITHUB_API_BASE_URL = 'https://api.github.com';
 
@@ -34,27 +35,23 @@ export default class ReactionController {
 
     static async prepareData(reactionId: string, ctx: Context): Promise<object> {
         let reactionRepository : ReactionRepository | undefined = undefined;
-        let githubTokenRepository : GithubTokenRepository | undefined = undefined;
+        let userRepository : UserRepository | undefined = undefined;
         try {
             reactionRepository = await ctx.get('repositories.ReactionRepository');
-            githubTokenRepository = await ctx.get('repositories.GithubTokenRepository');
+            userRepository = await ctx.get('repositories.UserRepository');
         } catch (e) {
             const error = { success: false, error: "Failed to resolve repositories", detail: e };
             throw error;
         }
-        if (!reactionRepository || !githubTokenRepository) {
+        if (!reactionRepository || !userRepository) {
             const error = { success: false, error: "Failed to resolve repositories" };
             throw error;
         }
         const reaction: Reaction = await reactionRepository.findById(reactionId);
         const reactionConfig : ForkReactionConfig = reaction.options as ForkReactionConfig;
-        let githubToken : GithubToken | null = null;
+        let githubToken : GithubTokenModel | null = null;
         try {
-            githubToken = await githubTokenRepository.findOne({
-                where: {
-                    userId: reactionConfig.userId
-                }
-            }, {strictObjectIDCoercion: true});
+            githubToken = await userRepository.getServiceInformation(reactionConfig.userId, 'github') as GithubTokenModel;
         } catch (e) {
             const error = { success: false, error: "Failed to resolve github token", details: e };
             throw error;
@@ -82,7 +79,8 @@ export default class ReactionController {
                 userId: userId,
                 owner: forkReactionConfig.owner,
                 repo: forkReactionConfig.repo
-            }
+            },
+            data: {}
         }
     }
 
@@ -104,14 +102,16 @@ export default class ReactionController {
                 userId: oldForkReactionConfig.userId,
                 owner: newForkReactionConfig.owner,
                 repo: newForkReactionConfig.repo
-            }
+            },
+            data: {}
         }
     }
 
     static async deleteReaction(reactionId: string, reactionConfig: Object, ctx: Context): Promise<OperationStatus> {
         return {
             success: true,
-            options: reactionConfig
+            options: reactionConfig,
+            data: {}
         }
     }
 
