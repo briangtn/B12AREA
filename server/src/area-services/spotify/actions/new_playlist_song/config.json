@@ -1,5 +1,5 @@
 {
-  "displayName": "new_playlist_song",
+  "displayName": "New playlist song",
   "description": "Triggered when a new sound is posted in a playlist.",
   "configSchema": [
     {
