@@ -33,8 +33,9 @@ class PasswordActivity : AppCompatActivity() {
                 inputMethodManager.hideSoftInputFromWindow(currentFocus!!.windowToken, 0)
 
                 submitValidationPassword(token)
+                return@OnKeyListener true
             }
-            return@OnKeyListener true
+            return@OnKeyListener false
         })
 
         btnValidationPassword.setOnClickListener {

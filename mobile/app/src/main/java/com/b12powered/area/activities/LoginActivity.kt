@@ -39,8 +39,9 @@ class LoginActivity : AppCompatActivity() {
                 inputMethodManager.hideSoftInputFromWindow(currentFocus!!.windowToken, 0)
 
                 submitLogin()
+                return@OnKeyListener true
             }
-            return@OnKeyListener true
+            return@OnKeyListener false
         })
 
         settings_button.setOnClickListener {

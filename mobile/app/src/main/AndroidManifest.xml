@@ -11,17 +11,22 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name="com.b12powered.area.activities.RegisterActivity">
+        <activity android:name="com.b12powered.area.activities.RegisterActivity"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".activities.LoginActivity" />
-        <activity android:name=".activities.RegistrationValidationActivity" />
-        <activity android:name=".activities.TwoFAActivity" />
-        <activity android:name=".activities.EmailValidationActivity">
+        <activity android:name=".activities.LoginActivity"
+            android:screenOrientation="portrait" />
+        <activity android:name=".activities.RegistrationValidationActivity"
+            android:screenOrientation="portrait" />
+        <activity android:name=".activities.TwoFAActivity"
+            android:screenOrientation="portrait" />
+        <activity android:name=".activities.EmailValidationActivity"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
@@ -34,7 +39,8 @@
                     android:pathPrefix="/email_validation" />
             </intent-filter>
         </activity>
-        <activity android:name=".activities.HomeActivity">
+        <activity android:name=".activities.HomeActivity"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
@@ -46,12 +52,16 @@
                     android:host="home" />
             </intent-filter>
         </activity>
-        <activity android:name=".activities.UserActivity" />
-        <activity android:name=".activities.SearchActivity" />
-        <activity android:name=".activities.ConfirmTwoFAActivity" />
-        <activity android:name=".activities.ForgotPasswordActivity" />
-        <activity android:name=".activities.RequestResetPasswordValidationActivity" />
-        <activity android:name=".activities.PasswordActivity">
+        <activity android:name=".activities.UserActivity"
+            android:screenOrientation="portrait" />
+        <activity android:name=".activities.SearchActivity"
+            android:screenOrientation="portrait" />
+        <activity android:name=".activities.ForgotPasswordActivity"
+            android:screenOrientation="portrait" />
+        <activity android:name=".activities.RequestResetPasswordValidationActivity"
+            android:screenOrientation="portrait" />
+        <activity android:name=".activities.PasswordActivity"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
@@ -64,7 +74,8 @@
                     android:pathPrefix="/reset_password" />
             </intent-filter>
         </activity>
-        <activity android:name=".activities.PasswordValidationActivity" />
+        <activity android:name=".activities.PasswordValidationActivity"
+            android:screenOrientation="portrait" />
         <meta-data
             android:name="preloaded_fonts"
             android:resource="@array/preloaded_fonts" />

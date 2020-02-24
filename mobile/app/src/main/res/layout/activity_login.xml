@@ -24,8 +24,8 @@
         android:layout_width="340dp"
         android:layout_height="44dp"
         android:layout_marginStart="99dp"
-        android:layout_marginTop="20dp"
         android:layout_marginEnd="99dp"
+        android:layout_marginBottom="496dp"
         android:background="@drawable/edit_text_style"
         android:ems="10"
         android:fontFamily="@font/roboto_light"
@@ -34,9 +34,9 @@
         android:padding="10dp"
         android:textColor="@color/colorPrimary"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.511"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/title" />
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintHorizontal_bias="0.488"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <EditText
         android:id="@+id/password"
