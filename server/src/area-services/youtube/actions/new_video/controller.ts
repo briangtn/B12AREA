@@ -1,4 +1,4 @@
-import {param, post} from "@loopback/rest";
+import {get, param, post, requestBody} from "@loopback/rest";
 import {ActionConfig, OperationStatus} from '../../../../services-interfaces'
 import config from './config.json';
 import {Context, inject} from "@loopback/context";
@@ -11,6 +11,7 @@ import {RandomGeneratorManager} from "../../../../services";
 import axios from "axios";
 import * as qs from 'querystring'
 import {Action} from "../../../../models";
+import {GithubPushHookBody} from "../../../github/interfaces";
 
 
 const API_URL : string = process.env.API_URL ?? "http://localhost:8080";
@@ -33,11 +34,30 @@ export default class ActionController {
     ) {
     }
 
+    @get('/webhook/{webhookId}')
+    async validation(
+        @param.path.string('webhookId') webhookId: string,
+        @param.query.string('hub.challenge') challenge: string,
+    ) {
+        console.log("Validation");
+        if (!challenge)
+            return "No challenge provided";
+        return challenge;
+    }
+
     @post('/webhook/{webhookId}')
     async webhook(
         @param.path.string('webhookId') webhookId: string,
+        @requestBody({
+            content: {
+                'text/xml': {
+                    'x-parser': 'text'
+                }
+            }
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        }) body : any
     ) {
-        return "YES";
+        console.log(body);
     }
 
     static async createAction(userId: string, actionConfig: Object, ctx: Context): Promise<OperationStatus> {
@@ -54,11 +74,11 @@ export default class ActionController {
         if (!randomGeneratorService || !actionRepository)
             return { success: false, error: "Could not resolve RandomGeneratorService in given context"};
 
-        let generatedUUID = '';
         let generated = false;
-        const webhookUrl = `${WEBHOOK_PREFIX}${generatedUUID}`;
+        let webhookUrl = "";
         while (!generated) {
-            generatedUUID = randomGeneratorService.generateRandomString(16);
+            let generatedUUID = randomGeneratorService.generateRandomString(16);
+            webhookUrl = `${WEBHOOK_PREFIX}${generatedUUID}`;
             try {
                 const count = await actionRepository.count({
                     and: [
@@ -76,6 +96,7 @@ export default class ActionController {
                 generated = false;
             }
         }
+
         const topicUrl = YOUTUBE_WATCH_URL + newVideoConfig.channel;
 
         try {
