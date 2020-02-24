@@ -1,5 +1,5 @@
 {
-  "displayName": "newVideo",
+  "displayName": "new_video",
   "description": "Triggered on a new Video upload by a specific channel.",
   "configSchema": [
     {

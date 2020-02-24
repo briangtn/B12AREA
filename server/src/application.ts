@@ -133,7 +133,7 @@ export class AreaApplication extends BootMixin(
                     class AreaActions extends module.default {
 
                     }
-
+                    console.log(dir);
                     this.controller(AreaActions, dir);
                 }).catch(error => {
                     return console.error(error);
