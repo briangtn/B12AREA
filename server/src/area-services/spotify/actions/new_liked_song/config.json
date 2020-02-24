@@ -1,0 +1,47 @@
+{
+  "displayName": "New song liked",
+  "description": "Triggered when a new sound is liked by you in spotify.",
+  "configSchema": [],
+  "placeholders": [
+    {
+      "name": "SpotifyTrackName",
+      "description": "The name of the spotify track."
+    },
+    {
+      "name": "SpotifyTrackExplicit",
+      "description": "'explicit' if the track is explicit empty elsewhere."
+    },
+    {
+      "name": "SpotifyTrackDuration",
+      "description": "Duration of the track in milliseconds."
+    },
+    {
+      "name": "SpotifyTrackArtistName",
+      "description": "The name of the main artist of this track."
+    },
+    {
+      "name": "SpotifyTrackArtistId",
+      "description": "The spotify id of the main artist of this track."
+    },
+    {
+      "name": "SpotifyTrackArtistUrl",
+      "description": "The spotify url of the main artist of this track."
+    },
+    {
+      "name": "SpotifyTrackAddedAt",
+      "description": "The timestamp when the track was added ISO formated."
+    },
+    {
+      "name": "SpotifyTrackAddedById",
+      "description": "The value of the user who have added this track to playlist."
+    },
+    {
+      "name": "SpotifyTrackId",
+      "description": "The spotify id of the added track."
+    },
+    {
+      "name": "SpotifyTrackUri",
+      "description": "The spotify uri of the added track."
+    }
+  ]
+}
