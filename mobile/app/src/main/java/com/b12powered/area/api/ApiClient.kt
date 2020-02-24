@@ -8,6 +8,7 @@ import com.android.volley.toolbox.BasicNetwork
 import com.android.volley.toolbox.DiskBasedCache
 import com.android.volley.toolbox.HurlStack
 import com.android.volley.toolbox.StringRequest
+import com.b12powered.area.About
 import com.b12powered.area.User
 import com.b12powered.area.toObject
 import com.google.gson.Gson
@@ -289,8 +290,20 @@ class ApiClient(private val context: Context) {
         val route = ApiRoute.PatchUser(user, context)
         this.performRequest(route) { success, response ->
             if (success) {
-                val user: User = response.json.toObject()
-                completion.invoke(user, "success")
+                val newUser: User = response.json.toObject()
+                completion.invoke(newUser, "success")
+            } else {
+                completion.invoke(null, response.message)
+            }
+        }
+    }
+
+    fun aboutJson(completion: (about: About?, message: String) -> Unit) {
+        val route = ApiRoute.AboutJson(context)
+        this.performRequest(route) { success, response ->
+            if (success) {
+                val about: About = response.json.toObject()
+                completion.invoke(about, "success")
             } else {
                 completion.invoke(null, response.message)
             }

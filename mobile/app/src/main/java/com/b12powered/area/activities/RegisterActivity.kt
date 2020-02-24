@@ -31,6 +31,14 @@ class RegisterActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_register)
 
+        val sharedPreferences = getSharedPreferences("com.b12powered.area", Context.MODE_PRIVATE)
+
+        if (sharedPreferences.contains("jwt-token")) {
+            val intent = Intent(this, HomeActivity::class.java)
+            finish()
+            startActivity(intent)
+        }
+
         val etConfirmPassword = findViewById<EditText>(R.id.confirm_password)
 
         etConfirmPassword.setOnKeyListener(View.OnKeyListener { _, keyCode, event ->
