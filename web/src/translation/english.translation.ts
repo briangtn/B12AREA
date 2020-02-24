@@ -26,7 +26,13 @@ const english = {
     resetPassword: "Reset password",
     resetPasswordEmailSent: "To continue, please follow the steps in your email",
     resetPasswordConfirmation: "Your password has been reset, please connect.",
-    goToAdmin: "Administration panel"
+    goToAdmin: "Administration panel",
+    myServices: "My services",
+    /**
+     * Add services translation
+     */
+    addServices: "Add services",
+    addServicesSubtitle: "To subscribe to a new services, please fill the informations below."
 };
 
 export default english;

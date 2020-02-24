@@ -9,6 +9,7 @@ import Translator from '../components/Translator';
 import { setToken } from "../actions/api.action";
 
 import Alert from './Alert';
+import Utilities from "../utils/Utilities";
 
 import Cookies from "universal-cookie";
 
@@ -73,16 +74,7 @@ class AuthButton extends Component<Props, State> {
     }
 
     componentDidMount() {
-        function getParameterByName(name: string, url: string): string | null {
-            if (!url) url = window.location.href;
-            name = name.replace(/[\[\]]/g, '\\$&');
-            var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
-                results = regex.exec(url);
-            if (!results) return null;
-            if (!results[2]) return '';
-            return decodeURIComponent(results[2].replace(/\+/g, ' '));
-        }
-        const code: string | null = getParameterByName('code', window.location.href);
+        const code: string | null = Utilities.getQueryParameter(window.location.href, 'code');
         const headers: any = {};
         const jwtToken = this.props.token;
 
