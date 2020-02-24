@@ -9,7 +9,9 @@ import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.EditText
+import android.widget.Toast
 import com.b12powered.area.R
+import com.b12powered.area.api.ApiClient
 import kotlinx.android.synthetic.main.activity_login.*
 
 class PasswordActivity : AppCompatActivity() {
@@ -17,6 +19,8 @@ class PasswordActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_password)
+
+        val token: String = intent!!.data!!.getQueryParameter("token")!!
 
         val btnValidationPassword = findViewById<Button>(R.id.validation_password_button)
 
@@ -28,18 +32,21 @@ class PasswordActivity : AppCompatActivity() {
                     getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
                 inputMethodManager.hideSoftInputFromWindow(currentFocus!!.windowToken, 0)
 
-                submitValidationPassword()
+                submitValidationPassword(token)
             }
             return@OnKeyListener true
         })
 
         btnValidationPassword.setOnClickListener {
-            submitValidationPassword()
+            submitValidationPassword(token)
         }
 
     }
 
-    private fun submitValidationPassword() {
+    /**
+     * Check password parameters validity. Call [changePassword] method if parameters are valid, reset input fields if they are not
+     */
+    private fun submitValidationPassword(token: String) {
         val etPassword = findViewById<EditText>(R.id.new_password)
         val etConfirmPassword = findViewById<EditText>(R.id.confirm_new_password)
 
@@ -52,23 +59,37 @@ class PasswordActivity : AppCompatActivity() {
         etPassword.error = null
         etConfirmPassword.error = null
 
-        if (password.isEmpty()) {
-            etPassword.error = getString(R.string.no_password)
+        when {
+            password.isEmpty() -> etPassword.error = getString(R.string.no_password)
+            confirmPassword.isEmpty() -> etConfirmPassword.error = getString(R.string.no_password)
+            password.toString() != confirmPassword.toString() -> {
+                etConfirmPassword.setText("")
+                etConfirmPassword.error = getString(R.string.different_password)
+            }
         }
-        else if (confirmPassword.isEmpty()) {
-            etConfirmPassword.error = getString(R.string.no_password)
-        }
-        else if (password != confirmPassword) {
-            etConfirmPassword.setText("")
-            etConfirmPassword.error = getString(R.string.different_password)
-        }
-        if (password.isNotEmpty() && confirmPassword.isNotEmpty() && password == confirmPassword) {
-            changePassword()
+        if (password.isNotEmpty() && confirmPassword.isNotEmpty() && password.toString() == confirmPassword.toString()) {
+            changePassword(token, password.toString())
         }
     }
 
-    private fun changePassword() {
-
+    /**
+     * Make a reset password request to api, using [token] and [password]. If the call is successful, redirect the user to the confirmation page, if not display a toast with the error
+     */
+    private fun changePassword(token: String, password: String) {
+        ApiClient(this)
+            .resetPassword(token, password) { user, message ->
+                if (user != null) {
+                    val intent = Intent(this, PasswordValidationActivity::class.java)
+                    finish()
+                    startActivity(intent)
+                } else {
+                    Toast.makeText(
+                        this,
+                        message,
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
     }
 
 }

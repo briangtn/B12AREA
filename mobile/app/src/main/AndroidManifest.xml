@@ -20,6 +20,7 @@
         </activity>
         <activity android:name=".activities.LoginActivity" />
         <activity android:name=".activities.RegistrationValidationActivity" />
+        <activity android:name=".activities.TwoFAActivity" />
         <activity android:name=".activities.EmailValidationActivity">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
@@ -28,14 +29,41 @@
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <data
-                    android:scheme="http"
+                    android:scheme="https"
                     android:host="${HOST}"
                     android:pathPrefix="/email_validation" />
             </intent-filter>
         </activity>
-        <activity android:name=".activities.HomeActivity" />
+        <activity android:name=".activities.HomeActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:scheme="area"
+                    android:host="home" />
+            </intent-filter>
+        </activity>
         <activity android:name=".activities.UserActivity" />
         <activity android:name=".activities.SearchActivity" />
+        <activity android:name=".activities.ForgotPasswordActivity" />
+        <activity android:name=".activities.RequestResetPasswordValidationActivity" />
+        <activity android:name=".activities.PasswordActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:scheme="https"
+                    android:host="${HOST}"
+                    android:pathPrefix="/reset_password" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".activities.PasswordValidationActivity" />
         <meta-data
             android:name="preloaded_fonts"
             android:resource="@array/preloaded_fonts" />

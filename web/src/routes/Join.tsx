@@ -18,6 +18,8 @@ import MuiAlert from '@material-ui/lab/Alert';
 import GoogleIcon from "../components/icons/GoogleIcon";
 import TwitterIcon from '@material-ui/icons/Twitter';
 
+import AuthButton from "../components/AuthButton";
+
 function Alert(props: any) {
     return <MuiAlert elevation={6} variant="filled" {...props} />;
 }
@@ -163,6 +165,15 @@ class Join extends Component<Props, State> {
         this.setState({ error: 'false' });
     };
 
+    keyPress = (e: any) => {
+        if (e.keyCode === 13) {
+            const toClick: HTMLElement | null = document.getElementById('signup')
+
+            if (toClick)
+                toClick.click();
+        }
+    }
+
     render() {
         const { email, password, confirm_password, email_error} = this.state;
         const { classes } = this.props;
@@ -188,6 +199,7 @@ class Join extends Component<Props, State> {
                             className={classes.field}
                             value={email}
                             onChange={this.onChange}
+                            onKeyDown={this.keyPress}
                             error={ (email_error !== 'false') }
                             required
                         />
@@ -197,6 +209,7 @@ class Join extends Component<Props, State> {
                             label="Password"
                             variant="outlined"
                             type="password"
+                            onKeyDown={this.keyPress}
                             className={classes.field}
                             value={password}
                             onChange={this.onChange}
@@ -208,6 +221,7 @@ class Join extends Component<Props, State> {
                             label="Confirm Password"
                             variant="outlined"
                             type="password"
+                            onKeyDown={this.keyPress}
                             className={classes.field}
                             value={confirm_password}
                             onChange={this.onChange}
@@ -215,6 +229,7 @@ class Join extends Component<Props, State> {
                         />
                         <br />
                         <Button
+                            id="signup"
                             variant="contained"
                             color="secondary"
                             className={classes.signupButton}
@@ -227,22 +242,10 @@ class Join extends Component<Props, State> {
                         <br />
                         <Grid container spacing={3}>
                             <Grid item xs={6}>
-                                <Button
-                                    variant="contained"
-                                    className={classes.imageButton}
-                                    startIcon={<GoogleIcon />}
-                                >
-                                    <Translator sentence="connectGoogle" />
-                                </Button>
+                                <AuthButton token={null} history={this.props.history} apiUrl={this.props.api_url} serviceName="Google" serviceIcon={<GoogleIcon />} />
                             </Grid>
                             <Grid item xs={6}>
-                                <Button
-                                    variant="contained"
-                                    className={classes.imageButton}
-                                    startIcon={<TwitterIcon />}
-                                >
-                                    <Translator sentence="connectTwitter" />
-                                </Button>
+                                <AuthButton token={null} history={this.props.history} apiUrl={this.props.api_url} serviceName="Twitter" serviceIcon={<TwitterIcon />} />
                             </Grid>
                         </Grid>
                     </Grid>

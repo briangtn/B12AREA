@@ -10,9 +10,11 @@ import { connect } from 'react-redux';
 import './App.css';
 
 import NavigationBar from "./components/NavigationBar";
+import AuthButton from "./components/AuthButton";
 import OrDivider from "./components/OrDivider";
 import Translator from "./components/Translator";
 import HomeCarousel from "./components/HomeCarousel";
+import Footer from "./components/Footer";
 
 // Material UI components
 import Grid from '@material-ui/core/Grid';
@@ -21,12 +23,6 @@ import Button from '@material-ui/core/Button';
 
 import GoogleIcon from './components/icons/GoogleIcon';
 import TwitterIcon from '@material-ui/icons/Twitter';
-import YoutubeIcon from '@material-ui/icons/YouTube';
-import GitHubIcon from '@material-ui/icons/GitHub';
-import SpotifyIcon from "./components/icons/SpotifyIcon";
-import TeamsIcon from "./components/icons/TeamsIcon";
-import OutlookIcon from "./components/icons/OutlookIcon";
-import AirtableIcon from "./components/icons/AirtableIcon";
 import InputBase from "@material-ui/core/InputBase";
 import Divider from "@material-ui/core/Divider";
 import Paper from "@material-ui/core/Paper";
@@ -47,11 +43,13 @@ interface Props {
         push: any
     },
     language: string,
-    token: string
+    token: string,
+    api_url: string
 }
 
 interface State {
-    email: string
+    email: string,
+    services: any
 }
 
 interface Services {
@@ -81,8 +79,7 @@ const styles = (theme: Theme) => createStyles({
         backgroundColor: '#FFBE76',
         width: '100%',
         minHeight: '350px',
-        marginTop: theme.spacing(10),
-        position: 'absolute'
+        marginTop: theme.spacing(10)
     },
     heroContent: {
         textAlign: 'center',
@@ -107,12 +104,13 @@ const styles = (theme: Theme) => createStyles({
 });
 
 const mapStateToProps = (state: any) => {
-    return { language: state.language, token : state.token };
+    return { language: state.language, token : state.token, api_url: state.api_url };
 };
 
 class App extends Component<Props, State> {
     state: State = {
         email: '',
+        services: []
     };
 
     onEmailEnter: React.ChangeEventHandler<HTMLInputElement> = (e) => {
@@ -124,7 +122,39 @@ class App extends Component<Props, State> {
 
         if (token)
             this.props.history.push('/services');
+        else
+            this.fetchServices(this.props.api_url);
     }
+
+    fetchServices(api_url: string): void {
+        this.setState({ services: [] });
+        fetch(`${api_url}/about.json`)
+            .then(res => res.json())
+            .then(data => {
+                const servicesArray = data['server']['services'];
+                const tmp: {name: string, description: string, icon: string, color: string}[] = [];
+
+                for (let service of servicesArray) {
+                    const tmpObject: {name: string, description: string, icon: string, color: string} = {
+                        name: service['name'],
+                        description: service['description'],
+                        icon: service['icon'],
+                        color: service['string']
+                    };
+                    tmp.push(tmpObject);
+                }
+                this.setState({ services: tmp });
+            });
+    }
+
+    keyPress = (e: any) => {
+        if (e.keyCode === 13) {
+            const toClick: HTMLElement | null = document.getElementById('getStarted');
+
+            if (toClick)
+                toClick.click();
+        }
+    };
 
     render() {
         const { classes } = this.props;
@@ -151,35 +181,22 @@ class App extends Component<Props, State> {
                                 inputProps={{ 'aria-label': 'enter your email' }}
                                 value={this.state.email}
                                 onChange={this.onEmailEnter}
+                                onKeyDown={this.keyPress}
                             />
                             <Divider className={classes.divider} orientation="vertical" />
                             <Link
                                 to={{pathname: '/join', state: { email: this.state.email }}}
                                 style={{ textDecoration: 'none', color: '#FFFFFF' }}>
-                                <Button color="primary"><Translator sentence="getStarted" /></Button>
+                                <Button id="getStarted" color="primary"><Translator sentence="getStarted" /></Button>
                             </Link>
                         </Paper>
                         <OrDivider />
-                        <Grid container spacing={3}>
+                        <Grid container spacing={3} direction="row" alignItems="center" justify="center">
                             <Grid item xs={6}>
-                                <Button
-                                    variant="contained"
-                                    className={classes.imageButton}
-                                    startIcon={<GoogleIcon />}
-                                    disableElevation={true}
-                                >
-                                    <Translator sentence="connectGoogle" />
-                                </Button>
+                                <AuthButton token={null} history={this.props.history} apiUrl={this.props.api_url} serviceName="Google" serviceIcon={<GoogleIcon />} />
                             </Grid>
                             <Grid item xs={6}>
-                                <Button
-                                    variant="contained"
-                                    className={classes.imageButton}
-                                    startIcon={<TwitterIcon />}
-                                    disableElevation={true}
-                                >
-                                    <Translator sentence="connectTwitter" />
-                                </Button>
+                                <AuthButton token={null} history={this.props.history} apiUrl={this.props.api_url} serviceName="Twitter" serviceIcon={<TwitterIcon />} />
                             </Grid>
                         </Grid>
                     </Grid>
@@ -187,8 +204,10 @@ class App extends Component<Props, State> {
                 <div className={classes.hero}>
                     <br />
                     <br />
-                    <HomeCarousel />
+                    <HomeCarousel services={this.state.services} />
                 </div>
+                <br />
+                <Footer apiUrl={this.props.api_url} reloadFunction={this.fetchServices.bind(this)} isConnected={this.props.token !== null} />
             </div>
         );
     }

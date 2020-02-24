@@ -2,7 +2,11 @@ version: '3'
 
 services:
   client_web:
-    build: ./web
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+      args:
+        REACT_APP_API_URL: $REACT_APP_API_URL
     command: npm start
     restart: unless-stopped
     environment:
@@ -51,17 +55,14 @@ services:
     command: npm run worker
     restart: unless-stopped
     environment:
-      - DB_HOST=db
       - REDIS_HOST=redis
     env_file:
       - .env
     volumes:
       - ./server:/server
     networks:
-      - "db-tier"
       - "redis-tier"
     depends_on:
-      - db
       - redis
 
   db:
