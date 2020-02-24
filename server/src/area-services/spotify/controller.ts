@@ -93,7 +93,7 @@ export default class ServiceController {
         spotifyRedirectUrl += ('?client_id=' + SPOTIFY_CLIENT_ID);
         spotifyRedirectUrl += ('&response_type=code');
         spotifyRedirectUrl += ('&redirect_uri=' + endApiRedirectUrl);
-        spotifyRedirectUrl += ('&scope=user-read-private user-read-email user-modify-playback-state user-library-read');
+        spotifyRedirectUrl += ('&scope=user-read-private user-read-email user-modify-playback-state user-library-read user-read-playback-state');
         spotifyRedirectUrl += ('&state=' + state);
         return spotifyRedirectUrl;
     }

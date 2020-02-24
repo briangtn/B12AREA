@@ -1,0 +1,18 @@
+{
+  "displayName": "Play / Pause Spotify",
+  "description": "Play or pause the spotify player",
+  "configSchema": [
+    {
+      "name": "play",
+      "description": "If true set player status to play elsewhere set player status to pause",
+      "type": "boolean",
+      "required": true
+    },
+    {
+      "name": "swapStatus",
+      "description": "If true the play settings is ignored and the status will become play if it's currently pause and vice versa",
+      "type": "boolean",
+      "required": true
+    }
+  ]
+}

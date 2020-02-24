@@ -123,6 +123,8 @@ export class SpotifyHelper {
         const serviceData: {token: string} = await userRepository.getServiceInformation(userID, 'spotify') as {token: string};
         const options: {id: string} = (await actionRepository.getActionSettings(actionID))! as {id: string};
 
+        if (!serviceData || !serviceData.token)
+            return;
         areaService.startPulling(
             `https://api.spotify.com/v1/playlists/${options.id}/tracks`,
             {headers: {Authorization: 'Bearer ' + serviceData.token}},
@@ -204,7 +206,8 @@ export class SpotifyHelper {
 
         const serviceData: {token: string} = await userRepository.getServiceInformation(userID, 'spotify') as {token: string};
 
-        console.log("Starting new liked song pulling");
+        if (!serviceData || !serviceData.token)
+            return;
         areaService.startPulling(
             `https://api.spotify.com/v1/me/tracks`,
             {headers: {Authorization: 'Bearer ' + serviceData.token}},
