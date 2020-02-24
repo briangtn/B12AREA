@@ -284,7 +284,7 @@ class ApiClient(private val context: Context) {
     }
 
     /**
-     * Build a patchUser request taking one parameter [user] and perform it, then invoke [completion] with a User object
+     * Build a patchUser request with [user] and perform it, then invoke [completion] with a User object
      */
     fun patchUser(user: User, completion: (user: User?, message: String) -> Unit) {
         val route = ApiRoute.PatchUser(user, context)
@@ -298,12 +298,29 @@ class ApiClient(private val context: Context) {
         }
     }
 
+    /**
+     * Build a aboutJson request taking no parameter and perform it, then invoke [completion] with a About object
+     */
     fun aboutJson(completion: (about: About?, message: String) -> Unit) {
         val route = ApiRoute.AboutJson(context)
         this.performRequest(route) { success, response ->
             if (success) {
                 val about: About = response.json.toObject()
                 completion.invoke(about, "success")
+            } else {
+                completion.invoke(null, response.message)
+            }
+        }
+    }
+
+    /**
+     * Build a subscribeService with [service] and [redirectUrl] and perform it, then invoke [completion] with a boolean corresponding to the result of the call
+     */
+    fun loginService(service: String, redirectUrl: String, completion: (uri: Uri?, message: String) -> Unit) {
+        val route = ApiRoute.LoginService(service, redirectUrl, context)
+        this.performRequest(route) { success, response ->
+            if (success) {
+                completion.invoke(JSONObject(response.json).getString("url").toUri(), "success")
             } else {
                 completion.invoke(null, response.message)
             }

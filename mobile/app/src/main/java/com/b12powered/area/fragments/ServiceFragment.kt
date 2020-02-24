@@ -2,6 +2,9 @@ package com.b12powered.area.fragments
 
 import android.animation.Animator
 import android.animation.ObjectAnimator
+import android.app.AlertDialog
+import android.content.DialogInterface
+import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.drawable.Drawable
@@ -11,12 +14,14 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.view.animation.DecelerateInterpolator
+import android.widget.Toast
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.fragment.app.Fragment
 import androidx.palette.graphics.Palette
 import com.b12powered.area.R
 import com.b12powered.area.Service
+import com.b12powered.area.api.ApiClient
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
@@ -61,7 +66,6 @@ class ServiceFragment(private val service: Service) : Fragment() {
                         DrawableCompat.setTint(addWrap, color.rgb)
                         Glide.with(view)
                             .load(addWrap)
-                            .fitCenter()
                             .into(plus)
                     }
                 }
@@ -73,9 +77,45 @@ class ServiceFragment(private val service: Service) : Fragment() {
 
         view.setBackgroundColor(Color.parseColor(service.color))
         view.setOnClickListener {
-            flipCard()
+            when (isFlipped) {
+                true -> showDialog()
+                false -> flipCard()
+            }
         }
         super.onViewCreated(view, savedInstanceState)
+    }
+
+    private fun showDialog() {
+        val builder = AlertDialog.Builder(context)
+        val dialogClickListener = DialogInterface.OnClickListener {_, which ->
+            when(which) {
+                DialogInterface.BUTTON_POSITIVE -> subscribeService()
+                DialogInterface.BUTTON_NEGATIVE -> flipCard()
+            }
+        }
+        builder
+            .setTitle(getString(R.string.subscribe_service))
+            .setMessage(getString(R.string.subscribe_service_message) + service.name + " ?")
+            .setPositiveButton(getString(R.string.confirm), dialogClickListener)
+            .setNegativeButton(getString(R.string.cancel), dialogClickListener)
+            .create()
+            .show()
+    }
+
+    private fun subscribeService() {
+        ApiClient(context!!)
+            .loginService(service.name, "area://search") { uri, message ->
+                if (uri != null) {
+                    val intent = Intent(Intent.ACTION_VIEW, uri)
+                    startActivity(intent)
+                } else {
+                    Toast.makeText(
+                        context!!,
+                        message,
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
     }
 
     private fun flipCard() {
