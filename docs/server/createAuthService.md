@@ -6,7 +6,7 @@ In this page we gonna see how to create an area authentication service.
 
 An authentication service is an external service for login (like Google, Twitter, ...)
 
-### Call an auth service 📲
+### Call an auth service 📣
 
 If you want to use the API for calling an auth service first you have to call the `GET /users/serviceLogin/{serviceName}` you must give a `redirectURL` query params.
 
@@ -82,4 +82,26 @@ sequenceDiagram
     end
 
 ```
+## Build an auth service ⚒
 
+You must create a folder in `server/src/area-auth-services` named by your serviceName
+
+In this folder you must create a file named `controller.ts`.
+
+this controller need one static method name `login` and must be exported as default
+
+```js
+
+export default class GoogleAuthController{
+
+    constructor() {
+    }
+
+    static async login(finalRedirect: string, ctx: Context, userID?: string) {
+        
+    }
+
+
+}
+
+```
