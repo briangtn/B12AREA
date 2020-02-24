@@ -30,14 +30,15 @@ class TwoFAActivity : AppCompatActivity() {
 
         val etAuthenticationCode = findViewById<EditText>(R.id.authentication_code)
 
-/*        etAuthenticationCode.setOnKeyListener(View.OnKeyListener { _, keyCode, event ->
+        etAuthenticationCode.setOnKeyListener(View.OnKeyListener { _, keyCode, event ->
             if (keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_UP) {
                 val inputMethodManager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
                 inputMethodManager.hideSoftInputFromWindow(currentFocus!!.windowToken, 0)
                 submitCode()
+                return@OnKeyListener true
             }
-            return@OnKeyListener true
-        })*/
+            return@OnKeyListener false
+        })
 
         submit_button.setOnClickListener {
             submitCode()
