@@ -35,7 +35,7 @@
     <string name="change_url_fail">L\'url est invalide</string>
     <string name="invalid_2fa_code">Le code doit comporter 6 chiffres</string>
     <string name="invalid_token">Token invalide</string>
-    <string name="forgot_password">Mot de passe oublié</string>
+    <string name="forgot_password">Mot de passe oublié ?</string>
     <string name="successful_password_reset">Votre mot de passe a été réinitialisé avec succès !</string>
     <string name="password_reset_confirmation_message">Nous vous avons envoyé un email afin de définir votre nouveau mot de passe. Vérifiez vos spams si vous ne le voyez pas !</string>
     <string name="success_new_password">Nouveau mot de passe enregistré avec succès !</string>
