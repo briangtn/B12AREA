@@ -131,6 +131,16 @@ static async createAction(userId: string, actionConfig: Object, ctx: Context): P
     // if OperationStatus.success, OperationStatus.option will be stored in db
 }
 
+    static async createActionFinished(actionID: string, userID: string, actionConfig: Object, ctx: Context): Promise<OperationStatus> {
+      // After the action was created in db
+      // the result should be reuturned in OperationStatus
+      // actionId is the id of the action that is beeing updated
+      // userId is the user performing the request
+      // actionConfig is the config given by the front end
+      // ctx is the loopback context
+    }
+
+
 static async updateAction(actionId: string, oldActionConfig: Object, newActionConfig: Object, ctx: Context): Promise<OperationStatus> {
     // Ask for the update of an action
     // the result of the update should be reuturned in OperationStatus
