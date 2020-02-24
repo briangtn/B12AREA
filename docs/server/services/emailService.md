@@ -67,7 +67,7 @@ Example:
             text: "text version"
         })
         .then(o => console.log("Email sent"))
-        .catch(e => console.log("Failed to deliver email", e));
+        .catch(e => console.error("Failed to deliver email", e));
     }
 
 // ...

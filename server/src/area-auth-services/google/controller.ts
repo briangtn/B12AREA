@@ -10,13 +10,13 @@ export default class GoogleController {
                 @inject('services.areaAuthService') public authenticator: AreaAuthServiceService) {
     }
 
-    static async login(finalRedirect: string, ctx: Context) {
+    static async login(finalRedirect: string, ctx: Context, userID?: string) {
         const baseApiURl = process.env.API_URL;
         const redirectURL = baseApiURl + '/auth-services/google/auth';
         const clientID = process.env.GOOGLE_CLIENT_ID;
 
         const exchangeCodeGenerator: ExchangeCodeGeneratorManager = await ctx.get('services.exchangeCodeGenerator');
-        const state = await exchangeCodeGenerator.generate({url: finalRedirect}, false);
+        const state = await exchangeCodeGenerator.generate({url: finalRedirect, userID}, false);
 
         let url = 'https://accounts.google.com/o/oauth2/v2/auth';
         url += '?scope=email';
@@ -40,8 +40,8 @@ export default class GoogleController {
                 if (!dataFromCode) {
                     reject('Invalid state code');
                 }
-                const dataWithUrl: {url: string} = dataFromCode! as {url: string};
-                if (!dataWithUrl) {
+                const dataTyped: {url: string, userID: string} = dataFromCode! as {url: string, userID: string};
+                if (!dataTyped) {
                     reject('Invalid format for data');
                 }
                 axios.post('https://www.googleapis.com/oauth2/v4/token', {
@@ -61,8 +61,17 @@ export default class GoogleController {
 
                     axios.get('https://openidconnect.googleapis.com/v1/userinfo', {headers: {Authorization: googleAuthHeader}}).then(async (profileReponse) => {
                         try {
-                            const responseCode = await this.authenticator.loginOrRegister('google', profileReponse.data.email);
-                            this.response.redirect(dataWithUrl.url + '?code=' + responseCode);
+                            if (!dataTyped) {
+                                return reject('Invalid format for data');
+                            }
+                            console.log(profileReponse.data); //
+                            const responseCode = await this.authenticator.loginOrRegister({
+                                serviceName: 'google',
+                                email: profileReponse.data.email,
+                                userID: dataTyped.userID,
+                                serviceAccountId: profileReponse.data.sub
+                            });
+                            this.response.redirect(dataTyped.url + '?code=' + responseCode);
                         } catch (e) {
                             console.log(e);
                             reject(e);
@@ -73,9 +82,8 @@ export default class GoogleController {
                                 error: 'Problem when fetching google.com profile',
                                 info: err.config
                             }, true);
-                            this.response.redirect(dataWithUrl.url + '?code=' + responseCode);
+                            this.response.redirect(dataTyped.url + '?code=' + responseCode);
                         } catch (e) {
-
                             console.log(e);
                             reject(e);
                         }
@@ -87,7 +95,7 @@ export default class GoogleController {
                             error: 'Problem when fetching google.com',
                             info: err.config
                         }, true);
-                        this.response.redirect(dataWithUrl.url + '?code=' + responseCode);
+                        this.response.redirect(dataTyped.url + '?code=' + responseCode);
                     } catch (e) {
                         console.log(e);
                         reject(e);

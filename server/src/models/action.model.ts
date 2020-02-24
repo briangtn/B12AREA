@@ -1,6 +1,7 @@
-import {Entity, model, property} from '@loopback/repository';
+import {Entity, model, property, belongsTo} from '@loopback/repository';
+import {Area} from './area.model';
 
-@model({settings: {strict: false}})
+@model({settings: {strict: false, strictObjectIDCoercion: true}})
 export class Action extends Entity {
     @property({
         type: 'string',
@@ -15,16 +16,21 @@ export class Action extends Entity {
     })
     serviceAction: string;
 
+    @belongsTo(() => Area, {name: 'area'})
+    areaId?: string;
+
     @property({
         type: 'object',
-        required: true,
     })
     options: object;
 
     @property({
-        type: 'string',
+        type: 'object',
+        default: {},
+        required: false
     })
-    areaId?: string;
+    data?: object;
+
     // Define well-known properties here
 
     // Indexer property to allow additional data

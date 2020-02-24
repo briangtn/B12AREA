@@ -14,7 +14,6 @@ import CardMedia from '@material-ui/core/CardMedia';
 import Typography from '@material-ui/core/Typography';
 
 interface State {
-    services: {name: string, description: string, icon: string, color: string}[]
 }
 
 interface Props {
@@ -22,7 +21,8 @@ interface Props {
         root: string,
         media: string
     },
-    api_url: string
+    api_url: string,
+    services: {name: string, description: string, icon: string, color: string}[]
 }
 
 const styles = (theme: Theme) => createStyles({
@@ -66,35 +66,8 @@ const mapStateToProps = (state: any) => {
 };
 
 class HomeCarousel extends Component<Props, State> {
-    state: State = {
-        services: []
-    };
-
-    componentDidMount(): void {
-        const { api_url } = this.props;
-
-        fetch(`${api_url}/about.json`)
-            .then(res => res.json())
-            .then(data => {
-                const servicesArray = data['server']['services'];
-                const tmp: {name: string, description: string, icon: string, color: string}[] = [];
-
-                for (let service of servicesArray) {
-                    const tmpObject: {name: string, description: string, icon: string, color: string} = {
-                        name: service['name'],
-                        description: service['description'],
-                        icon: service['icon'],
-                        color: service['string']
-                    };
-                    tmp.push(tmpObject);
-                }
-                this.setState({ services: tmp });
-            });
-    }
-
     render() {
-        const { classes } = this.props;
-        const { services } = this.state;
+        const { classes, services } = this.props;
 
         return (
             <Carousel

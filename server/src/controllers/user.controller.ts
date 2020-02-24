@@ -1,5 +1,5 @@
-import {requestBody, get, post, patch, param, api, HttpErrors, del} from '@loopback/rest';
-import {property, repository, model} from '@loopback/repository';
+import {requestBody, get, post, patch, param, api, HttpErrors, getModelSchemaRef, getFilterSchemaFor, del, RestBindings, Request} from '@loopback/rest';
+import {property, repository, model, Filter} from '@loopback/repository';
 import {inject, Context} from '@loopback/context';
 import {User} from '../models';
 import validator from 'validator';
@@ -126,10 +126,35 @@ export class UserController {
         @inject('services.2fa')
         protected twoFactorAuthenticationService: TwoFactorAuthenticationManager,
 
+        @inject(RestBindings.Http.REQUEST)
+        public request: Request,
+
         @inject.context() private ctx: Context
     ) {}
-    @get('/')
-    getUsers() {
+
+    @get('/', {
+        security: OPERATION_SECURITY_SPEC,
+        responses: {
+            '200': {
+                description: 'All users',
+                content: {
+                    'application/json': {
+                        schema: {
+                            type: 'array',
+                            items: getModelSchemaRef(User),
+                        },
+                    },
+                },
+            },
+        }
+    })
+    @authenticate('jwt-all')
+    @authorize({allowedRoles: ['admin']})
+    async getUsers(
+        @inject(SecurityBindings.USER) currentUserProfile: UserProfile,
+        @param.query.object('filter', getFilterSchemaFor(User)) filter?: Filter<User>
+    ) {
+        return this.userRepository.find();
     }
 
     @post('/register', {
@@ -216,6 +241,32 @@ export class UserController {
         return {token, require2fa: user.twoFactorAuthenticationEnabled};
     }
 
+    @authenticate('jwt-all')
+    @get('/refreshToken', {
+        responses: {
+            '200': {
+                description: 'Gives a new JWT to a user',
+                content: {
+                    'application/json': {
+                        schema: {
+                            type: 'object',
+                            properties: {
+                                token: {
+                                    type: 'string',
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        },
+    })
+    async refresh(
+        @inject(SecurityBindings.USER) currentUserProfile: CustomUserProfile
+    ) : Promise<{token: string}> {
+        return {token: await this.tokenService.generateToken(currentUserProfile)};
+    }
+
     @get('/serviceLogin/{serviceName}', {
         responses: {
             '200': {
@@ -239,12 +290,31 @@ export class UserController {
     })
     async serviceLogin(
         @param.path.string('serviceName') serviceName: string,
-        @param.query.string('redirectURL') redirectURL: string
+        @param.query.string('redirectURL') redirectURL: string,
     ): Promise<object> {
+        if (!redirectURL) {
+            throw new HttpErrors.BadRequest("Redirect url required.");
+        }
         try {
             const module = await import('../area-auth-services/' + serviceName + '/controller');
             const controller = module.default;
-            const res = await controller.login(redirectURL, this.ctx);
+            let res = null;
+            let currentUserProfile: UserProfile | undefined;
+            try {
+                currentUserProfile = await this.userService.getUserProfile(this.request);
+            } catch (e) {
+                currentUserProfile = undefined;
+            }
+
+            if (currentUserProfile) {
+                const user: User | null = await this.userRepository.getFromUserProfile(currentUserProfile);
+                if (!user) {
+                    throw new HttpErrors.BadRequest("User not found.");
+                }
+                res = await controller.login(redirectURL, this.ctx, user.id);
+            } else {
+                res = await controller.login(redirectURL, this.ctx);
+            }
             return {url: res};
         } catch (e) {
             throw new HttpErrors.NotFound('Service not found');
@@ -277,7 +347,8 @@ export class UserController {
             '404': response404('User not found'),
             '401': {
                 description: 'Unauthorized'
-            }
+            },
+            '422': response422('Invalid params format')
         }
     })
     @authenticate('jwt-all')
@@ -302,6 +373,9 @@ export class UserController {
         if (updatedUser.disable2FA) {
             updatedUser.twoFactorAuthenticationEnabled = false;
         }
+        if (updatedUser.disable2FA !== undefined) {
+            delete updatedUser.disable2FA;
+        }
         if (updatedUser.email) {
             if (!validator.isEmail(updatedUser.email)) {
                 throw new HttpErrors.BadRequest('Invalid email.');
@@ -324,14 +398,38 @@ export class UserController {
         return this.userRepository.findById(currentUser.id);
     }
 
+    @get('/availableRoles', {
+        responses: {
+            '200': {
+                description: 'The url where you have to redirect',
+                content: {
+                    'application/json': {
+                        schema: {
+                            type: 'object',
+                            properties: {
+                                url: {
+                                    type: 'string',
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        }
+    })
+    getAvailableRoles() {
+        return this.userService.getAvailableRoles();
+    }
+
     @get('/{id}', {
+        security: OPERATION_SECURITY_SPEC,
         responses: {
             '200': response200(User, "Return a user"),
             '404': response404('User not found')
         }
     })
-    @authenticate('jwt-all')
     @authorize({allowedRoles: ['admin']})
+    @authenticate('jwt-all')
     async getUser(
         @param.path.string('id') id: string,
         @inject(SecurityBindings.USER) currentUserProfile: UserProfile,
@@ -456,7 +554,7 @@ export class UserController {
                 subject: "Reset password instructions",
                 html: htmlData,
                 text: textData
-            }).catch(e => console.log("Failed to deliver password reset email: ", e));
+            }).catch(e => console.error("Failed to deliver password reset email: ", e));
         }
 
         return {};

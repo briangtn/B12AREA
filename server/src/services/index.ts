@@ -7,3 +7,4 @@ export * from './two-factor-authentication.service';
 export * from './exchange-code-generator.service';
 export * from './area-auth-service.service';
 export * from './authorizor';
+export * from './area.service';

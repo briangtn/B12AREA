@@ -65,7 +65,7 @@ export class UserRepository extends DefaultCrudRepository<User,
             subject: "Welcome to AREA",
             html: htmlData,
             text: textData
-        }).catch(e => console.log("Failed to deliver email validation email: ", e));
+        }).catch(e => console.error("Failed to deliver email validation email: ", e));
         return validationToken;
     }
 
@@ -87,7 +87,7 @@ export class UserRepository extends DefaultCrudRepository<User,
             subject: "Password changed",
             html: htmlData,
             text: textData
-        }).catch(e => console.log("Failed to deliver password reset validation email: ", e));
+        }).catch(e => console.error("Failed to deliver password reset validation email: ", e));
         return this.findById(userId);
     }
 
@@ -96,6 +96,21 @@ export class UserRepository extends DefaultCrudRepository<User,
             where: {
                 email: userProfile.email
             }
+        });
+    }
+
+    async addService(userId: typeof User.prototype.id, data: object, serviceName: string) {
+        const user: User = await this.findById(userId)!;
+        user.services![serviceName as keyof typeof user.services] = data as never;
+        await this.update(user);
+    }
+
+    async getServiceInformation(userID: typeof User.prototype.id, serviceName: string): Promise<object> {
+        // eslint-disable-next-line @typescript-eslint/no-misused-promises,no-async-promise-executor
+        return new Promise<object>(async (resolve, reject) => {
+            const user : User = await this.findById(userID)!;
+            const service: object = user.services![serviceName as keyof typeof user.services]!;
+            return resolve(service);
         });
     }
 

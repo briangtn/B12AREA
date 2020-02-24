@@ -1,0 +1,18 @@
+{
+  "displayName": "star",
+  "description": "Star a repository",
+  "configSchema": [
+    {
+      "name": "owner",
+      "description": "The owner of the repository to star",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "repo",
+      "description": "The name of the repository to star",
+      "type": "string",
+      "required": true
+    }
+  ]
+}

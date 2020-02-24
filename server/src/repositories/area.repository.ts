@@ -25,17 +25,14 @@ export class AreaRepository extends DefaultCrudRepository<Area,
     ) {
         super(Area, dataSource);
         this.action = this.createHasOneRepositoryFactoryFor('action', actionRepositoryGetter,);
-        this.registerInclusionResolver('actions', this.action.inclusionResolver);
+        this.registerInclusionResolver('action', this.action.inclusionResolver);
         this.reactions = this.createHasManyRepositoryFactoryFor('reactions', reactionRepositoryGetter,);
         this.registerInclusionResolver('reactions', this.reactions.inclusionResolver);
     }
 
     checkArea(area: Area | null, user: UserProfile): void {
-        if (area === null) {
+        if (area === null || area?.ownerId !== user.email) {
             throw new HttpErrors.NotFound(`Area not found`);
-        }
-        if (area?.ownerId !== user.email) {
-            throw new HttpErrors.Unauthorized("Invalid user");
         }
     }
 }

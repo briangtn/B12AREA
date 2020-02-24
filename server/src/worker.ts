@@ -1,5 +1,5 @@
 import Queue from 'bull';
-import {TriggerObject} from "./services-interfaces";
+import {WorkableObject} from "./services-interfaces";
 
 export class Worker {
 
@@ -33,8 +33,17 @@ export class Worker {
         });
     }
 
-    async processJob(data: TriggerObject)
+    async processJob(data: WorkableObject)
     {
-        console.log(`Starting to process job from ${data.from}, data: ${data.placeholders}`);
+        console.debug(`Starting to process job [${data.actionId} (${data.actionType}), ${data.reactionId} (${data.reactionType})], data: ${JSON.stringify(data)}`);
+        const serviceName = data.reactionType.split('.')[0];
+        const reactionName = data.reactionType.split('.')[2];
+        try {
+            const module = await import('./area-services/' + serviceName + '/reactions/' + reactionName + '/controller');
+            const controller = module.default;
+            await controller.trigger(data);
+        } catch (e) {
+            console.error(`Failed to process job [${data.actionId} (${data.actionType}), ${data.reactionId} (${data.reactionType})] : ${e}`);
+        }
     }
 }

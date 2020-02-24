@@ -1,0 +1,57 @@
+sequenceDiagram
+    participant Client
+    participant Server
+    participant Service
+
+    rect rgba(155, 0, 0, .3)
+        Note over Client,Service: Email / Password (2FA Disabled)
+
+        Client ->> Server: Login request (email, password)
+        Note Over Client,Server: /users/login
+
+        alt Valid pair
+            Server ->> Client: 200 (JWT Token)
+        else Invalid pair
+            Server ->> Client: 401
+        end
+    end
+
+    rect rgba(0, 155, 0, .3)
+        Note over Client,Service: Email / Password (2FA Enabled)
+
+        Client ->> Server: Login request (email, password)
+        Note Over Client,Server: /users/login
+
+        alt Valid pair
+            Server ->> Client: 200 (JWT Token)
+            Note over Client,Server:  (Only works on /users/2fa/validate)
+            alt Valid 2FA code
+                Server ->> Client: 200 (JWT Token)
+            else Invalid 2FA code
+                Server ->> Client: 400
+            else Invalid JWT
+                Server ->> Client: 401
+            end
+        else Invalid pair
+            Server ->> Client: 401
+        end
+    end
+
+    rect rgba(0, 0, 155, .3)
+        Note over Client,Service: Service
+
+        Client ->> Server: Login redirect url request
+        Note over Client, Server: /users/serviceLogin/{serviceName}
+        Server ->> Client: 200 (Redirect url)
+        Client ->> Service: Redirect
+        Service ->> Server: Redirect for authentication
+        Server ->> Client: Redirection
+        Note over Server,Client: If the JWT is valid he is generated
+        Note over Server,Client: redirectUrl?code={code}
+
+        alt Login success
+            Server ->> Client: 200 (JWT TOKEN)
+        else Login failed
+            Server ->> Client: 200 (Object with error message)
+        end
+    end
