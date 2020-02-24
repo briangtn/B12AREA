@@ -34,7 +34,8 @@ interface Props {
     classes: {
         fab: string,
         formControl: string
-    }
+    },
+    availableServices: any
 }
 
 interface ServiceFromAbout {
@@ -48,7 +49,6 @@ interface ServiceFromAbout {
 
 interface State {
     dialogOpened: boolean,
-    availableServices: ServiceFromAbout[],
     selectedService: string
 }
 
@@ -75,33 +75,8 @@ const mapStateToProps = (state: any) => {
 class AddServices extends Component<Props, State> {
     state: State = {
         dialogOpened: false,
-        availableServices: [],
         selectedService: ''
     };
-
-    componentDidMount() {
-        const { api_url, token } = this.props;
-
-        fetch(`${api_url}/about.json`)
-            .then(res => res.json())
-            .then((data) => {
-                fetch(`${api_url}/users/me`, {
-                    method: 'GET',
-                    headers: { 'Authorization': `Bearer ${token}` }
-                })
-                .then(res => res.json())
-                .then((dataMe) => {
-                    const alreadyRegisteredServices = dataMe['services'];
-
-                    if (Object.keys(alreadyRegisteredServices).length === 0) {
-                        this.setState({ availableServices: data['server']['services'] });
-                    } else {
-                        // TODO Check if already registered to a service then don't fill in array
-                        console.log(dataMe);
-                    }
-                });
-            });
-    }
 
     // Handle the confirmation
 
@@ -137,10 +112,10 @@ class AddServices extends Component<Props, State> {
     };
 
     render() {
-        const { classes } = this.props;
-        const { dialogOpened, availableServices, selectedService } = this.state;
+        const { classes, availableServices } = this.props;
+        const { dialogOpened, selectedService } = this.state;
 
-        const serviceChoices = availableServices.map((service) => (
+        const serviceChoices = availableServices.map((service: any) => (
             <MenuItem key={availableServices.indexOf(service)} value={service.name}>{service.name.charAt(0).toUpperCase() + service.name.slice(1)}</MenuItem>
         ));
 
