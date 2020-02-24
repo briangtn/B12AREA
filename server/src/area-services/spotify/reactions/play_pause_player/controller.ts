@@ -1,4 +1,4 @@
-import {applyPlaceholders, OperationStatus, WorkableObject} from '../../../../services-interfaces';
+import {OperationStatus, WorkableObject} from '../../../../services-interfaces';
 import { Context } from '@loopback/core';
 import config from './config.json';
 import {ReactionRepository, UserRepository} from '../../../../repositories';
