@@ -107,9 +107,8 @@ export class AboutController {
             let actionDirs: Array<string> = [];
             try {
                 actionDirs = await readdir(serviceActionsPath);
+                // eslint-disable-next-line no-empty
             } catch (e) {
-                console.error(`Unable to scan directory ${serviceActionsPath}: ${e}`);
-                continue;
             }
             for (const actionName of actionDirs) {
                 const newAction = new Action;
@@ -144,9 +143,8 @@ export class AboutController {
             let reactionDirs: Array<string> = [];
             try {
                 reactionDirs = await readdir(serviceReactionsPath);
+                // eslint-disable-next-line no-empty
             } catch (e) {
-                console.error(`Unable to scan directory ${serviceReactionsPath}: ${e}`);
-                continue;
             }
             for (const reactionName of reactionDirs) {
                 const newReaction = new Reaction;
