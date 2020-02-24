@@ -4,7 +4,7 @@ import {Context} from "@loopback/context";
 
 export default class ReactionController {
     static async trigger(params: WorkableObject): Promise<void> {
-
+        console.log(params);
     }
 
     static async prepareData(reactionId: string, ctx: Context): Promise<object> {

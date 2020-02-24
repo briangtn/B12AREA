@@ -26,7 +26,7 @@ export const NewActionInArea = {
         'application/json': {
             schema: getModelSchemaRef(Action, {
                 title: 'NewActionInArea',
-                exclude: ['id'],
+                exclude: ['id', 'data'],
                 optional: ['areaId']
             }),
         },

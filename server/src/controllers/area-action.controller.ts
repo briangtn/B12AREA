@@ -90,7 +90,7 @@ export class AreaActionController {
     })
     async create(
         @param.path.string('id') id: typeof Area.prototype.id,
-        @requestBody(NewActionInArea) action: Omit<Action, 'id'>,
+        @requestBody(NewActionInArea) action: Omit<Omit<Action, 'data'>, 'id'>,
     ): Promise<Action> {
         const area = await this.areaRepository.findById(id, {
             include: [{
@@ -125,8 +125,22 @@ export class AreaActionController {
             throw new HttpErrors.BadRequest(result.error);
         }
         action.options = result.options;
+        action.data = {};
+        if (result.data)
+            action.data = result.data;
 
-        return this.areaRepository.action(id).create(action);
+        const created = await this.areaRepository.action(id).create(action);
+
+        if (controller.createActionFinished) {
+            try {
+                result = await controller.createActionFinished(created.id!, user.id!, action.options, this.ctx);
+                if (!result.success)
+                    throw new HttpErrors.BadRequest(result.error);
+            } catch (e) {
+                throw new HttpErrors.BadRequest('Failed to create action in service');
+            }
+        }
+        return created;
     }
 
     @patch('/{id}/action', {
