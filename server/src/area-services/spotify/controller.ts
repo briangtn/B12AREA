@@ -36,7 +36,6 @@ export default class ServiceController {
 
         // Start pulling's for new playlist song actions
         for (const action of actions) {
-            console.log(action.id);
             const ownerId  = await actionRepository.getActionOwnerID(action.id?.toString()!);
             if (!ownerId)
                 continue;
@@ -84,7 +83,7 @@ export default class ServiceController {
         spotifyRedirectUrl += ('?client_id=' + SPOTIFY_CLIENT_ID);
         spotifyRedirectUrl += ('&response_type=code');
         spotifyRedirectUrl += ('&redirect_uri=' + endApiRedirectUrl);
-        spotifyRedirectUrl += ('&scope=user-read-private user-read-email');
+        spotifyRedirectUrl += ('&scope=user-read-private user-read-email user-modify-playback-state');
         spotifyRedirectUrl += ('&state=' + state);
         return spotifyRedirectUrl;
     }

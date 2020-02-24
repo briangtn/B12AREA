@@ -40,7 +40,15 @@
     },
     {
       "name": "SpotifyTrackAddedById",
-      "value": "The value of the user who have added this track to playlist."
+      "description": "The value of the user who have added this track to playlist."
+    },
+    {
+      "name": "SpotifyTrackId",
+      "description": "The spotify id of the added track."
+    },
+    {
+      "name": "SpotifyTrackUri",
+      "description": "The spotify uri of the added track."
     }
   ]
 }

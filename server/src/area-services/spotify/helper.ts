@@ -21,10 +21,12 @@ interface SpotifyArtist {
 }
 
 interface SpotifyTrack {
+    id: string,
     name: string,
     explicit: boolean,
     duration_ms: number,
     artists: SpotifyArtist[],
+    uri: string,
 }
 
 interface SpotifyUser {
@@ -52,6 +54,8 @@ export interface AreaSpotifyTrack {
     artistUrl: string,
     addedAt: string,
     addedById: string,
+    id: string,
+    uri: string
 }
 
 const SPOTIFY_NEW_PLAYLIST_SONG_PULLING_PREFIX = "spotify_newPlaylistSong_";
@@ -170,6 +174,14 @@ export class SpotifyHelper {
                             {
                                 name: 'SpotifyTrackAddedById',
                                 value: track.addedById
+                            },
+                            {
+                                name: 'SpotifyTrackId',
+                                value: track.id
+                            },
+                            {
+                                name: 'SpotifyTrackUri',
+                                value: track.uri
                             }
                         ]
                     }, ctx)
@@ -193,7 +205,9 @@ export class SpotifyHelper {
             addedAt: spotifyTrackVersion.added_at,
             addedById: spotifyTrackVersion.added_by.id,
             artistId: spotifyTrackVersion.track.artists[0].id,
-            artistUrl: spotifyTrackVersion.track.artists[0].uri
+            artistUrl: spotifyTrackVersion.track.artists[0].uri,
+            id: spotifyTrackVersion.track.id,
+            uri: spotifyTrackVersion.track.uri
         }
     }
 

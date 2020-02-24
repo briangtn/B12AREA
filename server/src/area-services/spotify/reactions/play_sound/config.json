@@ -1,0 +1,12 @@
+{
+  "displayName": "play_sound",
+  "description": "Play a sound",
+  "configSchema": [
+    {
+      "name": "id",
+      "description": "The spotify id of the sound",
+      "type": "string",
+      "required": true
+    }
+  ]
+}
