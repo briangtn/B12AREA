@@ -32,10 +32,6 @@
       "description": "The timestamp when the track was added ISO formated."
     },
     {
-      "name": "SpotifyTrackAddedById",
-      "description": "The value of the user who have added this track to playlist."
-    },
-    {
       "name": "SpotifyTrackId",
       "description": "The spotify id of the added track."
     },

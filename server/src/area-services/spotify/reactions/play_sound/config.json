@@ -1,6 +1,6 @@
 {
   "displayName": "Play sound",
-  "description": "Play a sound",
+  "description": "Add a sound to play queue",
   "configSchema": [
     {
       "name": "id",
