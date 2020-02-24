@@ -99,6 +99,21 @@ export class UserRepository extends DefaultCrudRepository<User,
         });
     }
 
+    async addService(userId: typeof User.prototype.id, data: object, serviceName: string) {
+        const user: User = await this.findById(userId)!;
+        user.services![serviceName as keyof typeof user.services] = data as never;
+        await this.update(user);
+    }
+
+    async getServiceInformation(userID: typeof User.prototype.id, serviceName: string): Promise<object> {
+        // eslint-disable-next-line @typescript-eslint/no-misused-promises,no-async-promise-executor
+        return new Promise<object>(async (resolve, reject) => {
+            const user : User = await this.findById(userID)!;
+            const service: object = user.services![serviceName as keyof typeof user.services]!;
+            return resolve(service);
+        });
+    }
+
     async createArea(userId: typeof User.prototype.id, area: Omit<Area, 'id'>) : Promise<Area> {
         return this.areas(userId).create(area);
     }

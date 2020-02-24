@@ -159,6 +159,25 @@ describe('/users', () => {
         });
     });
 
+    describe('GET /users/refreshToken', function () {
+        it('Should send a new token', async () => {
+            const res = await helper.client
+                .get('/users/refreshToken')
+                .set('Authorization', 'Bearer ' + userToken)
+                .expect(200);
+            const body = res.body;
+            expect(body.token).to.not.empty();
+        });
+
+        it('Should return a 401 when request with authorization header', async () => {
+            const res = await helper.client
+                .get('/users/refreshToken')
+                .expect(401);
+            const error = JSON.parse(res.error.text);
+            expect(error.error.message).to.equal('Authorization header not found.');
+        });
+    });
+
     describe('POST /users/resetPassword', () => {
         it('Should create a reset password token on existing user', async () => {
             const user = await helper.userRepository.create({
@@ -657,7 +676,7 @@ describe('/users', () => {
                 id: JSON.parse(JSON.stringify(userId)),
                 email: userData.email,
                 role: ['user', 'admin'],
-                services: [],
+                services: {},
                 twoFactorAuthenticationEnabled: false,
                 authServices: []
             });

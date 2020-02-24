@@ -69,7 +69,7 @@ tests-docker-compose:
     - develop
   script:
     - apk update && apk add --no-cache py-pip curl python-dev libffi-dev openssl-dev gcc libc-dev make
-    - pip install docker-compose
+    - pip install enum34==1.1.6 docker-compose
     - touch .env
     - echo -ne "AREA_JWT_SECRET_VALUE=verySecretEnv\n" >> .env
     - echo -ne "DB_NAME=$DB_NAME\nDB_USER=$DB_USER\nDB_PASS=$DB_PASS\nDB_PORT=27017\n" >> .env
@@ -274,6 +274,8 @@ deploy-production-api:
     - sed -i "s/__TWITTER_CONSUMER_SECRET__/`echo -ne ${PROD_TWITTER_CONSUMER_SECRET} | base64 -w 0`/" area.api.secrets.yaml
     - sed -i "s/__GITHUB_CLIENT_ID__/`echo -ne ${PROD_GITHUB_CLIENT_ID} | base64 -w 0`/" area.api.secrets.yaml
     - sed -i "s/__GITHUB_CLIENT_SECRET__/`echo -ne ${PROD_GITHUB_CLIENT_SECRET} | base64 -w 0`/" area.api.secrets.yaml
+    - sed -i "s/__SPOTIFY_CLIENT_ID__/`echo -ne ${PROD_SPOTIFY_CLIENT_ID} | base64 -w 0`/" area.api.secrets.yaml
+    - sed -i "s/__SPOTIFY_CLIENT_SECRET__/`echo -ne ${PROD_SPOTIFY_CLIENT_SECRET} | base64 -w 0`/" area.api.secrets.yaml
     - sed -i "s/__INGRESS_HOST__/${DEPLOYMENT_HOST}/" area.api.ingress.yaml
     - kubectl apply -f area.api.configmap.yaml -f area.api.secrets.yaml
     - kubectl apply -f area.api.deployment.yaml
@@ -321,6 +323,8 @@ deploy-production-worker:
     - sed -i "s/__TWITTER_CONSUMER_SECRET__/`echo -ne ${PROD_TWITTER_CONSUMER_SECRET} | base64 -w 0`/" area.worker.secrets.yaml
     - sed -i "s/__GITHUB_CLIENT_ID__/`echo -ne ${PROD_GITHUB_CLIENT_ID} | base64 -w 0`/" area.worker.secrets.yaml
     - sed -i "s/__GITHUB_CLIENT_SECRET__/`echo -ne ${PROD_GITHUB_CLIENT_SECRET} | base64 -w 0`/" area.worker.secrets.yaml
+    - sed -i "s/__SPOTIFY_CLIENT_ID__/`echo -ne ${PROD_SPOTIFY_CLIENT_ID} | base64 -w 0`/" area.worker.secrets.yaml
+    - sed -i "s/__SPOTIFY_CLIENT_SECRET__/`echo -ne ${PROD_SPOTIFY_CLIENT_SECRET} | base64 -w 0`/" area.worker.secrets.yaml
     - kubectl apply -f area.worker.configmap.yaml -f area.worker.secrets.yaml
     - kubectl apply -f area.worker.deployment.yaml
 
@@ -483,6 +487,8 @@ deploy-development-api:
     - sed -i "s/__TWITTER_CONSUMER_SECRET__/`echo -ne ${DEV_TWITTER_CONSUMER_SECRET} | base64 -w 0`/" area.api.secrets.yaml
     - sed -i "s/__GITHUB_CLIENT_ID__/`echo -ne ${DEV_GITHUB_CLIENT_ID} | base64 -w 0`/" area.api.secrets.yaml
     - sed -i "s/__GITHUB_CLIENT_SECRET__/`echo -ne ${DEV_GITHUB_CLIENT_SECRET} | base64 -w 0`/" area.api.secrets.yaml
+    - sed -i "s/__SPOTIFY_CLIENT_ID__/`echo -ne ${DEV_SPOTIFY_CLIENT_ID} | base64 -w 0`/" area.api.secrets.yaml
+    - sed -i "s/__SPOTIFY_CLIENT_SECRET__/`echo -ne ${DEV_SPOTIFY_CLIENT_SECRET} | base64 -w 0`/" area.api.secrets.yaml
     - sed -i "s/__INGRESS_HOST__/${DEPLOYMENT_HOST}/" area.api.ingress.yaml
     - kubectl apply -f area.api.configmap.yaml -f area.api.secrets.yaml
     - kubectl apply -f area.api.deployment.yaml
@@ -530,6 +536,8 @@ deploy-development-worker:
     - sed -i "s/__TWITTER_CONSUMER_SECRET__/`echo -ne ${DEV_TWITTER_CONSUMER_SECRET} | base64 -w 0`/" area.worker.secrets.yaml
     - sed -i "s/__GITHUB_CLIENT_ID__/`echo -ne ${DEV_GITHUB_CLIENT_ID} | base64 -w 0`/" area.worker.secrets.yaml
     - sed -i "s/__GITHUB_CLIENT_SECRET__/`echo -ne ${DEV_GITHUB_CLIENT_SECRET} | base64 -w 0`/" area.worker.secrets.yaml
+    - sed -i "s/__SPOTIFY_CLIENT_ID__/`echo -ne ${DEV_SPOTIFY_CLIENT_ID} | base64 -w 0`/" area.worker.secrets.yaml
+    - sed -i "s/__SPOTIFY_CLIENT_SECRET__/`echo -ne ${DEV_SPOTIFY_CLIENT_SECRET} | base64 -w 0`/" area.worker.secrets.yaml
     - kubectl apply -f area.worker.configmap.yaml -f area.worker.secrets.yaml
     - kubectl apply -f area.worker.deployment.yaml
 

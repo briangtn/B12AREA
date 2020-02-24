@@ -281,4 +281,19 @@ class ApiClient(private val context: Context) {
             }
         }
     }
+
+    /**
+     * Build a patchUser request taking one parameter [user] and perform it, then invoke [completion] with a User object
+     */
+    fun patchUser(user: User, completion: (user: User?, message: String) -> Unit) {
+        val route = ApiRoute.PatchUser(user, context)
+        this.performRequest(route) { success, response ->
+            if (success) {
+                val user: User = response.json.toObject()
+                completion.invoke(user, "success")
+            } else {
+                completion.invoke(null, response.message)
+            }
+        }
+    }
 }

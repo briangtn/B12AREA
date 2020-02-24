@@ -2,6 +2,8 @@ package com.b12powered.area.api
 
 import android.content.Context
 import com.android.volley.Request
+import com.b12powered.area.User
+import java.nio.file.Path
 
 /**
  * A sealed class which represent every api call
@@ -110,6 +112,14 @@ sealed class ApiRoute(private var mainContext: Context) {
     data class GetUser(var context: Context) : ApiRoute(context)
 
     /**
+     * Data class for [PatchUser] route
+     *
+     * @param user The user to patch
+     * @param context The context of the call
+     */
+    data class PatchUser(var user: User, var context: Context) : ApiRoute(context)
+
+    /**
      * Timeout of the api call
      */
     val timeout: Int
@@ -166,6 +176,7 @@ sealed class ApiRoute(private var mainContext: Context) {
                 is RequestResetPassword -> "users/resetPassword"
                 is ResetPassword -> "/users/resetPassword"
                 is GetUser -> "users/me"
+                is PatchUser -> "users/me"
                 else -> ""
             }}"
         }
@@ -188,6 +199,7 @@ sealed class ApiRoute(private var mainContext: Context) {
                 is Activate2fa -> Request.Method.POST
                 is Confirm2fa -> Request.Method.PATCH
                 is Validate2fa -> Request.Method.POST
+                is PatchUser -> Request.Method.PATCH
                 is RequestResetPassword -> Request.Method.POST
                 is ResetPassword -> Request.Method.PATCH
                 else -> Request.Method.GET
@@ -197,7 +209,7 @@ sealed class ApiRoute(private var mainContext: Context) {
     /**
      * Request body
      */
-    val body: HashMap<String, String>
+    val body: HashMap<String, Any>
 
         /**
          * Return request's parameters
@@ -223,6 +235,9 @@ sealed class ApiRoute(private var mainContext: Context) {
                 }
                 is ResetPassword -> {
                     hashMapOf(Pair("token", token), Pair("password", password))
+                }
+                is PatchUser -> {
+                    hashMapOf(Pair("password", this.user.password), Pair("disable2FA", (!this.user.twoFactorAuthenticationEnabled)))
                 }
                 else -> hashMapOf()
             }
@@ -279,6 +294,9 @@ sealed class ApiRoute(private var mainContext: Context) {
                     hashMapOf(Pair("Authorization", "Bearer $token"))
                 }
                 is GetUser -> {
+                    hashMapOf(Pair("Authorization", "Bearer $token"))
+                }
+                is PatchUser -> {
                     hashMapOf(Pair("Authorization", "Bearer $token"))
                 }
                 else -> hashMapOf()
