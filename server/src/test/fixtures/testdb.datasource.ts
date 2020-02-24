@@ -32,7 +32,7 @@ before(async function() {
         mongo = await startMongo();
     }
     // eslint-disable-next-line no-invalid-this
-    this.timeout(6000);
+    this.timeout(1000 * 60 * 10); // 10 minutes timeout
 });
 
 after(async function() {
