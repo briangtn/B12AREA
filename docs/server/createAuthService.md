@@ -90,7 +90,9 @@ In this folder you must create a file named `controller.ts`.
 
 this controller need one static method name `login` and must be exported as default
 
-```js
+this method return the url where te client have to redirect.
+
+```ts
 
 export default class GoogleAuthController{
 
@@ -98,10 +100,65 @@ export default class GoogleAuthController{
     }
 
     static async login(finalRedirect: string, ctx: Context, userID?: string) {
-        
+        // finalRedirect: The final redirection url
+        // The loopback application context
+        // the userID is the database id of the user
+    }
+}
+
+```
+
+***example:***
+
+```ts
+
+export default class GoogleAuthController{
+
+    constructor() {
     }
 
+    static async login(finalRedirect: string, ctx: Context, userID?: string) {
+        let url = 'https://accounts.google.com/o/oauth2/v2/auth';
+        url += '?scope=email';
+        url += '&access_type=online';
+        url += '&redirect_uri=aRedirectUrl';
+        url += '&response_type=code';
+        url += '&client_id=clientID';
+        url += '&state=aStateCode';
+        return url;
+    }
+}
 
+```
+
+You can also use this controller as a loopback4 controller
+
+
+```ts
+
+export default class GoogleAuthController{
+
+    constructor() {
+    }
+
+    static async login(finalRedirect: string, ctx: Context, userID?: string) {
+        const baseApiURl = process.env.API_URL;
+        const redirectURL = baseApiURl + '/auth-services/google/auth';
+
+        let url = 'https://accounts.google.com/o/oauth2/v2/auth';
+        url += '?scope=email';
+        url += '&access_type=online';
+        url += '&redirect_uri=' + redirectURL;
+        url += '&response_type=code';
+        url += '&client_id=clientID';
+        url += '&state=aStateCode';
+        return url;
+    }
+
+    @get('/auth')
+    auth(@param.query.string('code') code: string, @param.query.string('state') state: string): Promise<string> {
+        console.log(code);
+    }
 }
 
 ```
