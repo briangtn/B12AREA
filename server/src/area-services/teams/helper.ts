@@ -78,7 +78,7 @@ export class TeamsHelper {
         if (!services.teams) {
             throw new TeamsException('User is not connected to teams', {});
         }
-        if (new Date().valueOf() < services.teams.expires_at!)
+        if (new Date().valueOf() + 5 * 60 * 1000 < services.teams.expires_at!)
             return;
         try {
             const tokens = await axios.post(TEAMS_TOKEN_URL, qs.stringify({
