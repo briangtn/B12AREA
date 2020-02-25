@@ -4,7 +4,7 @@ import config from './config.json';
 import {Context} from "@loopback/context";
 
 export default class ReactionController {
-    private static rate: RateEnum = RateEnum.LIKE;
+    private static rate: RateEnum = RateEnum.DISLIKE;
 
     static async trigger(params: WorkableObject): Promise<void> {
         return RateReactionHelper.trigger(params);

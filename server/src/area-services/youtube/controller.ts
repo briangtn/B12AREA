@@ -7,19 +7,12 @@ import {UserRepository} from "../../repositories";
 import {User} from "../../models";
 import axios from "axios";
 import {repository} from "@loopback/repository";
+import {TokensResponse} from "./interfaces";
 
 const API_URL : string = process.env.API_URL ?? "http://localhost:8080";
 const GOOGLE_AUTHORIZE_BASE_URL = 'https://accounts.google.com/o/oauth2/v2/auth';
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
-
-interface TokensResponse {
-    access_token: string,
-    expires_in: number,
-    scope: string,
-    token_type: string,
-    id_token: string
-}
 
 export default class ServiceController {
     static serviceName = 'youtube';
@@ -53,7 +46,7 @@ export default class ServiceController {
         const state = await exchangeCodeGenerator.generate({url: params.redirectUrl, user: params.user, redirectedUri: endApiRedirectUrl}, false);
 
         let googleRedirectUrl = GOOGLE_AUTHORIZE_BASE_URL;
-        googleRedirectUrl += '?scope=email';
+        googleRedirectUrl += '?scope=https://www.googleapis.com/auth/youtube';
         googleRedirectUrl += '&access_type=online';
         googleRedirectUrl += '&redirect_uri=' + endApiRedirectUrl;
         googleRedirectUrl += '&response_type=code';
@@ -116,14 +109,6 @@ export default class ServiceController {
                         expiresAt: new Date().valueOf() + googleTokens.expires_in,
                     }
                 }, ServiceController.serviceName);
-
-                this.userRepository.findOne({
-                    where: {
-                        email: data.user.email
-                    }
-                }).then(u => {
-                    console.log("User after addService", u);
-                })
             } catch (e) {
                 const codeParam = await this.exchangeCodeGenerator.generate({error: `Failed to store ${ServiceController.serviceName} token`, info: e}, true);
                 return this.response.redirect(data.url + '?code=' + codeParam);
