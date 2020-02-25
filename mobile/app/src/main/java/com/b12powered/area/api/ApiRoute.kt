@@ -120,6 +120,14 @@ sealed class ApiRoute(private var mainContext: Context) {
     data class PatchUser(var user: User, var context: Context) : ApiRoute(context)
 
     /**
+     * Data class for [RefreshToken] route
+     *
+     * @param context The context of the call
+     */
+    data class RefreshToken(var context: Context) : ApiRoute(context)
+
+
+    /**
      * Timeout of the api call
      */
     val timeout: Int
@@ -177,6 +185,7 @@ sealed class ApiRoute(private var mainContext: Context) {
                 is ResetPassword -> "/users/resetPassword"
                 is GetUser -> "users/me"
                 is PatchUser -> "users/me"
+                is RefreshToken -> "users/refreshToken"
                 else -> ""
             }}"
         }
@@ -297,6 +306,9 @@ sealed class ApiRoute(private var mainContext: Context) {
                     hashMapOf(Pair("Authorization", "Bearer $token"))
                 }
                 is PatchUser -> {
+                    hashMapOf(Pair("Authorization", "Bearer $token"))
+                }
+                is RefreshToken -> {
                     hashMapOf(Pair("Authorization", "Bearer $token"))
                 }
                 else -> hashMapOf()

@@ -4,13 +4,17 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.os.PersistableBundle
 import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.auth0.android.jwt.JWT
 import com.b12powered.area.R
 import com.b12powered.area.User
 import com.b12powered.area.api.ApiClient
+import java.util.*
 
 /**
  * The activity where the user can have all services
@@ -19,7 +23,8 @@ import com.b12powered.area.api.ApiClient
  */
 class HomeActivity : AppCompatActivity() {
 
-    private var currentUser: User? = null
+    private lateinit var handler: Handler
+    private lateinit var currentUser: User
 
     /**
      * Override method onCreate
@@ -57,6 +62,34 @@ class HomeActivity : AppCompatActivity() {
             checkTokenValidity()
         }
 
+        handler = Handler(Looper.getMainLooper())
+
+        handler.post(object : Runnable {
+            override fun run() {
+                val sharedPreferences = getSharedPreferences("com.b12powered.area", Context.MODE_PRIVATE)
+
+                if (!sharedPreferences.contains("jwt-token")) {
+                    return
+                }
+
+                val token = sharedPreferences.getString("jwt-token", null)
+                val jwt = JWT(token!!)
+                val expirationDate = jwt.expiresAt
+
+                if (expirationDate!!.time - Date().time < 60000) {
+                    ApiClient(this@HomeActivity)
+                        .refreshToken { newToken, _ ->
+                            if (newToken !== null) {
+                                val editor = sharedPreferences.edit()
+
+                                editor.putString("jwt-token", newToken)
+                                editor.apply()
+                            }
+                        }
+                }
+                handler.postDelayed(this, 60000)
+            }
+        })
     }
 
     private fun checkTokenValidity() {

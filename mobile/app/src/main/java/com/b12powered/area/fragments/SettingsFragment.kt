@@ -23,7 +23,7 @@ import java.lang.IllegalStateException
 class SettingsFragment : DialogFragment() {
 
 
-    private var root: View? = null
+    private lateinit var root: View
 
     /**
      * Override method onCreateView
@@ -74,7 +74,7 @@ class SettingsFragment : DialogFragment() {
                     ApiClient(activity!!)
                         .readinessProbe { isUp ->
                             if (!isUp) {
-                                input.error = root!!.context.getString(R.string.change_url_fail)
+                                input.error = root.context.getString(R.string.change_url_fail)
                                 if (containsApiUrl) {
                                     editor.putString("api_url", oldUrl)
                                 } else {
