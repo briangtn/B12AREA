@@ -12,6 +12,8 @@ import com.auth0.android.jwt.JWT
 import com.b12powered.area.R
 import com.b12powered.area.User
 import com.b12powered.area.api.ApiClient
+import com.b12powered.area.fragments.ServiceUserFragment
+import kotlinx.android.synthetic.main.fragment_service_user.*
 import com.b12powered.area.toObject
 import java.util.*
 
@@ -60,6 +62,7 @@ class HomeActivity : AppCompatActivity() {
         } else {
             checkTokenValidity()
         }
+        findSubscribeService()
 
         handler = Handler(Looper.getMainLooper())
 
@@ -90,14 +93,65 @@ class HomeActivity : AppCompatActivity() {
             }
         })
     }
+    
+    /**
+     * Find all subscribe service for the user
+     *
+     * Perform an API call on /me to get the current user and get all services he subscribe
+     */
+    private fun findSubscribeService() {
+        ApiClient(this)
+            .getUser { user, message ->
+                if (user != null) {
+                    user.services.forEach { service ->
+                        addService(service)
+                    }
+                } else {
+                    Toast.makeText(
+                        this,
+                        message,
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    val intent = Intent(this, LoginActivity::class.java)
+                    finish()
+                    startActivity(intent)
+                }
+            }
+    }
 
+    /**
+     * Add a card with the service name
+     */
+    private fun addService(serviceName: String) {
+        ApiClient(this)
+            .aboutJson { about, message ->
+                if (about !== null) {
+                    about.server.services.forEach { service ->
+                        if (serviceName == service.name) {
+                            supportFragmentManager.beginTransaction()
+                                .add(R.id.home, ServiceUserFragment.newInstance(service))
+                                .commit()
+                        }
+                    }
+                } else {
+                    Toast.makeText(
+                        this,
+                        message,
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+    }
+
+    /**
+     * Check the token validity
+     */
     private fun checkTokenValidity() {
-
         ApiClient(this)
             .getUser { user, message ->
                 if (user != null) {
                     currentUser = user
-                } else {
+                  } else {
                     Toast.makeText(
                         this,
                         message,
@@ -116,5 +170,4 @@ class HomeActivity : AppCompatActivity() {
                 }
             }
     }
-
 }
