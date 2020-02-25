@@ -2,6 +2,7 @@ import {applyPlaceholders, OperationStatus, ReactionConfig, WorkableObject} from
 import config from './config.json';
 import {Context} from "@loopback/context";
 import axios from "axios";
+import ServiceController from "../../controller";
 
 const YOUTUBE_API_BASE_URL = "https://www.googleapis.com/youtube/v3/videos";
 const YOUTUBE_API_KEY : string = process.env.YOUTUBE_API_KEY ?? "";

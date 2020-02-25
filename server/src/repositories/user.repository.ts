@@ -112,7 +112,9 @@ export class UserRepository extends DefaultCrudRepository<User,
     async addService(userId: typeof User.prototype.id, data: object, serviceName: string) {
         const user: User = await this.findById(userId)!;
         user.services![serviceName as keyof typeof user.services] = data as never;
+        console.log(user.services);
         await this.update(user);
+        await this.save(user);
     }
 
     async getServiceInformation(userID: typeof User.prototype.id, serviceName: string): Promise<object> {
