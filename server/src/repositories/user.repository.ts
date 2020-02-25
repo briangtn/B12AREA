@@ -1,5 +1,5 @@
-import {DefaultCrudRepository, HasManyRepositoryFactory, repository, Options, Filter, Class, juggler} from '@loopback/repository';
-import {Area, FormatedUser, User, UserRelations} from '../models';
+import {DefaultCrudRepository, HasManyRepositoryFactory, repository, juggler} from '@loopback/repository';
+import {Area, User, UserRelations} from '../models';
 import {MongoDataSource} from '../datasources';
 import {Getter, inject} from '@loopback/core';
 import {AreaRepository} from './area.repository';
@@ -27,21 +27,7 @@ export class UserRepository extends DefaultCrudRepository<User,
         this.areas = this.createHasManyRepositoryFactoryFor('areas', areaRepositoryGetter,);
         this.registerInclusionResolver('areas', this.areas.inclusionResolver);
     }
-
-    async find(filter?: Filter<User>, options?: Options): Promise<User[]> {
-        const users = await super.find(filter, options);
-
-        // eslint-disable-next-line @typescript-eslint/prefer-for-of
-        for (let i = 0; i < users.length; i++) {
-            if (!users[i].services) {
-                users[i].services = [];
-                continue;
-            }
-            users[i].services = Object.keys(users[i].services!);
-        }
-        return users;
-    }
-
+    
     toEntity<R extends User>(model: juggler.PersistedModel) {
         const entity: R = super.toEntity(model);
 

@@ -92,35 +92,6 @@ export class User extends Entity {
     }
 }
 
-@model({
-    settings: {
-        strictObjectIDCoercion: true,
-        hiddenProperties: ['password', 'validationToken', 'resetToken', 'twoFactorAuthenticationSecret'],
-        indexes: {
-            uniqueEmail: {
-                keys: {
-                    email: 1,
-                },
-                options: {
-                    unique: true,
-                },
-            },
-        },
-    },
-})
-export class FormatedUser extends User {
-
-    @property({
-        type: 'array',
-        default: [],
-    })
-    services?: string[];
-
-    constructor(data?: Partial<FormatedUser>) {
-        super(data);
-    }
-}
-
 export interface UserRelations {
     // describe navigational properties here
 }

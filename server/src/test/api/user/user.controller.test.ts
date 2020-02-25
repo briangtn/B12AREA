@@ -676,7 +676,7 @@ describe('/users', () => {
                 id: JSON.parse(JSON.stringify(userId)),
                 email: userData.email,
                 role: ['user', 'admin'],
-                services: {},
+                services: [],
                 twoFactorAuthenticationEnabled: false,
                 authServices: []
             });
