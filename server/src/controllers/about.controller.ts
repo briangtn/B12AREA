@@ -20,6 +20,7 @@ class Placeholder {
 
 class Action {
     name: string;
+    displayName: string;
     description: string;
     configSchema: ConfigShema[];
     placeholders: Placeholder[];
@@ -27,12 +28,14 @@ class Action {
 
 class Reaction {
     name: string;
+    displayName: string;
     description: string;
     configSchema: ConfigShema[];
 }
 
 class Service {
     name: string;
+    displayName: string;
     description: string;
     icon: string;
     color: string;
@@ -93,7 +96,8 @@ export class AboutController {
                     continue;
                 }
                 const config = await controller.getConfig();
-                newService.name = config.displayName;
+                newService.name = serviceName;
+                newService.displayName = config.displayName;
                 newService.description = config.description;
                 newService.icon = config.icon;
                 newService.color = config.color;
@@ -124,7 +128,8 @@ export class AboutController {
                         continue;
                     }
                     const config = await controller.getConfig();
-                    newAction.name = config.displayName;
+                    newAction.name = actionName;
+                    newAction.displayName = config.displayName;
                     newAction.description = config.description;
                     newAction.configSchema = config.configSchema;
                     newAction.placeholders = config.placeholders;
@@ -155,7 +160,8 @@ export class AboutController {
                     if (!controller)
                         console.error("The service controller class is not exported as default in " + serviceName + ' (reaction: ' + reactionName + ')');
                     const config = await controller.getConfig();
-                    newReaction.name = config.displayName;
+                    newReaction.name = reactionName;
+                    newReaction.displayName = config.displayName;
                     newReaction.description = config.description;
                     newReaction.configSchema = config.configSchema;
                 } catch (e) {
