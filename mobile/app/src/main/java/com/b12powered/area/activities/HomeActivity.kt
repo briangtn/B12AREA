@@ -45,7 +45,7 @@ class HomeActivity : AppCompatActivity() {
                             val sharedPreferences = getSharedPreferences(getString(R.string.storage_name), Context.MODE_PRIVATE)
                             val editor = sharedPreferences.edit()
 
-                            editor.putString(getString(R.string.token_key), user.token)
+                            editor.putString(getString(R.string.token_key), user.toObject<User>().token)
                             editor.apply()
                             checkTokenValidity()
                         } else {
