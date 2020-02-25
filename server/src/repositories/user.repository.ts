@@ -29,12 +29,12 @@ export class UserRepository extends DefaultCrudRepository<User,
     }
     
     toEntity<R extends User>(model: juggler.PersistedModel) {
-        const entity: R = super.toEntity(model);
+        const entity: R & {servicesList: string[]} = super.toEntity(model);
 
         if (!entity.services) {
-            entity.services = [];
+            entity.servicesList = [];
         }
-        entity.services = Object.keys(entity.services);
+        entity.servicesList = Object.keys(entity.services!);
         return entity;
     }
 
