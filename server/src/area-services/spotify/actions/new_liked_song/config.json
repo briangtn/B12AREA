@@ -1,14 +1,7 @@
 {
-  "displayName": "New playlist song",
-  "description": "Triggered when a new sound is posted in a playlist.",
-  "configSchema": [
-    {
-      "name": "id",
-      "description": "The id of the playlist",
-      "type": "string",
-      "required": true
-    }
-  ],
+  "displayName": "New song liked",
+  "description": "Triggered when a new sound is liked by you in spotify.",
+  "configSchema": [],
   "placeholders": [
     {
       "name": "SpotifyTrackName",
@@ -37,10 +30,6 @@
     {
       "name": "SpotifyTrackAddedAt",
       "description": "The timestamp when the track was added ISO formated."
-    },
-    {
-      "name": "SpotifyTrackAddedById",
-      "description": "The value of the user who have added this track to playlist."
     },
     {
       "name": "SpotifyTrackId",

@@ -1,0 +1,18 @@
+{
+  "displayName": "Add to playlist",
+  "description": "Add a sound to spotify playlist",
+  "configSchema": [
+    {
+      "name": "trackId",
+      "description": "The spotify id of the song",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "playlistId",
+      "description": "The spotify id of the playlist",
+      "type": "string",
+      "required": true
+    }
+  ]
+}

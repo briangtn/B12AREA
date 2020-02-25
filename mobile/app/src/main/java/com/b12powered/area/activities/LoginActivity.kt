@@ -117,10 +117,10 @@ class LoginActivity : AppCompatActivity() {
         ApiClient(this)
             .login(email, password) { user, message ->
                 if (user != null) {
-                    val sharedPreferences = getSharedPreferences("com.b12powered.area", Context.MODE_PRIVATE)
+                    val sharedPreferences = getSharedPreferences(getString(R.string.storage_name), Context.MODE_PRIVATE)
                     val editor = sharedPreferences.edit()
 
-                    editor.putString("jwt-token", user.token)
+                    editor.putString(getString(R.string.token_key), user.token)
                     editor.apply()
 
                     if (user.require2fa) {

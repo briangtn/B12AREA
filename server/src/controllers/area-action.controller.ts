@@ -146,7 +146,7 @@ export class AreaActionController {
     @patch('/{id}/action', {
         security: OPERATION_SECURITY_SPEC,
         responses: {
-            '200': response200Schema(CountSchema, 'Area.Action PATCH success count')
+            '200': response200Schema(getModelSchemaRef(Action), 'Area model instance')
         }
     })
     async patch(

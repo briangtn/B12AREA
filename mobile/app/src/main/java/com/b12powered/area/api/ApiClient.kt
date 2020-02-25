@@ -13,6 +13,7 @@ import com.b12powered.area.About
 import com.b12powered.area.User
 import com.b12powered.area.toObject
 import com.google.gson.Gson
+import com.google.gson.JsonObject
 import org.json.JSONObject
 
 /**
@@ -321,6 +322,21 @@ class ApiClient(private val context: Context) {
         this.performRequest(route) { success, response ->
             if (success) {
                 completion.invoke(JSONObject(response.json).getString("url").toUri(), "success")
+            } else {
+                completion.invoke(null, response.message)
+            }
+        }
+    }
+
+    /**
+     * Build a refreshToken request taking no parameter and perform it, then invoke [completion] with a token
+     */
+    fun refreshToken(completion: (token: String?, message: String) -> Unit) {
+        val route = ApiRoute.RefreshToken(context)
+        this.performRequest(route) { success, response ->
+            if (success) {
+                val token = JSONObject(response.json).getString("token")
+                completion.invoke(token, "success")
             } else {
                 completion.invoke(null, response.message)
             }

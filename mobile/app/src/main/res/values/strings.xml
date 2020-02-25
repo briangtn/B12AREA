@@ -48,4 +48,7 @@
     <string name="success_new_password">New password successfully set !</string>
     <string name="subscribe_service">Subscribe to this service ?</string>
     <string name="subscribe_service_message">Do you want to subscribe to</string>
+    <string name="storage_name">com.b12powered.area</string>
+    <string name="token_key">jwt-token</string>
+    <string name="api_url_key">api_url</string>
 </resources>
