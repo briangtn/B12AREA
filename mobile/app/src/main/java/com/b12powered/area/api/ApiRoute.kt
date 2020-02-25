@@ -3,7 +3,6 @@ package com.b12powered.area.api
 import android.content.Context
 import com.android.volley.Request
 import com.b12powered.area.User
-import java.nio.file.Path
 
 /**
  * A sealed class which represent every api call
@@ -120,6 +119,22 @@ sealed class ApiRoute(private var mainContext: Context) {
     data class PatchUser(var user: User, var context: Context) : ApiRoute(context)
 
     /**
+     * Data class for [AboutJson] route
+     *
+     * @param context The context of the call
+     */
+    data class AboutJson(var context: Context) : ApiRoute(context)
+
+    /**
+     * Data class for [LoginService] route
+     *
+     * @param service The service to subscribe
+     * @param redirectUrl The url where the OAuth service should redirect the user
+     * @param context The context of the call
+     */
+    data class LoginService(var service: String, var redirectUrl: String, var context: Context) : ApiRoute(context)
+
+    /**
      * Timeout of the api call
      */
     val timeout: Int
@@ -177,6 +192,8 @@ sealed class ApiRoute(private var mainContext: Context) {
                 is ResetPassword -> "/users/resetPassword"
                 is GetUser -> "users/me"
                 is PatchUser -> "users/me"
+                is AboutJson -> "about.json"
+                is LoginService -> "services/login/${service}"
                 else -> ""
             }}"
         }
@@ -202,6 +219,7 @@ sealed class ApiRoute(private var mainContext: Context) {
                 is PatchUser -> Request.Method.PATCH
                 is RequestResetPassword -> Request.Method.POST
                 is ResetPassword -> Request.Method.PATCH
+                is LoginService -> Request.Method.POST
                 else -> Request.Method.GET
             }
         }
@@ -264,6 +282,9 @@ sealed class ApiRoute(private var mainContext: Context) {
                 is Validate -> {
                     hashMapOf(Pair("token", token))
                 }
+                is LoginService -> {
+                    hashMapOf(Pair("redirectURL", redirectUrl))
+                }
                 else -> hashMapOf()
             }
         }
@@ -297,6 +318,9 @@ sealed class ApiRoute(private var mainContext: Context) {
                     hashMapOf(Pair("Authorization", "Bearer $token"))
                 }
                 is PatchUser -> {
+                    hashMapOf(Pair("Authorization", "Bearer $token"))
+                }
+                is LoginService -> {
                     hashMapOf(Pair("Authorization", "Bearer $token"))
                 }
                 else -> hashMapOf()
