@@ -101,12 +101,16 @@ export default class ServiceController {
             });
             const googleTokens: TokensResponse = response.data as TokensResponse;
             try {
-                const user = await this.userRepository.findOne({
+                const user: User|null = (await this.userRepository.findOne({
                     where: {
                         email: data.user.email
                     }
-                });
-                await this.userRepository.addService(user?.getId(), {
+                }));
+                if (user == null) {
+                    const codeParam = await this.exchangeCodeGenerator.generate({error: 'User not found', info: {cause: 'database could probably not be reached'}}, true);
+                    return this.response.redirect(data.url + '?code=' + codeParam);
+                }
+                await this.userRepository.addService(user.id, {
                     ...googleTokens,
                     ...{
                         expiresAt: new Date().valueOf() + googleTokens.expires_in,
@@ -118,7 +122,7 @@ export default class ServiceController {
                         email: data.user.email
                     }
                 }).then(u => {
-                    console.log(u);
+                    console.log("User after addService", u);
                 })
             } catch (e) {
                 const codeParam = await this.exchangeCodeGenerator.generate({error: `Failed to store ${ServiceController.serviceName} token`, info: e}, true);
