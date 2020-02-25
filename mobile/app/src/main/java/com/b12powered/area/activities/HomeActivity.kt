@@ -2,13 +2,10 @@ package com.b12powered.area.activities
 
 import android.content.Context
 import android.content.Intent
-import android.content.SharedPreferences
 import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.os.PersistableBundle
-import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.auth0.android.jwt.JWT
@@ -44,10 +41,10 @@ class HomeActivity : AppCompatActivity() {
                 ApiClient(this)
                     .dataCode(code) { user, message ->
                         if (user !== null) {
-                            val sharedPreferences = getSharedPreferences("com.b12powered.area", Context.MODE_PRIVATE)
+                            val sharedPreferences = getSharedPreferences(getString(R.string.storage_name), Context.MODE_PRIVATE)
                             val editor = sharedPreferences.edit()
 
-                            editor.putString("jwt-token", user.token)
+                            editor.putString(getString(R.string.token_key), user.token)
                             editor.apply()
                             checkTokenValidity()
                         } else {
@@ -67,13 +64,13 @@ class HomeActivity : AppCompatActivity() {
 
         handler.post(object : Runnable {
             override fun run() {
-                val sharedPreferences = getSharedPreferences("com.b12powered.area", Context.MODE_PRIVATE)
+                val sharedPreferences = getSharedPreferences(getString(R.string.storage_name), Context.MODE_PRIVATE)
 
-                if (!sharedPreferences.contains("jwt-token")) {
+                if (!sharedPreferences.contains(getString(R.string.token_key))) {
                     return
                 }
 
-                val token = sharedPreferences.getString("jwt-token", null)
+                val token = sharedPreferences.getString(getString(R.string.token_key), null)
                 val jwt = JWT(token!!)
                 val expirationDate = jwt.expiresAt
 
@@ -83,7 +80,7 @@ class HomeActivity : AppCompatActivity() {
                             if (newToken !== null) {
                                 val editor = sharedPreferences.edit()
 
-                                editor.putString("jwt-token", newToken)
+                                editor.putString(getString(R.string.token_key), newToken)
                                 editor.apply()
                             }
                         }
@@ -106,10 +103,10 @@ class HomeActivity : AppCompatActivity() {
                         Toast.LENGTH_SHORT
                     ).show()
 
-                    val sharedPreferences = getSharedPreferences("com.b12powered.area", Context.MODE_PRIVATE)
+                    val sharedPreferences = getSharedPreferences(getString(R.string.storage_name), Context.MODE_PRIVATE)
                     val editor = sharedPreferences.edit()
 
-                    editor.remove("jwt-token")
+                    editor.remove(getString(R.string.token_key))
                     editor.apply()
 
                     val intent = Intent(this, LoginActivity::class.java)

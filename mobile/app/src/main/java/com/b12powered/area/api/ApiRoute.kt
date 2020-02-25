@@ -2,6 +2,7 @@ package com.b12powered.area.api
 
 import android.content.Context
 import com.android.volley.Request
+import com.b12powered.area.R
 import com.b12powered.area.User
 import java.nio.file.Path
 
@@ -152,9 +153,9 @@ sealed class ApiRoute(private var mainContext: Context) {
          * @return The url stored in local storage if it exists, else the API_HOST environment variable or a hardcoded url
          */
         get() {
-            val sharedPreferences = mainContext.getSharedPreferences("com.b12powered.area", Context.MODE_PRIVATE)
-            return if (sharedPreferences.contains("api_url")) {
-                    sharedPreferences.getString("api_url", null)!!
+            val sharedPreferences = mainContext.getSharedPreferences(mainContext.getString(R.string.storage_name), Context.MODE_PRIVATE)
+            return if (sharedPreferences.contains(mainContext.getString(R.string.api_url_key))) {
+                    sharedPreferences.getString(mainContext.getString(R.string.api_url_key), null)!!
                 } else {
                     System.getenv("API_HOST") ?: "https://dev.api.area.b12powered.com"
                 }
@@ -289,8 +290,8 @@ sealed class ApiRoute(private var mainContext: Context) {
          */
         get() {
             val map: HashMap<String, String> = hashMapOf()
-            val sharedPreferences = mainContext.getSharedPreferences("com.b12powered.area", Context.MODE_PRIVATE)
-            val token = sharedPreferences.getString("jwt-token", null)
+            val sharedPreferences = mainContext.getSharedPreferences(mainContext.getString(R.string.storage_name), Context.MODE_PRIVATE)
+            val token = sharedPreferences.getString(mainContext.getString(R.string.token_key), null)
             map["Accept"] = "application/json"
             return when (this) {
                 is Activate2fa -> {
