@@ -30,6 +30,8 @@ class HomeActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_home)
 
+        Log.d("start", "onCreate yes")
+
         val data: Uri? = intent?.data
 
         if (data !== null) {
@@ -56,7 +58,31 @@ class HomeActivity : AppCompatActivity() {
         } else {
             checkTokenValidity()
         }
+        showCurrentService()
+    }
 
+    private fun showCurrentService() {
+        ApiClient(this)
+            .getUser { user, message ->
+                if (user != null) {
+                    Log.d("user", "get the user information")
+                    if (user.services === null)
+                            Log.d("NULL", "Services null")
+                    for (i in user.services) {
+                        println("salut")
+                        println(i)
+                    }
+                } else {
+                    Toast.makeText(
+                        this,
+                        message,
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    val intent = Intent(this, LoginActivity::class.java)
+                    finish()
+                    startActivity(intent)
+                }
+            }
     }
 
     private fun checkTokenValidity() {
@@ -65,6 +91,10 @@ class HomeActivity : AppCompatActivity() {
             .getUser { user, message ->
                 if (user != null) {
                     currentUser = user
+                    println(user)
+                    user.services.forEach {service ->
+                        println(service)
+                    }
                 } else {
                     Toast.makeText(
                         this,
