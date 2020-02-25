@@ -2,12 +2,14 @@ package com.b12powered.area.api
 
 import android.content.Context
 import android.net.Uri
+import android.util.Log
 import androidx.core.net.toUri
 import com.android.volley.*
 import com.android.volley.toolbox.BasicNetwork
 import com.android.volley.toolbox.DiskBasedCache
 import com.android.volley.toolbox.HurlStack
 import com.android.volley.toolbox.StringRequest
+import com.b12powered.area.About
 import com.b12powered.area.User
 import com.b12powered.area.toObject
 import com.google.gson.Gson
@@ -166,12 +168,11 @@ class ApiClient(private val context: Context) {
     /**
      * Build a dataCode request with [code] and perform it, then invoke [completion] with a User object
      */
-    fun dataCode(code: String, completion: (user: User?, message: String) -> Unit) {
+    fun dataCode(code: String, completion: (json: String?, message: String) -> Unit) {
         val route = ApiRoute.DataCode(code, context)
         this.performRequest(route) { success, response ->
             if (success) {
-                val user: User = response.json.toObject()
-                completion.invoke(user, "success")
+                completion.invoke(response.json, "success")
             } else {
                 completion.invoke(null, response.message)
             }
@@ -284,7 +285,7 @@ class ApiClient(private val context: Context) {
     }
 
     /**
-     * Build a patchUser request taking one parameter [user] and perform it, then invoke [completion] with a User object
+     * Build a patchUser request with [user] and perform it, then invoke [completion] with a User object
      */
     fun patchUser(user: User, completion: (user: User?, message: String) -> Unit) {
         val route = ApiRoute.PatchUser(user, context)
@@ -292,6 +293,35 @@ class ApiClient(private val context: Context) {
             if (success) {
                 val newUser: User = response.json.toObject()
                 completion.invoke(newUser, "success")
+            } else {
+                completion.invoke(null, response.message)
+            }
+        }
+    }
+
+    /**
+     * Build a aboutJson request taking no parameter and perform it, then invoke [completion] with a About object
+     */
+    fun aboutJson(completion: (about: About?, message: String) -> Unit) {
+        val route = ApiRoute.AboutJson(context)
+        this.performRequest(route) { success, response ->
+            if (success) {
+                val about: About = response.json.toObject()
+                completion.invoke(about, "success")
+            } else {
+                completion.invoke(null, response.message)
+            }
+        }
+    }
+
+    /**
+     * Build a subscribeService with [service] and [redirectUrl] and perform it, then invoke [completion] with a boolean corresponding to the result of the call
+     */
+    fun loginService(service: String, redirectUrl: String, completion: (uri: Uri?, message: String) -> Unit) {
+        val route = ApiRoute.LoginService(service, redirectUrl, context)
+        this.performRequest(route) { success, response ->
+            if (success) {
+                completion.invoke(JSONObject(response.json).getString("url").toUri(), "success")
             } else {
                 completion.invoke(null, response.message)
             }

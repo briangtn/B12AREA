@@ -12,6 +12,7 @@ import com.auth0.android.jwt.JWT
 import com.b12powered.area.R
 import com.b12powered.area.User
 import com.b12powered.area.api.ApiClient
+import com.b12powered.area.toObject
 import java.util.*
 
 /**
@@ -44,7 +45,7 @@ class HomeActivity : AppCompatActivity() {
                             val sharedPreferences = getSharedPreferences(getString(R.string.storage_name), Context.MODE_PRIVATE)
                             val editor = sharedPreferences.edit()
 
-                            editor.putString(getString(R.string.token_key), user.token)
+                            editor.putString(getString(R.string.token_key), user.toObject<User>().token)
                             editor.apply()
                             checkTokenValidity()
                         } else {
