@@ -2,8 +2,8 @@ package com.b12powered.area.api
 
 import android.content.Context
 import com.android.volley.Request
+import com.b12powered.area.R
 import com.b12powered.area.User
-import java.nio.file.Path
 
 /**
  * A sealed class which represent every api call
@@ -120,6 +120,30 @@ sealed class ApiRoute(private var mainContext: Context) {
     data class PatchUser(var user: User, var context: Context) : ApiRoute(context)
 
     /**
+     * Data class for [AboutJson] route
+     *
+     * @param context The context of the call
+     */
+    data class AboutJson(var context: Context) : ApiRoute(context)
+
+    /**
+     * Data class for [LoginService] route
+     *
+     * @param service The service to subscribe
+     * @param redirectUrl The url where the OAuth service should redirect the user
+     * @param context The context of the call
+     */
+    data class LoginService(var service: String, var redirectUrl: String, var context: Context) : ApiRoute(context)
+
+    /**
+     * Data class for [RefreshToken] route
+     *
+     * @param context The context of the call
+     */
+    data class RefreshToken(var context: Context) : ApiRoute(context)
+
+
+    /**
      * Timeout of the api call
      */
     val timeout: Int
@@ -144,9 +168,9 @@ sealed class ApiRoute(private var mainContext: Context) {
          * @return The url stored in local storage if it exists, else the API_HOST environment variable or a hardcoded url
          */
         get() {
-            val sharedPreferences = mainContext.getSharedPreferences("com.b12powered.area", Context.MODE_PRIVATE)
-            return if (sharedPreferences.contains("api_url")) {
-                    sharedPreferences.getString("api_url", null)!!
+            val sharedPreferences = mainContext.getSharedPreferences(mainContext.getString(R.string.storage_name), Context.MODE_PRIVATE)
+            return if (sharedPreferences.contains(mainContext.getString(R.string.api_url_key))) {
+                    sharedPreferences.getString(mainContext.getString(R.string.api_url_key), null)!!
                 } else {
                     System.getenv("API_HOST") ?: "https://dev.api.area.b12powered.com"
                 }
@@ -177,6 +201,9 @@ sealed class ApiRoute(private var mainContext: Context) {
                 is ResetPassword -> "/users/resetPassword"
                 is GetUser -> "users/me"
                 is PatchUser -> "users/me"
+                is AboutJson -> "about.json"
+                is LoginService -> "services/login/${service}"
+                is RefreshToken -> "users/refreshToken"
                 else -> ""
             }}"
         }
@@ -202,6 +229,7 @@ sealed class ApiRoute(private var mainContext: Context) {
                 is PatchUser -> Request.Method.PATCH
                 is RequestResetPassword -> Request.Method.POST
                 is ResetPassword -> Request.Method.PATCH
+                is LoginService -> Request.Method.POST
                 else -> Request.Method.GET
             }
         }
@@ -264,6 +292,9 @@ sealed class ApiRoute(private var mainContext: Context) {
                 is Validate -> {
                     hashMapOf(Pair("token", token))
                 }
+                is LoginService -> {
+                    hashMapOf(Pair("redirectURL", redirectUrl))
+                }
                 else -> hashMapOf()
             }
         }
@@ -280,8 +311,8 @@ sealed class ApiRoute(private var mainContext: Context) {
          */
         get() {
             val map: HashMap<String, String> = hashMapOf()
-            val sharedPreferences = mainContext.getSharedPreferences("com.b12powered.area", Context.MODE_PRIVATE)
-            val token = sharedPreferences.getString("jwt-token", null)
+            val sharedPreferences = mainContext.getSharedPreferences(mainContext.getString(R.string.storage_name), Context.MODE_PRIVATE)
+            val token = sharedPreferences.getString(mainContext.getString(R.string.token_key), null)
             map["Accept"] = "application/json"
             return when (this) {
                 is Activate2fa -> {
@@ -297,6 +328,12 @@ sealed class ApiRoute(private var mainContext: Context) {
                     hashMapOf(Pair("Authorization", "Bearer $token"))
                 }
                 is PatchUser -> {
+                    hashMapOf(Pair("Authorization", "Bearer $token"))
+                }
+                is LoginService -> {
+                    hashMapOf(Pair("Authorization", "Bearer $token"))
+                }
+                is RefreshToken -> {
                     hashMapOf(Pair("Authorization", "Bearer $token"))
                 }
                 else -> hashMapOf()

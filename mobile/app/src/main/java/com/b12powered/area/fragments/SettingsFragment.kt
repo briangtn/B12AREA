@@ -23,7 +23,7 @@ import java.lang.IllegalStateException
 class SettingsFragment : DialogFragment() {
 
 
-    private var root: View? = null
+    private lateinit var root: View
 
     /**
      * Override method onCreateView
@@ -59,26 +59,26 @@ class SettingsFragment : DialogFragment() {
                     val input = dialog.api_url_input
                     val url = input.text.toString()
                     val sharedPreferences: SharedPreferences =
-                        activity!!.getSharedPreferences("com.b12powered.area", Context.MODE_PRIVATE)
-                    val containsApiUrl: Boolean = sharedPreferences.contains("api_url")
+                        activity!!.getSharedPreferences(getString(R.string.storage_name), Context.MODE_PRIVATE)
+                    val containsApiUrl: Boolean = sharedPreferences.contains(getString(R.string.api_url_key))
                     var oldUrl = ""
                     val editor: SharedPreferences.Editor = sharedPreferences.edit()
 
                     if (containsApiUrl) {
-                        oldUrl = sharedPreferences.getString("api_url", null)!!
+                        oldUrl = sharedPreferences.getString(getString(R.string.api_url_key), null)!!
                     }
 
-                    editor.putString("api_url", url)
+                    editor.putString(getString(R.string.api_url_key), url)
                     editor.apply()
 
                     ApiClient(activity!!)
                         .readinessProbe { isUp ->
                             if (!isUp) {
-                                input.error = root!!.context.getString(R.string.change_url_fail)
+                                input.error = root.context.getString(R.string.change_url_fail)
                                 if (containsApiUrl) {
-                                    editor.putString("api_url", oldUrl)
+                                    editor.putString(getString(R.string.api_url_key), oldUrl)
                                 } else {
-                                    editor.remove("api_url")
+                                    editor.remove(getString(R.string.api_url_key))
                                 }
                                 editor.apply()
                             } else {

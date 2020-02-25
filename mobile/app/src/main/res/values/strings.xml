@@ -46,4 +46,9 @@
     <string name="successful_password_reset">Password reset successful !</string>
     <string name="password_reset_confirmation_message">We\'ve sent you an email in order to set your new password. Check your spams if you don\'t see it !</string>
     <string name="success_new_password">New password successfully set !</string>
+    <string name="subscribe_service">Subscribe to this service ?</string>
+    <string name="subscribe_service_message">Do you want to subscribe to</string>
+    <string name="storage_name">com.b12powered.area</string>
+    <string name="token_key">jwt-token</string>
+    <string name="api_url_key">api_url</string>
 </resources>
