@@ -1,5 +1,13 @@
 import {bind} from '@loopback/core';
 import axios from 'axios';
+import {OperationStatus} from '../services-interfaces';
+
+export interface ConfigSchemaElement {
+    name: string,
+    description: string,
+    type: string,
+    required: boolean
+}
 
 @bind({tags: {namespace: "services", name: "area"}})
 export class AreaService {
@@ -36,5 +44,18 @@ export class AreaService {
             if (key.startsWith(start))
                 this.stopPulling(key);
         }
+    }
+
+    validateConfigSchema(data: object, model: ConfigSchemaElement[]): OperationStatus {
+        for (const modelElement of model) {
+            const existInConfig = Object.keys(data).indexOf(modelElement.name) !== -1;
+            if (modelElement.required && !existInConfig) {
+                return {success: false, error: `Missing ${modelElement.name} in config`};
+            }
+            if (existInConfig && typeof data[modelElement.name as keyof typeof data] !== modelElement.type) {
+                return {success: false, error: `Invalid type for ${modelElement.name} (${typeof data[modelElement.name as keyof typeof data]} is not ${modelElement.type}`};
+            }
+        }
+        return {success: true};
     }
 }

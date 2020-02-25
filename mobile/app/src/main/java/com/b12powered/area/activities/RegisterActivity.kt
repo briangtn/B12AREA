@@ -40,8 +40,9 @@ class RegisterActivity : AppCompatActivity() {
                 inputMethodManager.hideSoftInputFromWindow(currentFocus!!.windowToken, 0)
 
                 submitForm()
+                return@OnKeyListener true
             }
-            return@OnKeyListener true
+            return@OnKeyListener false
         })
 
         settings_button.setOnClickListener {

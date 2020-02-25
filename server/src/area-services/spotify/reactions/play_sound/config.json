@@ -1,0 +1,12 @@
+{
+  "displayName": "Play sound",
+  "description": "Add a sound to play queue",
+  "configSchema": [
+    {
+      "name": "id",
+      "description": "The spotify id of the sound",
+      "type": "string",
+      "required": true
+    }
+  ]
+}

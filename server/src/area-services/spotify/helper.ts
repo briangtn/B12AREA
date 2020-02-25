@@ -21,10 +21,12 @@ interface SpotifyArtist {
 }
 
 interface SpotifyTrack {
+    id: string,
     name: string,
     explicit: boolean,
     duration_ms: number,
     artists: SpotifyArtist[],
+    uri: string,
 }
 
 interface SpotifyUser {
@@ -51,10 +53,13 @@ export interface AreaSpotifyTrack {
     artistId: string,
     artistUrl: string,
     addedAt: string,
-    addedById: string,
+    addedById?: string,
+    id: string,
+    uri: string
 }
 
 const SPOTIFY_NEW_PLAYLIST_SONG_PULLING_PREFIX = "spotify_newPlaylistSong_";
+const SPOTIFY_NEW_LIKED_SONG_PULLING_PREFIX = "spotify_newLikedSong_";
 const SPOTIFY_TOKEN_EXCHANGE_BASE_URL = 'https://accounts.spotify.com/api/token';
 const SPOTIFY_CLIENT_ID = process.env.SPOTIFY_CLIENT_ID ?? "";
 const SPOTIFY_CLIENT_SECRET = process.env.SPOTIFY_CLIENT_SECRET ?? "";
@@ -118,6 +123,8 @@ export class SpotifyHelper {
         const serviceData: {token: string} = await userRepository.getServiceInformation(userID, 'spotify') as {token: string};
         const options: {id: string} = (await actionRepository.getActionSettings(actionID))! as {id: string};
 
+        if (!serviceData || !serviceData.token)
+            return;
         areaService.startPulling(
             `https://api.spotify.com/v1/playlists/${options.id}/tracks`,
             {headers: {Authorization: 'Bearer ' + serviceData.token}},
@@ -169,7 +176,15 @@ export class SpotifyHelper {
                             },
                             {
                                 name: 'SpotifyTrackAddedById',
-                                value: track.addedById
+                                value: track.addedById ?? ''
+                            },
+                            {
+                                name: 'SpotifyTrackId',
+                                value: track.id
+                            },
+                            {
+                                name: 'SpotifyTrackUri',
+                                value: track.uri
                             }
                         ]
                     }, ctx)
@@ -184,6 +199,85 @@ export class SpotifyHelper {
         areaService.stopPulling(SPOTIFY_NEW_PLAYLIST_SONG_PULLING_PREFIX + actionID);
     }
 
+    static async startNewLikedSongPulling(actionID: string, userID: string, ctx: Context) {
+        const areaService: AreaService = await ctx.get('services.area');
+        const userRepository: UserRepository = await ctx.get('repositories.UserRepository');
+        const actionRepository: ActionRepository = await ctx.get('repositories.ActionRepository');
+
+        const serviceData: {token: string} = await userRepository.getServiceInformation(userID, 'spotify') as {token: string};
+
+        if (!serviceData || !serviceData.token)
+            return;
+        areaService.startPulling(
+            `https://api.spotify.com/v1/me/tracks`,
+            {headers: {Authorization: 'Bearer ' + serviceData.token}},
+            async (data: {items: SpotifyPlaylistTrack[]}) => {
+                const tracks = data.items;
+                const diff = [];
+                const actionData = (await actionRepository.getActionData(actionID))! as {lastDate: string};
+
+                for (const track of tracks) {
+                    if (new Date(track.added_at) > new Date(actionData.lastDate)) {
+                        diff.push(this.parseSpotifyTrack(track));
+                    }
+                }
+                return diff;
+            }, async (tracks: AreaSpotifyTrack[]) => {
+                await actionRepository.setActionData(actionID, {lastDate: new Date().toISOString()});
+
+                for (const track of tracks) {
+                    await ActionFunction({
+                        actionId: actionID,
+                        placeholders: [
+                            {
+                                name: 'SpotifyTrackName',
+                                value: track.name
+                            },
+                            {
+                                name: 'SpotifyTrackExplicit',
+                                value: track.explicit ? 'explicit' : ''
+                            },
+                            {
+                                name: 'SpotifyTrackDuration',
+                                value: track.duration.toString()
+                            },
+                            {
+                                name: 'SpotifyTrackArtistName',
+                                value: track.artistName
+                            },
+                            {
+                                name: 'SpotifyTrackArtistId',
+                                value: track.artistId
+                            },
+                            {
+                                name: 'SpotifyTrackArtistUrl',
+                                value: track.artistUrl
+                            },
+                            {
+                                name: 'SpotifyTrackAddedAt',
+                                value: track.addedAt
+                            },
+                            {
+                                name: 'SpotifyTrackId',
+                                value: track.id
+                            },
+                            {
+                                name: 'SpotifyTrackUri',
+                                value: track.uri
+                            }
+                        ]
+                    }, ctx)
+                }
+
+            }, 30, SPOTIFY_NEW_LIKED_SONG_PULLING_PREFIX + actionID)
+    }
+
+    static async stopNewLikedSongPulling(actionID: string, ctx: Context) {
+        const areaService: AreaService = await ctx.get('services.area');
+
+        areaService.stopPulling(SPOTIFY_NEW_LIKED_SONG_PULLING_PREFIX + actionID);
+    }
+
     static parseSpotifyTrack(spotifyTrackVersion: SpotifyPlaylistTrack): AreaSpotifyTrack {
         return {
             name: spotifyTrackVersion.track.name,
@@ -191,9 +285,10 @@ export class SpotifyHelper {
             duration: spotifyTrackVersion.track.duration_ms,
             artistName: spotifyTrackVersion.track.artists[0].name,
             addedAt: spotifyTrackVersion.added_at,
-            addedById: spotifyTrackVersion.added_by.id,
             artistId: spotifyTrackVersion.track.artists[0].id,
-            artistUrl: spotifyTrackVersion.track.artists[0].uri
+            artistUrl: spotifyTrackVersion.track.artists[0].uri,
+            id: spotifyTrackVersion.track.id,
+            uri: spotifyTrackVersion.track.uri
         }
     }
 

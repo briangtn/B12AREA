@@ -21,7 +21,7 @@ export const testdb: juggler.DataSource = new juggler.DataSource({
 
 before(async function() {
     // eslint-disable-next-line no-invalid-this
-    this.timeout(60000);
+    this.timeout(1000 * 60 * 10);
     if (process.env.CI) {
         process.env.DB_HOST = "localhost";
         process.env.DB_PORT = "27017";
