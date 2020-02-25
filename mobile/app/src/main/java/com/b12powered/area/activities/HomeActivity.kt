@@ -62,7 +62,7 @@ class HomeActivity : AppCompatActivity() {
     /**
      * Find all subscribe service for the user
      *
-     * Perfrom an API call on /me to get the current user and get all services he subscribe
+     * Perform an API call on /me to get the current user and get all services he subscribe
      */
     private fun findSubscribeService() {
         ApiClient(this)

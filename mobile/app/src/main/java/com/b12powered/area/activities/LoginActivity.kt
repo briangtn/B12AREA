@@ -30,14 +30,6 @@ class LoginActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
 
-        val sharedPreferences = getSharedPreferences("com.b12powered.area", Context.MODE_PRIVATE)
-
-        if (sharedPreferences.contains("jwt-token")) {
-            val intent = Intent(this, HomeActivity::class.java)
-            finish()
-            startActivity(intent)
-        }
-
         val etPassword = findViewById<EditText>(R.id.password)
 
         etPassword.setOnKeyListener(View.OnKeyListener { _, keyCode, event ->
