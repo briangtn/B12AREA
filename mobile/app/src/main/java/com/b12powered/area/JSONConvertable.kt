@@ -15,7 +15,7 @@ data class User(
     @SerializedName("password") val password: String,
     @SerializedName("token") val token: String,
     @SerializedName("role") val role: List<String>,
-    @SerializedName("services") val services: Any,
+    @SerializedName("servicesList") val services: List<String>,
     @SerializedName("require2fa") val require2fa: Boolean,
     @SerializedName("twoFactorAuthenticationEnabled") val twoFactorAuthenticationEnabled: Boolean
 ) : JSONConvertable

@@ -9,6 +9,8 @@ import androidx.appcompat.app.AppCompatActivity
 import com.b12powered.area.R
 import com.b12powered.area.User
 import com.b12powered.area.api.ApiClient
+import com.b12powered.area.fragments.ServiceUserFragment
+import kotlinx.android.synthetic.main.fragment_service_user.*
 
 /**
  * The activity where the user can have all services
@@ -27,8 +29,6 @@ class HomeActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_home)
-
-        Log.d("start", "onCreate yes")
 
         val data: Uri? = intent?.data
 
@@ -56,19 +56,20 @@ class HomeActivity : AppCompatActivity() {
         } else {
             checkTokenValidity()
         }
-        showCurrentService()
+        findSubscribeService()
     }
 
-    private fun showCurrentService() {
+    /**
+     * Find all subscribe service for the user
+     *
+     * Perfrom an API call on /me to get the current user and get all services he subscribe
+     */
+    private fun findSubscribeService() {
         ApiClient(this)
             .getUser { user, message ->
                 if (user != null) {
-                    Log.d("user", "get the user information")
-                    if (user.services === null)
-                            Log.d("NULL", "Services null")
-                    for (i in user.services) {
-                        println("salut")
-                        println(i)
+                    user.services.forEach { service ->
+                        addService(service)
                     }
                 } else {
                     Toast.makeText(
@@ -83,17 +84,39 @@ class HomeActivity : AppCompatActivity() {
             }
     }
 
-    private fun checkTokenValidity() {
+    /**
+     * Add a card with the service name
+     */
+    private fun addService(serviceName: String) {
+        ApiClient(this)
+            .aboutJson { about, message ->
+                if (about !== null) {
+                    about.server.services.forEach { service ->
+                        if (serviceName == service.name) {
+                            supportFragmentManager.beginTransaction()
+                                .add(R.id.home, ServiceUserFragment.newInstance(service))
+                                .commit()
+                        }
+                    }
+                } else {
+                    Toast.makeText(
+                        this,
+                        message,
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+    }
 
+    /**
+     * Check the token validity
+     */
+    private fun checkTokenValidity() {
         ApiClient(this)
             .getUser { user, message ->
                 if (user != null) {
                     currentUser = user
-                    println(user)
-                    user.services.forEach {service ->
-                        println(service)
-                    }
-                } else {
+                  } else {
                     Toast.makeText(
                         this,
                         message,
@@ -105,5 +128,4 @@ class HomeActivity : AppCompatActivity() {
                 }
             }
     }
-
 }
