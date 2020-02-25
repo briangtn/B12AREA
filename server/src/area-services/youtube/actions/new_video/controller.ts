@@ -1,5 +1,5 @@
 import {get, param, post, requestBody} from "@loopback/rest";
-import {ActionConfig, OperationStatus} from '../../../../services-interfaces'
+import {ActionConfig, ActionFunction, OperationStatus} from '../../../../services-interfaces'
 import config from './config.json';
 import {Context, inject} from "@loopback/context";
 import {
@@ -11,12 +11,13 @@ import {RandomGeneratorManager} from "../../../../services";
 import axios from "axios";
 import * as qs from 'querystring'
 import {Action} from "../../../../models";
-import {GithubPushHookBody} from "../../../github/interfaces";
 
 
 const API_URL : string = process.env.API_URL ?? "http://localhost:8080";
 const YOUTUBE_WATCH_URL = "https://www.youtube.com/xml/feeds/videos.xml?channel_id=";
 const WEBHOOK_PREFIX = `${API_URL}/services/youtube/actions/${config.displayName}/webhook/`;
+const SUBSCRIBE_URL = 'https://pubsubhubbub.appspot.com/subscribe';
+const SUB_INFOS_URL = 'https://pubsubhubbub.appspot.com/subscription-details';
 
 interface NewVideoConfig {
     channel: string
@@ -31,6 +32,7 @@ export default class ActionController {
     constructor(
         @inject.context() private ctx: Context,
         @repository(UserRepository) public userRepository: UserRepository,
+        @repository(ActionRepository) public actionRepository: ActionRepository,
     ) {
     }
 
@@ -39,7 +41,6 @@ export default class ActionController {
         @param.path.string('webhookId') webhookId: string,
         @param.query.string('hub.challenge') challenge: string,
     ) {
-        console.log("Validation");
         if (!challenge)
             return "No challenge provided";
         return challenge;
@@ -50,14 +51,63 @@ export default class ActionController {
         @param.path.string('webhookId') webhookId: string,
         @requestBody({
             content: {
-                'text/xml': {
-                    'x-parser': 'text'
-                }
+                'application/atom+xml': {}
             }
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         }) body : any
     ) {
-        console.log(body);
+        const action = await this.actionRepository.findOne({
+            where: {
+                and: [
+                    {
+                        serviceAction: `youtube.A.${config.displayName}`
+                    },
+                    {
+                        "data.webHookUrl": `${WEBHOOK_PREFIX}${webhookId}`
+                    }
+                ]
+            }
+        });
+        if (!action)
+            return { error: `Failed to process event: webhook ${webhookId} : webhook not found in database` };
+        const video = body.feed.entry[0];
+        return ActionFunction({
+            actionId: action.id!,
+            placeholders: [
+                {
+                    name: "videoID",
+                    value: video['yt:videoid'][0]
+                },
+                {
+                    name: "channelId",
+                    value: video['yt:channelid'][0]
+                },
+                {
+                    name: "title",
+                    value: video.title[0]
+                },
+                {
+                    name: "link",
+                    value: video.link[0]['$'].href
+                },
+                {
+                    name: "authorName",
+                    value: video.author[0].name[0]
+                },
+                {
+                    name: "authorLink",
+                    value: video.author[0].uri[0]
+                },
+                {
+                    name: "published",
+                    value: video.published[0]
+                },
+                {
+                    name: "updated",
+                    value: video.updated[0]
+                }
+            ]
+        }, this.ctx);
     }
 
     static async createAction(userId: string, actionConfig: Object, ctx: Context): Promise<OperationStatus> {
@@ -77,7 +127,7 @@ export default class ActionController {
         let generated = false;
         let webhookUrl = "";
         while (!generated) {
-            let generatedUUID = randomGeneratorService.generateRandomString(16);
+            const generatedUUID = randomGeneratorService.generateRandomString(16);
             webhookUrl = `${WEBHOOK_PREFIX}${generatedUUID}`;
             try {
                 const count = await actionRepository.count({
@@ -100,7 +150,7 @@ export default class ActionController {
         const topicUrl = YOUTUBE_WATCH_URL + newVideoConfig.channel;
 
         try {
-            const response = await axios.post('https://pubsubhubbub.appspot.com/subscribe', qs.stringify({
+            await axios.post(SUBSCRIBE_URL, qs.stringify({
                 "hub.callback": webhookUrl,
                 "hub.topic": topicUrl,
                 "hub.verify": 'async',
@@ -115,11 +165,8 @@ export default class ActionController {
                     'Content-Type': 'application/x-www-form-urlencoded'
                 }
             });
-            console.log(response.statusText);
-            console.log("WebHook informations", `https://pubsubhubbub.appspot.com/subscription-details?hub.callback=${webhookUrl}&hub.topic=${topicUrl}&hub.secret=`)
+            console.log("WebHook informations", `${SUB_INFOS_URL}?hub.callback=${webhookUrl}&hub.topic=${topicUrl}&hub.secret=`)
         } catch (e) {
-            console.log(e.request.data);
-            console.log(e.response.data);
             return { success: false, options: actionConfig, details: e}
         }
         const data : NewVideoData = {
@@ -154,7 +201,7 @@ export default class ActionController {
             return { success: false, error: "Failed to retrieve action" };
         const data = action.data as NewVideoData;
         try {
-            const response = await axios.post('https://pubsubhubbub.appspot.com/subscribe', qs.stringify({
+            const response = await axios.post(SUBSCRIBE_URL, qs.stringify({
                 "hub.callback": data.webHookUrl,
                 "hub.topic": YOUTUBE_WATCH_URL + newVideoConfig.channel,
                 "hub.verify": 'async',
