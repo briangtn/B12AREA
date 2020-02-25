@@ -4,4 +4,5 @@ export interface TokensResponse {
     scope: string,
     token_type: string,
     id_token: string
+    expires_at?: number
 }

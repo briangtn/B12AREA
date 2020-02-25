@@ -70,6 +70,8 @@ export default class ActionController {
         });
         if (!action)
             return { error: `Failed to process event: webhook ${webhookId} : webhook not found in database` };
+        if (!body.feed.entry)
+            return { error: `Failed to process event: webhook ${webhookId} : Invalid data format` };
         const video = body.feed.entry[0];
         return ActionFunction({
             actionId: action.id!,

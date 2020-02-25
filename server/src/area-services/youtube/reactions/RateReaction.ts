@@ -5,6 +5,7 @@ import {ReactionRepository, UserRepository} from "../../../repositories";
 import {Reaction} from "../../../models";
 import ServiceController from "../controller";
 import {TokensResponse} from "../interfaces";
+import {YoutubeHelper} from "../YoutubeHelper";
 
 const YOUTUBE_API_BASE_URL = "https://www.googleapis.com/youtube/v3/videos";
 const YOUTUBE_API_KEY : string = process.env.YOUTUBE_API_KEY ?? "";
@@ -80,6 +81,9 @@ export class RateReactionHelper {
         }
         if (!tokens) {
             throw new Object({ success: false, error: `Failed to resolve ${ServiceController.serviceName} token` });
+        }
+        if (!YoutubeHelper.isTokenValid(tokens)) {
+            await YoutubeHelper.refreshToken(reactionConfig.userId, ctx);
         }
         return {
             token: tokens.access_token,
