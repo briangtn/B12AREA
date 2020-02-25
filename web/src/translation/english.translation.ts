@@ -27,7 +27,7 @@ const english = {
     resetPasswordEmailSent: "To continue, please follow the steps in your email",
     resetPasswordConfirmation: "Your password has been reset, please connect.",
     goToAdmin: "Administration panel",
-    myServices: "My services",
+    myServices: "My registered services",
     /**
      * Add services translation
      */

@@ -120,10 +120,11 @@ class App extends Component<Props, State> {
     componentDidMount(): void {
         const { token } = this.props;
 
-        if (token)
+        if (token && token !== undefined && token !== "undefined") {
             this.props.history.push('/services');
-        else
+        } else {
             this.fetchServices(this.props.api_url);
+        }
     }
 
     fetchServices(api_url: string): void {

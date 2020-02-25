@@ -12,6 +12,8 @@ import AddServices from "../components/services/AddServices";
 import Translator from "../components/Translator";
 import Service from "../components/services/Service";
 
+import { setServices } from "../actions/services.action";
+
 interface Props {
     token: string,
     api_url: string,
@@ -20,7 +22,9 @@ interface Props {
     },
     classes: {
         section: string
-    }
+    },
+    setServices: any,
+    services: any
 }
 
 interface State {
@@ -30,8 +34,12 @@ interface State {
 }
 
 const mapStateToProps = (state: any) => {
-    return { token: state.token, api_url: state.api_url };
+    return { token: state.token, api_url: state.api_url, services: state.services };
 };
+
+function mapDispatchToProps(dispatch: any) {
+    return { setServices: (token: object) => dispatch(setServices(token)) };
+}
 
 const styles = (theme: Theme) => createStyles({
     section: {
@@ -55,38 +63,40 @@ class Services extends Component<Props, State> {
 
         fetch(`${api_url}/about.json`)
             .then(res => res.json())
-            .then((dataMe) => {
-                this.setState({ about: dataMe });
+            .then((dataAbout) => {
+                this.setState({ about: dataAbout });
 
                 fetch(`${api_url}/users/me`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 })
                 .then(res => res.json())
                 .then((data) => {
-                    const { services } = data;
-                    const { registeredServices } = this.state;
+                    const { servicesList } = data;
+                    const aboutServices = dataAbout['server']['services'];
 
-                    for (let key of Object.keys(services)) {
-                        let tmp = {};
-                        tmp[key as keyof typeof tmp] = services[key] as never;
-                        registeredServices.push(tmp);
+                    const registeredServices = [];
+                    const availableServices = [];
+
+                    for (let aboutService of aboutServices) {
+                        if (servicesList.includes(aboutService.name))
+                            registeredServices.push(aboutService);
+                        else
+                            availableServices.push(aboutService);
                     }
 
-                    const registeredServicesName = Object.keys(services);
-
-                    const availableServicesArray = [];
-                    for (let service of dataMe['server']['services']) {
-                        if (!registeredServicesName.includes(service.name))
-                            availableServicesArray.push(service);
-                    }
-
-                    this.setState({ registeredServices: registeredServices, availableServices: availableServicesArray });
+                    this.props.setServices(registeredServices);
+                    this.setState({ registeredServices: registeredServices, availableServices: availableServices });
                 })
             })
     }
 
+    clickService = (e: any) => {
+        console.log('ehe');
+    }
+
     render() {
-        const { classes } = this.props;
+        const { classes, services } = this.props;
+
         return (
             <div>
                 <NavigationBar history={this.props.history} />
@@ -95,13 +105,12 @@ class Services extends Component<Props, State> {
                         position: 'absolute',
                         paddingTop: '50px',
                         left: '50%',
-                        width: '40em',
                         transform: 'translate(-50%)'
                     }}
                 >
                     <Typography variant="h3" className={classes.section} gutterBottom><b><Translator sentence="myServices" /></b></Typography>
-                    { this.state.registeredServices.map((elem: any) => (
-                        <Service key={Object.keys(elem)[0]} name={Object.keys(elem)[0]} utils={elem[Object.keys(elem)[0]]} about={this.state.about} />
+                    { services.map((elem: any) => (
+                        <Service key={services.indexOf(elem)} info={elem} history={this.props.history} />
                     ))}
                 </div>
                 <AddServices availableServices={this.state.availableServices} />
@@ -110,4 +119,4 @@ class Services extends Component<Props, State> {
     }
 }
 
-export default connect(mapStateToProps)(withStyles(styles)(Services));
+export default connect(mapStateToProps, mapDispatchToProps)(withStyles(styles)(Services));

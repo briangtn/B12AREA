@@ -33,13 +33,13 @@ interface Props {
         icon: string,
         serviceName: string
     },
-    utils: any,
-    about: any,
-    name: string
+    info: any,
+    history: {
+        push: any
+    }
 }
 
 interface State {
-    info: ServiceInfo,
     addDialogOpened: boolean
 }
 
@@ -74,36 +74,8 @@ const styles = (theme: Theme) => createStyles({
 
 class Service extends Component<Props, State> {
     state: State = {
-        info: {
-            name: '',
-            description: '',
-            icon: '',
-            color: '',
-            actions: [],
-            reactions: [],
-            token: '',
-            userId: ''
-        },
         addDialogOpened: false
     };
-
-    componentDidMount() {
-        const { about, utils, name } = this.props;
-
-        const filteredObject = about['server']['services'].filter((elem: any) => elem.name === name)[0];
-
-        const filledInfo: ServiceInfo = {
-            name: filteredObject.name,
-            description: filteredObject.description,
-            icon: filteredObject.icon,
-            color: filteredObject.color,
-            actions: filteredObject.actions,
-            reactions: filteredObject.reactions,
-            token: utils.token,
-            userId: utils.userId
-        };
-        this.setState({ info: filledInfo });
-    }
 
     handleDialogOpen = (e: any) => {
         this.setState({ addDialogOpened: true });
@@ -113,12 +85,17 @@ class Service extends Component<Props, State> {
         this.setState({ addDialogOpened: false });
     };
 
+    handleClick = (e: any) => {
+        const { info } = this.props;
+
+        this.props.history.push({ pathname: '/services_detail', state: { info: info } });
+    }
+
     render() {
-        const { classes } = this.props;
-        const { info } = this.state;
+        const { classes, info } = this.props;
 
         return (
-            <div>
+            <div onClick={this.handleClick}>
                 <Box width="auto" boxShadow={2} bgcolor={info.color} m={1} p={1} className={classes.root} style={{color: (Utilities.isLightColor(String(info.color)) ? 'black' : 'white')}}>
                     <Grid container>
                         <Grid item xs={4}>
@@ -136,7 +113,7 @@ class Service extends Component<Props, State> {
                 </Box>
                 <Dialog open={this.state.addDialogOpened} onClose={this.handleDialogClose} aria-labelledby="form-dialog-title">
                     <DialogContent>
-                        <AddAreaStepper actions={info.actions} reactions={info.reactions} />
+                        <AddAreaStepper serviceName={info.name} actions={info.actions} reactions={info.reactions} closeFunction={this.handleDialogClose} />
                     </DialogContent>
                 </Dialog>
             </div>

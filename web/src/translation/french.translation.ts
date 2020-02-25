@@ -27,7 +27,7 @@ const french = {
     resetPasswordEmailSent: "Pour continuer, veuillez suivre les instructions envoyées par mail",
     resetPasswordConfirmation: "Votre mot de passe a été réinitialiser, veuillez vous connecter.",
     goToAdmin: "Panneau d'administration",
-    myServices: "Mes services",
+    myServices: "Mes services enregistrés",
     /**
      * Add services translation
      */

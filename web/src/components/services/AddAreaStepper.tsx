@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 
+import { connect } from 'react-redux';
 import { withStyles, createStyles, Theme } from "@material-ui/core";
 
 import Stepper from '@material-ui/core/Stepper';
@@ -17,26 +18,40 @@ import MenuItem from '@material-ui/core/MenuItem';
 import TextField from "@material-ui/core/TextField";
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Switch from '@material-ui/core/Switch';
+import Divider from '@material-ui/core/Divider';
 
+const mapStateToProps = (state: any) => {
+    return { api_url: state.api_url, token: state.token, services: state.services };
+};
 interface Props {
     classes: {
         instructions: string,
         formControl: string
     },
     actions: any,
-    reactions: any
-}
-
-interface SchemaAction {
-    schemaActionName: string,
-    schemaActionValue: string | boolean | number
+    reactions: any,
+    services: any,
+    closeFunction: any,
+    token: string,
+    api_url: string,
+    serviceName: string
 }
 
 interface State {
+    areaName: string;
     activeStep: number;
     steps: string[],
     configSchemaActions: any,
+    configSchemaReactions: any,
+    chosenReactions: Reaction[],
     selectedAction: any
+}
+
+interface Reaction {
+    name: string,
+    displayName: string,
+    description: string,
+    configSchema: any[]
 }
 
 const styles = (theme: Theme) => createStyles({
@@ -53,9 +68,12 @@ const styles = (theme: Theme) => createStyles({
 
 class AddAreaStepper extends Component<Props, State> {
     state: State = {
+        areaName: '',
         activeStep: 0,
-        steps: ['Choose your action', 'Select your reactions', 'Summary'],
+        steps: ['Name your AREA', 'Choose your action', 'Select your reactions', 'Summary'],
         configSchemaActions: {},
+        configSchemaReactions: {},
+        chosenReactions: [],
         selectedAction: 0
     };
 
@@ -76,18 +94,42 @@ class AddAreaStepper extends Component<Props, State> {
     // Steps
 
     selectActionChange = (e: any) => {
-        this.setState({ selectedAction: e.target.value });
-    };
-
-    configSchemaChange = (e: any) => {
         const { configSchemaActions } = this.state;
 
-        configSchemaActions[e.target.id] = e.target.value;
-        this.setState({configSchemaActions: configSchemaActions});
+        configSchemaActions[e.target.value.name] = {};
+        configSchemaActions[e.target.value.name]['serviceName'] = e.target.value.serviceName;
+        for (let configSchema of e.target.value.configSchema) {
+            if (configSchema.type === "string")
+                configSchemaActions[e.target.value.name][configSchema.name] = ''
+            else if (configSchema.type === "boolean")
+                configSchemaActions[e.target.value.name][configSchema.name] = false
+            else
+                configSchemaActions[e.target.value.name][configSchema.name] = 0
+        }
+
+        this.setState({ selectedAction: e.target.value, configSchemaActions: configSchemaActions });
     };
 
-    displayConfigSchema = (configSchema: any) => {
-        const { configSchemaActions } = this.state;
+    configSchemaChange = (argGroupName: string, key: any, e: any, isAction: boolean) => {
+        const { configSchemaActions, configSchemaReactions } = this.state;
+
+        if (isAction) {
+            if (typeof configSchemaActions[argGroupName][e.target.id] === "boolean")
+                configSchemaActions[argGroupName][e.target.id] = e.target.checked;
+            else
+                configSchemaActions[argGroupName][e.target.id] = e.target.value;
+            this.setState({[key]: configSchemaActions} as unknown as Pick<State, keyof State>);
+        } else {
+            if (typeof configSchemaReactions[argGroupName][e.target.id] === "boolean")
+                configSchemaReactions[argGroupName][e.target.id] = e.target.checked;
+            else
+                configSchemaReactions[argGroupName][e.target.id] = e.target.value;
+            this.setState({[key]: configSchemaReactions} as unknown as Pick<State, keyof State>);
+        }
+    };
+
+    displayConfigSchema = (argGroupName: string, configSchema: any, key: any, isAction: boolean) => {
+        const { configSchemaActions, configSchemaReactions } = this.state;
         const { name, description, type, required } = configSchema;
 
         if (type === "string") {
@@ -97,8 +139,8 @@ class AddAreaStepper extends Component<Props, State> {
                     required={required}
                     id={name}
                     type={type}
-                    value={configSchemaActions[name]}
-                    onChange={this.configSchemaChange}
+                    value={(isAction) ? configSchemaActions[argGroupName][name] : configSchemaReactions[argGroupName][name]}
+                    onChange={(e) => this.configSchemaChange(argGroupName, key, e, isAction)}
                     fullWidth
                 />
             )
@@ -109,8 +151,8 @@ class AddAreaStepper extends Component<Props, State> {
                     required={required}
                     id={name}
                     type={type}
-                    value={configSchemaActions[name]}
-                    onChange={this.configSchemaChange}
+                    value={(isAction) ? configSchemaActions[argGroupName][name] : configSchemaReactions[argGroupName][name]}
+                    onChange={(e) => this.configSchemaChange(argGroupName, key, e, isAction)}
                     fullWidth
                 />
             )
@@ -121,8 +163,8 @@ class AddAreaStepper extends Component<Props, State> {
                         <Switch
                             id={name}
                             required={required}
-                            checked={configSchemaActions[name]}
-                            onChange={this.configSchemaChange}
+                            checked={(isAction) ? configSchemaActions[argGroupName][name] : configSchemaReactions[argGroupName][name]}
+                            onChange={(e) => this.configSchemaChange(argGroupName, key, e, isAction)}
                             value="checkedA"
                         />
                     }
@@ -130,6 +172,23 @@ class AddAreaStepper extends Component<Props, State> {
                 />
             )
         }
+    }
+
+    nameStep = () => {
+        return (
+            <div>
+                <TextField
+                    label="AREA Name"
+                    required
+                    id="area-name"
+                    value={this.state.areaName}
+                    onChange={(e) => this.setState({ areaName: e.target.value })}
+                    fullWidth
+                />
+                <br />
+                <br />
+            </div>
+        );
     }
 
     actionStep = () => {
@@ -156,7 +215,7 @@ class AddAreaStepper extends Component<Props, State> {
                 {
                     (selectedAction !== 0)
                     ? (<div>{selectedAction.configSchema.map((elem: any) => (
-                        <div key={selectedAction.configSchema.indexOf(elem)}>{this.displayConfigSchema(elem)}</div>
+                        <div key={selectedAction.configSchema.indexOf(elem)}>{this.displayConfigSchema(selectedAction.name, elem, "configSchemaActions", true)}</div>
                     ))}</div>)
                     : ''
                 }
@@ -165,17 +224,216 @@ class AddAreaStepper extends Component<Props, State> {
         );
     }
 
-    reactionStep = () => {
-        const { reactions } = this.props;
+    selectReaction = (e: any) => {
+        const { configSchemaReactions } = this.state;
 
-        console.log(reactions);
+        for (let reaction of e.target.value) {
+            if (!configSchemaReactions[reaction.name]) {
+                configSchemaReactions[reaction.name] = {};
+                configSchemaReactions[reaction.name]['serviceName'] = reaction.serviceName;
+                for (let configSchema of reaction.configSchema) {
+                    if (configSchema.type === "string")
+                        configSchemaReactions[reaction.name][configSchema.name] = ''
+                    else if (configSchema.type === "boolean")
+                        configSchemaReactions[reaction.name][configSchema.name] = false
+                    else
+                        configSchemaReactions[reaction.name][configSchema.name] = 0
+                }
+            }
+        }
+        this.setState({ chosenReactions: e.target.value, configSchemaReactions: configSchemaReactions });
+    }
+
+    reactionStep = () => {
+        const { chosenReactions } = this.state;
+        const { services, classes } = this.props;
+        const allRegisteredReactions: Reaction[] = [];
+
+        for (let service of services)
+            for (let reaction of service.reactions) {
+                reaction['serviceName'] = service.name;
+                allRegisteredReactions.push(reaction);
+            }
+
+        return (
+            <div>
+                <FormControl className={classes.formControl}>
+                    <InputLabel htmlFor="service-simple">Reactions</InputLabel>
+                    <Select
+                        id="reactions-select"
+                        multiple
+                        value={chosenReactions}
+                        renderValue={(selected) => (
+                            <div>
+                                {(selected as any[]).map((elem: any, index: number) => (
+                                    (index !== (selected as any[]).length - 1) ? `${elem.name}, ` : `${elem.name}`
+                                ))}
+                            </div>
+                        )}
+                        onChange={this.selectReaction}
+                        autoWidth
+                    >
+                        {allRegisteredReactions.map((reaction: Reaction) => (
+                            <MenuItem key={allRegisteredReactions.indexOf(reaction)} value={reaction as any}>
+                                { `${reaction.name} - ${reaction.description}` }
+                            </MenuItem>
+                        ))}
+                    </Select>
+                </FormControl>
+                <br />
+                { chosenReactions.map((reaction: Reaction) => (
+                    <div key={chosenReactions.indexOf(reaction)}>
+                        <Typography variant="h6" gutterBottom>
+                            { reaction.displayName }
+                        </Typography>
+                        <Typography variant="subtitle1" gutterBottom>
+                            { reaction.description }
+                        </Typography>
+                        { reaction.configSchema.map((configSchema: any) => (
+                            <div key={reaction.configSchema.indexOf(configSchema)}>
+                                {this.displayConfigSchema(reaction.name, configSchema, "configSchemaReactions", false)}
+                            </div>
+                        ))}
+                        <br />
+                        <Divider />
+                        <br />
+                    </div>
+                ))}
+            </div>
+        );
+    }
+
+    formatConfigSchema = (configSchema: any): any[] => {
+        const formatted: any = [];
+
+        for (let configSchemaName of Object.keys(configSchema)) {
+            let tmp: any = {};
+            tmp['name'] = configSchemaName;
+            tmp['serviceName'] = configSchema[configSchemaName]['serviceName'];
+            tmp['arguments'] = [];
+            for (let configSchemaNameArgument of Object.keys(configSchema[configSchemaName])) {
+                if (configSchemaNameArgument === "serviceName")
+                    continue;
+                tmp['arguments'].push({ name: configSchemaNameArgument, value: configSchema[configSchemaName][configSchemaNameArgument] });
+            }
+            formatted.push(tmp);
+        }
+
+        return formatted
+    }
+
+    summaryStep = () => {
+        const { selectedAction, configSchemaActions, chosenReactions, configSchemaReactions } = this.state;
+
+        const formatActionArgument = this.formatConfigSchema(configSchemaActions);
+        const formatReactionArgument = this.formatConfigSchema(configSchemaReactions);
+
+        return (
+            <div>
+                <Typography variant="h6" gutterBottom>
+                    Action - { selectedAction.displayName }
+                </Typography>
+                <Typography variant="subtitle2" gutterBottom>
+                    { selectedAction.description }
+                </Typography>
+                {formatActionArgument.map((configSchema: any) => (
+                    configSchema['arguments'].map((arg: any) => (
+                        <Typography variant="body1" gutterBottom>
+                            <b>{arg.name}:</b> {arg.value}
+                        </Typography>
+                    ))
+                ))}
+                <br />
+                <Divider />
+                <br />
+                {formatReactionArgument.map((configSchema: any) => (
+                    <div>
+                        <Typography variant="h6" gutterBottom>
+                            Reaction - { configSchema.name }
+                        </Typography>
+                        {configSchema['arguments'].map((arg: any) => (
+                            <Typography variant="body1" gutterBottom>
+                                <b>{arg.name}:</b> {'' + arg.value}
+                            </Typography>
+                        ))}
+                    </div>
+                ))}
+                <br />
+            </div>
+        )
+    }
+
+    setActionToArea: any = (id: string) => {
+        const { api_url, token, serviceName } = this.props;
+        const headers: any = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` };
+
+        const actionConfigSchema = this.formatConfigSchema(this.state.configSchemaActions);
+
+        const actionBody: { serviceAction: string, options: any } = {
+            serviceAction: `${serviceName}.A.${actionConfigSchema[0].name}`,
+            options: {}
+        }
+        for (let argument of actionConfigSchema[0].arguments)
+                actionBody.options[argument.name] = argument.value;
+        fetch(`${api_url}/areas/${id}/action`, {
+            method: 'POST',
+            headers: headers,
+            body: JSON.stringify(actionBody)
+        }).then(res => res.json())
+    }
+
+    setReactionsToArea: any = (id: string) => {
+        const { api_url, token, serviceName } = this.props;
+        const headers: any = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` };
+
+        const reactionConfigSchema = this.formatConfigSchema(this.state.configSchemaReactions);
+
+        for (let reaction of reactionConfigSchema) {
+            const reactionBody: { serviceReaction: string, options: any } = {
+                serviceReaction: `${reaction.serviceName}.R.${reaction.name}`,
+                options: {}
+            }
+            for (let argument of reaction.arguments)
+                reactionBody.options[argument.name] = argument.value;
+            fetch(`${api_url}/areas/${id}/reactions`, {
+                method: 'POST',
+                headers: headers,
+                body: JSON.stringify(reactionBody)
+            }).then(res => res.json())
+        }
+    }
+
+    createAREA = () => {
+        const { api_url, token } = this.props;
+        const { areaName } = this.state;
+        const headers: any = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` };
+
+        fetch(`${api_url}/areas`, {
+            method: 'POST',
+            headers: headers,
+            body: JSON.stringify({ name: areaName, enabled: true })
+        })
+        .then(res => res.json())
+        .then((data) => {
+            const { id } = data;
+            // Create Action
+            this.setActionToArea(id);
+
+            // Create reactions
+            this.setReactionsToArea(id);
+        })
+        this.props.closeFunction();
     }
 
     contentStep = (activeStep: number) => {
         if (activeStep === 0) {
-            return this.actionStep();
+            return this.nameStep();
         } else if (activeStep === 1) {
+            return this.actionStep();
+        } else if (activeStep === 2) {
             return this.reactionStep();
+        } else if (activeStep === 3) {
+            return this.summaryStep();
         }
     }
 
@@ -193,11 +451,6 @@ class AddAreaStepper extends Component<Props, State> {
                     ))}
                 </Stepper>
                 <div>
-                    {activeStep === steps.length ? (
-                    <div>
-                        <Typography className={classes.instructions}>All steps completed</Typography>
-                    </div>
-                    ) : (
                     <div>
                         {this.contentStep(activeStep)}
                         <div>
@@ -207,16 +460,15 @@ class AddAreaStepper extends Component<Props, State> {
                         >
                             Back
                         </Button>
-                        <Button variant="contained" color="primary" onClick={this.handleNextStep}>
+                        <Button variant="contained" color="primary" onClick={(activeStep === steps.length - 1) ? this.createAREA : this.handleNextStep}>
                             {activeStep === steps.length - 1 ? 'Finish' : 'Next'}
                         </Button>
                         </div>
                     </div>
-                    )}
                 </div>
             </div>
         );
     }
 }
 
-export default withStyles(styles)(AddAreaStepper);
+export default connect(mapStateToProps)(withStyles(styles)(AddAreaStepper));
