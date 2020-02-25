@@ -31,9 +31,9 @@ class RegisterActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_register)
 
-        val sharedPreferences = getSharedPreferences("com.b12powered.area", Context.MODE_PRIVATE)
+        val sharedPreferences = getSharedPreferences(getString(R.string.storage_name), Context.MODE_PRIVATE)
 
-        if (sharedPreferences.contains("jwt-token")) {
+        if (sharedPreferences.contains(getString(R.string.token_key))) {
             val intent = Intent(this, HomeActivity::class.java)
             finish()
             startActivity(intent)
