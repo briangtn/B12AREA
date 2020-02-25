@@ -4,7 +4,7 @@
   "configSchema": [
     {
       "name": "video",
-      "description": "The url of the video",
+      "description": "The id of the video",
       "type": "string",
       "required": true
     }

@@ -176,6 +176,7 @@ export default class ActionController {
     }
 
     static async updateAction(actionId: string, oldActionConfig: Object, newActionConfig: Object, ctx: Context): Promise<OperationStatus> {
+        //TODO
         return { success: true, options: newActionConfig}
     }
 
