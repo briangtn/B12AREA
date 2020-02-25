@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.b12powered.area.R
 import com.b12powered.area.User
 import com.b12powered.area.api.ApiClient
+import com.b12powered.area.toObject
 
 /**
  * The activity where the user can have all services
@@ -39,7 +40,7 @@ class HomeActivity : AppCompatActivity() {
                             val sharedPreferences = getSharedPreferences("com.b12powered.area", Context.MODE_PRIVATE)
                             val editor = sharedPreferences.edit()
 
-                            editor.putString("jwt-token", user.token)
+                            editor.putString("jwt-token", user.toObject<User>().token)
                             editor.apply()
                             checkTokenValidity()
                         } else {

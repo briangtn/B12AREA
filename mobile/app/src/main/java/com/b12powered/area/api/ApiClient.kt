@@ -2,6 +2,7 @@ package com.b12powered.area.api
 
 import android.content.Context
 import android.net.Uri
+import android.util.Log
 import androidx.core.net.toUri
 import com.android.volley.*
 import com.android.volley.toolbox.BasicNetwork
@@ -166,12 +167,11 @@ class ApiClient(private val context: Context) {
     /**
      * Build a dataCode request with [code] and perform it, then invoke [completion] with a User object
      */
-    fun dataCode(code: String, completion: (user: User?, message: String) -> Unit) {
+    fun dataCode(code: String, completion: (json: String?, message: String) -> Unit) {
         val route = ApiRoute.DataCode(code, context)
         this.performRequest(route) { success, response ->
             if (success) {
-                val user: User = response.json.toObject()
-                completion.invoke(user, "success")
+                completion.invoke(response.json, "success")
             } else {
                 completion.invoke(null, response.message)
             }

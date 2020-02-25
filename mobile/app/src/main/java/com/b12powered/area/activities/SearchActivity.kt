@@ -1,14 +1,14 @@
 package com.b12powered.area.activities
 
-import android.content.Context
 import android.net.Uri
 import android.os.Bundle
-import android.util.Log
 import android.widget.Toast
 import com.b12powered.area.R
 import androidx.appcompat.app.AppCompatActivity
+import com.b12powered.area.Status
 import com.b12powered.area.api.ApiClient
 import com.b12powered.area.fragments.ServiceFragment
+import com.b12powered.area.toObject
 
 
 class SearchActivity : AppCompatActivity() {
@@ -24,8 +24,14 @@ class SearchActivity : AppCompatActivity() {
 
             if (code !== null) {
                 ApiClient(this)
-                    .dataCode(code) { user, message ->
-                        if (user == null) {
+                    .dataCode(code) { status, message ->
+                        if (status !== null){
+                            Toast.makeText(
+                                this,
+                                status.toObject<Status>().status,
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        } else {
                             Toast.makeText(
                                 this,
                                 message,
@@ -37,13 +43,27 @@ class SearchActivity : AppCompatActivity() {
         }
 
         ApiClient(this)
-            .aboutJson { about, message ->
-                if (about !== null) {
-                    about.server.services.forEach { service ->
-                        supportFragmentManager.beginTransaction()
-                            .add(R.id.search, ServiceFragment.newInstance(service))
-                            .commit()
-                    }
+            .getUser { user, message ->
+                if (user !== null) {
+                    ApiClient(this)
+                        .aboutJson { about, msg ->
+                            if (about !== null) {
+                                about.server.services.forEach { service ->
+                                    if (!user.services.contains(service.name)) {
+                                        supportFragmentManager.beginTransaction()
+                                            .add(R.id.search, ServiceFragment.newInstance(service))
+                                            .commit()
+                                    }
+                                }
+                            } else {
+                                Toast.makeText(
+                                    this,
+                                    msg,
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                        }
+
                 } else {
                     Toast.makeText(
                         this,

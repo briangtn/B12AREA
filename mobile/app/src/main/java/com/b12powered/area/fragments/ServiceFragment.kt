@@ -5,9 +5,7 @@ import android.animation.ObjectAnimator
 import android.app.AlertDialog
 import android.content.DialogInterface
 import android.content.Intent
-import android.graphics.Bitmap
 import android.graphics.Color
-import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -15,16 +13,11 @@ import android.view.ViewGroup
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.view.animation.DecelerateInterpolator
 import android.widget.Toast
-import androidx.appcompat.content.res.AppCompatResources
-import androidx.core.graphics.drawable.DrawableCompat
 import androidx.fragment.app.Fragment
-import androidx.palette.graphics.Palette
 import com.b12powered.area.R
 import com.b12powered.area.Service
 import com.b12powered.area.api.ApiClient
 import com.bumptech.glide.Glide
-import com.bumptech.glide.request.target.CustomTarget
-import com.bumptech.glide.request.transition.Transition
 import kotlinx.android.synthetic.main.fragment_service.*
 
 
@@ -53,25 +46,9 @@ class ServiceFragment(private val service: Service) : Fragment() {
             .fitCenter()
             .into(icon)
 
-        val add = AppCompatResources.getDrawable(context!!, R.drawable.ic_add)
-        val addWrap = DrawableCompat.wrap(add!!)
-
-        Glide.with(this)
-            .asBitmap()
-            .load(service.icon)
-            .into(object : CustomTarget<Bitmap>() {
-                override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
-                    val color = Palette.from(resource).generate().vibrantSwatch
-                    if (color !== null) {
-                        DrawableCompat.setTint(addWrap, color.rgb)
-                        Glide.with(view)
-                            .load(addWrap)
-                            .into(plus)
-                    }
-                }
-
-                override fun onLoadCleared(placeholder: Drawable?) {}
-            })
+        Glide.with(view)
+            .load(R.drawable.ic_add)
+            .into(plus)
 
         plus.imageAlpha = 0
 
@@ -87,7 +64,7 @@ class ServiceFragment(private val service: Service) : Fragment() {
 
     private fun showDialog() {
         val builder = AlertDialog.Builder(context)
-        val dialogClickListener = DialogInterface.OnClickListener {_, which ->
+        val dialogClickListener = DialogInterface.OnClickListener { _, which ->
             when(which) {
                 DialogInterface.BUTTON_POSITIVE -> subscribeService()
                 DialogInterface.BUTTON_NEGATIVE -> flipCard()
