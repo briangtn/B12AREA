@@ -1,6 +1,6 @@
 {
-  "displayName": "like",
-  "description": "Like a video",
+  "displayName": "unrate",
+  "description": "Remove any rate on a video",
   "configSchema": [
     {
       "name": "video",
