@@ -39,6 +39,14 @@
     {
       "name": "GitLastCommitAuthorEmail",
       "description": "The last commit author email"
+    },
+    {
+      "name": "GitRepositoryOwner",
+      "description": "A string that must be the owner of the repository"
+    },
+    {
+      "name": "GitRepositoryName",
+      "description": "A string that must be the name of the repository"
     }
   ]
 }

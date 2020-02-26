@@ -9,8 +9,9 @@ import {
 } from "../../../../repositories";
 import {Action} from "../../../../models";
 import {repository} from "@loopback/repository";
-import {RandomGeneratorManager} from "../../../../services";
+import {AreaService, RandomGeneratorManager} from "../../../../services";
 import {GithubPushHookBody, GithubTokenModel, GithubWebhookModel, GithubWebhookResponse} from "../../interfaces";
+import {service} from "@loopback/core";
 
 const API_URL : string = process.env.API_URL ?? "http://localhost:8080";
 
@@ -58,6 +59,7 @@ export default class ActionController {
         if (!action) {
             return { error: `Failed to process event: webhook ${webhookId} : action not found in database` };
         }
+        const actionOptions = await this.actionRepository.getActionSettings(action.id!) as {owner: string, repo: string};
         return ActionFunction({
             actionId: action.id!,
             placeholders: [
@@ -84,6 +86,14 @@ export default class ActionController {
                 {
                     name: "GitLastCommitAuthorEmail",
                     value: body.commits[0].author.email
+                },
+                {
+                    name: "GitRepositoryOwner",
+                    value: actionOptions.owner
+                },
+                {
+                    name: "GitRepositoryName",
+                    value: actionOptions.repo
                 }
             ]
         }, this.ctx);
