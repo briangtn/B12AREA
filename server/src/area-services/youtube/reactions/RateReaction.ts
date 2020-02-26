@@ -6,6 +6,7 @@ import {Reaction} from "../../../models";
 import ServiceController from "../controller";
 import {TokensResponse} from "../interfaces";
 import {YoutubeHelper} from "../YoutubeHelper";
+import {google} from "googleapis";
 
 const YOUTUBE_API_BASE_URL = "https://www.googleapis.com/youtube/v3/videos";
 const YOUTUBE_API_KEY : string = process.env.YOUTUBE_API_KEY ?? "";
@@ -30,24 +31,38 @@ interface PreparedData {
 export class RateReactionHelper {
     static async trigger(params: WorkableObject): Promise<void> {
         console.log(params);
+
+
         const reactionOptions: RateReactionOptions = params.reactionOptions as RateReactionOptions;
-        const preapredData: PreparedData = params.reactionPreparedData as PreparedData;
+        const preparedData: TokensResponse = params.reactionPreparedData as TokensResponse;
 
         const video = applyPlaceholders(reactionOptions.video, params.actionPlaceholders);
-        console.log(video);
+        console.log(preparedData);
 
-        let url = `${YOUTUBE_API_BASE_URL}/rate`;
-        url += '?id=' + video;
-        url += '&rating=' + reactionOptions.rate;
-        url += '&key=' + YOUTUBE_API_KEY;
-        url += '&access_token=' + preapredData.token;
+        const googleOAuthClient = new google.auth.OAuth2(
+            YoutubeHelper.GOOGLE_CLIENT_ID,
+            YoutubeHelper.GOOGLE_CLIENT_SECRET,
+            YOUTUBE_API_KEY
+        );
+        googleOAuthClient.setCredentials({
+            // eslint-disable-next-line @typescript-eslint/camelcase
+            refresh_token: preparedData.refresh_token,
+            // eslint-disable-next-line @typescript-eslint/camelcase
+            access_token: preparedData.access_token,
+            // eslint-disable-next-line @typescript-eslint/camelcase
+            token_type: preparedData.token_type,
+        });
+        const youtube = google.youtube({
+            version: 'v3',
+            auth: googleOAuthClient
+        });
 
         try {
-            await axios.post(url, {}, {
-                headers: {
-                    Authorization: `${preapredData.tokenType} ${preapredData.token}}`
-                }
+            const res = await youtube.videos.rate({
+                id: video,
+                rating: reactionOptions.rate
             });
+            console.debug("Response", res.status, res.statusText);
         } catch (e) {
             console.debug(`Failed to rate video`, e.response.data.error.code, e.response.data.error.message);
             if (e.response.data) {
@@ -82,13 +97,7 @@ export class RateReactionHelper {
         if (!tokens) {
             throw new Object({ success: false, error: `Failed to resolve ${ServiceController.serviceName} token` });
         }
-        if (!YoutubeHelper.isTokenValid(tokens)) {
-            await YoutubeHelper.refreshToken(reactionConfig.userId, ctx);
-        }
-        return {
-            token: tokens.access_token,
-            tokenType: tokens.token_type
-        };
+        return tokens;
     }
 
     static async createReaction(userId: string, reactionConfig: Object, ctx: Context, rate: RateEnum): Promise<OperationStatus> {
