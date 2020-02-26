@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 
 import { connect } from 'react-redux';
-import { withStyles, createStyles, Theme } from "@material-ui/core";
+import {withStyles, createStyles, Theme, Snackbar} from "@material-ui/core";
 
 import Stepper from '@material-ui/core/Stepper';
 import Step from '@material-ui/core/Step';
@@ -18,6 +18,7 @@ import TextField from "@material-ui/core/TextField";
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Switch from '@material-ui/core/Switch';
 import Divider from '@material-ui/core/Divider';
+import Alert from '../Alert';
 
 const mapStateToProps = (state: any) => {
     return { api_url: state.api_url, token: state.token, services: state.services };
@@ -44,7 +45,11 @@ interface State {
     configSchemaActions: any,
     configSchemaReactions: any,
     chosenReactions: Reaction[],
-    selectedAction: any
+    selectedAction: any,
+    alert: boolean,
+    alertMessage: string,
+    alertSeverity: string,
+    displayCloseButton: boolean
 }
 
 interface Reaction {
@@ -74,7 +79,11 @@ class AddAreaStepper extends Component<Props, State> {
         configSchemaActions: {},
         configSchemaReactions: {},
         chosenReactions: [],
-        selectedAction: 0
+        selectedAction: 0,
+        alert: false,
+        alertMessage: '',
+        alertSeverity: 'error',
+        displayCloseButton: false
     };
 
     handleNextStep = (e: any) => {
@@ -172,7 +181,7 @@ class AddAreaStepper extends Component<Props, State> {
                 />
             )
         }
-    }
+    };
 
     nameStep = () => {
         return (
@@ -189,7 +198,7 @@ class AddAreaStepper extends Component<Props, State> {
                 <br />
             </div>
         );
-    }
+    };
 
     actionStep = () => {
         const { selectedAction } = this.state;
@@ -222,7 +231,7 @@ class AddAreaStepper extends Component<Props, State> {
                 <br />
             </div>
         );
-    }
+    };
 
     selectReaction = (e: any) => {
         const { configSchemaReactions } = this.state;
@@ -242,7 +251,7 @@ class AddAreaStepper extends Component<Props, State> {
             }
         }
         this.setState({ chosenReactions: e.target.value, configSchemaReactions: configSchemaReactions });
-    }
+    };
 
     reactionStep = () => {
         const { chosenReactions } = this.state;
@@ -301,7 +310,7 @@ class AddAreaStepper extends Component<Props, State> {
                 ))}
             </div>
         );
-    }
+    };
 
     formatConfigSchema = (configSchema: any): any[] => {
         const formatted: any = [];
@@ -320,7 +329,7 @@ class AddAreaStepper extends Component<Props, State> {
         }
 
         return formatted
-    }
+    };
 
     summaryStep = () => {
         const { selectedAction, configSchemaActions, configSchemaReactions } = this.state;
@@ -338,7 +347,7 @@ class AddAreaStepper extends Component<Props, State> {
                 </Typography>
                 {formatActionArgument.map((configSchema: any) => (
                     configSchema['arguments'].map((arg: any) => (
-                        <Typography variant="body1" gutterBottom>
+                        <Typography key={configSchema['arguments'].indexOf(arg)} variant="body1" gutterBottom>
                             <b>{arg.name}:</b> {arg.value}
                         </Typography>
                     ))
@@ -347,12 +356,12 @@ class AddAreaStepper extends Component<Props, State> {
                 <Divider />
                 <br />
                 {formatReactionArgument.map((configSchema: any) => (
-                    <div>
+                    <div key={formatReactionArgument.indexOf(configSchema)}>
                         <Typography variant="h6" gutterBottom>
                             Reaction - { configSchema.name }
                         </Typography>
                         {configSchema['arguments'].map((arg: any) => (
-                            <Typography variant="body1" gutterBottom>
+                            <Typography key={configSchema['arguments'].indexOf(arg)} variant="body1" gutterBottom>
                                 <b>{arg.name}:</b> {'' + arg.value}
                             </Typography>
                         ))}
@@ -361,7 +370,7 @@ class AddAreaStepper extends Component<Props, State> {
                 <br />
             </div>
         )
-    }
+    };
 
     setActionToArea: any = (id: string) => {
         const { api_url, token, serviceName } = this.props;
@@ -372,15 +381,24 @@ class AddAreaStepper extends Component<Props, State> {
         const actionBody: { serviceAction: string, options: any } = {
             serviceAction: `${serviceName}.A.${actionConfigSchema[0].name}`,
             options: {}
-        }
+        };
+
         for (let argument of actionConfigSchema[0].arguments)
                 actionBody.options[argument.name] = argument.value;
         fetch(`${api_url}/areas/${id}/action`, {
             method: 'POST',
             headers: headers,
             body: JSON.stringify(actionBody)
-        }).then(res => res.json())
-    }
+        })
+            .then(res => res.json())
+            .then((data) => {
+                const { error } = data;
+
+                if (error) {
+                    this.setState({ alert: true, alertMessage: `${error.name}: ${error.message}` });
+                }
+            })
+    };
 
     setReactionsToArea: any = (id: string) => {
         const { api_url, token } = this.props;
@@ -399,9 +417,17 @@ class AddAreaStepper extends Component<Props, State> {
                 method: 'POST',
                 headers: headers,
                 body: JSON.stringify(reactionBody)
-            }).then(res => res.json())
+            })
+                .then(res => res.json())
+                .then((data) => {
+                    const { error } = data;
+
+                    if (error) {
+                        this.setState({ alert: true, alertMessage: `${error.name}: ${error.message}` });
+                    }
+                })
         }
-    }
+    };
 
     createAREA = () => {
         const { api_url, token } = this.props;
@@ -422,7 +448,8 @@ class AddAreaStepper extends Component<Props, State> {
             // Create reactions
             this.setReactionsToArea(id);
         });
-        this.props.closeFunction();
+        this.setState({ displayCloseButton: true });
+        //this.props.closeFunction();
     };
 
     contentStep = (activeStep: number) => {
@@ -437,9 +464,14 @@ class AddAreaStepper extends Component<Props, State> {
         }
     };
 
+    closeAlert = (e: any) => {
+        this.setState({ alert: false });
+    };
+
     render() {
         const { activeStep, steps } = this.state;
 
+        console.log(this.state);
         return (
             <div>
                 <Stepper activeStep={activeStep} alternativeLabel>
@@ -453,18 +485,33 @@ class AddAreaStepper extends Component<Props, State> {
                     <div>
                         {this.contentStep(activeStep)}
                         <div>
-                        <Button
-                            disabled={activeStep === 0}
-                            onClick={this.handleBackStep}
-                        >
-                            Back
-                        </Button>
-                        <Button variant="contained" color="primary" onClick={(activeStep === steps.length - 1) ? this.createAREA : this.handleNextStep}>
-                            {activeStep === steps.length - 1 ? 'Finish' : 'Next'}
-                        </Button>
+                            <Button
+                                disabled={activeStep === 0}
+                                onClick={this.handleBackStep}
+                            >
+                                Back
+                            </Button>
+                            <Button variant="contained" color="primary" onClick={(activeStep === steps.length - 1) ? this.createAREA : this.handleNextStep}>
+                                {activeStep === steps.length - 1 ? 'Finish' : 'Next'}
+                            </Button>
+                            {(activeStep === steps.length - 1 && this.state.displayCloseButton) ?
+                                <Button
+                                    variant="contained"
+                                    color="secondary"
+                                    onClick={this.props.closeFunction}
+                                >
+                                    Close
+                                </Button>
+                                : ''
+                            }
                         </div>
                     </div>
                 </div>
+                <Snackbar open={this.state.alert} autoHideDuration={6000} onClose={this.closeAlert}>
+                    <Alert onClose={this.closeAlert} severity="error">
+                        { this.state.alertMessage }
+                    </Alert>
+                </Snackbar>
             </div>
         );
     }

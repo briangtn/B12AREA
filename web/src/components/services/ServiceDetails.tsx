@@ -13,7 +13,13 @@ import Typography from "@material-ui/core/Typography";
 import ExpansionPanel from '@material-ui/core/ExpansionPanel';
 import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
 import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
+import ExpansionPanelActions from "@material-ui/core/ExpansionPanelActions";
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+
+import Button from '@material-ui/core/Button';
+import DeleteIcon from '@material-ui/icons/Delete';
+
+import Divider from '@material-ui/core/Divider';
 
 interface Props {
     token: string,
@@ -23,7 +29,9 @@ interface Props {
     },
     classes: {
         section: string,
-        heading: string
+        heading: string,
+        button: string,
+        details: string
     },
     location: {
         state: {
@@ -43,6 +51,8 @@ interface Area {
     id: string;
     name: string;
     ownerId: string;
+    action: any;
+    reactions: any[];
 }
 
 const mapStateToProps = (state: any) => {
@@ -58,6 +68,12 @@ const styles = (theme: Theme) => createStyles({
         fontSize: theme.typography.pxToRem(15),
         fontWeight: theme.typography.fontWeightRegular,
     },
+    button: {
+        margin: theme.spacing(1),
+    },
+    details: {
+        flexDirection: "column"
+    }
 });
 
 class ServiceDetails extends Component<Props, State> {
@@ -66,15 +82,35 @@ class ServiceDetails extends Component<Props, State> {
         info: (this.props.location.state.info) ? this.props.location.state.info : {}
     };
 
+    deleteAREA = (e: any) => {
+        const { api_url, token } = this.props;
+        const { areas } = this.state;
+        const { id } = areas[e.currentTarget.value];
+        const index  = e.currentTarget.value;
+
+        fetch(`${api_url}/areas/${id}`, {
+            method: 'DELETE',
+            headers: {'Authorization': `Bearer ${token}`}
+        }).then(r => {
+            if (r.ok) {
+                areas.splice(index, 1);
+                this.setState({ areas: areas });
+            }
+        });
+    };
+
     componentDidMount() {
         const { token, api_url } = this.props;
 
-        fetch(`${api_url}/areas`, {
+        fetch(`${api_url}/areas?filter={"include": [{"relation":"action"},{"relation":"reactions"}]}`, {
             headers: { 'Authorization': `Bearer ${token}` }
         })
         .then(res => res.json())
         .then((data) => {
-            this.setState({ areas: data });
+            const { info } = this.state;
+
+            const tmpAreaArray = data.filter((reaction: Area) => (!reaction.action || !reaction.reactions) || (reaction.action.serviceAction.split('.')[0] === info.name));
+            this.setState({ areas: tmpAreaArray });
         });
     }
 
@@ -82,6 +118,7 @@ class ServiceDetails extends Component<Props, State> {
         const { classes } = this.props;
         const { areas, info } = this.state;
 
+        console.log(areas);
         return (
             <div>
                 <NavigationBar history={this.props.history} />
@@ -101,14 +138,55 @@ class ServiceDetails extends Component<Props, State> {
                                 aria-controls="panel1a-content"
                                 id="panel1a-header"
                             >
-                                <Typography className={classes.heading}>{ area.name }</Typography>
+                                <Typography className={classes.heading} variant="h5">{ area.name }</Typography>
                             </ExpansionPanelSummary>
-                            <ExpansionPanelDetails>
-                                <Typography>
-                                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse malesuada lacus ex,
-                                    sit amet blandit leo lobortis eget.
-                                </Typography>
+                            <ExpansionPanelDetails className={classes.details}>
+                                {
+                                    (area.action) ?
+                                        <div>
+                                            <Typography variant="h5" gutterBottom>
+                                                <b>Action</b> - {area.action.serviceAction.split('.')[area.action.serviceAction.split('.').length - 1]}
+                                            </Typography>
+                                            {Object.keys(area.action.options).map((elem: string) => (
+                                                <p key={Object.keys(area.action.options).indexOf(elem)}>
+                                                    <b>{elem}</b>{': ' + area.action.options[elem]}
+                                                </p>
+                                            ))}
+                                            <Divider />
+                                        </div>
+                                    :
+                                        ''
+                                }
                             </ExpansionPanelDetails>
+                            {
+                                (area.reactions) ?
+                                    area.reactions.map((reaction) => (
+                                        <ExpansionPanelDetails key={area.reactions.indexOf(reaction)} className={classes.details}>
+                                            <Typography variant="h5" gutterBottom>
+                                                <b>Reaction</b> - {reaction.serviceReaction.split('.')[reaction.serviceReaction.split('.').length - 1]}
+                                            </Typography>
+                                            { Object.keys(reaction.options).map((elem: string) => (
+                                                <p key={Object.keys(reaction.options).indexOf(elem)}>
+                                                    <b>{elem}</b>{': ' + reaction.options[elem]}
+                                                </p>
+                                            ))}
+                                        </ExpansionPanelDetails>
+                                    ))
+                                    :
+                                    ''
+                            }
+                            <ExpansionPanelActions>
+                                <Button
+                                    value={areas.indexOf(area)}
+                                    variant="contained"
+                                    color="primary"
+                                    className={classes.button}
+                                    onClick={(e) => {e.persist();this.deleteAREA(e);}}
+                                    startIcon={<DeleteIcon />}
+                                >
+                                    <Translator sentence="delete" />
+                                </Button>
+                            </ExpansionPanelActions>
                         </ExpansionPanel>
                     ))}
                 </div>

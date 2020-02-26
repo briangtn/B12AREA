@@ -34,6 +34,7 @@ const english = {
     addServices: "Add services",
     addServicesSubtitle: "To subscribe to a new services, please fill the informations below.",
     myActions: "My AREA",
+    delete: "Delete"
 };
 
 export default english;

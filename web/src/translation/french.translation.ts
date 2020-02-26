@@ -33,7 +33,8 @@ const french = {
      */
     addServices: "Ajouter un service",
     addServicesSubtitle: "Pour vous enregistrer à un nouveau services, renseignez les champs ci-dessous",
-    myActions: "Mes AREA"
+    myActions: "Mes AREA",
+    delete: "Supprimer"
 };
 
 export default french;
