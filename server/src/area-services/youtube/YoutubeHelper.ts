@@ -55,8 +55,7 @@ export class YoutubeHelper {
             this.GOOGLE_CLIENT_SECRET,
             redirectUri
         );
-
-        return oauth2Client.getToken(code);
+        return (await oauth2Client.getToken(code)).tokens
     }
 
     public static getAuthClient() {
