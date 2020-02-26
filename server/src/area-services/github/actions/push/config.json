@@ -1,5 +1,5 @@
 {
-  "displayName": "push",
+  "displayName": "Push",
   "description": "Triggered on a push to a repository branch. Branch pushes and repository tag pushes also trigger this action.",
   "configSchema": [
     {

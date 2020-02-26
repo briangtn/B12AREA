@@ -189,7 +189,19 @@ export class AreaActionController {
         action.options = result.options;
 
         await this.areaRepository.action(id).patch(action, where);
-        return this.areaRepository.action(id).get();
+
+        const updated = await this.areaRepository.action(id).get();
+
+        if (controller.updateActionFinished) {
+            try {
+                result = await controller.updateActionFinished(updated.id!, (await this.actionRepository.getActionOwnerID(updated.id!))!, action.options, this.ctx);
+                if (!result.success)
+                    throw new HttpErrors.BadRequest(result.error);
+            } catch (e) {
+                throw new HttpErrors.BadRequest('Failed to create action in service');
+            }
+        }
+        return updated;
     }
 
     @del('/{id}/action', {
