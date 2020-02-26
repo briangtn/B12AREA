@@ -1,15 +1,11 @@
 import {applyPlaceholders, OperationStatus, WorkableObject} from "../../../services-interfaces";
 import {Context} from "@loopback/context";
-import axios from "axios";
 import {ReactionRepository, UserRepository} from "../../../repositories";
 import {Reaction} from "../../../models";
 import ServiceController from "../controller";
 import {TokensResponse} from "../interfaces";
 import {YoutubeHelper} from "../YoutubeHelper";
 import {google} from "googleapis";
-
-const YOUTUBE_API_BASE_URL = "https://www.googleapis.com/youtube/v3/videos";
-const YOUTUBE_API_KEY : string = process.env.YOUTUBE_API_KEY ?? "";
 
 interface RateReactionOptions {
     userId: string,
@@ -23,27 +19,13 @@ export enum RateEnum {
     UNRATED = "none"
 }
 
-interface PreparedData {
-    tokenType: string,
-    token: string
-}
-
 export class RateReactionHelper {
     static async trigger(params: WorkableObject): Promise<void> {
-        console.log(params);
-
-
         const reactionOptions: RateReactionOptions = params.reactionOptions as RateReactionOptions;
         const preparedData: TokensResponse = params.reactionPreparedData as TokensResponse;
-
         const video = applyPlaceholders(reactionOptions.video, params.actionPlaceholders);
-        console.log(preparedData);
 
-        const googleOAuthClient = new google.auth.OAuth2(
-            YoutubeHelper.GOOGLE_CLIENT_ID,
-            YoutubeHelper.GOOGLE_CLIENT_SECRET,
-            YOUTUBE_API_KEY
-        );
+        const googleOAuthClient = YoutubeHelper.getAuthClient();
         googleOAuthClient.setCredentials({
             // eslint-disable-next-line @typescript-eslint/camelcase
             refresh_token: preparedData.refresh_token,
@@ -58,11 +40,10 @@ export class RateReactionHelper {
         });
 
         try {
-            const res = await youtube.videos.rate({
+            await youtube.videos.rate({
                 id: video,
                 rating: reactionOptions.rate
             });
-            console.debug("Response", res.status, res.statusText);
         } catch (e) {
             console.debug(`Failed to rate video`, e.response.data.error.code, e.response.data.error.message);
             if (e.response.data) {

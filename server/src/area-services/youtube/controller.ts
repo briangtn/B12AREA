@@ -5,12 +5,9 @@ import {Context, inject} from "@loopback/context";
 import {CustomUserProfile, ExchangeCodeGeneratorManager} from "../../services";
 import {UserRepository} from "../../repositories";
 import {User} from "../../models";
-import axios from "axios";
 import {repository} from "@loopback/repository";
 import {TokensResponse} from "./interfaces";
 import {YoutubeHelper} from "./YoutubeHelper";
-import {authenticate} from "@loopback/authentication";
-import {Token} from "nodemailer/lib/xoauth2";
 
 const API_URL : string = process.env.API_URL ?? "http://localhost:8080";
 
@@ -25,7 +22,7 @@ export default class ServiceController {
     }
 
     static async start(ctx: Context): Promise<void> {
-        console.log('Starting youtube service');
+        console.log(`Starting ${this.serviceName} service`);
     }
 
     @get('/oauth', {
@@ -78,11 +75,6 @@ export default class ServiceController {
         const userRepository: UserRepository = await params.ctx.get('repositories.UserRepository');
         const exchangeCodeGenerator: ExchangeCodeGeneratorManager = await params.ctx.get('services.exchangeCodeGenerator');
         const user: User = (await userRepository.findOne({where: {email: params.user.email}}))!;
-
-        if (user.services && user.services[this.serviceName as keyof typeof user.services]) {
-            const token = (user.services as never)['youtube']["access_token"];
-            await YoutubeHelper.refreshToken(user.id!, token);
-        }
 
         if (await userRepository.getServiceInformation(user.id, this.serviceName)) {
             const codeParam = await exchangeCodeGenerator.generate({status: `Authenticated with ${this.serviceName}`}, true);

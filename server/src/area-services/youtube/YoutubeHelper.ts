@@ -8,6 +8,7 @@ import {google} from "googleapis";
 export class YoutubeHelper {
     public static GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
     public static GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
+    public static YOUTUBE_API_KEY : string = process.env.YOUTUBE_API_KEY ?? "";
 
     public static isTokenValid(token: TokensResponse): Boolean {
         if (!token.expires_at)
@@ -49,33 +50,13 @@ export class YoutubeHelper {
         console.log(tokens);
         return tokens;
     }
-    public static async refreshToken(userId: string, ctx: Context): Promise<void> {
-        const userRepository: UserRepository = await ctx.get('repositories.UserRepository');
 
-        const oauth2Client = new google.auth.OAuth2(
-            this.GOOGLE_CLIENT_ID,
-            this.GOOGLE_CLIENT_SECRET
+    public static getAuthClient() {
+        return new google.auth.OAuth2(
+            YoutubeHelper.GOOGLE_CLIENT_ID,
+            YoutubeHelper.GOOGLE_CLIENT_SECRET,
+            YoutubeHelper.YOUTUBE_API_KEY
         );
-        oauth2Client.setCredentials({
-            // eslint-disable-next-line @typescript-eslint/camelcase
-            refresh_token: `STORED_REFRESH_TOKEN`
-        });
-
-        const token: TokensResponse = await userRepository.getServiceInformation(userId, ServiceController.serviceName) as TokensResponse;
-
-        const response =  await axios.post('https://oauth2.googleapis.com/token', {
-            // eslint-disable-next-line @typescript-eslint/camelcase
-            client_id: YoutubeHelper.GOOGLE_CLIENT_ID,
-            // eslint-disable-next-line @typescript-eslint/camelcase
-            client_secret: YoutubeHelper.GOOGLE_CLIENT_SECRET,
-            // eslint-disable-next-line @typescript-eslint/camelcase
-            grant_type: 'refresh_token',
-            // eslint-disable-next-line @typescript-eslint/camelcase
-            access_type: 'offline',
-            // eslint-disable-next-line @typescript-eslint/camelcase
-            refresh_token: token.access_token
-        });
-        await YoutubeHelper.updateToken(userId, (response.data) as TokensResponse, ctx);
     }
 
     public static async updateToken(userId: string, token: TokensResponse, ctx: Context) {
