@@ -55,6 +55,13 @@ export interface TeamsNewMessageInChannelData {
     lastPulled: string;
 }
 
+export interface TeamsReplyToMessageOptions {
+    teamsId: string;
+    channelId: string;
+    messageId: string;
+    message: string;
+}
+
 export class TeamsHelper {
 
     public static generateLoginRedirectUrlWithoutState() : string {
@@ -159,7 +166,6 @@ export class TeamsHelper {
 
         const tokens: TeamsTokens = await userRepository.getServiceInformation(userID, 'teams') as TeamsTokens;
         const actionOptions: TeamsNewMessageInChannelOptions = (await actionRepository.getActionSettings(actionID))! as TeamsNewMessageInChannelOptions;
-        const actionData: TeamsNewMessageInChannelData = (await actionRepository.getActionData(actionID))! as TeamsNewMessageInChannelData;
 
         if (!tokens || !tokens.access_token)
             return;
@@ -168,6 +174,7 @@ export class TeamsHelper {
             {headers: {Authorization: 'Bearer ' + tokens.access_token}},
             async (data: {value: TeamsAPIChatMessageResource[]}) => {
                 const diff = [];
+                const actionData: TeamsNewMessageInChannelData = (await actionRepository.getActionData(actionID))! as TeamsNewMessageInChannelData;
 
                 for (const chatMessage of data.value) {
                     if (new Date(chatMessage.createdDateTime) >= new Date(actionData.lastPulled)) {
@@ -196,6 +203,14 @@ export class TeamsHelper {
                         {
                             name: "MessageId",
                             value: chatMessage.id
+                        },
+                        {
+                            name: "TeamsId",
+                            value: actionOptions.teamId
+                        },
+                        {
+                            name: "ChannelId",
+                            value: actionOptions.channelId
                         }
                     ];
                     placeholders = placeholders.concat(areaService.createWordsPlaceholders(chatMessage.body.content));
