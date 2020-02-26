@@ -31,6 +31,14 @@ class RegisterActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_register)
 
+        val sharedPreferences = getSharedPreferences(getString(R.string.storage_name), Context.MODE_PRIVATE)
+
+        if (sharedPreferences.contains(getString(R.string.token_key))) {
+            val intent = Intent(this, HomeActivity::class.java)
+            finish()
+            startActivity(intent)
+        }
+
         val etConfirmPassword = findViewById<EditText>(R.id.confirm_password)
 
         etConfirmPassword.setOnKeyListener(View.OnKeyListener { _, keyCode, event ->

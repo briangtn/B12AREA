@@ -47,6 +47,8 @@
     <string name="successful_password_reset">Votre mot de passe a été réinitialisé avec succès !</string>
     <string name="password_reset_confirmation_message">Nous vous avons envoyé un email afin de définir votre nouveau mot de passe. Vérifiez vos spams si vous ne le voyez pas !</string>
     <string name="success_new_password">Nouveau mot de passe enregistré avec succès !</string>
+    <string name="subscribe_service">S\'abonner à ce service ?</string>
+    <string name="subscribe_service_message">"Voulez-vous vous abonner à "</string>
     <string name="storage_name">com.b12powered.area</string>
     <string name="token_key">jwt-token</string>
     <string name="api_url_key">api_url</string>

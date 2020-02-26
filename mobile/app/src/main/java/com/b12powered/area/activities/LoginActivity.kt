@@ -30,6 +30,14 @@ class LoginActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
 
+        val sharedPreferences = getSharedPreferences(getString(R.string.storage_name), Context.MODE_PRIVATE)
+
+        if (sharedPreferences.contains(getString(R.string.token_key))) {
+            val intent = Intent(this, HomeActivity::class.java)
+            finish()
+            startActivity(intent)
+        }
+
         val etPassword = findViewById<EditText>(R.id.password)
 
         etPassword.setOnKeyListener(View.OnKeyListener { _, keyCode, event ->
