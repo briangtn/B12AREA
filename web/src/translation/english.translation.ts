@@ -34,7 +34,9 @@ const english = {
     addServices: "Add services",
     addServicesSubtitle: "To subscribe to a new services, please fill the informations below.",
     myActions: "My AREA",
-    delete: "Delete"
+    delete: "Delete",
+    addReactions: "Add reaction",
+    addReactionsDescription: "Please fill the informations to add a new reaction to your AREA"
 };
 
 export default english;

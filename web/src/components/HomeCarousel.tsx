@@ -99,6 +99,7 @@ class HomeCarousel extends Component<Props, State> {
                     <Card className={classes.root} key={services.indexOf(elem)}>
                         <CardActionArea>
                             <CardMedia
+                                style={{backgroundColor: elem["color"]}}
                                 className={classes.media}
                                 image={elem["icon"]}
                                 title="Contemplative Reptile"

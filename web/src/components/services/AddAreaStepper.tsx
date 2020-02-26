@@ -471,7 +471,6 @@ class AddAreaStepper extends Component<Props, State> {
     render() {
         const { activeStep, steps } = this.state;
 
-        console.log(this.state);
         return (
             <div>
                 <Stepper activeStep={activeStep} alternativeLabel>

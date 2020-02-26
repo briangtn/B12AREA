@@ -34,7 +34,9 @@ const french = {
     addServices: "Ajouter un service",
     addServicesSubtitle: "Pour vous enregistrer à un nouveau services, renseignez les champs ci-dessous",
     myActions: "Mes AREA",
-    delete: "Supprimer"
+    delete: "Supprimer",
+    addReactions: "Ajouter une reaction",
+    addReactionsDescription: "Veuillez renseigner les informations, pour ajouter une nouvelle reaction à votre AREA"
 };
 
 export default french;

@@ -140,7 +140,7 @@ class App extends Component<Props, State> {
                         name: service['name'],
                         description: service['description'],
                         icon: service['icon'],
-                        color: service['string']
+                        color: service['color']
                     };
                     tmp.push(tmpObject);
                 }
