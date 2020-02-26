@@ -12,6 +12,7 @@ import android.widget.CheckBox
 import android.widget.EditText
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import com.b12powered.area.AreaCreationStatus
 import com.b12powered.area.R
 import com.b12powered.area.activities.ServiceInformationActivity
 import com.b12powered.area.api.ApiClient
@@ -76,7 +77,7 @@ class CreateAreaFragment : Fragment() {
         ApiClient(activity!!)
             .createArea(name, enabled) { area, message ->
                 if (area !== null) {
-                    (activity as ServiceInformationActivity).createArea(area)
+                    (activity as ServiceInformationActivity).nextStep(area, null, AreaCreationStatus.AreaCreated)
                 } else {
                     Toast.makeText(
                         context,

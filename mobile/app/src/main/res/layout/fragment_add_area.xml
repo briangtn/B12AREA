@@ -11,14 +11,14 @@
         android:layout_marginStart="36dp"
         android:layout_marginTop="40dp"
         android:fontFamily="@font/roboto_medium"
-        android:text="@string/add_action"
+        android:text="@string/edit_action"
         android:textColor="@color/colorPrimary"
         android:textSize="24sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <ListView
-        android:id="@+id/action_list"
+        android:id="@+id/list"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
@@ -27,5 +27,19 @@
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView" />
+
+    <Button
+        android:id="@+id/submit_button"
+        android:layout_width="130dp"
+        android:layout_height="60dp"
+        android:layout_marginTop="48dp"
+        android:backgroundTint="@color/colorSecondary"
+        android:fontFamily="@font/roboto_medium"
+        android:text="@string/next"
+        android:textSize="16sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/list" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

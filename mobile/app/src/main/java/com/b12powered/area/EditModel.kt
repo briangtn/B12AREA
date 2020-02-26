@@ -4,7 +4,9 @@ class EditModel {
     private lateinit var editTextValue: String
 
     fun getEditTextValue(): String {
-        return editTextValue
+        if (::editTextValue.isInitialized)
+            return editTextValue
+        return ""
     }
 
     fun setEditTextValue(value: String) {

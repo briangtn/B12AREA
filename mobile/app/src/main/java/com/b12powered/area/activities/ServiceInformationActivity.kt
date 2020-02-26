@@ -6,8 +6,8 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.b12powered.area.*
 import com.b12powered.area.fragments.CreateAreaFragment
-import com.b12powered.area.fragments.AddActionFragment
-import com.b12powered.area.fragments.EditActionFragment
+import com.b12powered.area.fragments.SelectAreaFragment
+import com.b12powered.area.fragments.AddAreaFragment
 
 class ServiceInformationActivity : AppCompatActivity() {
 
@@ -38,15 +38,16 @@ class ServiceInformationActivity : AppCompatActivity() {
 
     }
 
-    fun createArea(area: Area) {
+    fun nextStep(area: Area, ar: ActionReaction?, step: AreaCreationStatus) {
         supportFragmentManager.beginTransaction()
-            .replace(R.id.create_area_layout, AddActionFragment.newInstance(service, area))
+            .replace(R.id.create_area_layout, when(step) {
+                is AreaCreationStatus.AreaCreated -> SelectAreaFragment.newInstance(service, area, step)
+                is AreaCreationStatus.ActionSelected -> AddAreaFragment.newInstance(service, area, ar!!, step)
+                is AreaCreationStatus.ActionAdded -> SelectAreaFragment.newInstance(service, area, step)
+                is AreaCreationStatus.ReactionSelected -> AddAreaFragment.newInstance(service, area, ar!!, step)
+                is AreaCreationStatus.ReactionAdded -> SelectAreaFragment.newInstance(service, area, step)
+            })
             .commit()
     }
 
-    fun addAction(area: Area, action: Action) {
-        supportFragmentManager.beginTransaction()
-            .replace(R.id.create_area_layout, EditActionFragment.newInstance(service, area, action))
-            .commit()
-    }
 }

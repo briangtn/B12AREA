@@ -11,14 +11,14 @@
         android:layout_marginStart="36dp"
         android:layout_marginTop="40dp"
         android:fontFamily="@font/roboto_medium"
-        android:text="@string/edit_action"
+        android:text="@string/add_action"
         android:textColor="@color/colorPrimary"
         android:textSize="24sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <ListView
-        android:id="@+id/action_list"
+        android:id="@+id/list"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"

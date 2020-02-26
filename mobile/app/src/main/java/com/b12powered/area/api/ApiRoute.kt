@@ -159,8 +159,17 @@ sealed class ApiRoute(private var mainContext: Context) {
      * @param options An object containing action parameters
      * @param context The context of the call
      */
-    data class AddAction(var areaId: String, var serviceAction: String, var options: Any, var context: Context) : ApiRoute(context)
+    data class AddAction(var areaId: String, var serviceAction: String, var options: HashMap<String, Any>, var context: Context) : ApiRoute(context)
 
+    /**
+     * Data class [AddReaction] route
+     *
+     * @param areaId The area id
+     * @param serviceReaction The string matching service and reaction name
+     * @param options An object containing action parameters
+     * @param context The context of the call
+     */
+    data class AddReaction(var areaId: String, var serviceReaction: String, var options: HashMap<String, Any>, var context: Context) : ApiRoute(context)
 
     /**
      * Timeout of the api call
@@ -225,6 +234,7 @@ sealed class ApiRoute(private var mainContext: Context) {
                 is RefreshToken -> "users/refreshToken"
                 is CreateArea -> "areas"
                 is AddAction -> "areas/${areaId}/action"
+                is AddReaction -> "areas/${areaId}/action"
                 else -> ""
             }}"
         }
@@ -295,6 +305,9 @@ sealed class ApiRoute(private var mainContext: Context) {
                 }
                 is AddAction -> {
                     hashMapOf(Pair("serviceAction", serviceAction), Pair("options", options))
+                }
+                is AddReaction -> {
+                    hashMapOf(Pair("serviceReaction", serviceReaction), Pair("options", options))
                 }
                 else -> hashMapOf()
             }
@@ -369,6 +382,9 @@ sealed class ApiRoute(private var mainContext: Context) {
                     hashMapOf(Pair("Authorization", "Bearer $token"))
                 }
                 is AddAction -> {
+                    hashMapOf(Pair("Authorization", "Bearer $token"))
+                }
+                is AddReaction -> {
                     hashMapOf(Pair("Authorization", "Bearer $token"))
                 }
                 else -> hashMapOf()

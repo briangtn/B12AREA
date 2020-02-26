@@ -55,10 +55,9 @@
         android:layout_marginTop="76dp"
         android:backgroundTint="@color/colorSecondary"
         android:fontFamily="@font/roboto_medium"
-        android:text="@string/submit"
+        android:text="@string/next"
         android:textSize="16sp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/area_name" />
 

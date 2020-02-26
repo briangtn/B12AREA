@@ -58,4 +58,6 @@
     <string name="empty_area_name">Area name cannot be empty</string>
     <string name="add_action">Add action to your area</string>
     <string name="edit_action">Edit action parameters</string>
+    <string name="next">Next</string>
+    <string name="missing_parameter">Missing parameter</string>
 </resources>

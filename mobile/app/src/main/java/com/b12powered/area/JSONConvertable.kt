@@ -40,19 +40,12 @@ data class PlaceHolder(
     @SerializedName("description") val description: String
 ) : JSONConvertable
 
-data class Action(
+data class ActionReaction(
     @SerializedName("name") val name: String,
     @SerializedName("displayName") val displayName: String,
     @SerializedName("description") val description: String,
     @SerializedName("configSchema") val configSchema: List<ConfigSchema>,
     @SerializedName("placeholders") val placeholders: List<PlaceHolder>
-) : JSONConvertable
-
-data class Reaction(
-    @SerializedName("name") val name: String,
-    @SerializedName("displayName") val displayName: String,
-    @SerializedName("description") val description: String,
-    @SerializedName("configSchema") val configSchema: List<ConfigSchema>
 ) : JSONConvertable
 
 data class Service(
@@ -61,8 +54,8 @@ data class Service(
     @SerializedName("description") val description: String,
     @SerializedName("icon") val icon: String,
     @SerializedName("color") val color: String,
-    @SerializedName("actions") val actions: List<Action>,
-    @SerializedName("reaction") val reactions: List<Reaction>
+    @SerializedName("actions") val actions: List<ActionReaction>,
+    @SerializedName("reaction") val reactions: List<ActionReaction>
 ) : JSONConvertable
 
 data class Server(

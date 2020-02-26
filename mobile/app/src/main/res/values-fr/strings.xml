@@ -59,4 +59,6 @@
     <string name="empty_area_name">Le nom de l\'area ne peut pas être vide</string>
     <string name="add_action">Ajouter une action à votre area</string>
     <string name="edit_action">Editer les paramètres de l\'action</string>
+    <string name="next">Suivant</string>
+    <string name="missing_parameter">Paramètre manquant</string>
 </resources>

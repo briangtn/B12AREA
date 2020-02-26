@@ -362,8 +362,18 @@ class ApiClient(private val context: Context) {
     /**
      * Build a addAction request with [areaId], [serviceAction] and [options] and perform it, then invoke [completion] with a boolean corresponding to the result of the call
      */
-    fun addAction(areaId: String, serviceAction: String, options: Any, completion: (success: Boolean, message: String) -> Unit) {
+    fun addAction(areaId: String, serviceAction: String, options: HashMap<String, Any>, completion: (success: Boolean, message: String) -> Unit) {
         val route = ApiRoute.AddAction(areaId, serviceAction, options, context)
+        this.performRequest(route) { success, response ->
+            completion.invoke(success, response.message)
+        }
+    }
+
+    /**
+     * Build a addReaction request with [areaId], [serviceReaction] and [options] and perform it, then invoke [completion] with a boolean corresponding to the result of the call
+     */
+    fun addReaction(areaId: String, serviceReaction: String, options: HashMap<String, Any>, completion: (success: Boolean, message: String) -> Unit) {
+        val route = ApiRoute.AddReaction(areaId, serviceReaction, options, context)
         this.performRequest(route) { success, response ->
             completion.invoke(success, response.message)
         }
