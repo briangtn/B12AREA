@@ -10,6 +10,7 @@ import com.android.volley.toolbox.DiskBasedCache
 import com.android.volley.toolbox.HurlStack
 import com.android.volley.toolbox.StringRequest
 import com.b12powered.area.About
+import com.b12powered.area.Area
 import com.b12powered.area.User
 import com.b12powered.area.toObject
 import com.google.gson.Gson
@@ -337,6 +338,18 @@ class ApiClient(private val context: Context) {
             if (success) {
                 val token = JSONObject(response.json).getString("token")
                 completion.invoke(token, "success")
+            } else {
+                completion.invoke(null, response.message)
+            }
+        }
+    }
+
+    fun createArea(name: String, enabled: Boolean, completion: (area: Area?, message: String) -> Unit) {
+        val route = ApiRoute.CreateArea(name, enabled, context)
+        this.performRequest(route) { success, response ->
+            if (success) {
+                val area: Area = response.json.toObject()
+                completion.invoke(area, "success")
             } else {
                 completion.invoke(null, response.message)
             }

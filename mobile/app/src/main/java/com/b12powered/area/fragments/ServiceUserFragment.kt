@@ -39,9 +39,8 @@ class ServiceUserFragment(private val service: Service) : Fragment() {
         view.setBackgroundColor(Color.parseColor(service.color))
         super.onViewCreated(view, savedInstanceState)
         view.setOnClickListener {
-            println(service.name)
             val intent = Intent(context, ServiceInformationActivity::class.java)
-            intent.putExtra("serviceName", service.name)
+            intent.putExtra("service", service.toJSON())
             startActivity(intent)
         }
     }

@@ -42,6 +42,7 @@ data class PlaceHolder(
 
 data class Action(
     @SerializedName("name") val name: String,
+    @SerializedName("displayName") val displayName: String,
     @SerializedName("description") val description: String,
     @SerializedName("configSchema") val configSchema: List<ConfigSchema>,
     @SerializedName("placeholders") val placeholders: List<PlaceHolder>
@@ -49,12 +50,14 @@ data class Action(
 
 data class Reaction(
     @SerializedName("name") val name: String,
+    @SerializedName("displayName") val displayName: String,
     @SerializedName("description") val description: String,
     @SerializedName("configSchema") val configSchema: List<ConfigSchema>
 ) : JSONConvertable
 
 data class Service(
     @SerializedName("name") val name: String,
+    @SerializedName("displayName") val displayName: String,
     @SerializedName("description") val description: String,
     @SerializedName("icon") val icon: String,
     @SerializedName("color") val color: String,
@@ -65,6 +68,14 @@ data class Service(
 data class Server(
     @SerializedName("current_time") val currentTime: Any,
     @SerializedName("services") val services: List<Service>
+) : JSONConvertable
+
+data class Area(
+    @SerializedName("id") val id: String,
+    @SerializedName("name") val name: String,
+    @SerializedName("enabled") val enabled: Boolean,
+    @SerializedName("ownerId") val ownerId: String,
+    @SerializedName("data") val data: Any
 ) : JSONConvertable
 
 data class About(

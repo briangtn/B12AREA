@@ -13,7 +13,6 @@ import com.b12powered.area.R
 import com.b12powered.area.User
 import com.b12powered.area.api.ApiClient
 import com.b12powered.area.fragments.ServiceUserFragment
-import kotlinx.android.synthetic.main.fragment_service_user.*
 import com.b12powered.area.toObject
 import java.util.*
 
@@ -103,9 +102,27 @@ class HomeActivity : AppCompatActivity() {
         ApiClient(this)
             .getUser { user, message ->
                 if (user != null) {
-                    user.services.forEach { service ->
-                        addService(service)
-                    }
+                    ApiClient(this)
+                        .aboutJson { about, msg ->
+                            if (about !== null) {
+                                about.server.services.forEach { service ->
+                                    if (user.services.contains(service.name)) {
+                                        supportFragmentManager.beginTransaction()
+                                            .add(
+                                                R.id.home,
+                                                ServiceUserFragment.newInstance(service)
+                                            )
+                                            .commit()
+                                    }
+                                }
+                            } else {
+                                Toast.makeText(
+                                    this,
+                                    msg,
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                        }
                 } else {
                     Toast.makeText(
                         this,
@@ -115,30 +132,6 @@ class HomeActivity : AppCompatActivity() {
                     val intent = Intent(this, LoginActivity::class.java)
                     finish()
                     startActivity(intent)
-                }
-            }
-    }
-
-    /**
-     * Add a card with the service name
-     */
-    private fun addService(serviceName: String) {
-        ApiClient(this)
-            .aboutJson { about, message ->
-                if (about !== null) {
-                    about.server.services.forEach { service ->
-                        if (serviceName == service.name) {
-                            supportFragmentManager.beginTransaction()
-                                .add(R.id.home, ServiceUserFragment.newInstance(service))
-                                .commit()
-                        }
-                    }
-                } else {
-                    Toast.makeText(
-                        this,
-                        message,
-                        Toast.LENGTH_SHORT
-                    ).show()
                 }
             }
     }

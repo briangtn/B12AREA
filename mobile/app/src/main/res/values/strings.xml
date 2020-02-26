@@ -51,4 +51,10 @@
     <string name="storage_name">com.b12powered.area</string>
     <string name="token_key">jwt-token</string>
     <string name="api_url_key">api_url</string>
+    <string name="area_name">Area name</string>
+    <string name="active_at_creation">Active at creation</string>
+    <string name="submit">Submit</string>
+    <string name="create_area">Create new area</string>
+    <string name="empty_area_name">Area name cannot be empty</string>
+    <string name="add_action">Add action to your area</string>
 </resources>

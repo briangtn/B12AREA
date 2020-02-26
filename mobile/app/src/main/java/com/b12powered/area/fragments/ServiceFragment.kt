@@ -72,7 +72,7 @@ class ServiceFragment(private val service: Service) : Fragment() {
         }
         builder
             .setTitle(getString(R.string.subscribe_service))
-            .setMessage(getString(R.string.subscribe_service_message) + service.name + " ?")
+            .setMessage(getString(R.string.subscribe_service_message) + service.displayName + " ?")
             .setPositiveButton(getString(R.string.confirm), dialogClickListener)
             .setNegativeButton(getString(R.string.cancel), dialogClickListener)
             .create()

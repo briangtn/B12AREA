@@ -142,6 +142,15 @@ sealed class ApiRoute(private var mainContext: Context) {
      */
     data class RefreshToken(var context: Context) : ApiRoute(context)
 
+    /**
+     * Data class for [CreateArea] route
+     *
+     * @param name The area name
+     * @param enabled If the area should be enabled at creation or not
+     * @param context The context of the call
+     */
+    data class CreateArea(var name: String, var enabled: Boolean, var context: Context) : ApiRoute(context)
+
 
     /**
      * Timeout of the api call
@@ -204,6 +213,7 @@ sealed class ApiRoute(private var mainContext: Context) {
                 is AboutJson -> "about.json"
                 is LoginService -> "services/login/${service}"
                 is RefreshToken -> "users/refreshToken"
+                is CreateArea -> "areas"
                 else -> ""
             }}"
         }
@@ -230,6 +240,7 @@ sealed class ApiRoute(private var mainContext: Context) {
                 is RequestResetPassword -> Request.Method.POST
                 is ResetPassword -> Request.Method.PATCH
                 is LoginService -> Request.Method.POST
+                is CreateArea -> Request.Method.POST
                 else -> Request.Method.GET
             }
         }
@@ -265,7 +276,10 @@ sealed class ApiRoute(private var mainContext: Context) {
                     hashMapOf(Pair("token", token), Pair("password", password))
                 }
                 is PatchUser -> {
-                    hashMapOf(Pair("password", this.user.password), Pair("disable2FA", (!this.user.twoFactorAuthenticationEnabled)))
+                    hashMapOf(Pair("password", user.password), Pair("disable2FA", (!user.twoFactorAuthenticationEnabled)))
+                }
+                is CreateArea -> {
+                    hashMapOf(Pair("name", name), Pair("enabled", enabled))
                 }
                 else -> hashMapOf()
             }
@@ -334,6 +348,9 @@ sealed class ApiRoute(private var mainContext: Context) {
                     hashMapOf(Pair("Authorization", "Bearer $token"))
                 }
                 is RefreshToken -> {
+                    hashMapOf(Pair("Authorization", "Bearer $token"))
+                }
+                is CreateArea -> {
                     hashMapOf(Pair("Authorization", "Bearer $token"))
                 }
                 else -> hashMapOf()
