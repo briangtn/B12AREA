@@ -4,7 +4,7 @@ import {LoginObject, ServiceConfig} from "../../services-interfaces";
 import {ExchangeCodeGeneratorManager} from "../../services";
 import {get, param, Response, RestBindings} from "@loopback/rest";
 import {TeamsHelper, TeamsTokens} from "./helper";
-import {UserRepository} from "../../repositories";
+import {ActionRepository, UserRepository} from "../../repositories";
 import {User} from "../../models";
 import {UserProfile} from "@loopback/security";
 import {HttpErrors} from "@loopback/rest/dist";
@@ -20,6 +20,17 @@ export default class ServiceController {
 
     static async start(ctx: Context): Promise<void> {
         console.log('Starting teams service');
+        const actionRepository: ActionRepository = await ctx.get('repositories.ActionRepository');
+
+        const actions = await actionRepository.find({where: {serviceAction: 'teams.A.new_message_in_channel'}});
+
+        // Start pulling's for new playlist song actions
+        for (const action of actions) {
+            const ownerId  = await actionRepository.getActionOwnerID(action.id?.toString()!);
+            if (!ownerId)
+                continue;
+            await TeamsHelper.startNewMessageInChannelPulling(action.id!, ownerId, ctx);
+        }
     }
 
     static async login(params: LoginObject): Promise<string> {

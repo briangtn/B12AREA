@@ -138,7 +138,17 @@ export class TeamsHelper {
         }
     }
 
-    static async startNewMessageInChannelPulling(actionID: string, userID: string, ctx: Context) {
+    public static async getNewMessageInChannelPullingUrl(actionId?: string, ctx?: Context): Promise<string|undefined> {
+        if (!actionId || !ctx)
+            return;
+        const actionRepository: ActionRepository = await ctx.get('repositories.ActionRepository');
+        const actionOptions: TeamsNewMessageInChannelOptions = (await actionRepository.getActionSettings(actionId))! as TeamsNewMessageInChannelOptions;
+        const actionData: TeamsNewMessageInChannelData = (await actionRepository.getActionData(actionId))! as TeamsNewMessageInChannelData;
+        const lastPulledDate = new Date(actionData.lastPulled).toISOString();
+        return `https://graph.microsoft.com/beta/teams/${actionOptions.teamId}/channels/${actionOptions.channelId}/messages/delta?filter=lastModifiedDateTime gt ${lastPulledDate}`
+    }
+
+    public static async startNewMessageInChannelPulling(actionID: string, userID: string, ctx: Context) {
         const areaService: AreaService = await ctx.get('services.area');
         const userRepository: UserRepository = await ctx.get('repositories.UserRepository');
         const actionRepository: ActionRepository = await ctx.get('repositories.ActionRepository');
@@ -150,12 +160,11 @@ export class TeamsHelper {
         const tokens: TeamsTokens = await userRepository.getServiceInformation(userID, 'teams') as TeamsTokens;
         const actionOptions: TeamsNewMessageInChannelOptions = (await actionRepository.getActionSettings(actionID))! as TeamsNewMessageInChannelOptions;
         const actionData: TeamsNewMessageInChannelData = (await actionRepository.getActionData(actionID))! as TeamsNewMessageInChannelData;
-        const lastPulledDate = new Date(actionData.lastPulled).toISOString();
 
         if (!tokens || !tokens.access_token)
             return;
         areaService.startPulling(
-            `https://graph.microsoft.com/beta/teams/${actionOptions.teamId}/channels/${actionOptions.channelId}/messages/delta?filter=lastModifiedDateTime gt ${lastPulledDate}`,
+            this.getNewMessageInChannelPullingUrl,
             {headers: {Authorization: 'Bearer ' + tokens.access_token}},
             async (data: {value: TeamsAPIChatMessageResource[]}) => {
                 const diff = [];
@@ -183,6 +192,10 @@ export class TeamsHelper {
                         {
                             name: "Message",
                             value: chatMessage.body.content
+                        },
+                        {
+                            name: "MessageId",
+                            value: chatMessage.id
                         }
                     ];
                     placeholders = placeholders.concat(areaService.createWordsPlaceholders(chatMessage.body.content));
@@ -194,10 +207,10 @@ export class TeamsHelper {
                         placeholders: placeholders
                     }, ctx)
                 }
-            }, TEAMS_NEW_MESSAGE_IN_CHANNEL_PULLING_DELTA, TEAMS_NEW_MESSAGE_IN_CHANNEL_PULLING_PREFIX + actionID)
+            }, TEAMS_NEW_MESSAGE_IN_CHANNEL_PULLING_DELTA, TEAMS_NEW_MESSAGE_IN_CHANNEL_PULLING_PREFIX + actionID, actionID, ctx);
     }
 
-    static async stopNewMessageInChannelPulling(actionID: string, ctx: Context) {
+    public static async stopNewMessageInChannelPulling(actionID: string, ctx: Context) {
         const areaService: AreaService = await ctx.get('services.area');
 
         areaService.stopPulling(TEAMS_NEW_MESSAGE_IN_CHANNEL_PULLING_PREFIX + actionID);

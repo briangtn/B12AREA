@@ -58,13 +58,13 @@ export default class ActionController {
     }
 
     static async updateAction(actionId: string, oldActionConfig: Object, newActionConfig: Object, ctx: Context): Promise<OperationStatus> {
-        await TeamsHelper.stopNewMessageInChannelPulling(actionId, ctx);
         let newConfig: TeamsNewMessageInChannelOptions | undefined = undefined;
         try {
             newConfig = await this.parseAndValidateActionConfig(newActionConfig);
         } catch (e) {
             return e;
         }
+        await TeamsHelper.stopNewMessageInChannelPulling(actionId, ctx);
         return { success: true, options: newConfig, data: { lastPulled: new Date().toISOString() } };
     }
 

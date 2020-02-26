@@ -21,6 +21,14 @@
       "description": "The complete teams message."
     },
     {
+      "name": "Author",
+      "description": "The author of the message"
+    },
+    {
+      "name": "MessageId",
+      "description": "The teams id of the message that is new"
+    },
+    {
       "name": "Words[i]",
       "description": "The word at index i in the message."
     },
@@ -37,8 +45,12 @@
       "description": "The number of matches in the Matches array"
     },
     {
-      "name": "Author",
-      "description": "The author of the message"
+      "name": "MatchesGroups[i]",
+      "description": "The match group at index i in the regex. /!\\ Can only be used if mustMatch was given"
+    },
+    {
+      "name": "NbMatchesGroups",
+      "description": "The number of matches groups in the MatchesGroupes array"
     }
   ]
 }
