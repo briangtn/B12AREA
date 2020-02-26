@@ -8,8 +8,6 @@ import {Action, User} from "../../models";
 import {repository} from "@loopback/repository";
 import {NewVideoConfig, NewVideoData, TokensResponse} from "./interfaces";
 import {YoutubeHelper} from "./YoutubeHelper";
-import axios from "axios";
-import DomParser from "dom-parser";
 
 const API_URL : string = process.env.API_URL ?? "http://localhost:8080";
 

@@ -13,6 +13,11 @@ import DomParser from "dom-parser";
 
 const API_URL : string = process.env.API_URL ?? "http://localhost:8080";
 
+export enum PubSubMode {
+    SUBSCRIBE = "subscribe",
+    UNSUBSCRIBE = "unsubscribe"
+}
+
 export class YoutubeHelper {
     public static WEBHOOK_PREFIX = `${API_URL}/services/youtube/actions/${config.displayName}/webhook/`;
     public static YOUTUBE_WATCH_URL = "https://www.youtube.com/xml/feeds/videos.xml?channel_id=";
@@ -44,16 +49,14 @@ export class YoutubeHelper {
         });
     }
 
-    public static async getToken(code: string, redirectUri: string): Promise<any> {
+    public static async getToken(code: string, redirectUri: string) {
         const oauth2Client = new google.auth.OAuth2(
             this.GOOGLE_CLIENT_ID,
             this.GOOGLE_CLIENT_SECRET,
             redirectUri
         );
 
-        const {tokens} = await oauth2Client.getToken(code);
-        console.log(tokens);
-        return tokens;
+        return oauth2Client.getToken(code);
     }
 
     public static getAuthClient() {
@@ -93,17 +96,7 @@ export class YoutubeHelper {
         const topicUrl = this.getTopicUrl(channelId);
 
         return new Promise<string>((resolve, reject) => {
-            axios.post(this.SUBSCRIBE_URL, qs.stringify({
-                "hub.callback": webhookUrl,
-                "hub.topic": topicUrl,
-                "hub.verify": 'async',
-                "hub.mode": 'subscribe',
-                // eslint-disable-next-line @typescript-eslint/camelcase
-                "hub.verify_token": "",
-                "hub.secret": "",
-                // eslint-disable-next-line @typescript-eslint/camelcase
-                "hub.lease_seconds": ""
-            }), {
+            axios.post(this.SUBSCRIBE_URL, this.getPushSubHubData(webhookUrl, channelId, PubSubMode.SUBSCRIBE), {
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded'
                 }
@@ -158,17 +151,7 @@ export class YoutubeHelper {
         const data = action.data as NewVideoData;
 
         return new Promise((resolve, reject) => {
-            axios.post(this.SUBSCRIBE_URL, qs.stringify({
-                "hub.callback": data.webHookUrl,
-                "hub.topic": this.YOUTUBE_WATCH_URL + channelId,
-                "hub.verify": 'async',
-                "hub.mode": 'unsubscribe',
-                // eslint-disable-next-line @typescript-eslint/camelcase
-                "hub.verify_token": "",
-                "hub.secret": "",
-                // eslint-disable-next-line @typescript-eslint/camelcase
-                "hub.lease_seconds": ""
-            }), {
+            axios.post(this.SUBSCRIBE_URL, this.getPushSubHubData(data.webHookUrl, channelId, PubSubMode.UNSUBSCRIBE), {
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded'
                 }
@@ -203,6 +186,18 @@ export class YoutubeHelper {
             console.log();
         }).catch((err) => {
             console.error(err);
+        })
+    }
+
+    static getPushSubHubData(webHookUrl: string, channelId: string, mode: PubSubMode): string {
+        return qs.stringify({
+            "hub.callback": webHookUrl,
+            "hub.topic": this.YOUTUBE_WATCH_URL + channelId,
+            "hub.verify": 'async',
+            "hub.mode": mode,
+            "hub.verify_token": "",
+            "hub.secret": "",
+            "hub.lease_seconds": ""
         })
     }
 

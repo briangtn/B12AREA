@@ -17,7 +17,6 @@ import {SECURITY_SCHEME_SPEC} from "./utils/security-specs";
 import {AuthorizationComponent, AuthorizationTags} from '@loopback/authorization';
 import * as fs from 'fs';
 import {XmlBodyParser} from './body-parser'
-import xmlparser from "express-xml-bodyparser";
 
 export interface PackageInfo {
     name: string;
