@@ -8,8 +8,8 @@ import {Action, User} from "../../models";
 import {repository} from "@loopback/repository";
 import {NewVideoConfig, NewVideoData, TokensResponse} from "./interfaces";
 import {YoutubeHelper} from "./YoutubeHelper";
-import {GithubTokenModel, GithubWebhookModel, GithubWebhookResponse} from "../github/interfaces";
 import axios from "axios";
+import DomParser from "dom-parser";
 
 const API_URL : string = process.env.API_URL ?? "http://localhost:8080";
 
@@ -36,15 +36,13 @@ export default class ServiceController {
             const channelId = (action.options as NewVideoConfig).channel;
             const webhook = (action.data as NewVideoData).webHookUrl;
             if (!webhook.startsWith(API_URL)) {
+                console.log(webhook);
+                console.log(API_URL);
                 setTimeout(() => {
-                    YoutubeHelper.deleteWebhook(action.id!, channelId, ctx).then(() => {
-                        YoutubeHelper.createWebhook(action.serviceAction.split('.')[2], channelId, ctx).then(() => {}).catch((err) => {
-                            console.error(`Failed to recreate webhook ${webhook}`, err);
-                        });
-                    }).catch((err) => {
-                        console.error(`Failed to delete webhook ${webhook}`, err);
-                    });
+                    YoutubeHelper.updateWebhookAPIURL(action, channelId, ctx);
                 }, 2000);
+            } else {
+                YoutubeHelper.prepareRefreshWebhook(channelId, webhook);
             }
         }
     }

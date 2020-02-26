@@ -9,6 +9,7 @@ import * as qs from "querystring";
 import {RandomGeneratorManager} from "../../services";
 import {Action} from "../../models";
 import {OperationStatus} from "../../services-interfaces";
+import DomParser from "dom-parser";
 
 const API_URL : string = process.env.API_URL ?? "http://localhost:8080";
 
@@ -71,6 +72,51 @@ export class YoutubeHelper {
         }, ServiceController.serviceName);
     }
 
+    public static updateWebhookAPIURL(action: Action, channelId: string, ctx: Context) {
+        YoutubeHelper.deleteWebhook(action.id!, channelId, ctx).then(() => {
+            YoutubeHelper.createWebhook(action.serviceAction.split('.')[2], channelId, ctx).then(async (webhookUrl) => {
+                const actionRepository: ActionRepository = await ctx.get('repositories.ActionRepository');
+                const data : NewVideoData = {
+                    webHookUrl: webhookUrl
+                };
+                action.data = data;
+                await actionRepository.save(action);
+            }).catch((err) => {
+                console.error(`Failed to recreate webhook`, err);
+            });
+        }).catch((err) => {
+            console.error(`Failed to delete webhook`, err);
+        });
+    }
+
+    public static async postSubscribeWebhook(webhookUrl: string, channelId: string): Promise<string> {
+        const topicUrl = this.getTopicUrl(channelId);
+
+        return new Promise<string>((resolve, reject) => {
+            axios.post(this.SUBSCRIBE_URL, qs.stringify({
+                "hub.callback": webhookUrl,
+                "hub.topic": topicUrl,
+                "hub.verify": 'async',
+                "hub.mode": 'subscribe',
+                // eslint-disable-next-line @typescript-eslint/camelcase
+                "hub.verify_token": "",
+                "hub.secret": "",
+                // eslint-disable-next-line @typescript-eslint/camelcase
+                "hub.lease_seconds": ""
+            }), {
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                }
+            }).then(() => {
+                console.log("WebHook informations", this.getInfosUrl(channelId, webhookUrl));
+                this.prepareRefreshWebhook(channelId, webhookUrl);
+                resolve(webhookUrl);
+            }).catch(() => {
+                reject(`Could not setup webhook for ${topicUrl}`)
+            });
+        });
+    }
+
     public static async createWebhook(actionName: string, channelId: string, ctx: Context) : Promise<string> {
         let generated = false;
         let webhookUrl = "";
@@ -98,30 +144,9 @@ export class YoutubeHelper {
             }
         }
 
-        const topicUrl = this.YOUTUBE_WATCH_URL + channelId;
-
-        return new Promise<string>((resolve, reject) => {
-            axios.post(this.SUBSCRIBE_URL, qs.stringify({
-                "hub.callback": webhookUrl,
-                "hub.topic": topicUrl,
-                "hub.verify": 'async',
-                "hub.mode": 'subscribe',
-                // eslint-disable-next-line @typescript-eslint/camelcase
-                "hub.verify_token": "",
-                "hub.secret": "",
-                // eslint-disable-next-line @typescript-eslint/camelcase
-                "hub.lease_seconds": ""
-            }), {
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                }
-            }).then(() => {
-                console.log("WebHook informations", `${this.SUB_INFOS_URL}?hub.callback=${webhookUrl}&hub.topic=${topicUrl}&hub.secret=`);
-                resolve(webhookUrl);
-            }).catch(() => {
-                reject(`Could not setup webhook for ${topicUrl}`)
-            })
-        });
+        const res = await this.postSubscribeWebhook(webhookUrl, channelId);
+        this.prepareRefreshWebhook(channelId, webhookUrl);
+        return res;
     }
 
     public static async deleteWebhook(actionId: string, channelId: string, ctx: Context): Promise<OperationStatus> {
@@ -153,5 +178,39 @@ export class YoutubeHelper {
                 reject({ success: false, details: err});
             })
         });
+    }
+
+    static prepareRefreshWebhook(channelId: string, webhook: string) {
+        axios.get(YoutubeHelper.getInfosUrl(channelId, webhook)).then((res) => {
+            const data = new DomParser().parseFromString(res.data).getElementsByTagName('dd');
+            const dates: Date[] = [];
+
+            for (const node of data!) {
+                const date = new Date(node.textContent);
+                if (!isNaN(date.getUTCMilliseconds())) {
+                    dates.push(date);
+                }
+            }
+            const delayToRefresh = dates.sort()[0].getTime() - new Date(Date.now()).getTime() - (1000 * 60 * 60);
+
+            setTimeout(() => {
+                this.postSubscribeWebhook(webhook, channelId).then(() => {
+                    console.log(`Webhook re-subscribed`);
+                }).catch(() => {
+                    console.log(`Failed to re-subscribe to webhook`);
+                })
+            }, delayToRefresh);
+            console.log();
+        }).catch((err) => {
+            console.error(err);
+        })
+    }
+
+    static getTopicUrl(channelId: string) {
+        return this.YOUTUBE_WATCH_URL + channelId;
+    }
+
+    static getInfosUrl(channelId: string, webhookUrl: string) {
+        return `${YoutubeHelper.SUB_INFOS_URL}?hub.callback=${webhookUrl}&hub.topic=${YoutubeHelper.getTopicUrl(channelId)}&hub.secret=`
     }
 }
