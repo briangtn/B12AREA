@@ -16,13 +16,7 @@ import Utilities from '../../utils/Utilities';
 // Dialogs Utils
 
 import Dialog from '@material-ui/core/Dialog';
-import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
-import DialogContentText from '@material-ui/core/DialogContentText';
-import DialogTitle from '@material-ui/core/DialogTitle';
-import Button from '@material-ui/core/Button';
-
-import Translator from "../Translator";
 import AddAreaStepper from "./AddAreaStepper";
 
 interface Props {
@@ -40,7 +34,8 @@ interface Props {
 }
 
 interface State {
-    addDialogOpened: boolean
+    addDialogOpened: boolean,
+    color: string
 }
 
 interface ServiceInfo {
@@ -61,6 +56,9 @@ const mapStateToProps = (state: any) => {
 const styles = (theme: Theme) => createStyles({
     root: {
         borderRadius: '5px',
+        '&:hover': {
+            cursor: 'pointer'
+        }
     },
     icon: {
         width: '50px',
@@ -74,11 +72,19 @@ const styles = (theme: Theme) => createStyles({
 
 class Service extends Component<Props, State> {
     state: State = {
-        addDialogOpened: false
+        addDialogOpened: false,
+        color: ''
     };
+
+    componentDidMount(): void {
+        const { info } = this.props;
+
+        this.setState({ color: info.color });
+    }
 
     handleDialogOpen = (e: any) => {
         this.setState({ addDialogOpened: true });
+        e.stopPropagation();
     };
 
     handleDialogClose = (e: any) => {
@@ -89,23 +95,55 @@ class Service extends Component<Props, State> {
         const { info } = this.props;
 
         this.props.history.push({ pathname: '/services_detail', state: { info: info } });
-    }
+    };
+
+    hoverEffectEnter = (e: any) => {
+        const { color } = this.state;
+
+        if (Utilities.isLightColor(color)) {
+            this.setState({ color: Utilities.lightenDarkenColor(color, -20) });
+        } else {
+            this.setState({ color: Utilities.lightenDarkenColor(color, 20) });
+        }
+    };
+
+    hoverEffectExit = (e: any) => {
+        const { color } = this.state;
+
+        if (Utilities.isLightColor(color)) {
+            this.setState({ color: Utilities.lightenDarkenColor(color, 20) });
+        } else {
+            this.setState({ color: Utilities.lightenDarkenColor(color, -20) });
+        }
+    };
 
     render() {
         const { classes, info } = this.props;
+        const { color } = this.state;
 
         return (
-            <div onClick={this.handleClick}>
-                <Box width="auto" boxShadow={2} bgcolor={info.color} m={1} p={1} className={classes.root} style={{color: (Utilities.isLightColor(String(info.color)) ? 'black' : 'white')}}>
+            <div>
+                <Box
+                    onMouseEnter={this.hoverEffectEnter}
+                    onMouseLeave={this.hoverEffectExit}
+                    onClick={this.handleClick}
+                    width="auto"
+                    boxShadow={2}
+                    bgcolor={color}
+                    m={1}
+                    p={1}
+                    className={classes.root}
+                    style={{color: (Utilities.isLightColor(String(color)) ? 'black' : 'white')}}
+                >
                     <Grid container>
                         <Grid item xs={4}>
-                            <img className={classes.icon} src={info.icon}></img>
+                            <img alt={info.name} className={classes.icon} src={info.icon} />
                         </Grid>
                         <Grid item xs={4}>
                             <Typography className={classes.serviceName} variant="h6">{Utilities.capitalizeString(info.name)}</Typography>
                         </Grid>
                         <Grid item xs={4}>
-                            <IconButton onClick={this.handleDialogOpen} style={{float: 'right'}} aria-label="settings" color={(Utilities.isLightColor(info.color)) ? 'primary' : 'secondary'}>
+                            <IconButton onClick={this.handleDialogOpen} style={{float: 'right', zIndex: 100, position: 'relative'}} aria-label="settings" color={(Utilities.isLightColor(info.color)) ? 'primary' : 'secondary'}>
                                 <AddIcon />
                             </IconButton>
                         </Grid>

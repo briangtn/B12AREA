@@ -32,7 +32,8 @@ const french = {
      * Add services translation
      */
     addServices: "Ajouter un service",
-    addServicesSubtitle: "Pour vous enregistrer à un nouveau services, renseignez les champs ci-dessous"
+    addServicesSubtitle: "Pour vous enregistrer à un nouveau services, renseignez les champs ci-dessous",
+    myActions: "Mes AREA"
 };
 
 export default french;

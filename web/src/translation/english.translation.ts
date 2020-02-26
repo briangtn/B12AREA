@@ -32,7 +32,8 @@ const english = {
      * Add services translation
      */
     addServices: "Add services",
-    addServicesSubtitle: "To subscribe to a new services, please fill the informations below."
+    addServicesSubtitle: "To subscribe to a new services, please fill the informations below.",
+    myActions: "My AREA",
 };
 
 export default english;

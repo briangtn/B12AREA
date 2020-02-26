@@ -11,7 +11,6 @@ import Typography from "@material-ui/core/Typography";
 import Button from '@material-ui/core/Button';
 
 import InputLabel from '@material-ui/core/InputLabel';
-import FormHelperText from '@material-ui/core/FormHelperText';
 import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
@@ -23,6 +22,7 @@ import Divider from '@material-ui/core/Divider';
 const mapStateToProps = (state: any) => {
     return { api_url: state.api_url, token: state.token, services: state.services };
 };
+
 interface Props {
     classes: {
         instructions: string,
@@ -81,7 +81,7 @@ class AddAreaStepper extends Component<Props, State> {
         const { activeStep } = this.state;
 
         this.setState({ activeStep: activeStep + 1 });
-    }
+    };
 
     handleBackStep = (e: any) => {
         const { activeStep } = this.state;
@@ -89,7 +89,7 @@ class AddAreaStepper extends Component<Props, State> {
         if (activeStep === 0)
             return;
         this.setState({ activeStep: activeStep - 1 });
-    }
+    };
 
     // Steps
 
@@ -100,11 +100,11 @@ class AddAreaStepper extends Component<Props, State> {
         configSchemaActions[e.target.value.name]['serviceName'] = e.target.value.serviceName;
         for (let configSchema of e.target.value.configSchema) {
             if (configSchema.type === "string")
-                configSchemaActions[e.target.value.name][configSchema.name] = ''
+                configSchemaActions[e.target.value.name][configSchema.name] = '';
             else if (configSchema.type === "boolean")
-                configSchemaActions[e.target.value.name][configSchema.name] = false
+                configSchemaActions[e.target.value.name][configSchema.name] = false;
             else
-                configSchemaActions[e.target.value.name][configSchema.name] = 0
+                configSchemaActions[e.target.value.name][configSchema.name] = 0;
         }
 
         this.setState({ selectedAction: e.target.value, configSchemaActions: configSchemaActions });
@@ -130,7 +130,7 @@ class AddAreaStepper extends Component<Props, State> {
 
     displayConfigSchema = (argGroupName: string, configSchema: any, key: any, isAction: boolean) => {
         const { configSchemaActions, configSchemaReactions } = this.state;
-        const { name, description, type, required } = configSchema;
+        const { name, type, required } = configSchema;
 
         if (type === "string") {
             return (
@@ -323,7 +323,7 @@ class AddAreaStepper extends Component<Props, State> {
     }
 
     summaryStep = () => {
-        const { selectedAction, configSchemaActions, chosenReactions, configSchemaReactions } = this.state;
+        const { selectedAction, configSchemaActions, configSchemaReactions } = this.state;
 
         const formatActionArgument = this.formatConfigSchema(configSchemaActions);
         const formatReactionArgument = this.formatConfigSchema(configSchemaReactions);
@@ -383,7 +383,7 @@ class AddAreaStepper extends Component<Props, State> {
     }
 
     setReactionsToArea: any = (id: string) => {
-        const { api_url, token, serviceName } = this.props;
+        const { api_url, token } = this.props;
         const headers: any = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` };
 
         const reactionConfigSchema = this.formatConfigSchema(this.state.configSchemaReactions);
@@ -421,9 +421,9 @@ class AddAreaStepper extends Component<Props, State> {
 
             // Create reactions
             this.setReactionsToArea(id);
-        })
+        });
         this.props.closeFunction();
-    }
+    };
 
     contentStep = (activeStep: number) => {
         if (activeStep === 0) {
@@ -435,10 +435,9 @@ class AddAreaStepper extends Component<Props, State> {
         } else if (activeStep === 3) {
             return this.summaryStep();
         }
-    }
+    };
 
     render() {
-        const { classes } = this.props;
         const { activeStep, steps } = this.state;
 
         return (

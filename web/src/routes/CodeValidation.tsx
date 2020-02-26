@@ -6,7 +6,6 @@ import NavigationBar from '../components/NavigationBar';
 
 import Grid from "@material-ui/core/Grid";
 import Typography from "@material-ui/core/Typography";
-import Translator from "../components/Translator";
 
 import Utilities from "../utils/Utilities";
 
