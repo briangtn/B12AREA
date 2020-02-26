@@ -3,11 +3,13 @@ import config from './config.json';
 import {param, get, Response, RestBindings} from "@loopback/rest";
 import {Context, inject} from "@loopback/context";
 import {CustomUserProfile, ExchangeCodeGeneratorManager} from "../../services";
-import {UserRepository} from "../../repositories";
-import {User} from "../../models";
+import {ActionRepository, UserRepository} from "../../repositories";
+import {Action, User} from "../../models";
 import {repository} from "@loopback/repository";
-import {TokensResponse} from "./interfaces";
+import {NewVideoConfig, NewVideoData, TokensResponse} from "./interfaces";
 import {YoutubeHelper} from "./YoutubeHelper";
+import {GithubTokenModel, GithubWebhookModel, GithubWebhookResponse} from "../github/interfaces";
+import axios from "axios";
 
 const API_URL : string = process.env.API_URL ?? "http://localhost:8080";
 
@@ -23,6 +25,28 @@ export default class ServiceController {
 
     static async start(ctx: Context): Promise<void> {
         console.log(`Starting ${this.serviceName} service`);
+        const actionRepository : ActionRepository = await ctx.get('repositories.ActionRepository');
+
+        const youtubeActions : Action[] = await actionRepository.find({
+            where: {
+                serviceAction: `${this.serviceName}.A.new_video`
+            }
+        });
+        for (const action of youtubeActions) {
+            const channelId = (action.options as NewVideoConfig).channel;
+            const webhook = (action.data as NewVideoData).webHookUrl;
+            if (!webhook.startsWith(API_URL)) {
+                setTimeout(() => {
+                    YoutubeHelper.deleteWebhook(action.id!, channelId, ctx).then(() => {
+                        YoutubeHelper.createWebhook(action.serviceAction.split('.')[2], channelId, ctx).then(() => {}).catch((err) => {
+                            console.error(`Failed to recreate webhook ${webhook}`, err);
+                        });
+                    }).catch((err) => {
+                        console.error(`Failed to delete webhook ${webhook}`, err);
+                    });
+                }, 2000);
+            }
+        }
     }
 
     @get('/oauth', {

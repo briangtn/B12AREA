@@ -1,22 +1,26 @@
-import {TokensResponse} from "./interfaces";
+import {NewVideoData, TokensResponse} from "./interfaces";
 import axios from "axios";
-import {UserRepository} from "../../repositories";
+import {ActionRepository, UserRepository} from "../../repositories";
 import {Context} from "@loopback/context";
 import ServiceController from "./controller";
 import {google} from "googleapis";
+import config from "./actions/new_video/config.json";
+import * as qs from "querystring";
+import {RandomGeneratorManager} from "../../services";
+import {Action} from "../../models";
+import {OperationStatus} from "../../services-interfaces";
+
+const API_URL : string = process.env.API_URL ?? "http://localhost:8080";
 
 export class YoutubeHelper {
+    public static WEBHOOK_PREFIX = `${API_URL}/services/youtube/actions/${config.displayName}/webhook/`;
+    public static YOUTUBE_WATCH_URL = "https://www.youtube.com/xml/feeds/videos.xml?channel_id=";
+    public static SUBSCRIBE_URL = 'https://pubsubhubbub.appspot.com/subscribe';
+    private static SUB_INFOS_URL = 'https://pubsubhubbub.appspot.com/subscription-details';
+
     public static GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
     public static GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
     public static YOUTUBE_API_KEY : string = process.env.YOUTUBE_API_KEY ?? "";
-
-    public static isTokenValid(token: TokensResponse): Boolean {
-        if (!token.expires_at)
-            return false;
-        if (new Date().valueOf() > token.expires_at)
-            return false;
-        return true;
-    }
 
     public static getAuthUrl(redirectUrl: string) {
         const oauth2Client = new google.auth.OAuth2(
@@ -59,14 +63,95 @@ export class YoutubeHelper {
         );
     }
 
-    public static async updateToken(userId: string, token: TokensResponse, ctx: Context) {
+    public static async updateToken(userId: string, token: TokensResponse, ctx: Context) : Promise<void> {
         const userRepository: UserRepository = await ctx.get('repositories.UserRepository');
 
         await userRepository.addService(userId, {
             ...token,
-            ...{
-                expiresAt: new Date().valueOf() + token.expires_in,
-            }
         }, ServiceController.serviceName);
+    }
+
+    public static async createWebhook(actionName: string, channelId: string, ctx: Context) : Promise<string> {
+        let generated = false;
+        let webhookUrl = "";
+        const randomGeneratorService: RandomGeneratorManager = await ctx.get('services.randomGenerator');
+        const actionRepository : ActionRepository = await ctx.get('repositories.ActionRepository');
+
+        while (!generated) {
+            const generatedUUID = randomGeneratorService.generateRandomString(16);
+            webhookUrl = `${this.WEBHOOK_PREFIX}${generatedUUID}`;
+            try {
+                const count = await actionRepository.count({
+                    and: [
+                        {
+                            serviceAction: `youtube.A.${actionName}`
+                        },
+                        {
+                            "data.webHookUrl": webhookUrl
+                        }
+                    ]
+                });
+                if (count.count === 0)
+                    generated = true;
+            } catch (e) {
+                generated = false;
+            }
+        }
+
+        const topicUrl = this.YOUTUBE_WATCH_URL + channelId;
+
+        return new Promise<string>((resolve, reject) => {
+            axios.post(this.SUBSCRIBE_URL, qs.stringify({
+                "hub.callback": webhookUrl,
+                "hub.topic": topicUrl,
+                "hub.verify": 'async',
+                "hub.mode": 'subscribe',
+                // eslint-disable-next-line @typescript-eslint/camelcase
+                "hub.verify_token": "",
+                "hub.secret": "",
+                // eslint-disable-next-line @typescript-eslint/camelcase
+                "hub.lease_seconds": ""
+            }), {
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                }
+            }).then(() => {
+                console.log("WebHook informations", `${this.SUB_INFOS_URL}?hub.callback=${webhookUrl}&hub.topic=${topicUrl}&hub.secret=`);
+                resolve(webhookUrl);
+            }).catch(() => {
+                reject(`Could not setup webhook for ${topicUrl}`)
+            })
+        });
+    }
+
+    public static async deleteWebhook(actionId: string, channelId: string, ctx: Context): Promise<OperationStatus> {
+        const actionRepository : ActionRepository = await ctx.get('repositories.ActionRepository');
+        const action : Action = await actionRepository.findById(actionId);
+
+        if (!action || !action.data)
+            return { success: false, error: "Failed to retrieve action" };
+        const data = action.data as NewVideoData;
+
+        return new Promise((resolve, reject) => {
+            axios.post(this.SUBSCRIBE_URL, qs.stringify({
+                "hub.callback": data.webHookUrl,
+                "hub.topic": this.YOUTUBE_WATCH_URL + channelId,
+                "hub.verify": 'async',
+                "hub.mode": 'unsubscribe',
+                // eslint-disable-next-line @typescript-eslint/camelcase
+                "hub.verify_token": "",
+                "hub.secret": "",
+                // eslint-disable-next-line @typescript-eslint/camelcase
+                "hub.lease_seconds": ""
+            }), {
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                }
+            }).then(() => {
+                resolve({ success: true });
+            }).catch((err) => {
+                reject({ success: false, details: err});
+            })
+        });
     }
 }
