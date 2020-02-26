@@ -75,6 +75,12 @@ export interface TeamsReplyToMessageOptions {
     message: string;
 }
 
+export interface TeamsPostMessageInChannelOptions {
+    teamsId: string;
+    channelId: string;
+    message: string;
+}
+
 export class TeamsHelper {
 
     public static generateLoginRedirectUrlWithoutState() : string {
