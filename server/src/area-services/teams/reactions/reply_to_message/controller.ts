@@ -7,7 +7,7 @@ import {ReactionRepository, UserRepository} from "../../../../repositories";
 import axios from "axios";
 import {User} from "../../../../models";
 
-interface RawReActionConfig {
+interface RawReactionConfig {
     teamsId?: string;
     channelId?: string;
     messageId?: string;
@@ -83,7 +83,7 @@ export default class ReactionController {
     }
 
     static async createReaction(userId: string, reactionConfig: Object, ctx: Context): Promise<OperationStatus> {
-        const castedConfig = reactionConfig as RawReActionConfig;
+        const castedConfig = reactionConfig as RawReactionConfig;
         let areaService : AreaService | undefined = undefined;
         try {
             areaService = await ctx.get('services.area');
@@ -110,7 +110,7 @@ export default class ReactionController {
     }
 
     static async updateReaction(reactionId: string, oldReactionConfig: Object, newReactionConfig: Object, ctx: Context): Promise<OperationStatus> {
-        const castedConfig = newReactionConfig as RawReActionConfig;
+        const castedConfig = newReactionConfig as RawReactionConfig;
         let areaService : AreaService | undefined = undefined;
         try {
             areaService = await ctx.get('services.area');

@@ -1,0 +1,40 @@
+{
+  "displayName": "New react on message",
+  "description": "Triggered when a reaction is added to a specific message.",
+  "configSchema": [
+    {
+      "name": "messageUrl",
+      "description": "The share link of a teams message",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "onlyTypeOf",
+      "description": "The react must be of the specific type to trigger the reaction, can only be 'like', 'angry', 'sad', 'laugh', 'heart', 'surprised'",
+      "type": "string",
+      "required": false
+    }
+  ],
+  "placeholders": [
+    {
+      "name": "Author",
+      "description": "The author of the react"
+    },
+    {
+      "name": "MessageId",
+      "description": "The teams id of the message that the react was posted on"
+    },
+    {
+      "name": "TeamsId",
+      "description": "The teams id of the teams team"
+    },
+    {
+      "name": "ChannelId",
+      "description": "The teams id of the teams channel"
+    },
+    {
+      "name": "ReactType",
+      "description": "The react type that was added"
+    }
+  ]
+}

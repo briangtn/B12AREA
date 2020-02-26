@@ -5,7 +5,7 @@ import {User} from "../../models";
 import {ActionRepository, UserRepository} from "../../repositories";
 import {AreaService} from "../../services";
 import {ActionFunction} from "../../services-interfaces";
-import {TeamsAPIChatMessageResource} from "./teamsApiResources";
+import {TeamsAPIChatMessageReaction, TeamsAPIChatMessageResource, TeamsAPIUserResource} from "./teamsApiResources";
 
 const TEAMS_CLIENT_ID : string = process.env.TEAMS_CLIENT_ID ?? "";
 const TEAMS_CLIENT_SECRET : string = process.env.TEAMS_CLIENT_SECRET ?? "";
@@ -26,6 +26,8 @@ const TEAMS_REDIRECT_URL = `${API_URL}/services/teams/oauth`;
 
 const TEAMS_NEW_MESSAGE_IN_CHANNEL_PULLING_PREFIX = 'teams_newMessageInChannel_';
 const TEAMS_NEW_MESSAGE_IN_CHANNEL_PULLING_DELTA = 30; //in seconds
+const TEAMS_NEW_REACT_ON_MESSAGE_PULLING_PREFIX = 'teams_newReactOnMessage_';
+const TEAMS_NEW_REACT_ON_MESSAGE_PULLING_DELTA = 30; //in seconds
 
 export class TeamsException {
     constructor(error: string, info: object) {
@@ -55,6 +57,17 @@ export interface TeamsNewMessageInChannelData {
     lastPulled: string;
 }
 
+export interface TeamsNewReactOnMessageOptions {
+    teamId: string;
+    channelId: string;
+    messageId: string;
+    onlyTypeOf?: string;
+}
+
+export interface TeamsNewReactOnMessageData {
+    lastPulled: string;
+}
+
 export interface TeamsReplyToMessageOptions {
     teamsId: string;
     channelId: string;
@@ -66,6 +79,22 @@ export class TeamsHelper {
 
     public static generateLoginRedirectUrlWithoutState() : string {
         return `${TEAMS_AUTHORIZE_URL}?client_id=${TEAMS_CLIENT_ID}&response_type=code&redirect_uri=${encodeURI(TEAMS_REDIRECT_URL)}&response_mode=query&scope=${encodeURI(TEAMS_FORMATTED_SCOPE)}`;
+    }
+
+    public static async getTeamsUserFromUserId(tokens: TeamsTokens, teamsUserId?: string): Promise<TeamsAPIUserResource|null> {
+        if (!teamsUserId)
+            return null;
+        try {
+            const data = await axios.get(`https://graph.microsoft.com/v1.0/users/${teamsUserId}`, {
+                headers: {
+                    Authorization: `${tokens.token_type} ${tokens.access_token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+            return data.data;
+        } catch (e) {
+            return null;
+        }
     }
 
     public static async exchangeCodeForTokens(code : string) : Promise<TeamsTokens> {
@@ -176,6 +205,8 @@ export class TeamsHelper {
                 const diff = [];
                 const actionData: TeamsNewMessageInChannelData = (await actionRepository.getActionData(actionID))! as TeamsNewMessageInChannelData;
 
+                await this.refreshTokensForUser(user, ctx);
+
                 for (const chatMessage of data.value) {
                     if (new Date(chatMessage.createdDateTime) >= new Date(actionData.lastPulled)) {
                         if (actionOptions.mustMatch) {
@@ -229,6 +260,85 @@ export class TeamsHelper {
         const areaService: AreaService = await ctx.get('services.area');
 
         areaService.stopPulling(TEAMS_NEW_MESSAGE_IN_CHANNEL_PULLING_PREFIX + actionID);
+    }
+
+    public static async startNewReactOnMessagePulling(actionID: string, userID: string, ctx: Context) {
+        const areaService: AreaService = await ctx.get('services.area');
+        const userRepository: UserRepository = await ctx.get('repositories.UserRepository');
+        const actionRepository: ActionRepository = await ctx.get('repositories.ActionRepository');
+
+        const user: User = await userRepository.findById(userID);
+
+        await this.refreshTokensForUser(user, ctx);
+
+        const tokens: TeamsTokens = await userRepository.getServiceInformation(userID, 'teams') as TeamsTokens;
+        const actionOptions: TeamsNewReactOnMessageOptions = (await actionRepository.getActionSettings(actionID))! as TeamsNewReactOnMessageOptions;
+
+        if (!tokens || !tokens.access_token)
+            return;
+        areaService.startPulling(
+            `https://graph.microsoft.com/beta/teams/${actionOptions.teamId}/channels/${actionOptions.channelId}/messages/${actionOptions.messageId}`,
+            {headers: {Authorization: 'Bearer ' + tokens.access_token}},
+            async (data: TeamsAPIChatMessageResource) => {
+                const diff = [];
+                const actionData: TeamsNewReactOnMessageData = (await actionRepository.getActionData(actionID))! as TeamsNewReactOnMessageData;
+
+                await this.refreshTokensForUser(user, ctx);
+
+                for (const react of data.reactions) {
+                    if (new Date(react.createdDateTime) >= new Date(actionData.lastPulled)) {
+                        if (actionOptions.onlyTypeOf) {
+                            if (react.reactionType === actionOptions.onlyTypeOf) {
+                                diff.push({message: data, react: react});
+                            }
+                        } else {
+                            diff.push({message: data, react: react});
+                        }
+                    }
+                }
+                await actionRepository.setActionData(actionID, {lastPulled: new Date().toISOString()});
+                return diff;
+            }, async (data: {message: TeamsAPIChatMessageResource, react: TeamsAPIChatMessageReaction}[]) => {
+                for (const pair of data) {
+                    let authorName = '';
+                    const teamsUser: TeamsAPIUserResource|null = await this.getTeamsUserFromUserId(tokens, pair.react.user.user?.id);
+                    if (teamsUser) {
+                        authorName = teamsUser.displayName;
+                    }
+                    const placeholders: Array<{name: string, value: string}> = [
+                        {
+                            name: "Author",
+                            value: authorName
+                        },
+                        {
+                            name: "MessageId",
+                            value: pair.message.id
+                        },
+                        {
+                            name: "TeamsId",
+                            value: actionOptions.teamId
+                        },
+                        {
+                            name: "ChannelId",
+                            value: actionOptions.channelId
+                        },
+                        {
+                            name: "ReactType",
+                            value: pair.react.reactionType
+                        }
+                    ];
+                    await ActionFunction({
+                        actionId: actionID,
+                        placeholders: placeholders
+                    }, ctx)
+                }
+            }, TEAMS_NEW_REACT_ON_MESSAGE_PULLING_DELTA, TEAMS_NEW_REACT_ON_MESSAGE_PULLING_PREFIX + actionID);
+    }
+
+    public static async stopNewReactOnMessagePulling(actionID: string, ctx: Context) {
+        const areaService: AreaService = await ctx.get('services.area');
+
+        areaService.stopPulling(TEAMS_NEW_REACT_ON_MESSAGE_PULLING_PREFIX + actionID);
     }
 
     public static getClientId() : string {
