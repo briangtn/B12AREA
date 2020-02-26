@@ -9,9 +9,8 @@ import {
 } from "../../../../repositories";
 import {Action} from "../../../../models";
 import {repository} from "@loopback/repository";
-import {AreaService, RandomGeneratorManager} from "../../../../services";
+import {RandomGeneratorManager} from "../../../../services";
 import {GithubPushHookBody, GithubTokenModel, GithubWebhookModel, GithubWebhookResponse} from "../../interfaces";
-import {service} from "@loopback/core";
 
 const API_URL : string = process.env.API_URL ?? "http://localhost:8080";
 
