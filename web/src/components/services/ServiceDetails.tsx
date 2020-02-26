@@ -374,7 +374,7 @@ class ServiceDetails extends Component<Props, State> {
                                                 <Grid container spacing={3}>
                                                     <Grid item xs={6}>
                                                         <Typography variant="h6" gutterBottom>
-                                                            <u>{reaction.serviceReaction.split('.')[reaction.serviceReaction.split('.').length - 1]}</u>
+                                                            <u>{reaction.serviceReaction.split('.')[reaction.serviceReaction.split('.').length - 1]}:</u>
                                                         </Typography>
                                                     </Grid>
                                                     <Grid item xs={6}>
