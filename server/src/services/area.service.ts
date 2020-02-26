@@ -58,4 +58,22 @@ export class AreaService {
         }
         return {success: true};
     }
+
+    createWordsPlaceholders(data: string): Array<{name: string, value: string}> {
+        return this.createRegexPlaceholders(data, '[^ \r\n\t]+', 'Words');
+    }
+
+    createRegexPlaceholders(data: string, regex: string, placeholderName: string): Array<{name: string, value: string}> {
+        const ret: Array<{name: string, value: string}> = [];
+        const re = new RegExp(regex, 'g');
+        const result = data.match(re);
+        if (result === null) {
+            return ret;
+        }
+        for (let i = 0; i < result.length; ++i) {
+            ret.push({name: `${placeholderName}[${i}]`, value: result[i]});
+        }
+        ret.push({name: `Nb${placeholderName}`, value: `${ret.length}`});
+        return ret;
+    }
 }

@@ -1,0 +1,44 @@
+{
+  "displayName": "New message in channel",
+  "description": "Triggered when a new message is posted in a teams channel.",
+  "configSchema": [
+    {
+      "name": "channelUrl",
+      "description": "The share link of a teams channel",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "mustMatch",
+      "description": "The message must match the given regex to be counted as a trigger, using this variable enable the Matches[i] placeholder to be used",
+      "type": "string",
+      "required": false
+    }
+  ],
+  "placeholders": [
+    {
+      "name": "Message",
+      "description": "The complete teams message."
+    },
+    {
+      "name": "Words[i]",
+      "description": "The word at index i in the message."
+    },
+    {
+      "name": "NbWords",
+      "description": "The number of words in the Words array"
+    },
+    {
+      "name": "Matches[i]",
+      "description": "The match at index i in the regex. /!\\ Can only be used if mustMatch was given"
+    },
+    {
+      "name": "NbMatches",
+      "description": "The number of matches in the Matches array"
+    },
+    {
+      "name": "Author",
+      "description": "The author of the message"
+    }
+  ]
+}
