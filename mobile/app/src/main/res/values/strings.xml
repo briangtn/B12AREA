@@ -57,4 +57,5 @@
     <string name="create_area">Create new area</string>
     <string name="empty_area_name">Area name cannot be empty</string>
     <string name="add_action">Add action to your area</string>
+    <string name="edit_action">Edit action parameters</string>
 </resources>

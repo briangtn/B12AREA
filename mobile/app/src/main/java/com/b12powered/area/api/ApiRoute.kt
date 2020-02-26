@@ -151,6 +151,16 @@ sealed class ApiRoute(private var mainContext: Context) {
      */
     data class CreateArea(var name: String, var enabled: Boolean, var context: Context) : ApiRoute(context)
 
+    /**
+     * Data class [AddAction] route
+     *
+     * @param areaId The area id
+     * @param serviceAction The string matching service and action name
+     * @param options An object containing action parameters
+     * @param context The context of the call
+     */
+    data class AddAction(var areaId: String, var serviceAction: String, var options: Any, var context: Context) : ApiRoute(context)
+
 
     /**
      * Timeout of the api call
@@ -214,6 +224,7 @@ sealed class ApiRoute(private var mainContext: Context) {
                 is LoginService -> "services/login/${service}"
                 is RefreshToken -> "users/refreshToken"
                 is CreateArea -> "areas"
+                is AddAction -> "areas/${areaId}/action"
                 else -> ""
             }}"
         }
@@ -241,6 +252,7 @@ sealed class ApiRoute(private var mainContext: Context) {
                 is ResetPassword -> Request.Method.PATCH
                 is LoginService -> Request.Method.POST
                 is CreateArea -> Request.Method.POST
+                is AddAction -> Request.Method.POST
                 else -> Request.Method.GET
             }
         }
@@ -280,6 +292,9 @@ sealed class ApiRoute(private var mainContext: Context) {
                 }
                 is CreateArea -> {
                     hashMapOf(Pair("name", name), Pair("enabled", enabled))
+                }
+                is AddAction -> {
+                    hashMapOf(Pair("serviceAction", serviceAction), Pair("options", options))
                 }
                 else -> hashMapOf()
             }
@@ -351,6 +366,9 @@ sealed class ApiRoute(private var mainContext: Context) {
                     hashMapOf(Pair("Authorization", "Bearer $token"))
                 }
                 is CreateArea -> {
+                    hashMapOf(Pair("Authorization", "Bearer $token"))
+                }
+                is AddAction -> {
                     hashMapOf(Pair("Authorization", "Bearer $token"))
                 }
                 else -> hashMapOf()

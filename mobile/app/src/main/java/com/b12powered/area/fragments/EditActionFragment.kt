@@ -4,17 +4,14 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ArrayAdapter
 import android.widget.ListView
 import androidx.fragment.app.Fragment
-import com.b12powered.area.Area
-import com.b12powered.area.R
-import com.b12powered.area.Service
+import com.b12powered.area.*
 
-class EditActionFragment(private val service: Service, private val area: Area) : Fragment() {
+class EditActionFragment(private val service: Service, private val area: Area, private val action: Action) : Fragment() {
     companion object {
-        fun newInstance(service: Service, area: Area): EditActionFragment {
-            return EditActionFragment(service, area)
+        fun newInstance(service: Service, area: Area, action: Action): EditActionFragment {
+            return EditActionFragment(service, area, action)
         }
     }
 
@@ -33,8 +30,19 @@ class EditActionFragment(private val service: Service, private val area: Area) :
 
         listView = view.findViewById(R.id.action_list)
 
-        val actionList: List<String> = service.actions.map { action -> action.displayName }
-        val adapter = ArrayAdapter(activity!!, android.R.layout.simple_list_item_1, actionList)
+        val editModelArrayList = initList()
+        val adapter = EditTextListAdapter(activity!!, editModelArrayList)
         listView.adapter = adapter
+    }
+
+    private fun initList(): ArrayList<EditModel> {
+        val list: ArrayList<EditModel> = ArrayList()
+
+        action.configSchema.forEach { option ->
+            val editModel = EditModel()
+            editModel.setEditTextValue(option.name)
+            list.add(editModel)
+        }
+        return list
     }
 }

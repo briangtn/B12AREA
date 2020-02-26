@@ -4,12 +4,10 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import com.b12powered.area.Area
-import com.b12powered.area.R
-import com.b12powered.area.Service
+import com.b12powered.area.*
 import com.b12powered.area.fragments.CreateAreaFragment
+import com.b12powered.area.fragments.AddActionFragment
 import com.b12powered.area.fragments.EditActionFragment
-import com.b12powered.area.toObject
 
 class ServiceInformationActivity : AppCompatActivity() {
 
@@ -42,7 +40,13 @@ class ServiceInformationActivity : AppCompatActivity() {
 
     fun createArea(area: Area) {
         supportFragmentManager.beginTransaction()
-            .replace(R.id.create_area_layout, EditActionFragment.newInstance(service, area))
+            .replace(R.id.create_area_layout, AddActionFragment.newInstance(service, area))
+            .commit()
+    }
+
+    fun addAction(area: Area, action: Action) {
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.create_area_layout, EditActionFragment.newInstance(service, area, action))
             .commit()
     }
 }

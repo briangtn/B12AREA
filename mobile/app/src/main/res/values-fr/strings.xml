@@ -58,4 +58,5 @@
     <string name="create_area">Créer une nouvelle area</string>
     <string name="empty_area_name">Le nom de l\'area ne peut pas être vide</string>
     <string name="add_action">Ajouter une action à votre area</string>
+    <string name="edit_action">Editer les paramètres de l\'action</string>
 </resources>
