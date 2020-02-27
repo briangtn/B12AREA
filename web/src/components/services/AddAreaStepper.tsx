@@ -22,7 +22,7 @@ import Alert from '../Alert';
 import Tooltip from '@material-ui/core/Tooltip';
 
 const mapStateToProps = (state: any) => {
-    return { api_url: state.api_url, token: state.token, services: state.services };
+    return { language: state.language, api_url: state.api_url, token: state.token, services: state.services };
 };
 
 interface Props {
@@ -31,6 +31,7 @@ interface Props {
         formControl: string,
         noMaxWidth: string
     },
+    language: string,
     actions: any,
     reactions: any,
     services: any,
@@ -92,7 +93,11 @@ class AddAreaStepper extends Component<Props, State> {
     state: State = {
         areaName: '',
         activeStep: 0,
-        steps: ['Name your AREA', 'Choose your action', 'Select your reactions', 'Summary'],
+        steps: (this.props.language === 'en')
+            ?
+                ['Name your AREA', 'Choose your action', 'Select your reactions', 'Summary']
+            :
+                ['Donnez un nom à votre AREA', 'Choisissez votre action', 'Choisissez vos reactions', 'Résumé'],
         configSchemaActions: {},
         configSchemaReactions: {},
         chosenReactions: [],
@@ -546,10 +551,10 @@ class AddAreaStepper extends Component<Props, State> {
                                 disabled={activeStep === 0}
                                 onClick={this.handleBackStep}
                             >
-                                Back
+                                {(this.props.language === "en") ? 'Back' : 'Retour'}
                             </Button>
                             <Button variant="contained" color="primary" onClick={(activeStep === steps.length - 1) ? this.createAREA : this.handleNextStep}>
-                                {activeStep === steps.length - 1 ? 'Finish' : 'Next'}
+                                {activeStep === steps.length - 1 ? ((this.props.language === 'en') ? 'Finish' : 'Valider') : ((this.props.language === 'en') ? 'Next' : 'Suivant')}
                             </Button>
                         </div>
                     </div>

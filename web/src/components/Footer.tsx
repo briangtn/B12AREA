@@ -33,7 +33,8 @@ const styles = (theme: Theme) => createStyles({
         width: '100%',
         position: 'absolute',
         marginTop: '20px',
-        backgroundColor: '#212121'
+        backgroundColor: '#212121',
+        bottom: '0'
     },
     footerText: {
         color: 'white',
