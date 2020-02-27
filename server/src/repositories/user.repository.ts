@@ -8,7 +8,7 @@ import {
 } from '@loopback/repository';
 import {Area, User, UserRelations} from '../models';
 import {MongoDataSource} from '../datasources';
-import {asLifeCycleObserver, Getter, inject} from '@loopback/core';
+import {Getter, inject} from '@loopback/core';
 import {AreaRepository} from './area.repository';
 import {EmailManager, RandomGeneratorManager} from '../services';
 import {UserProfile} from '@loopback/security';

@@ -252,7 +252,7 @@ describe('/areas', () => {
             });
 
             expect((await helper.areaRepository.count({id: area.id})).count).to.be.equal(1);
-            expect((await helper.actionRepository.count({id: reaction.id})).count).to.be.equal(1);
+            expect((await helper.reactionRepository.count({id: reaction.id})).count).to.be.equal(1);
 
             await helper.client
                 .delete('/areas/' + area.id)

@@ -2,7 +2,7 @@ import {
     DefaultCrudRepository,
     repository,
     HasManyRepositoryFactory,
-    HasOneRepositoryFactory
+    HasOneRepositoryFactory, AnyObject, Condition, AndClause, OrClause, Count
 } from '@loopback/repository';
 import {Area, AreaRelations, Reaction, Action} from '../models';
 import {MongoDataSource} from '../datasources';
@@ -21,7 +21,9 @@ export class AreaRepository extends DefaultCrudRepository<Area,
     public readonly action: HasOneRepositoryFactory<Action, typeof Area.prototype.id>;
 
     constructor(
-        @inject('datasources.mongo') dataSource: MongoDataSource, @repository.getter('ReactionRepository') protected reactionRepositoryGetter: Getter<ReactionRepository>, @repository.getter('ActionRepository') protected actionRepositoryGetter: Getter<ActionRepository>,
+        @inject('datasources.mongo') dataSource: MongoDataSource,
+        @repository.getter('ReactionRepository') protected reactionRepositoryGetter: Getter<ReactionRepository>,
+        @repository.getter('ActionRepository') protected actionRepositoryGetter: Getter<ActionRepository>,
     ) {
         super(Area, dataSource);
         this.action = this.createHasOneRepositoryFactoryFor('action', actionRepositoryGetter,);
@@ -34,5 +36,23 @@ export class AreaRepository extends DefaultCrudRepository<Area,
         if (area === null || area?.ownerId !== user.email) {
             throw new HttpErrors.NotFound(`Area not found`);
         }
+    }
+
+    deleteById(id: typeof Area.prototype.id, options?: AnyObject): Promise<void> {
+        return new Promise((resolve, reject) => {
+            this.action(id).delete().then(() => {
+            }).catch((err) => {
+                reject(err);
+            });
+            this.reactions(id).delete().then(() => {
+            }).catch((err) => {
+                reject(err);
+            });
+            super.deleteById(id, options).then(() => {
+                resolve();
+            }).catch((err) => {
+                reject(err);
+            });
+        });
     }
 }
