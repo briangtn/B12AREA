@@ -767,6 +767,17 @@ describe('/users', () => {
             expect((await helper.areaRepository.count({id: area.id})).count).to.be.equal(0);
         });
 
+        it('Should delete areas belonging to the user even when using deleteAll', async () => {
+            const newUser = await helper.createUser('test@b12.com', 'abcde');
+            const area = await helper.createArea(newUser, "Test AREA");
+
+            expect((await helper.userRepository.count({id: newUser.id})).count).to.be.equal(1);
+            expect((await helper.areaRepository.count({id: area.id})).count).to.be.equal(1);
+            await helper.userRepository.deleteAll();
+            expect((await helper.userRepository.count({id: newUser.id})).count).to.be.equal(0);
+            expect((await helper.areaRepository.count({id: area.id})).count).to.be.equal(0);
+        });
+
         it("Should send 404 user not found", async () => {
             const startCount = (await helper.userRepository.count()).count;
 

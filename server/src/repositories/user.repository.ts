@@ -1,7 +1,14 @@
-import {DefaultCrudRepository, HasManyRepositoryFactory, repository, juggler} from '@loopback/repository';
+import {
+    DefaultCrudRepository,
+    HasManyRepositoryFactory,
+    repository,
+    juggler,
+    AnyObject,
+    Condition, AndClause, OrClause, Count
+} from '@loopback/repository';
 import {Area, User, UserRelations} from '../models';
 import {MongoDataSource} from '../datasources';
-import {Getter, inject} from '@loopback/core';
+import {asLifeCycleObserver, Getter, inject} from '@loopback/core';
 import {AreaRepository} from './area.repository';
 import {EmailManager, RandomGeneratorManager} from '../services';
 import {UserProfile} from '@loopback/security';
@@ -19,7 +26,8 @@ export class UserRepository extends DefaultCrudRepository<User,
     public readonly areas: HasManyRepositoryFactory<Area, typeof User.prototype.id>;
 
     constructor(
-        @inject('datasources.mongo') dataSource: MongoDataSource, @repository.getter('AreaRepository') protected areaRepositoryGetter: Getter<AreaRepository>,
+        @inject('datasources.mongo') dataSource: MongoDataSource,
+        @repository.getter('AreaRepository') protected areaRepositoryGetter: Getter<AreaRepository>,
         @inject('services.email') protected emailService: EmailManager,
         @inject('services.randomGenerator') protected randomGeneratorService: RandomGeneratorManager
     ) {
@@ -27,7 +35,31 @@ export class UserRepository extends DefaultCrudRepository<User,
         this.areas = this.createHasManyRepositoryFactoryFor('areas', areaRepositoryGetter,);
         this.registerInclusionResolver('areas', this.areas.inclusionResolver);
     }
-    
+
+    deleteById(id: typeof User.prototype.id, options?: AnyObject): Promise<void> {
+        return new Promise((resolve, reject) => {
+            this.areas(id).delete().then(() => {
+            }).catch((err) => {
+                reject(err);
+            });
+            super.deleteById(id, options).then(() => {
+                resolve();
+            }).catch((err) => {
+                reject(err);
+            });
+        });
+    }
+
+    async deleteAll(where?: Condition<User> | AndClause<User> | OrClause<User>, options?: AnyObject): Promise<Count> {
+        const users = await this.find({
+            where: where
+        }, options);
+        users.forEach((user) => {
+            this.areas(user.id).delete().then().catch(console.error);
+        });
+        return super.deleteAll(where, options);
+    }
+
     toEntity<R extends User>(model: juggler.PersistedModel) {
         const entity: R & {servicesList: string[]} = super.toEntity(model);
 
