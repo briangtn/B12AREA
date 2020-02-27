@@ -4,7 +4,6 @@ import {ActionRepository, UserRepository} from "../../repositories";
 import {Context} from "@loopback/context";
 import ServiceController from "./controller";
 import {google} from "googleapis";
-import config from "./actions/new_video/config.json";
 import * as qs from "querystring";
 import {RandomGeneratorManager} from "../../services";
 import {Action} from "../../models";
@@ -19,7 +18,7 @@ export enum PubSubMode {
 }
 
 export class YoutubeHelper {
-    public static WEBHOOK_PREFIX = `${API_URL}/services/youtube/actions/${config.displayName}/webhook/`;
+    public static WEBHOOK_PREFIX = `${API_URL}/services/youtube/actions/new_video/webhook/`;
     public static YOUTUBE_WATCH_URL = "https://www.youtube.com/xml/feeds/videos.xml?channel_id=";
     public static SUBSCRIBE_URL = 'https://pubsubhubbub.appspot.com/subscribe';
     private static SUB_INFOS_URL = 'https://pubsubhubbub.appspot.com/subscription-details';
@@ -100,7 +99,7 @@ export class YoutubeHelper {
                     'Content-Type': 'application/x-www-form-urlencoded'
                 }
             }).then(() => {
-                console.log("WebHook informations", this.getInfosUrl(channelId, webhookUrl));
+                console.debug("[YOUTUBE SERVICE] WebHook subscription details", this.getInfosUrl(channelId, webhookUrl));
                 this.prepareRefreshWebhook(channelId, webhookUrl);
                 resolve(webhookUrl);
             }).catch(() => {
@@ -165,7 +164,7 @@ export class YoutubeHelper {
     static prepareRefreshWebhook(channelId: string, webhook: string) {
         axios.get(YoutubeHelper.getInfosUrl(channelId, webhook)).then((res) => {
             const data = new DomParser().parseFromString(res.data).getElementsByTagName('dd');
-            const dates: Date[] = [];
+            let dates: Date[] = [];
 
             for (const node of data!) {
                 const date = new Date(node.textContent);
@@ -173,8 +172,8 @@ export class YoutubeHelper {
                     dates.push(date);
                 }
             }
-            const delayToRefresh = dates.sort()[0].getTime() - new Date(Date.now()).getTime() - (1000 * 60 * 60);
-
+            dates = dates.sort();
+            const delayToRefresh = dates[dates.length - 1].getTime() - new Date(Date.now()).getTime() - (1000 * 60 * 60);
             setTimeout(() => {
                 this.postSubscribeWebhook(webhook, channelId).then(() => {
                     console.log(`Webhook re-subscribed`);
@@ -182,7 +181,6 @@ export class YoutubeHelper {
                     console.log(`Failed to re-subscribe to webhook`);
                 })
             }, delayToRefresh);
-            console.log();
         }).catch((err) => {
             console.error(err);
         })

@@ -34,8 +34,6 @@ export default class ServiceController {
             const channelId = (action.options as NewVideoConfig).channel;
             const webhook = (action.data as NewVideoData).webHookUrl;
             if (!webhook.startsWith(API_URL)) {
-                console.log(webhook);
-                console.log(API_URL);
                 setTimeout(() => {
                     YoutubeHelper.updateWebhookAPIURL(action, channelId, ctx);
                 }, 2000);

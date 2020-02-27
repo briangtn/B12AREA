@@ -1,5 +1,5 @@
 {
-  "displayName": "unrate",
+  "displayName": "Unrate",
   "description": "Remove any rate on a video",
   "configSchema": [
     {

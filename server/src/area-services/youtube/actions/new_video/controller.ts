@@ -43,7 +43,7 @@ export default class ActionController {
             where: {
                 and: [
                     {
-                        serviceAction: `youtube.A.${config.displayName}`
+                        serviceAction: `youtube.A.new_video`
                     },
                     {
                         "data.webHookUrl": `${YoutubeHelper.WEBHOOK_PREFIX}${webhookId}`
@@ -98,7 +98,8 @@ export default class ActionController {
     static async createAction(userId: string, actionConfig: Object, ctx: Context): Promise<OperationStatus> {
         const newVideoConfig: NewVideoConfig = actionConfig as NewVideoConfig;
 
-        return YoutubeHelper.createWebhook(config.displayName, newVideoConfig.channel, ctx).then((webhookUrl: string) => {
+        console.log(this.getActionName());
+        return YoutubeHelper.createWebhook(this.getActionName(), newVideoConfig.channel, ctx).then((webhookUrl: string) => {
             const data : NewVideoData = {
                 webHookUrl: webhookUrl
             };
@@ -121,5 +122,11 @@ export default class ActionController {
 
     static async getConfig(): Promise<ActionConfig> {
         return config as ActionConfig;
+    }
+
+    static getActionName(): string {
+        const folders = __dirname.split('/');
+
+        return folders[folders.length];
     }
 }
