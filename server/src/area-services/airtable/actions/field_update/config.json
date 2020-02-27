@@ -1,0 +1,6 @@
+{
+  "displayName": "Field updated",
+  "description": "This action is triggered when a specific field is updated",
+  "configSchema": [
+  ]
+}

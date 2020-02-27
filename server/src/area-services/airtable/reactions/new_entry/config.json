@@ -1,0 +1,6 @@
+{
+  "displayName": "New entry",
+  "description": "This action creates an entry in a Airtable base",
+  "configSchema": [
+  ]
+}
