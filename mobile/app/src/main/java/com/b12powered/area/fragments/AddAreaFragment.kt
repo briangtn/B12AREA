@@ -58,7 +58,7 @@ class AddAreaFragment(private val service: Service, private val area: Area, priv
 
         ar.configSchema.forEach { option ->
             val editModel = EditModel()
-            editModel.setEditTextValue(option.name)
+            editModel.setEditTextHint(option.name)
             list.add(editModel)
         }
         return list
@@ -67,17 +67,18 @@ class AddAreaFragment(private val service: Service, private val area: Area, priv
     private fun submit(editModelArrayList: ArrayList<EditModel>) {
         val options: HashMap<String, Any> = HashMap()
 
-        editModelArrayList.forEach { input ->
+        editModelArrayList.forEachIndexed { index, input ->
             val value = input.getEditTextValue()
-            if (value.isEmpty()) {
+            if (value.isEmpty() && ar.configSchema[index].required) {
                 Toast.makeText(
                     context,
                     getString(R.string.missing_parameter),
                     Toast.LENGTH_SHORT
                 ).show()
                 return
+            } else if (value.isNotEmpty()) {
+                options[ar.configSchema[editModelArrayList.indexOf(input)].name] = input.getEditTextValue()
             }
-            options[ar.configSchema[editModelArrayList.indexOf(input)].name] = input.getEditTextValue()
         }
 
         when(step) {

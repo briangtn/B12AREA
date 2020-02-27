@@ -24,23 +24,16 @@ class EditTextListAdapter(private val context: Context, private val editModelArr
     }
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
-        val holder: ViewHolder
+        val holder = ViewHolder()
         val view: View
 
-        if (convertView == null) {
-            holder = ViewHolder()
+        val inflater: LayoutInflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
 
-            val inflater: LayoutInflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+        view = inflater.inflate(R.layout.edittext_item, null, true)
+        holder.editText = view.findViewById(R.id.editText)
+        view.tag = holder
 
-            view = inflater.inflate(R.layout.edittext_item, null, true)
-            holder.editText = view.findViewById(R.id.editText)
-            view.tag = holder
-        } else {
-            view = convertView
-            holder = convertView.tag as ViewHolder
-        }
-
-        holder.editText.hint = editModelArrayList[position].getEditTextValue()
+        holder.editText.hint = editModelArrayList[position].getEditTextHint()
 
         holder.editText.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
