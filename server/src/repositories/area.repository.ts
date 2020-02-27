@@ -55,4 +55,15 @@ export class AreaRepository extends DefaultCrudRepository<Area,
             });
         });
     }
+
+    async deleteAll(where?: Condition<Area> | AndClause<Area> | OrClause<Area>, options?: AnyObject): Promise<Count> {
+        const areas = await this.find({
+            where: where
+        }, options);
+        areas.forEach((area) => {
+            this.action(area.id).delete().then().catch(console.error);
+            this.reactions(area.id).delete().then().catch(console.error);
+        });
+        return super.deleteAll(where, options);
+    }
 }
