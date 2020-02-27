@@ -110,8 +110,23 @@ export default class ActionController {
     }
 
     static async updateAction(actionId: string, oldActionConfig: Object, newActionConfig: Object, ctx: Context): Promise<OperationStatus> {
-        //TODO
-        return { success: true, options: newActionConfig}
+        const oldActionCfg: NewVideoConfig = oldActionConfig as NewVideoConfig;
+        const newActionCfg: NewVideoConfig = newActionConfig as NewVideoConfig;
+
+
+        if (oldActionCfg.channel === undefined)
+            return { success: false, error: "Invalid oldActionConfig" };
+        if (newActionCfg.channel === undefined)
+            return { success: false, error: "Invalid newActionConfig" };
+        if (newActionCfg === oldActionCfg)
+            return { success: true, options: oldActionConfig };
+        try {
+            await this.deleteAction(actionId, oldActionConfig, ctx)
+        } catch (e) {
+            return { success: false, error: "Failed to remove old webhook", details: e };
+        }
+        const actionRepository: ActionRepository = await ctx.get('ActionRepository');
+        return this.createAction((await actionRepository.getActionOwnerID(actionId))!, newActionCfg, ctx);
     }
 
     static async deleteAction(actionId: string, actionConfig: Object, ctx: Context): Promise<OperationStatus> {
@@ -127,6 +142,6 @@ export default class ActionController {
     static getActionName(): string {
         const folders = __dirname.split('/');
 
-        return folders[folders.length];
+        return folders[folders.length - 1];
     }
 }
