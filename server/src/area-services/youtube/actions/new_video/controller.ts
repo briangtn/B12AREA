@@ -98,7 +98,6 @@ export default class ActionController {
     static async createAction(userId: string, actionConfig: Object, ctx: Context): Promise<OperationStatus> {
         const newVideoConfig: NewVideoConfig = actionConfig as NewVideoConfig;
 
-        console.log(this.getActionName());
         return YoutubeHelper.createWebhook(this.getActionName(), newVideoConfig.channel, ctx).then((webhookUrl: string) => {
             const data : NewVideoData = {
                 webHookUrl: webhookUrl
