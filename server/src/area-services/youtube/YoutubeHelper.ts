@@ -175,11 +175,7 @@ export class YoutubeHelper {
             dates = dates.sort();
             const delayToRefresh = dates[dates.length - 1].getTime() - new Date(Date.now()).getTime() - (1000 * 60 * 60);
             setTimeout(() => {
-                this.postSubscribeWebhook(webhook, channelId).then(() => {
-                    console.log(`Webhook re-subscribed`);
-                }).catch(() => {
-                    console.log(`Failed to re-subscribe to webhook`);
-                })
+                this.postSubscribeWebhook(webhook, channelId).then(() => {}).catch(console.error);
             }, delayToRefresh);
         }).catch((err) => {
             console.error(err);
