@@ -1,0 +1,30 @@
+{
+  "displayName": "Reply to message",
+  "description": "Reply to a teams message",
+  "configSchema": [
+    {
+      "name": "teamsId",
+      "description": "The id of the teams team",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "channelId",
+      "description": "The id of the teams channel",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "messageId",
+      "description": "The id of the message to reply to",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "message",
+      "description": "The message body content to reply to the message",
+      "type": "string",
+      "required": true
+    }
+  ]
+}
