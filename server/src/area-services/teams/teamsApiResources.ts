@@ -1,3 +1,9 @@
+export interface TeamsAPIUserResource {
+    displayName: string;
+    mail: string;
+    id: string;
+}
+
 export interface TeamsAPIIdentityResource {
     displayName: string;
     id: string;

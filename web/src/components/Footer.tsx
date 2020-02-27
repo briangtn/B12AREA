@@ -31,9 +31,10 @@ interface State {
 const styles = (theme: Theme) => createStyles({
     footer: {
         width: '100%',
-        position: 'absolute',
+        position: 'fixed',
         marginTop: '20px',
-        backgroundColor: '#212121'
+        backgroundColor: '#212121',
+        bottom: '0'
     },
     footerText: {
         color: 'white',

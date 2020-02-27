@@ -29,6 +29,14 @@
       "description": "The teams id of the message that is new"
     },
     {
+      "name": "TeamsId",
+      "description": "The teams id of the teams team"
+    },
+    {
+      "name": "ChannelId",
+      "description": "The teams id of the teams channel"
+    },
+    {
       "name": "Words[i]",
       "description": "The word at index i in the message."
     },

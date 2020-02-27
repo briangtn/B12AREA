@@ -22,14 +22,23 @@ export default class ServiceController {
         console.log('Starting teams service');
         const actionRepository: ActionRepository = await ctx.get('repositories.ActionRepository');
 
-        const actions = await actionRepository.find({where: {serviceAction: 'teams.A.new_message_in_channel'}});
+        // Start pulling's for new messages in channels
+        const newMessagesInChannelActions = await actionRepository.find({where: {serviceAction: 'teams.A.new_message_in_channel'}});
 
-        // Start pulling's for new playlist song actions
-        for (const action of actions) {
+        for (const action of newMessagesInChannelActions) {
             const ownerId  = await actionRepository.getActionOwnerID(action.id?.toString()!);
             if (!ownerId)
                 continue;
             await TeamsHelper.startNewMessageInChannelPulling(action.id!, ownerId, ctx);
+        }
+        // Start pulling's for new reacts on messages
+        const newReactsOnMessageActions = await actionRepository.find({where: {serviceAction: 'teams.A.new_react_on_message'}});
+
+        for (const action of newReactsOnMessageActions) {
+            const ownerId  = await actionRepository.getActionOwnerID(action.id?.toString()!);
+            if (!ownerId)
+                continue;
+            await TeamsHelper.startNewReactOnMessagePulling(action.id!, ownerId, ctx);
         }
     }
 

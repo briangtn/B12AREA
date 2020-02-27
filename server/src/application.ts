@@ -167,7 +167,11 @@ export class AreaApplication extends BootMixin(
 
     public async beforeStart() {
         for (const Class of this.areaServicesControllers) {
-            await Class.start(this);
+            try {
+                await Class.start(this);
+            } catch (e) {
+                console.error(`Failed to start service:`, e);
+            }
         }
     }
 }
