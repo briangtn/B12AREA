@@ -6,4 +6,6 @@ sealed class AreaCreationStatus {
     object ActionAdded : AreaCreationStatus()
     object ReactionSelected : AreaCreationStatus()
     object ReactionAdded : AreaCreationStatus()
+    object AdditionalReactionSelected : AreaCreationStatus()
+    object AdditionalReactionAdded : AreaCreationStatus()
 }

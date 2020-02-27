@@ -10,6 +10,7 @@ import android.view.ViewGroup
 import android.widget.ListView
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
 import com.b12powered.area.*
 import com.b12powered.area.activities.ServiceInformationActivity
@@ -31,6 +32,16 @@ class AddAreaFragment(private val service: Service, private val area: Area, priv
         savedInstanceState: Bundle?
     ): View? {
         return inflater.inflate(R.layout.fragment_add_area, container, false)
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        requireActivity().onBackPressedDispatcher.addCallback(object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                (activity!! as ServiceInformationActivity).goBack(area, step)
+            }
+        })
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -98,6 +109,7 @@ class AddAreaFragment(private val service: Service, private val area: Area, priv
                         response,
                         Toast.LENGTH_SHORT
                     ).show()
+                    (activity!! as ServiceInformationActivity).goBack(area, step)
                 }
             }
     }
@@ -114,6 +126,7 @@ class AddAreaFragment(private val service: Service, private val area: Area, priv
                         response,
                         Toast.LENGTH_SHORT
                     ).show()
+                    (activity!! as ServiceInformationActivity).goBack(area, step)
                 }
             }
     }
@@ -122,7 +135,10 @@ class AddAreaFragment(private val service: Service, private val area: Area, priv
         val builder = AlertDialog.Builder(context)
         val dialogClickListener = DialogInterface.OnClickListener { _, which ->
             when(which) {
-                DialogInterface.BUTTON_POSITIVE -> (activity as ServiceInformationActivity).nextStep(area, null, AreaCreationStatus.ReactionAdded)
+                DialogInterface.BUTTON_POSITIVE -> (activity as ServiceInformationActivity).nextStep(area, null, when(step) {
+                    is AreaCreationStatus.ReactionSelected -> AreaCreationStatus.ReactionAdded
+                    else -> AreaCreationStatus.AdditionalReactionAdded
+                })
                 DialogInterface.BUTTON_NEGATIVE -> (activity as ServiceInformationActivity).finishArea()
             }
         }

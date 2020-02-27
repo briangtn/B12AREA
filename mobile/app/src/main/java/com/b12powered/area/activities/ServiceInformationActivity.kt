@@ -4,8 +4,10 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.b12powered.area.*
+import com.b12powered.area.api.ApiClient
 import com.b12powered.area.fragments.CreateAreaFragment
 import com.b12powered.area.fragments.SelectAreaFragment
 import com.b12powered.area.fragments.AddAreaFragment
@@ -42,14 +44,56 @@ class ServiceInformationActivity : AppCompatActivity() {
 
     }
 
+    fun goBack(area: Area, step: AreaCreationStatus) {
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.create_area_layout, when(step) {
+                is AreaCreationStatus.AreaCreated -> {
+                    ApiClient(this)
+                        .deleteArea(area.id) { success, message ->
+                            if (!success) {
+                                Toast.makeText(
+                                    this,
+                                    message,
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                        }
+                    CreateAreaFragment.newInstance()
+                }
+                is AreaCreationStatus.ActionSelected -> SelectAreaFragment.newInstance(service, area, AreaCreationStatus.AreaCreated)
+                is AreaCreationStatus.ActionAdded -> {
+                    ApiClient(this)
+                        .deleteAction(area.id) { success, message ->
+                            if (!success) {
+                                Toast.makeText(
+                                    this,
+                                    message,
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                        }
+                    SelectAreaFragment.newInstance(service, area, AreaCreationStatus.AreaCreated)
+                }
+                is AreaCreationStatus.ReactionSelected -> SelectAreaFragment.newInstance(service, area, AreaCreationStatus.ActionAdded)
+                is AreaCreationStatus.AdditionalReactionSelected -> SelectAreaFragment.newInstance(service, area, AreaCreationStatus.AdditionalReactionAdded)
+                else -> CreateAreaFragment.newInstance()
+            })
+            .commit()
+    }
+
     fun nextStep(area: Area, ar: ActionReaction?, step: AreaCreationStatus) {
         supportFragmentManager.beginTransaction()
             .replace(R.id.create_area_layout, when(step) {
-                is AreaCreationStatus.AreaCreated -> SelectAreaFragment.newInstance(service, area, step)
-                is AreaCreationStatus.ActionSelected -> AddAreaFragment.newInstance(service, area, ar!!, step)
-                is AreaCreationStatus.ActionAdded -> SelectAreaFragment.newInstance(service, area, step)
-                is AreaCreationStatus.ReactionSelected -> AddAreaFragment.newInstance(service, area, ar!!, step)
-                is AreaCreationStatus.ReactionAdded -> SelectAreaFragment.newInstance(service, area, step)
+                is
+                AreaCreationStatus.AreaCreated,
+                AreaCreationStatus.ActionAdded,
+                AreaCreationStatus.ReactionAdded,
+                AreaCreationStatus.AdditionalReactionAdded -> SelectAreaFragment.newInstance(service, area, step)
+
+                is
+                AreaCreationStatus.ActionSelected,
+                AreaCreationStatus.ReactionSelected,
+                AreaCreationStatus.AdditionalReactionSelected -> AddAreaFragment.newInstance(service, area, ar!!, step)
             })
             .commit()
     }

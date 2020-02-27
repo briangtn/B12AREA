@@ -66,4 +66,6 @@
     <string name="no">No</string>
     <string name="add_reaction">Add reaction to your area</string>
     <string name="edit_reaction">Edit reaction parameters</string>
+    <string name="confirm_exit">Do you really want to exit this page ?</string>
+    <string name="exit_area_message">This action will take you back to homepage. Your area will still be saved.</string>
 </resources>

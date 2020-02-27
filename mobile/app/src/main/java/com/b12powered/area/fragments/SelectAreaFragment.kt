@@ -1,5 +1,7 @@
 package com.b12powered.area.fragments
 
+import android.app.AlertDialog
+import android.content.DialogInterface
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -9,6 +11,7 @@ import android.widget.ArrayAdapter
 import android.widget.ListView
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
 import com.b12powered.area.*
 import com.b12powered.area.activities.ServiceInformationActivity
@@ -29,6 +32,20 @@ class SelectAreaFragment(private val service: Service, private val area: Area, p
         savedInstanceState: Bundle?
     ): View? {
         return inflater.inflate(R.layout.fragment_select_area, container, false)
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        requireActivity().onBackPressedDispatcher.addCallback(object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                if (step is AreaCreationStatus.ReactionAdded || step is AreaCreationStatus.AdditionalReactionAdded) {
+                    showWarning()
+                } else {
+                    (activity!! as ServiceInformationActivity).goBack(area, step)
+                }
+            }
+        })
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -73,9 +90,27 @@ class SelectAreaFragment(private val service: Service, private val area: Area, p
 
             (activity as ServiceInformationActivity).nextStep(area, arList[position].second, when(step) {
                 is AreaCreationStatus.AreaCreated -> AreaCreationStatus.ActionSelected
-                else -> AreaCreationStatus.ReactionSelected
+                is AreaCreationStatus.ActionAdded -> AreaCreationStatus.ReactionSelected
+                else -> AreaCreationStatus.AdditionalReactionSelected
             })
         }
+    }
+
+    private fun showWarning() {
+        val builder = AlertDialog.Builder(context)
+        val dialogClickListener = DialogInterface.OnClickListener { dialog, which ->
+            when(which) {
+                DialogInterface.BUTTON_POSITIVE -> (activity as ServiceInformationActivity).finishArea()
+                DialogInterface.BUTTON_NEGATIVE -> dialog.dismiss()
+            }
+        }
+        builder
+            .setTitle(getString(R.string.confirm_exit))
+            .setMessage(getString(R.string.exit_area_message))
+            .setPositiveButton(getString(R.string.confirm), dialogClickListener)
+            .setNegativeButton(getString(R.string.cancel), dialogClickListener)
+            .create()
+            .show()
     }
 
 }
