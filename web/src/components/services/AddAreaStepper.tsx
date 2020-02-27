@@ -19,6 +19,7 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Switch from '@material-ui/core/Switch';
 import Divider from '@material-ui/core/Divider';
 import Alert from '../Alert';
+import Tooltip from '@material-ui/core/Tooltip';
 
 const mapStateToProps = (state: any) => {
     return { api_url: state.api_url, token: state.token, services: state.services };
@@ -27,7 +28,8 @@ const mapStateToProps = (state: any) => {
 interface Props {
     classes: {
         instructions: string,
-        formControl: string
+        formControl: string,
+        noMaxWidth: string
     },
     actions: any,
     reactions: any,
@@ -48,8 +50,7 @@ interface State {
     selectedAction: any,
     alert: boolean,
     alertMessage: string,
-    alertSeverity: string,
-    displayCloseButton: boolean
+    alertSeverity: string
 }
 
 interface Reaction {
@@ -57,6 +58,11 @@ interface Reaction {
     displayName: string,
     description: string,
     configSchema: any[]
+}
+
+interface Placeholder {
+    name: string,
+    description: string
 }
 
 const styles = (theme: Theme) => createStyles({
@@ -68,8 +74,19 @@ const styles = (theme: Theme) => createStyles({
         fullWidth: 0,
         display: "flex",
         wrap: "nowrap"
-    }
+    },
+    noMaxWidth: {
+        maxWidth: 'none',
+    },
 });
+
+const HtmlTooltip = withStyles(theme => ({
+    tooltip: {
+        color: 'white',
+        maxWidth: 'none',
+        fontSize: theme.typography.pxToRem(12)
+    },
+}))(Tooltip);
 
 class AddAreaStepper extends Component<Props, State> {
     state: State = {
@@ -82,8 +99,7 @@ class AddAreaStepper extends Component<Props, State> {
         selectedAction: 0,
         alert: false,
         alertMessage: '',
-        alertSeverity: 'error',
-        displayCloseButton: false
+        alertSeverity: 'error'
     };
 
     handleNextStep = (e: any) => {
@@ -137,34 +153,47 @@ class AddAreaStepper extends Component<Props, State> {
         }
     };
 
-    displayConfigSchema = (argGroupName: string, configSchema: any, key: any, isAction: boolean) => {
+    displayConfigSchema = (argGroupName: string, configSchema: any, key: any, isAction: boolean, placeholder: Placeholder[] | null = null) => {
         const { configSchemaActions, configSchemaReactions } = this.state;
         const { name, type, required } = configSchema;
+        let placeHolderString: any = null;
 
-        if (type === "string") {
-            return (
-                <TextField
-                    label={name}
-                    required={required}
-                    id={name}
-                    type={type}
-                    value={(isAction) ? configSchemaActions[argGroupName][name] : configSchemaReactions[argGroupName][name]}
-                    onChange={(e) => this.configSchemaChange(argGroupName, key, e, isAction)}
-                    fullWidth
-                />
-            )
-        } else if (type === "number") {
-            return (
-                <TextField
-                    label={name}
-                    required={required}
-                    id={name}
-                    type={type}
-                    value={(isAction) ? configSchemaActions[argGroupName][name] : configSchemaReactions[argGroupName][name]}
-                    onChange={(e) => this.configSchemaChange(argGroupName, key, e, isAction)}
-                    fullWidth
-                />
-            )
+        if (placeholder) {
+                placeHolderString = (
+                    <React.Fragment>
+                        <p><b>Placeholders:</b></p>
+                        {placeholder.map((holder: Placeholder, index: number) => <p key={index}>{`{${holder.name}}: ${holder.description}`}</p>)}
+                    </React.Fragment>
+                );
+        }
+        if (type === "string" || type === "number") {
+            if (placeholder) {
+                return (
+                    <HtmlTooltip title={placeHolderString}>
+                        <TextField
+                            label={name}
+                            required={required}
+                            id={name}
+                            type={type}
+                            value={(isAction) ? configSchemaActions[argGroupName][name] : configSchemaReactions[argGroupName][name]}
+                            onChange={(e) => this.configSchemaChange(argGroupName, key, e, isAction)}
+                            fullWidth
+                        />
+                    </HtmlTooltip>
+                );
+            } else {
+                return (
+                    <TextField
+                        label={name}
+                        required={required}
+                        id={name}
+                        type={type}
+                        value={(isAction) ? configSchemaActions[argGroupName][name] : configSchemaReactions[argGroupName][name]}
+                        onChange={(e) => this.configSchemaChange(argGroupName, key, e, isAction)}
+                        fullWidth
+                    />
+                );
+            }
         } else if (type === "boolean") {
             return (
                 <FormControlLabel
@@ -300,7 +329,7 @@ class AddAreaStepper extends Component<Props, State> {
                         </Typography>
                         { reaction.configSchema.map((configSchema: any) => (
                             <div key={reaction.configSchema.indexOf(configSchema)}>
-                                {this.displayConfigSchema(reaction.name, configSchema, "configSchemaReactions", false)}
+                                {this.displayConfigSchema(reaction.name, configSchema, "configSchemaReactions", false, this.state.selectedAction.placeholders)}
                             </div>
                         ))}
                         <br />
@@ -372,6 +401,11 @@ class AddAreaStepper extends Component<Props, State> {
         )
     };
 
+    /**
+     * Function to set the action to the AREA just created
+     * based on the informations filled by the user.
+     * @param id id of the area
+     */
     setActionToArea: any = (id: string) => {
         const { api_url, token, serviceName } = this.props;
         const headers: any = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` };
@@ -385,7 +419,8 @@ class AddAreaStepper extends Component<Props, State> {
 
         for (let argument of actionConfigSchema[0].arguments)
                 actionBody.options[argument.name] = argument.value;
-        fetch(`${api_url}/areas/${id}/action`, {
+
+        return fetch(`${api_url}/areas/${id}/action`, {
             method: 'POST',
             headers: headers,
             body: JSON.stringify(actionBody)
@@ -396,39 +431,54 @@ class AddAreaStepper extends Component<Props, State> {
 
                 if (error) {
                     this.setState({ alert: true, alertMessage: `${error.name}: ${error.message}` });
+                    return error
                 }
+                return null;
             })
     };
 
-    setReactionsToArea: any = (id: string) => {
+    /**
+     * Function to set the reactions to the AREA just created
+     * based on the informations filled by the user.
+     * @param id id of the area
+     */
+    setReactionsToArea: any = async (id: string) => {
         const { api_url, token } = this.props;
         const headers: any = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` };
 
         const reactionConfigSchema = this.formatConfigSchema(this.state.configSchemaReactions);
-
+        let returnArray = []
         for (let reaction of reactionConfigSchema) {
             const reactionBody: { serviceReaction: string, options: any } = {
                 serviceReaction: `${reaction.serviceName}.R.${reaction.name}`,
                 options: {}
-            }
+            };
+
             for (let argument of reaction.arguments)
                 reactionBody.options[argument.name] = argument.value;
-            fetch(`${api_url}/areas/${id}/reactions`, {
+
+            const res = await fetch(`${api_url}/areas/${id}/reactions`, {
                 method: 'POST',
                 headers: headers,
                 body: JSON.stringify(reactionBody)
-            })
-                .then(res => res.json())
-                .then((data) => {
-                    const { error } = data;
+            });
+            const json = await res.json();
+            const { error } = json;
 
-                    if (error) {
-                        this.setState({ alert: true, alertMessage: `${error.name}: ${error.message}` });
-                    }
-                })
+            if (error) {
+                this.setState({ alert: true, alertMessage: `${error.name}: ${error.message}` });
+                returnArray.push(error);
+                continue;
+            }
+            returnArray.push(null);
         }
+        return returnArray;
     };
 
+    /**
+     * Create all the AREA based on the
+     * information the user filled before.
+     */
     createAREA = () => {
         const { api_url, token } = this.props;
         const { areaName } = this.state;
@@ -442,14 +492,22 @@ class AddAreaStepper extends Component<Props, State> {
         .then(res => res.json())
         .then((data) => {
             const { id } = data;
-            // Create Action
-            this.setActionToArea(id);
 
-            // Create reactions
-            this.setReactionsToArea(id);
+            Promise.all([this.setActionToArea(id), this.setReactionsToArea(id)])
+                .then(([action, reaction]) => {
+                    let error: boolean = false;
+
+                    for (let i = 0; i < reaction.length; i++) {
+                        if (reaction[i] !== null)
+                            error = true;
+                    }
+                    if (action !== null) {
+                        error = true;
+                    }
+                    if (!error)
+                        this.props.closeFunction();
+                });
         });
-        this.setState({ displayCloseButton: true });
-        //this.props.closeFunction();
     };
 
     contentStep = (activeStep: number) => {
@@ -493,16 +551,6 @@ class AddAreaStepper extends Component<Props, State> {
                             <Button variant="contained" color="primary" onClick={(activeStep === steps.length - 1) ? this.createAREA : this.handleNextStep}>
                                 {activeStep === steps.length - 1 ? 'Finish' : 'Next'}
                             </Button>
-                            {(activeStep === steps.length - 1 && this.state.displayCloseButton) ?
-                                <Button
-                                    variant="contained"
-                                    color="secondary"
-                                    onClick={this.props.closeFunction}
-                                >
-                                    Close
-                                </Button>
-                                : ''
-                            }
                         </div>
                     </div>
                 </div>
