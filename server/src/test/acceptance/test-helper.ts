@@ -6,7 +6,8 @@ import {
 } from '@loopback/testlab';
 import {EmailManager} from "../../services";
 import {sinon} from "@loopback/testlab/dist/sinon";
-import {UserRepository} from "../../repositories";
+import {ActionRepository, AreaRepository, ReactionRepository, UserRepository} from "../../repositories";
+import {Area, User} from "../../models";
 
 interface AppWithClient {
     app: AreaApplication;
@@ -17,6 +18,9 @@ export class TestHelper {
     client: Client;
     app: AreaApplication;
     userRepository: UserRepository;
+    areaRepository: AreaRepository;
+    actionRepository: ActionRepository;
+    reactionRepository: ReactionRepository;
     private hasBeenInit: boolean;
 
     constructor() {}
@@ -29,6 +33,9 @@ export class TestHelper {
         this.app = appWithClient.app;
         this.client = appWithClient.client;
         this.userRepository = await this.app.get('repositories.UserRepository');
+        this.areaRepository = await this.app.get('repositories.AreaRepository');
+        this.actionRepository = await this.app.get('repositories.ActionRepository');
+        this.reactionRepository = await this.app.get('repositories.ReactionRepository');
         await this.app.migrateSchema();
 
         this.hasBeenInit = true;
@@ -89,6 +96,13 @@ export class TestHelper {
             roles.push('email_not_validated');
         await this.userRepository.updateById(user.body.id, {role: roles});
         return this.userRepository.findById(user.body.id);
+    }
+
+    async createArea(user: User, areaName: string, enabled = true): Promise<Area> {
+        return this.userRepository.areas(user.id).create({
+            name: areaName,
+            enabled: enabled
+        })
     }
 
     async getJWT(email: string, password: string) {

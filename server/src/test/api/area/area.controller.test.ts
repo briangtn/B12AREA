@@ -225,6 +225,41 @@ describe('/areas', () => {
                 .delete('/areas/' + area.id)
                 .set('Authorization', 'Bearer ' + users[0].token)
                 .expect(204);
+            expect((await helper.areaRepository.count({id: area.id})).count).to.be.equal(0);
+        });
+
+        it('Should delete actions belonging to the area', async () => {
+            const area = await helper.userRepository.areas(users[0].email).create(newArea);
+            const action = await helper.areaRepository.action(area.id).create({
+                serviceAction: 'example.A.example'
+            });
+
+            expect((await helper.areaRepository.count({id: area.id})).count).to.be.equal(1);
+            expect((await helper.actionRepository.count({id: action.id})).count).to.be.equal(1);
+
+            await helper.client
+                .delete('/areas/' + area.id)
+                .set('Authorization', 'Bearer ' + users[0].token)
+                .expect(204);
+            expect((await helper.areaRepository.count({id: area.id})).count).to.be.equal(0);
+            expect((await helper.actionRepository.count({id: action.id})).count).to.be.equal(0);
+        });
+
+        it('Should delete reactions belonging to the area', async () => {
+            const area = await helper.userRepository.areas(users[0].email).create(newArea);
+            const reaction = await helper.areaRepository.reactions(area.id).create({
+                serviceReaction: 'example.R.example'
+            });
+
+            expect((await helper.areaRepository.count({id: area.id})).count).to.be.equal(1);
+            expect((await helper.actionRepository.count({id: reaction.id})).count).to.be.equal(1);
+
+            await helper.client
+                .delete('/areas/' + area.id)
+                .set('Authorization', 'Bearer ' + users[0].token)
+                .expect(204);
+            expect((await helper.areaRepository.count({id: area.id})).count).to.be.equal(0);
+            expect((await helper.actionRepository.count({id: reaction.id})).count).to.be.equal(0);
         });
 
         it('Should send 404 Not Found if the id doesn\'t match', async () => {
