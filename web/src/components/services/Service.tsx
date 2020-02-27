@@ -19,6 +19,8 @@ import Dialog from '@material-ui/core/Dialog';
 import DialogContent from '@material-ui/core/DialogContent';
 import AddAreaStepper from "./AddAreaStepper";
 
+import {IService} from "../../interfaces/IService.interface";
+
 interface Props {
     api_url: string,
     token: string,
@@ -27,7 +29,7 @@ interface Props {
         icon: string,
         serviceName: string
     },
-    info: any,
+    info: IService,
     history: {
         push: any
     }
