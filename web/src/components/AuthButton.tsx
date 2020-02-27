@@ -41,8 +41,6 @@ interface State {
 const styles = (theme: Theme) => createStyles({
     imageButton: {
         backgroundColor: '#FFFFFF',
-        minWidth: '150px',
-        maxWidth: '230px'
     }
 });
 

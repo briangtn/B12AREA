@@ -21,8 +21,10 @@ import Divider from '@material-ui/core/Divider';
 import Alert from '../Alert';
 import Tooltip from '@material-ui/core/Tooltip';
 
+import { IAction, IReaction, IPlaceHolder } from "../../interfaces/IService.interface";
+
 const mapStateToProps = (state: any) => {
-    return { api_url: state.api_url, token: state.token, services: state.services };
+    return { language: state.language, api_url: state.api_url, token: state.token, services: state.services };
 };
 
 interface Props {
@@ -31,8 +33,9 @@ interface Props {
         formControl: string,
         noMaxWidth: string
     },
-    actions: any,
-    reactions: any,
+    language: string,
+    actions: IAction[],
+    reactions: IReaction[],
     services: any,
     closeFunction: any,
     token: string,
@@ -46,23 +49,11 @@ interface State {
     steps: string[],
     configSchemaActions: any,
     configSchemaReactions: any,
-    chosenReactions: Reaction[],
-    selectedAction: any,
+    chosenReactions: IReaction[],
+    selectedAction: IAction | any,
     alert: boolean,
     alertMessage: string,
     alertSeverity: string
-}
-
-interface Reaction {
-    name: string,
-    displayName: string,
-    description: string,
-    configSchema: any[]
-}
-
-interface Placeholder {
-    name: string,
-    description: string
 }
 
 const styles = (theme: Theme) => createStyles({
@@ -92,7 +83,11 @@ class AddAreaStepper extends Component<Props, State> {
     state: State = {
         areaName: '',
         activeStep: 0,
-        steps: ['Name your AREA', 'Choose your action', 'Select your reactions', 'Summary'],
+        steps: (this.props.language === 'en')
+            ?
+                ['Name your AREA', 'Choose your action', 'Select your reactions', 'Summary']
+            :
+                ['Donnez un nom à votre AREA', 'Choisissez votre action', 'Choisissez vos reactions', 'Résumé'],
         configSchemaActions: {},
         configSchemaReactions: {},
         chosenReactions: [],
@@ -153,7 +148,7 @@ class AddAreaStepper extends Component<Props, State> {
         }
     };
 
-    displayConfigSchema = (argGroupName: string, configSchema: any, key: any, isAction: boolean, placeholder: Placeholder[] | null = null) => {
+    displayConfigSchema = (argGroupName: string, configSchema: any, key: any, isAction: boolean, placeholder: IPlaceHolder[] | null = null) => {
         const { configSchemaActions, configSchemaReactions } = this.state;
         const { name, type, required } = configSchema;
         let placeHolderString: any = null;
@@ -162,7 +157,7 @@ class AddAreaStepper extends Component<Props, State> {
                 placeHolderString = (
                     <React.Fragment>
                         <p><b>Placeholders:</b></p>
-                        {placeholder.map((holder: Placeholder, index: number) => <p key={index}>{`{${holder.name}}: ${holder.description}`}</p>)}
+                        {placeholder.map((holder: IPlaceHolder, index: number) => <p key={index}>{`{${holder.name}}: ${holder.description}`}</p>)}
                     </React.Fragment>
                 );
         }
@@ -285,7 +280,7 @@ class AddAreaStepper extends Component<Props, State> {
     reactionStep = () => {
         const { chosenReactions } = this.state;
         const { services, classes } = this.props;
-        const allRegisteredReactions: Reaction[] = [];
+        const allRegisteredReactions: IReaction[] = [];
 
         for (let service of services)
             for (let reaction of service.reactions) {
@@ -311,7 +306,7 @@ class AddAreaStepper extends Component<Props, State> {
                         onChange={this.selectReaction}
                         autoWidth
                     >
-                        {allRegisteredReactions.map((reaction: Reaction) => (
+                        {allRegisteredReactions.map((reaction: IReaction) => (
                             <MenuItem key={allRegisteredReactions.indexOf(reaction)} value={reaction as any}>
                                 { `${reaction.name} - ${reaction.description}` }
                             </MenuItem>
@@ -319,7 +314,7 @@ class AddAreaStepper extends Component<Props, State> {
                     </Select>
                 </FormControl>
                 <br />
-                { chosenReactions.map((reaction: Reaction) => (
+                { chosenReactions.map((reaction: IReaction) => (
                     <div key={chosenReactions.indexOf(reaction)}>
                         <Typography variant="h6" gutterBottom>
                             { reaction.displayName }
@@ -546,10 +541,10 @@ class AddAreaStepper extends Component<Props, State> {
                                 disabled={activeStep === 0}
                                 onClick={this.handleBackStep}
                             >
-                                Back
+                                {(this.props.language === "en") ? 'Back' : 'Retour'}
                             </Button>
                             <Button variant="contained" color="primary" onClick={(activeStep === steps.length - 1) ? this.createAREA : this.handleNextStep}>
-                                {activeStep === steps.length - 1 ? 'Finish' : 'Next'}
+                                {activeStep === steps.length - 1 ? ((this.props.language === 'en') ? 'Finish' : 'Valider') : ((this.props.language === 'en') ? 'Next' : 'Suivant')}
                             </Button>
                         </div>
                     </div>

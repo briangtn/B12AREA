@@ -1,7 +1,7 @@
 const french = {
     save: "Sauvegarder",
     cancel: "Annuler",
-    signin: "Se connecter",
+    signin: "Connexion",
     signup: "S'enregistrer",
     enterEmail: "Entrez votre email",
     getStarted: "Commencer",
@@ -36,7 +36,9 @@ const french = {
     myActions: "Mes AREA",
     delete: "Supprimer",
     addReactions: "Ajouter une reaction",
-    addReactionsDescription: "Veuillez renseigner les informations, pour ajouter une nouvelle reaction à votre AREA"
+    addReactionsDescription: "Veuillez renseigner les informations, pour ajouter une nouvelle reaction à votre AREA",
+    logOut: "Se déconnecter",
+    profile: "Mon profil"
 };
 
 export default french;

@@ -36,7 +36,9 @@ const english = {
     myActions: "My AREA",
     delete: "Delete",
     addReactions: "Add reaction",
-    addReactionsDescription: "Please fill the informations to add a new reaction to your AREA"
+    addReactionsDescription: "Please fill the informations to add a new reaction to your AREA",
+    logOut: "Log Out",
+    profile: "My Profile"
 };
 
 export default english;

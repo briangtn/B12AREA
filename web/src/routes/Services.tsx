@@ -14,6 +14,11 @@ import Service from "../components/services/Service";
 
 import { setServices } from "../actions/services.action";
 
+// Interface
+
+import { IService } from '../interfaces/IService.interface';
+import IAbout from "../interfaces/IAbout.interface";
+
 interface Props {
     token: string,
     api_url: string,
@@ -28,9 +33,9 @@ interface Props {
 }
 
 interface State {
-    registeredServices: any,
-    availableServices: any,
-    about: any
+    registeredServices: IService[],
+    availableServices: IService[],
+    about: IAbout | null
 }
 
 const mapStateToProps = (state: any) => {
@@ -52,7 +57,7 @@ class Services extends Component<Props, State> {
     state: State = {
         registeredServices: [],
         availableServices: [],
-        about: {}
+        about: null
     };
 
     componentDidMount(): void {
@@ -74,8 +79,8 @@ class Services extends Component<Props, State> {
                     const { servicesList } = data;
                     const aboutServices = dataAbout['server']['services'];
 
-                    const registeredServices = [];
-                    const availableServices = [];
+                    const registeredServices: IService[] = [];
+                    const availableServices: IService[] = [];
 
                     for (let aboutService of aboutServices) {
                         if (servicesList.includes(aboutService.name))
@@ -88,10 +93,6 @@ class Services extends Component<Props, State> {
                     this.setState({ registeredServices: registeredServices, availableServices: availableServices });
                 })
             })
-    }
-
-    clickService = (e: any) => {
-        console.log('ehe');
     }
 
     render() {
