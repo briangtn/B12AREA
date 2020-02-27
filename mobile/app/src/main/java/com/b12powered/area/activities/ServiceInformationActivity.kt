@@ -32,8 +32,6 @@ class ServiceInformationActivity : AppCompatActivity() {
         service = jsonService!!.toObject()
         serviceList = jsonServiceList!!.map { service -> service.toObject<Service>() } as ArrayList<Service>
 
-        Log.d("serviceList", serviceList.toString())
-
         val etServiceName = findViewById<TextView>(R.id.service_name)
 
         etServiceName.text = service.displayName
@@ -45,7 +43,6 @@ class ServiceInformationActivity : AppCompatActivity() {
     }
 
     fun nextStep(area: Area, ar: ActionReaction?, step: AreaCreationStatus) {
-        Log.d("nextStep", step.toString())
         supportFragmentManager.beginTransaction()
             .replace(R.id.create_area_layout, when(step) {
                 is AreaCreationStatus.AreaCreated -> SelectAreaFragment.newInstance(service, area, step)

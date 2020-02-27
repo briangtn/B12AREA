@@ -55,7 +55,7 @@ data class Service(
     @SerializedName("icon") val icon: String,
     @SerializedName("color") val color: String,
     @SerializedName("actions") val actions: List<ActionReaction>,
-    @SerializedName("reaction") val reactions: List<ActionReaction>
+    @SerializedName("reactions") val reactions: List<ActionReaction>
 ) : JSONConvertable
 
 data class Server(
