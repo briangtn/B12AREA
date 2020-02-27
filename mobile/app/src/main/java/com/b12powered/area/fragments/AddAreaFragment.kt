@@ -1,10 +1,14 @@
 package com.b12powered.area.fragments
 
+import android.app.AlertDialog
+import android.content.DialogInterface
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ListView
+import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.b12powered.area.*
@@ -31,6 +35,12 @@ class AddAreaFragment(private val service: Service, private val area: Area, priv
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        val textView: TextView = view.findViewById(R.id.textView)
+        textView.text = getString(when(step) {
+            is AreaCreationStatus.ActionSelected -> R.string.edit_action
+            else -> R.string.edit_reaction
+        })
 
         listView = view.findViewById(R.id.list)
 
@@ -92,10 +102,11 @@ class AddAreaFragment(private val service: Service, private val area: Area, priv
     }
 
     private fun addReaction(options: HashMap<String, Any>) {
+        Log.d("addReaction", "adding reaction")
         ApiClient(activity!!)
             .addReaction(area.id, service.name + ".R." + ar.name, options) { success, response ->
                 if (success) {
-                    (activity as ServiceInformationActivity).nextStep(area, null, AreaCreationStatus.ReactionAdded)
+                    showDialog()
                 } else {
                     Toast.makeText(
                         context,
@@ -104,5 +115,22 @@ class AddAreaFragment(private val service: Service, private val area: Area, priv
                     ).show()
                 }
             }
+    }
+
+    private fun showDialog() {
+        val builder = AlertDialog.Builder(context)
+        val dialogClickListener = DialogInterface.OnClickListener { _, which ->
+            when(which) {
+                DialogInterface.BUTTON_POSITIVE -> (activity as ServiceInformationActivity).nextStep(area, null, AreaCreationStatus.ReactionAdded)
+                DialogInterface.BUTTON_NEGATIVE -> (activity as ServiceInformationActivity).finishArea()
+            }
+        }
+        builder
+            .setTitle(getString(R.string.area_added))
+            .setMessage(getString(R.string.new_reaction_message))
+            .setPositiveButton(getString(R.string.yes), dialogClickListener)
+            .setNegativeButton(getString(R.string.no), dialogClickListener)
+            .create()
+            .show()
     }
 }

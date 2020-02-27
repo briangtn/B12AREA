@@ -61,4 +61,10 @@
     <string name="edit_action">Editer les paramètres de l\'action</string>
     <string name="next">Suivant</string>
     <string name="missing_parameter">Paramètre manquant</string>
+    <string name="area_added">Area ajoutée avec succès !</string>
+    <string name="new_reaction_message">Voulez-vous ajouter une autre réaction à cette area ?</string>
+    <string name="yes">Oui</string>
+    <string name="no">Non</string>
+    <string name="add_reaction">Ajouter une réaction à votre area</string>
+    <string name="edit_reaction">Editer les paramètres de la réaction</string>
 </resources>

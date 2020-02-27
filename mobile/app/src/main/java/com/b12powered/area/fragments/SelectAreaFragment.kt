@@ -7,10 +7,12 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.ListView
+import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.b12powered.area.*
 import com.b12powered.area.activities.ServiceInformationActivity
+import kotlinx.android.synthetic.main.fragment_add_area.*
 
 class SelectAreaFragment(private val service: Service, private val area: Area, private val step: AreaCreationStatus) : Fragment() {
     companion object {
@@ -31,6 +33,12 @@ class SelectAreaFragment(private val service: Service, private val area: Area, p
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        val textView: TextView = view.findViewById(R.id.textView)
+        textView.text = getString(when(step) {
+            is AreaCreationStatus.AreaCreated -> R.string.add_action
+            else -> R.string.add_reaction
+        })
 
         listView = view.findViewById(R.id.list)
 
@@ -56,7 +64,7 @@ class SelectAreaFragment(private val service: Service, private val area: Area, p
 
         listView.setOnItemClickListener { _, _, position, _ ->
 
-            if (step == AreaCreationStatus.ReactionSelected) {
+            if (step == AreaCreationStatus.ActionAdded) {
                 val serviceList = (activity as ServiceInformationActivity).getServices()
                 (activity as ServiceInformationActivity).setService(serviceList[serviceList.indexOfFirst { service ->
                     service.displayName == arList[position].first

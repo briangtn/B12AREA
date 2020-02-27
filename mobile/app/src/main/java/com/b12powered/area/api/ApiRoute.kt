@@ -234,7 +234,7 @@ sealed class ApiRoute(private var mainContext: Context) {
                 is RefreshToken -> "users/refreshToken"
                 is CreateArea -> "areas"
                 is AddAction -> "areas/${areaId}/action"
-                is AddReaction -> "areas/${areaId}/action"
+                is AddReaction -> "areas/${areaId}/reactions"
                 else -> ""
             }}"
         }
@@ -263,6 +263,7 @@ sealed class ApiRoute(private var mainContext: Context) {
                 is LoginService -> Request.Method.POST
                 is CreateArea -> Request.Method.POST
                 is AddAction -> Request.Method.POST
+                is AddReaction -> Request.Method.POST
                 else -> Request.Method.GET
             }
         }

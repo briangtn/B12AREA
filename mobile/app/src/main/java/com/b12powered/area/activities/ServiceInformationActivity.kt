@@ -54,6 +54,12 @@ class ServiceInformationActivity : AppCompatActivity() {
             .commit()
     }
 
+    fun finishArea() {
+        val intent = Intent(this, HomeActivity::class.java)
+        finish()
+        startActivity(intent)
+    }
+
     fun getServices(): ArrayList<Service> {
         return serviceList
     }
