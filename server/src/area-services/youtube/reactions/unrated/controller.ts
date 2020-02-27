@@ -22,6 +22,10 @@ export default class ReactionController {
         return RateReactionHelper.updateReaction(reactionId, oldReactionConfig, newReactionConfig, ctx, this.rate);
     }
 
+    static async deleteReaction(reactionId: string, reactionConfig: Object, ctx: Context): Promise<OperationStatus> {
+        return RateReactionHelper.deleteReaction(reactionId, reactionConfig, ctx);
+    }
+
     static async getConfig(): Promise<ReactionConfig> {
         return config as ReactionConfig;
     }
