@@ -10,7 +10,6 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.b12powered.area.*
 import com.b12powered.area.activities.ServiceInformationActivity
-import com.b12powered.area.api.ApiClient
 
 class SelectAreaFragment(private val service: Service, private val area: Area, private val step: AreaCreationStatus) : Fragment() {
     companion object {
@@ -36,7 +35,16 @@ class SelectAreaFragment(private val service: Service, private val area: Area, p
 
         val arList: ArrayList<Pair<String, ActionReaction>> = when(step) {
             is AreaCreationStatus.AreaCreated -> service.actions.map { action -> Pair(service.displayName, action) } as ArrayList<Pair<String, ActionReaction>>
-            else -> getReactions()
+            else -> {
+                val list: ArrayList<Pair<String, ActionReaction>> = ArrayList()
+                val services = (activity as ServiceInformationActivity).getServices()
+                services.forEach { service ->
+                    service.reactions.forEach { reaction ->
+                        list.add(Pair(service.displayName, reaction))
+                    }
+                }
+                list
+            }
         }
         val list: List<String> = when(step) {
             is AreaCreationStatus.AreaCreated -> arList.map { action -> "\n${action.second.displayName}\n\n${action.second.description}\n" }
@@ -46,46 +54,19 @@ class SelectAreaFragment(private val service: Service, private val area: Area, p
         listView.adapter = adapter
 
         listView.setOnItemClickListener { _, _, position, _ ->
-            (activity as ServiceInformationActivity).nextStep(area, service.actions[position], when(step) {
+
+            if (step == AreaCreationStatus.ReactionSelected) {
+                val serviceList = (activity as ServiceInformationActivity).getServices()
+                (activity as ServiceInformationActivity).setService(serviceList[serviceList.indexOfFirst { service ->
+                    service.displayName == arList[position].first
+                }])
+            }
+
+            (activity as ServiceInformationActivity).nextStep(area, arList[position].second, when(step) {
                 is AreaCreationStatus.AreaCreated -> AreaCreationStatus.ActionSelected
                 else -> AreaCreationStatus.ReactionSelected
             })
         }
     }
 
-    private fun getReactions(): ArrayList<Pair<String, ActionReaction>> {
-        val reactions: ArrayList<Pair<String, ActionReaction>> = ArrayList()
-
-        ApiClient(activity!!)
-            .getUser { user, message ->
-                if (user != null) {
-                    ApiClient(activity!!)
-                        .aboutJson { about, msg ->
-                            if (about !== null) {
-                                about.server.services.forEach { service ->
-                                    if (user.services.contains(service.name)) {
-                                        service.reactions.forEach { reaction ->
-                                            reactions.add(Pair(service.displayName, reaction))
-                                        }
-                                    }
-                                }
-                            } else {
-                                Toast.makeText(
-                                    context,
-                                    msg,
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                            }
-                        }
-                } else {
-                    Toast.makeText(
-                        context,
-                        message,
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
-            }
-
-        return reactions
-    }
 }

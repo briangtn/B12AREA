@@ -13,10 +13,10 @@ import com.b12powered.area.activities.ServiceInformationActivity
 import com.bumptech.glide.Glide
 import kotlinx.android.synthetic.main.fragment_service_user.*
 
-class ServiceUserFragment(private val service: Service) : Fragment() {
+class ServiceUserFragment(private val serviceList: ArrayList<Service>, private val service: Service) : Fragment() {
     companion object {
-        fun newInstance(service: Service): ServiceUserFragment {
-            return ServiceUserFragment(service)
+        fun newInstance(serviceList: ArrayList<Service>, service: Service): ServiceUserFragment {
+            return ServiceUserFragment(serviceList, service)
         }
     }
 
@@ -40,6 +40,7 @@ class ServiceUserFragment(private val service: Service) : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         view.setOnClickListener {
             val intent = Intent(context, ServiceInformationActivity::class.java)
+            intent.putExtra("serviceList", serviceList.map { service -> service.toJSON() } as ArrayList)
             intent.putExtra("service", service.toJSON())
             startActivity(intent)
         }

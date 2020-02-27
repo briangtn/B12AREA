@@ -10,11 +10,13 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.auth0.android.jwt.JWT
 import com.b12powered.area.R
+import com.b12powered.area.Service
 import com.b12powered.area.User
 import com.b12powered.area.api.ApiClient
 import com.b12powered.area.fragments.ServiceUserFragment
 import com.b12powered.area.toObject
 import java.util.*
+import kotlin.collections.ArrayList
 
 /**
  * The activity where the user can have all services
@@ -25,6 +27,7 @@ class HomeActivity : AppCompatActivity() {
 
     private lateinit var handler: Handler
     private lateinit var currentUser: User
+    private var serviceList: ArrayList<Service> = ArrayList()
 
     /**
      * Override method onCreate
@@ -110,9 +113,10 @@ class HomeActivity : AppCompatActivity() {
                                         supportFragmentManager.beginTransaction()
                                             .add(
                                                 R.id.home,
-                                                ServiceUserFragment.newInstance(service)
+                                                ServiceUserFragment.newInstance(serviceList, service)
                                             )
                                             .commit()
+                                        serviceList.add(service)
                                     }
                                 }
                             } else {
