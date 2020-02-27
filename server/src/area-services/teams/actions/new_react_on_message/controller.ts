@@ -22,11 +22,7 @@ export default class ActionController {
         }
         if (actionConfig.onlyTypeOf) {
             const allowedTypes = ['like', 'angry', 'sad', 'laugh', 'heart', 'surprised'];
-            let isValid = false;
-            for (const allowedType of allowedTypes) {
-                if (allowedType === actionConfig.onlyTypeOf)
-                    isValid = true;
-            }
+            const isValid = allowedTypes.indexOf(actionConfig.onlyTypeOf) !== -1;
             if (!isValid) {
                 failure.error = `Invalid onlyTypeOf, allowed values are ${allowedTypes.concat(',')}`;
                 throw failure;
