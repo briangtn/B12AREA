@@ -18,6 +18,7 @@ import Join from "./routes/Join";
 import Login from "./routes/Login";
 import ConfirmEmail from "./routes/ConfirmEmail";
 import Profile from "./routes/Profile";
+import CodeValidation from './routes/CodeValidation';
 
 // Administration Routes
 
@@ -32,6 +33,7 @@ import Services from "./routes/Services";
 import ForgotPassword from './routes/ForgotPassword';
 import ResetPassword from './routes/ResetPassword';
 import TokenRefresher from './components/TokenRefresher';
+import ServiceDetails from './components/services/ServiceDetails';
 
 interface Props {}
 
@@ -69,6 +71,8 @@ class RouterComponent extends React.Component<Props, State> {
                         <Route path='/profile' component={Profile} />
                         <Route path='/email_validation' component={EmailValidation} />
                         <Route path='/services' component={Services} />
+                        <Route path='/services_detail' component={ServiceDetails} />
+                        <Route path='/code_validator' component={CodeValidation} />
 
                         <Route path='/admin' component={AdministrationPanel} />
 

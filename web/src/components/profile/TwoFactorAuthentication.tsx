@@ -14,6 +14,8 @@ import Translator from "../Translator";
 import Button from "@material-ui/core/Button";
 import TextField from "@material-ui/core/TextField";
 
+import Utilities from "../../utils/Utilities";
+
 interface State {
     open: boolean,
     fakey: string,
@@ -105,15 +107,6 @@ class TwoFactorAuthentication extends Component<Props, State> {
     onClick = (e: React.FormEvent) => {
         const { api_url, token } = this.props;
 
-        const getUrlParameter = (url : string, name : string) : string | null => {
-            name = name.replace(/[\]]/g, '\\$&');
-            let regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
-                results = regex.exec(url);
-            if (!results) return null;
-            if (!results[2]) return '';
-            return decodeURIComponent(results[2].replace(/\+/g, ' '));
-        };
-
         fetch(`${api_url}/users/2fa/activate`, {
             method: 'POST',
             headers: {
@@ -125,7 +118,7 @@ class TwoFactorAuthentication extends Component<Props, State> {
                 const otpUrl : string = data.otpauthUrl;
 
                 QRCode.toDataURL(otpUrl).then(url => {
-                    this.setState({ qrcode: url, open: true, fasecret: getUrlParameter(otpUrl, 'secret') });
+                    this.setState({ qrcode: url, open: true, fasecret: Utilities.getQueryParameter(otpUrl, 'secret') });
                 });
             });
     };

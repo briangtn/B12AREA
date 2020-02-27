@@ -26,7 +26,17 @@ const french = {
     resetPassword: "Réinitialiser mon mot de passe",
     resetPasswordEmailSent: "Pour continuer, veuillez suivre les instructions envoyées par mail",
     resetPasswordConfirmation: "Votre mot de passe a été réinitialiser, veuillez vous connecter.",
-    goToAdmin: "Panneau d'administration"
+    goToAdmin: "Panneau d'administration",
+    myServices: "Mes services enregistrés",
+    /**
+     * Add services translation
+     */
+    addServices: "Ajouter un service",
+    addServicesSubtitle: "Pour vous enregistrer à un nouveau services, renseignez les champs ci-dessous",
+    myActions: "Mes AREA",
+    delete: "Supprimer",
+    addReactions: "Ajouter une reaction",
+    addReactionsDescription: "Veuillez renseigner les informations, pour ajouter une nouvelle reaction à votre AREA"
 };
 
 export default french;

@@ -47,7 +47,10 @@ class TokenRefresher extends Component<Props, State> {
     refreshToken = () => {
         const { token, api_url } = this.props;
 
-        if (token) {
+        if (token === "undefined") {
+            cookies.set('token', '');
+            this.props.setToken('');
+        } else if (token) {
             const decode: JWTDecoded = jwt_decode(token);
             const currentDate: number = new Date().getTime() / 1000;
 
@@ -68,7 +71,7 @@ class TokenRefresher extends Component<Props, State> {
     componentDidMount() {
         this.intervalID = setInterval(() => {
             this.refreshToken();
-        }, 60000);
+        }, 1000);
     }
 
     componentWillUnmount() {

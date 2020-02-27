@@ -18,9 +18,7 @@ import Snackbar from "@material-ui/core/Snackbar";
 
 import { changeApiUrl } from "../actions/api.action";
 
-import Cookies from "universal-cookie";
-
-const cookies = new Cookies();
+import Utilities from '../utils/Utilities';
 
 interface Props {
     history: {
@@ -79,20 +77,10 @@ class ResetPassword extends Component<Props, State> {
     };
 
     componentDidMount() {
-        const getUrlParameter = (name : string) : string | null => {
-            const url = window.location.href;
-            name = name.replace(/[\]]/g, '\\$&');
-            let regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
-                results = regex.exec(url);
-            if (!results) return null;
-            if (!results[2]) return '';
-            return decodeURIComponent(results[2].replace(/\+/g, ' '));
-        };
-
         if (this.props.token)
             this.props.history.push('/');
         // TODO Set api URL
-        const queryToken: string | null = getUrlParameter('token');
+        const queryToken: string | null = Utilities.getQueryParameter(window.location.href, 'token');
         if (queryToken)
             this.setState({ resetToken: queryToken });
     }
