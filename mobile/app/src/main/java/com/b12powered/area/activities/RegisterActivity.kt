@@ -117,8 +117,15 @@ class RegisterActivity : AppCompatActivity() {
      * Make a register request to api, using [email] and [password]. If the call is successful, redirect the user to the confirmation page, if not display a toast with the error
      */
     private fun register(email: String, password: String) {
+        val sharedPreferences = getSharedPreferences(getString(R.string.storage_name), Context.MODE_PRIVATE)
+        val apiUrl = if (sharedPreferences.contains(getString(R.string.api_url_key))) {
+            sharedPreferences.getString(getString(R.string.api_url_key), null)!!
+        } else {
+            System.getenv("API_HOST") ?: "https://dev.api.area.b12powered.com"
+        }
+
         ApiClient(this)
-            .register(email, password, "https://" + (System.getenv("HOST") ?: "dev.area.b12powered.com") + "/email_validation") { user, message ->
+            .register(email, password, "https://" + (System.getenv("HOST") ?: "dev.area.b12powered.com") + "/email_validation?api_url=$apiUrl") { user, message ->
                 if (user != null) {
                     val intent = Intent(this, RegistrationValidationActivity::class.java)
                     finish()

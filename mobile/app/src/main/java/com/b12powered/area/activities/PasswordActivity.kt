@@ -12,15 +12,33 @@ import android.widget.EditText
 import android.widget.Toast
 import com.b12powered.area.R
 import com.b12powered.area.api.ApiClient
-import kotlinx.android.synthetic.main.activity_login.*
 
+/**
+ * The activity where the user is redirected when clicking on the link in the reset password email
+ *
+ * Ths class check and parse new user's password and request the api for a password change
+ */
 class PasswordActivity : AppCompatActivity() {
 
+    /**
+     * Override method onCreate
+     *
+     * Set listeners to view's buttons and input fields
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_password)
 
+        val apiUrl: String = intent!!.data!!.getQueryParameter("api_url")!!
         val token: String = intent!!.data!!.getQueryParameter("token")!!
+
+        if (apiUrl !== getCurrentApiUrl()) {
+            val sharedPreferences = getSharedPreferences(getString(R.string.storage_name), Context.MODE_PRIVATE)
+            val editor = sharedPreferences.edit()
+
+            editor.putString(getString(R.string.api_url_key), apiUrl)
+            editor.apply()
+        }
 
         val btnValidationPassword = findViewById<Button>(R.id.validation_password_button)
 
@@ -40,6 +58,21 @@ class PasswordActivity : AppCompatActivity() {
 
         btnValidationPassword.setOnClickListener {
             submitValidationPassword(token)
+        }
+
+    }
+
+    /**
+     * Get the api url currently stored in local storage or its default value
+     *
+     * @return The api url
+     */
+    private fun getCurrentApiUrl() : String {
+        val sharedPreferences = getSharedPreferences(getString(R.string.storage_name), Context.MODE_PRIVATE)
+        return if (sharedPreferences.contains(getString(R.string.api_url_key))) {
+            sharedPreferences.getString(getString(R.string.api_url_key), null)!!
+        } else {
+            System.getenv("API_HOST") ?: "https://dev.api.area.b12powered.com"
         }
 
     }

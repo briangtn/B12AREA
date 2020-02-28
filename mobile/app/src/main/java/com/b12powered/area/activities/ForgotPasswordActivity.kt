@@ -1,5 +1,6 @@
 package com.b12powered.area.activities
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.widget.EditText
@@ -53,8 +54,15 @@ class ForgotPasswordActivity : AppCompatActivity() {
      * Make a reset password request to api, using [email]. If the call is successful, redirect the user to the confirmation page, if not display a toast with the error
      */
     private fun resetPassword(email: String) {
+        val sharedPreferences = getSharedPreferences(getString(R.string.storage_name), Context.MODE_PRIVATE)
+        val apiUrl = if (sharedPreferences.contains(getString(R.string.api_url_key))) {
+            sharedPreferences.getString(getString(R.string.api_url_key), null)!!
+        } else {
+            System.getenv("API_HOST") ?: "https://dev.api.area.b12powered.com"
+        }
+
         ApiClient(this)
-            .requestResetPassword(email, "https://" + (System.getenv("HOST") ?: "dev.area.b12powered.com") + "/reset_password") { success, message ->
+            .requestResetPassword(email, "https://" + (System.getenv("HOST") ?: "dev.area.b12powered.com") + "/reset_password?api_url=$apiUrl") { success, message ->
                 if (success) {
                     val intent = Intent(this, RequestResetPasswordValidationActivity::class.java)
                     finish()
