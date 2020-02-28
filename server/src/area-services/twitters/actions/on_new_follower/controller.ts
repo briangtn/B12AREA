@@ -51,8 +51,6 @@ export default class NewFollowerActionController {
         const twitterInfo = (user.services as {twitters: {twitterID: string}}).twitters;
         for (const event of twitterDatas) {
             if (event.target.id !== twitterInfo.twitterID) {
-                console.log(event);
-                console.log(event.target.id, twitterInfo.twitterID);
                 return;
             }
             await ActionFunction({
