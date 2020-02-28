@@ -15,6 +15,12 @@ export class BullNameToIdMap extends Entity {
     JobId: string;
 
     @property({
+        type: 'object',
+        required: false
+    })
+    AddOpts?: object;
+
+    @property({
         type: 'string',
         id: true,
         generated: true,

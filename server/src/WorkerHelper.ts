@@ -204,13 +204,14 @@ export default class WorkerHelper {
     private static async RemovePullingJobById(jobId: string, ctx: Context): Promise<PullingJobObject|null> {
         try {
             const bullNameToIdRepository: BullNameToIdMapRepository = await ctx.get('repositories.BullNameToIdMapRepository');
+            const bullNameToIdMap: BullNameToIdMap = (await bullNameToIdRepository.findOne({where: {JobId: jobId}}))!;
             const job: Job<PullingJobObject>|null = await this.pullingQueue.getJob(jobId);
-            if (!job)
-                return null;
-            await job.remove();
+            await this.pullingQueue.removeRepeatable(bullNameToIdMap.AddOpts as {every: number, jobId: string});
             await bullNameToIdRepository.deleteAll({
                 JobId: jobId
             });
+            if (!job)
+                return null;
             return job.data;
         } catch (e) {
             return null;
@@ -247,15 +248,17 @@ export default class WorkerHelper {
 
     public static async AddPullingJob(job: PullingJobObject, ctx: Context) {
         const bullNameToIdRepository: BullNameToIdMapRepository = await ctx.get('repositories.BullNameToIdMapRepository');
-        const jobName = `delayed_${job.service}_${job.name}`;
+        const jobName = `pulling_${job.service}_${job.name}`;
         const existingJobId: string|null = await this.GetJobIdFromJobName(jobName, ctx);
         if (existingJobId) {
             await this.RemovePullingJobById(existingJobId, ctx);
         }
-        const newJob = await this.pullingQueue.add(job, {repeat: {every: job.triggerEvery}});
+        const addOpts = {repeat: {every: job.triggerEvery}, jobId: jobName};
+        const newJob = await this.pullingQueue.add(job, addOpts);
         await bullNameToIdRepository.create({
             JobId: newJob.id.toString(),
-            JobName: jobName
+            JobName: jobName,
+            AddOpts: {every: addOpts.repeat.every, jobId: addOpts.jobId}
         });
     }
 

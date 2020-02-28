@@ -14,6 +14,7 @@ import {User} from "../../models";
 import {UserProfile} from "@loopback/security";
 import {HttpErrors} from "@loopback/rest/dist";
 import {repository} from "@loopback/repository";
+import WorkerHelper from "../../WorkerHelper";
 
 export default class ServiceController {
 

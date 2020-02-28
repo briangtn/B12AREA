@@ -61,10 +61,10 @@ export class Worker {
             });
             const module = await import('./area-services/' + data.service + '/controller');
             const controller = module.default;
-            if (controller.processDelayedJob) {
-                await controller.processDelayedJob(data, this.application);
-            } else {
+            if (!controller.processDelayedJob) {
                 console.error(`Failed to process job [delayed_${data.service}_${data.name}] : A delayed job was queued but service doesn't have a processDelayedJob static method`);
+            } else {
+                await controller.processDelayedJob(data, this.application);
             }
         } catch (e) {
             console.error(`Failed to process job [delayed_${data.service}_${data.name}] :`, e);
@@ -76,7 +76,7 @@ export class Worker {
         try {
             const module = await import('./area-services/' + data.service + '/controller');
             const controller = module.default;
-            if (controller.processDelayedJob) {
+            if (controller.processPullingJob) {
                 const pullingData: PullingData|null = await controller.processPullingJob(data, this.application) as PullingData|null;
                 if (pullingData)
                     await this.doTheActualPulling(pullingData);
