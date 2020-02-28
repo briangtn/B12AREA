@@ -5,6 +5,7 @@ import request from 'request';
 import NewDMActionController from './actions/on_new_dm/controller';
 import NewMentionActionController, {NewMentionTwitter} from './actions/on_mention/controller';
 import NewTweetActionController, {NewTweet} from './actions/on_tweet/controller';
+import NewFollowerActionController from './actions/on_new_follower/controller';
 
 const CONSUMER_KEY = process.env.TWITTER_CONSUMER_KEY ? process.env.TWITTER_CONSUMER_KEY :  "";
 const CONSUMER_SECRET = process.env.TWITTER_CONSUMER_SECRET ? process.env.TWITTER_CONSUMER_SECRET :  "";
@@ -55,7 +56,9 @@ const ACTION_EVENTS = {
     tweet_create_events: [
         {trigger: onTweet, actionName: 'on_mention'},
         {trigger: onTweet, actionName: 'on_tweet'}
-    ]
+    ],
+    // eslint-disable-next-line @typescript-eslint/camelcase
+    follow_events: {trigger: NewFollowerActionController.trigger, actionName: 'on_new_follower'}
 }
 
 export class TwitterHelper {

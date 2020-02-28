@@ -1,6 +1,6 @@
 {
   "displayName": "On new tweet",
-  "description": "Triggered when a new tweet is posted.",
+  "description": "Triggered when you post a new tweet.",
   "configSchema": [
     {
       "name": "mustMatch",
