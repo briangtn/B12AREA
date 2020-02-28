@@ -35,6 +35,8 @@ import ResetPassword from './routes/ResetPassword';
 import TokenRefresher from './components/TokenRefresher';
 import ServiceDetails from './components/services/ServiceDetails';
 
+import EasterEgg from "./components/EasterEgg";
+
 interface Props {}
 
 interface State {
@@ -61,6 +63,7 @@ class RouterComponent extends React.Component<Props, State> {
         return (
             <Provider store={rootStore}>
                 <MuiThemeProvider theme={ this.state.theme }>
+                    <EasterEgg />
                     <Router>
                         <Route exact path='/' component={App} />
                         <Route path='/join' component={Join} />
