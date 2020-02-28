@@ -3,6 +3,7 @@ import {
     repository,
     HasManyRepositoryFactory,
     HasOneRepositoryFactory, AnyObject, Condition, AndClause, OrClause, Count
+    BelongsToAccessor,
 } from '@loopback/repository';
 import {Area, AreaRelations, Reaction, Action, User} from '../models';
 import {MongoDataSource} from '../datasources';
