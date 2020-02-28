@@ -1,16 +1,235 @@
+import {Context} from '@loopback/context';
 import * as oauth from 'oauth';
+import {ActionRepository, UserRepository} from '../../repositories';
+import request from 'request';
+import NewDMActionController from './actions/on_new_dm/controller';
+
+const CONSUMER_KEY = process.env.TWITTER_CONSUMER_KEY ? process.env.TWITTER_CONSUMER_KEY :  "";
+const CONSUMER_SECRET = process.env.TWITTER_CONSUMER_SECRET ? process.env.TWITTER_CONSUMER_SECRET :  "";
+const WEBHOOK_URL = process.env.API_URL + '/services/twitters/webhook';
+
+const ACTION_EVENTS = {
+    // eslint-disable-next-line @typescript-eslint/camelcase
+    direct_message_events: {trigger: NewDMActionController.trigger, actionName: 'on_new_dm'}
+}
 
 export class TwitterHelper {
-    static getConsumer(state = "") {
+    static getTwitter(state = "") {
         const baseApiURl = process.env.API_URL;
-        const redirectURL = baseApiURl + '/services/twitter/auth';
-        const consumerKey = process.env.TWITTER_CONSUMER_KEY ? process.env.TWITTER_CONSUMER_KEY :  "";
-        const consumerSecret = process.env.TWITTER_CONSUMER_SECRET ? process.env.TWITTER_CONSUMER_SECRET : "";
+        const redirectURL = baseApiURl + '/services/twitters/auth';
 
         return new oauth.OAuth(
             "https://twitter.com/oauth/request_token",
             "https://twitter.com/oauth/access_token",
-            consumerKey, consumerSecret, "1.0A", redirectURL + '?state=' + state, "HMAC-SHA1"
+            CONSUMER_KEY, CONSUMER_SECRET, "1.0A", redirectURL + '?state=' + state, "HMAC-SHA1"
         );
     }
+
+    static async getOauthObject(userID: string, ctx: Context) {
+        const userRepository: UserRepository = await ctx.get('repositories.UserRepository');
+        let option: {accessToken: string, accessTokenSecret: string} | undefined;
+
+        try {
+            option = await userRepository.getServiceInformation(userID, 'twitters') as {accessToken: string, accessTokenSecret: string};
+        } catch (e) {
+            return null;
+        }
+        if (!option)
+            return null;
+        return {
+            // eslint-disable-next-line @typescript-eslint/camelcase
+            consumer_key: CONSUMER_KEY,
+            // eslint-disable-next-line @typescript-eslint/camelcase
+            consumer_secret: CONSUMER_SECRET,
+            token: option.accessToken,
+            // eslint-disable-next-line @typescript-eslint/camelcase
+            token_secret: option.accessTokenSecret
+        }
+    }
+
+    static createWebhook(ctx: Context) {
+        // eslint-disable-next-line @typescript-eslint/no-misused-promises,no-async-promise-executor
+        return new Promise(async (resolve, reject) => {
+            console.log("Whook", WEBHOOK_URL);
+            request.post({
+                url: 'https://api.twitter.com/1.1/account_activity/all/develop/webhooks.json',
+                oauth: {
+                    // eslint-disable-next-line @typescript-eslint/camelcase
+                    consumer_key: CONSUMER_KEY,
+                    // eslint-disable-next-line @typescript-eslint/camelcase
+                    consumer_secret: CONSUMER_SECRET
+                },
+                headers: {
+                    'Content-type': 'application/x-www-form-urlencoded'
+                },
+                form: {
+                    url: WEBHOOK_URL
+                }
+            }, (err, res, body) => {
+                console.log("Creating");
+
+                if (err)
+                    return reject(err);
+                console.log("Created", body);
+                return resolve(body);
+            });
+        })
+    }
+
+    static createWebhookFromTwitterClient(token: string, tokenSecret: string) {
+        // eslint-disable-next-line @typescript-eslint/no-misused-promises,no-async-promise-executor
+        return new Promise(async (resolve, reject) => {
+            request.post({
+                url: 'https://api.twitter.com/1.1/account_activity/all/develop/webhooks.json',
+                oauth: {
+                    // eslint-disable-next-line @typescript-eslint/camelcase
+                    consumer_key: CONSUMER_KEY,
+                    // eslint-disable-next-line @typescript-eslint/camelcase
+                    consumer_secret: CONSUMER_SECRET,
+                    token,
+                    // eslint-disable-next-line @typescript-eslint/camelcase
+                    token_secret: tokenSecret
+                },
+                headers: {
+                    'Content-type': 'application/x-www-form-urlencoded'
+                },
+                form: {
+                    url: WEBHOOK_URL
+                }
+            }, (err, res, body) => {
+                if (err)
+                    return reject(err);
+                return resolve(body);
+            });
+        })
+    }
+
+    static getCurrentWebhook(ctx: Context) {
+        // eslint-disable-next-line @typescript-eslint/no-misused-promises,no-async-promise-executor
+        return new Promise(async (resolve, reject) => {
+            request.get({
+                url: 'https://api.twitter.com/1.1/account_activity/all/develop/webhooks.json',
+                oauth: {
+                    // eslint-disable-next-line @typescript-eslint/camelcase
+                    consumer_key: CONSUMER_KEY,
+                    // eslint-disable-next-line @typescript-eslint/camelcase
+                    consumer_secret: CONSUMER_SECRET
+                }
+            }, (err, data, body) => {
+                if (err)
+                    return reject(err);
+                const bodyParsed = JSON.parse(body);
+                if (bodyParsed.length === 0)
+                    return resolve(null);
+                return resolve(bodyParsed[0]);
+            })
+        });
+    }
+
+    static deleteWebhook(webhookID: string, ctx: Context) {
+        // eslint-disable-next-line @typescript-eslint/no-misused-promises,no-async-promise-executor
+        return new Promise(async (resolve, reject) => {
+            request.delete({
+                url: 'https://api.twitter.com/1.1/account_activity/all/develop/webhooks/' + webhookID + '.json',
+                oauth: {
+                    // eslint-disable-next-line @typescript-eslint/camelcase
+                    consumer_key: CONSUMER_KEY,
+                    // eslint-disable-next-line @typescript-eslint/camelcase
+                    consumer_secret: CONSUMER_SECRET
+                }
+            }, (err, data, body) => {
+                if (err)
+                    return reject(err);
+                resolve(body);
+            });
+        });
+    }
+
+    static async refreshWebhook(webhookID: string, ctx: Context) {
+        await this.deleteWebhook(webhookID, ctx);
+        await this.createWebhook(ctx);
+    }
+
+    static subscribeWebhook(userID: string, ctx: Context) {
+        // eslint-disable-next-line @typescript-eslint/no-misused-promises,no-async-promise-executor
+        return new Promise(async (resolve, reject) => {
+            const oauthObject = await this.getOauthObject(userID, ctx);
+
+            if (!oauthObject)
+                return reject({error: 'User not found'});
+            request.post({
+                url: 'https://api.twitter.com/1.1/account_activity/all/develop/subscriptions.json',
+                oauth: oauthObject
+            }, (e, r, b) => {
+                if (e)
+                    return reject(e);
+                resolve(b);
+            });
+        })
+    }
+
+    static async unsubscribeWebhook(userID: string, ctx: Context) {
+        // eslint-disable-next-line @typescript-eslint/no-misused-promises,no-async-promise-executor
+        return new Promise(async (resolve, reject) => {
+            const oauthObject = await this.getOauthObject(userID, ctx);
+
+            if (!oauthObject)
+                return;
+            request.delete({
+                url: 'https://api.twitter.com/1.1/account_activity/all/develop/subscriptions.json',
+                oauth: oauthObject
+            }, (err, res, body) => {
+                if (err)
+                    return reject(err);
+                return resolve(body);
+            });
+        })
+    }
+
+    static getConsumerKeys() {
+        return {
+            consumerKey: CONSUMER_KEY,
+            consumerSecret: CONSUMER_SECRET
+        }
+    }
+
+    static getWebhookUrl() {
+        return WEBHOOK_URL;
+    }
+
+    static getActionsEvents() {
+        return ACTION_EVENTS;
+    }
+
+    static async triggerActionEvent(twitterData: object, userMail: string, userID: string, ctx: Context) {
+        const validEvents = Object.keys(ACTION_EVENTS);
+        const actionRepository: ActionRepository = await ctx.get('repositories.ActionRepository');
+
+        for (const eventName of validEvents) {
+            if (eventName in twitterData) {
+                const event = ACTION_EVENTS[eventName as keyof typeof ACTION_EVENTS];
+
+                const actions = await actionRepository.find({
+                    where: {
+                        serviceAction: 'twitters.A.on_new_dm'
+                    },
+                    include: [{
+                        relation: "area",
+                        scope: {
+                            where: {
+                                ownerId: userMail
+                            }
+                        }
+                    }]
+                });
+
+                console.log(actions);
+
+                for (const action of actions) {
+                    return event.trigger(twitterData[eventName as keyof typeof twitterData], action.id!, action.options!, userID, ctx);
+                }
+            }
+        }
+    }
+
 }
