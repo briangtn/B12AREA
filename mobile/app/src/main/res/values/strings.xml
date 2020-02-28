@@ -68,4 +68,8 @@
     <string name="edit_reaction">Edit reaction parameters</string>
     <string name="confirm_exit">Do you really want to exit this page ?</string>
     <string name="exit_area_message">This action will take you back to homepage. Your area will still be saved.</string>
+    <string name="delete_areas">Remove areas</string>
+    <string name="show_reactions">Show reactions</string>
+    <string name="what_you_want">What do you want ?</string>
+    <string name="delete_reaction">Do you realy want to delete this reaction ?</string>
 </resources>

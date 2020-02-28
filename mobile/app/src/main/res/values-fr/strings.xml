@@ -69,4 +69,8 @@
     <string name="edit_reaction">Editer les paramètres de la réaction</string>
     <string name="confirm_exit">Voulez-vous vraiment quitter cette page ?</string>
     <string name="exit_area_message">Cette action vous ramènera à la page d\'accueil. Votre area sera enregistrée.</string>
+    <string name="delete_areas">Supprimer l\'Areas</string>
+    <string name="show_reactions">Montrer les réactions</string>
+    <string name="what_you_want">Que voulez-vous ?</string>
+    <string name="delete_reaction">Voulez-vous vraiment supprimer cette réaction ?</string>
 </resources>
