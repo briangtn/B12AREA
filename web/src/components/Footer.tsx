@@ -8,8 +8,9 @@ import Typography from '@material-ui/core/Typography';
 import Dialog from '@material-ui/core/Dialog';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogTitle from '@material-ui/core/DialogTitle';
-
+import Grid from '@material-ui/core/Grid';
 import Slide from '@material-ui/core/Slide';
+
 import ChangeApi from "./ChangeApi";
 
 const Transition: any = React.forwardRef(function Transition(props, ref) {
@@ -23,7 +24,8 @@ const mapStateToProps = (state: any) => {
 interface Props {
     classes: {
         footer: string,
-        footerText: string
+        footerText: string,
+        downloadAndroidImage: string
     },
     isConnected: boolean,
     apiUrl: string,
@@ -46,7 +48,12 @@ const styles = (theme: Theme) => createStyles({
     footerText: {
         color: 'white',
         textAlign: 'center',
-        padding: theme.spacing(1)
+        paddingTop: theme.spacing(1)
+    },
+    downloadAndroidImage: {
+        paddingTop: '6px',
+        width: '60%',
+        height: 'auto'
     }
 });
 
@@ -66,24 +73,51 @@ class Footer extends Component<Props, State> {
     render() {
         const { classes, isConnected, apiUrl } = this.props;
 
+        const isMobile: boolean = window.innerWidth <= 500;
 
         if (isConnected)
             return (
                 <div className={classes.footer}>
-                    <Typography className={classes.footerText} variant="body1" gutterBottom>
-                        {
-                            (this.props.language === 'en')
-                                ?
-                                `You are currently using the ${apiUrl.split('://')[1]} api, click`
-                                :
-                                `Actuellement vous utilisez l'api ${apiUrl.split('://')[1]}, cliquez`
-                        }
-                        &nbsp;
-                        {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
-                        <a onClick={this.handleChangeApiClick} href="#" style={{color: '#FFBE76'}}>{(this.props.language === 'en') ? 'here' : 'ici'}</a>
-                        &nbsp;
-                        {(this.props.language === 'en') ? 'to change.' : 'pour changer.'}
-                    </Typography>
+                    {(!isMobile) ? (
+                    <Grid container spacing={3}>
+                        <Grid item xs={10}>
+                            <Typography className={classes.footerText} variant="body1" gutterBottom>
+                                {
+                                    (this.props.language === 'en')
+                                        ?
+                                        `You are currently using the ${apiUrl.split('://')[1]} api, click`
+                                        :
+                                        `Actuellement vous utilisez l'api ${apiUrl.split('://')[1]}, cliquez`
+                                }
+                                &nbsp;
+                                {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
+                                <a onClick={this.handleChangeApiClick} href="#" style={{color: '#FFBE76'}}>{(this.props.language === 'en') ? 'here' : 'ici'}</a>
+                                &nbsp;
+                                {(this.props.language === 'en') ? 'to change.' : 'pour changer.'}
+                            </Typography>
+                        </Grid>
+                        <Grid item xs={2}>
+                            <a href="/client.apk" target="_blank">
+                                <img alt="download android app" className={classes.downloadAndroidImage} src="/img/download-android-app.png" />
+                            </a>
+                        </Grid>
+                    </Grid>
+                    ) : (
+                        <Typography className={classes.footerText} variant="body1" gutterBottom>
+                            {
+                                (this.props.language === 'en')
+                                    ?
+                                    `You are currently using the ${apiUrl.split('://')[1]} api, click`
+                                    :
+                                    `Actuellement vous utilisez l'api ${apiUrl.split('://')[1]}, cliquez`
+                            }
+                            &nbsp;
+                            {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
+                            <a onClick={this.handleChangeApiClick} href="#" style={{color: '#FFBE76'}}>{(this.props.language === 'en') ? 'here' : 'ici'}</a>
+                            &nbsp;
+                            {(this.props.language === 'en') ? 'to change.' : 'pour changer.'}
+                        </Typography>
+                    )}
                     <Dialog
                         open={this.state.dialogOpened}
                         TransitionComponent={Transition}

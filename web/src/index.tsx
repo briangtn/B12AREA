@@ -36,6 +36,7 @@ import TokenRefresher from './components/TokenRefresher';
 import ServiceDetails from './components/services/ServiceDetails';
 
 import EasterEgg from "./components/EasterEgg";
+import MobileWarner from "./components/MobileWarner";
 
 interface Props {}
 
@@ -63,6 +64,7 @@ class RouterComponent extends React.Component<Props, State> {
         return (
             <Provider store={rootStore}>
                 <MuiThemeProvider theme={ this.state.theme }>
+                    <MobileWarner />
                     <EasterEgg />
                     <Router>
                         <Route exact path='/' component={App} />
