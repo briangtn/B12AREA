@@ -148,7 +148,7 @@ class HomeActivity : AppCompatActivity() {
             .getUser { user, message ->
                 if (user != null) {
                     currentUser = user
-                  } else {
+                } else {
                     Toast.makeText(
                         this,
                         message,

@@ -11,7 +11,7 @@ import com.b12powered.area.fragments.ServiceFragment
 import com.b12powered.area.toObject
 
 /**
- * The activity where every available service to which the user canc subscribe
+ * The activity where every available service to which the user can subscribe
  */
 class SearchActivity : AppCompatActivity() {
 
