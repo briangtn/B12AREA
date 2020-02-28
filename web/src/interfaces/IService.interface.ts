@@ -25,6 +25,16 @@ export interface IReaction {
     configSchema: IConfigSchema[]
 }
 
+export interface IArea {
+    data: any;
+    enabled: boolean;
+    id: string;
+    name: string;
+    ownerId: string;
+    action: IAction;
+    reactions: IReaction[];
+}
+
 export interface IService {
     name: string,
     description: string,

@@ -25,7 +25,7 @@ const french = {
     forgotPasswordLink: "Mot de passe oublié",
     resetPassword: "Réinitialiser mon mot de passe",
     resetPasswordEmailSent: "Pour continuer, veuillez suivre les instructions envoyées par mail",
-    resetPasswordConfirmation: "Votre mot de passe a été réinitialiser, veuillez vous connecter.",
+    resetPasswordConfirmation: "Votre mot de passe a été réinitialisé, veuillez vous connecter.",
     goToAdmin: "Panneau d'administration",
     myServices: "Mes services enregistrés",
     /**
@@ -38,7 +38,8 @@ const french = {
     addReactions: "Ajouter une reaction",
     addReactionsDescription: "Veuillez renseigner les informations, pour ajouter une nouvelle reaction à votre AREA",
     logOut: "Se déconnecter",
-    profile: "Mon profil"
+    profile: "Mon profil",
+    emailValidatedButConnected: "Veuillez vous déconnecter pour valider votre email"
 };
 
 export default french;

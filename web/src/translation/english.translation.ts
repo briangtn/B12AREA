@@ -38,7 +38,8 @@ const english = {
     addReactions: "Add reaction",
     addReactionsDescription: "Please fill the informations to add a new reaction to your AREA",
     logOut: "Log Out",
-    profile: "My Profile"
+    profile: "My Profile",
+    emailValidatedButConnected: "You are already connected, please log out to confirm your email"
 };
 
 export default english;

@@ -11,6 +11,9 @@ import Typography from "@material-ui/core/Typography";
 import Translator from "../components/Translator";
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
+import Snackbar from "@material-ui/core/Snackbar";
+import IError from "../interfaces/IError.interface";
+import Alert from "../components/Alert";
 
 interface Props {
     history: {
@@ -34,7 +37,6 @@ interface State {
 const styles = (theme: Theme) => createStyles({
     field: {
         marginTop: '20px',
-        width: '300px'
     },
     loginButton: {
         marginTop: '20px',
@@ -71,7 +73,7 @@ class ForgotPassword extends Component<Props, State> {
             if (toClick)
                 toClick.click();
         }
-    }
+    };
 
     onSubmit = (e: React.FormEvent) => {
         const { email, emailError } = this.state;
@@ -81,7 +83,7 @@ class ForgotPassword extends Component<Props, State> {
             return;
         }
         const { api_url } = this.props;
-        const redirectURL: string = `${window.location.protocol}//${window.location.host}/reset_password`;
+        const redirectURL: string = `${window.location.protocol}//${window.location.host}/reset_password?api_url=${api_url}`;
 
         fetch(`${api_url}/users/resetPassword`, {
             method: 'POST',
@@ -92,8 +94,7 @@ class ForgotPassword extends Component<Props, State> {
         .then((data) => {
             this.setState({ resetted: true });
         })
-        .catch((error) => {
-            console.log(error);
+        .catch((error: IError) => {
         })
     };
 
@@ -132,6 +133,7 @@ class ForgotPassword extends Component<Props, State> {
                         onKeyDown={this.keyPress}
                         error={this.state.emailError}
                         required
+                        fullWidth
                     />
                     <br />
                     <Button
