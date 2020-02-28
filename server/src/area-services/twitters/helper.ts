@@ -4,6 +4,7 @@ import {ActionRepository, UserRepository} from '../../repositories';
 import request from 'request';
 import NewDMActionController from './actions/on_new_dm/controller';
 import NewMentionActionController, {NewMentionTwitter} from './actions/on_mention/controller';
+import NewTweetActionController, {NewTweet} from './actions/on_tweet/controller';
 
 const CONSUMER_KEY = process.env.TWITTER_CONSUMER_KEY ? process.env.TWITTER_CONSUMER_KEY :  "";
 const CONSUMER_SECRET = process.env.TWITTER_CONSUMER_SECRET ? process.env.TWITTER_CONSUMER_SECRET :  "";
@@ -13,8 +14,33 @@ async function onTweet(twitterDatas: object, actionID: string, options: object, 
     if ('user_has_blocked' in twitterDatas) {
         await NewMentionActionController.trigger(twitterDatas as NewMentionTwitter, actionID, options, userID, ctx);
     } else {
-        //TODO: New tweet
+        await NewTweetActionController.trigger(twitterDatas as NewTweet, actionID, options, userID, ctx);
     }
+}
+
+export interface TwitterUser {
+    id: number,
+    id_str: string,
+    name: string,
+    screen_name: string
+}
+
+export interface TwitterPlace {
+    url: string,
+    place_type: string,
+    name: string,
+    full_name: string,
+    country_code: string,
+    country: string
+}
+
+export interface Tweet {
+    created_at: string,
+    id_str: string,
+    text: string,
+    source: string,
+    user: TwitterUser,
+    place: TwitterPlace
 }
 
 interface EventSetting {
@@ -27,8 +53,8 @@ const ACTION_EVENTS = {
     direct_message_events: {trigger: NewDMActionController.trigger, actionName: 'on_new_dm'},
     // eslint-disable-next-line @typescript-eslint/camelcase
     tweet_create_events: [
-        {trigger: onTweet, actionName: 'on_mention'}
-        //{trigger: NewTweetActionController.trigger, actionName: 'on_tweet'}
+        {trigger: onTweet, actionName: 'on_mention'},
+        {trigger: onTweet, actionName: 'on_tweet'}
     ]
 }
 

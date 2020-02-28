@@ -4,7 +4,7 @@ import {ActionConfig, ActionFunction, OperationStatus} from '../../../../service
 import {TwitterHelper, Tweet} from '../../helper';
 import {AreaService} from '../../../../services';
 
-export interface NewMentionTwitter {
+export interface NewTweet {
     tweet_create_events: Tweet[]
 }
 
@@ -13,7 +13,7 @@ interface NewMentionOptions {
     mustMatch?: string
 }
 
-export default class NewMentionActionController {
+export default class NewTweetActionController {
 
     static async createAction(userID: string, actionConfig: NewMentionOptions, ctx: Context): Promise<OperationStatus> {
         if (actionConfig.from && !actionConfig.from.startsWith('@')) {
@@ -34,7 +34,7 @@ export default class NewMentionActionController {
         return config as ActionConfig;
     }
 
-    static async trigger(rawData: NewMentionTwitter, actionID: string, options: NewMentionOptions, userID: string, ctx: Context) {
+    static async trigger(rawData: NewTweet, actionID: string, options: NewMentionOptions, userID: string, ctx: Context) {
         const twitterDatas = rawData.tweet_create_events;
         const oauthObject = await TwitterHelper.getOauthObject(userID, ctx);
         const areaService: AreaService = await ctx.get('services.area');
@@ -43,8 +43,6 @@ export default class NewMentionActionController {
             return;
         for (const event of twitterDatas) {
             if (options.mustMatch && !(new RegExp(options.mustMatch).test(event.text)))
-                return null;
-            if (options.from && options.from !== '@' + event.user.screen_name)
                 return null;
             let placeholders = [
                 {
