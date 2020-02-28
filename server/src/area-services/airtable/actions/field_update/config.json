@@ -2,5 +2,17 @@
   "displayName": "Field updated",
   "description": "This action is triggered when a specific field is updated",
   "configSchema": [
+    {
+      "name": "APIKey",
+      "description": "The User APIKEY",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "Base ID",
+      "description": "The ID of the base to watch for new entries",
+      "type": "string",
+      "required": true
+    }
   ]
 }

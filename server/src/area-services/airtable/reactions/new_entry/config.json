@@ -2,5 +2,28 @@
   "displayName": "New entry",
   "description": "This action creates an entry in a Airtable base",
   "configSchema": [
+    {
+      "name": "apikey",
+      "description": "The User APIKEY",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "baseId",
+      "description": "The ID of the base into which insert the data",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "data",
+      "description": "The data to insert into the base (Format: `{key1: value1, key2: value2...}`)",
+      "type": "string",
+      "required": true
+    }, {
+      "name": "tableID",
+      "description": "The table of the base into which you want to insert entry",
+      "type": "string",
+      "required": true
+    }
   ]
 }
