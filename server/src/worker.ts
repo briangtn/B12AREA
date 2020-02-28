@@ -1,5 +1,8 @@
 import Queue from 'bull';
 import {WorkableObject} from "./services-interfaces";
+import {Application} from "@loopback/core";
+import {AreaApplication} from "./application";
+import {UserRepository} from "./repositories";
 
 export class Worker {
 
@@ -8,9 +11,11 @@ export class Worker {
     redisPass?: string = process.env.REDIS_PASSWORD;
     queueName: string = process.env.BULL_QUEUE_NAME ? process.env.BULL_QUEUE_NAME : 'areaQueue';
     workerQueue: Queue.Queue;
+    application: Application;
 
-    constructor()
+    constructor(app: AreaApplication)
     {
+        this.application = app;
     }
 
     boot()
@@ -24,13 +29,15 @@ export class Worker {
         });
     }
 
-    start()
+    async start()
     {
         this.workerQueue.process(async job => {
             await this.processJob(job.data);
         }).catch(e => {
             console.error(`Failed to process job: ${e}`);
         });
+        const userRepo: UserRepository = await this.application.get('repositories.UserRepository');
+        userRepo.find({}).then(console.log).catch(console.error);
     }
 
     async processJob(data: WorkableObject)
