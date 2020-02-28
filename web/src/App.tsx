@@ -78,7 +78,8 @@ const styles = (theme: Theme) => createStyles({
     hero: {
         backgroundColor: '#FFBE76',
         width: '100%',
-        marginTop: '75px'
+        marginTop: '75px',
+        marginBottom: '75px'
     },
     heroContent: {
         textAlign: 'center',
