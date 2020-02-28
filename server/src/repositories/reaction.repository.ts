@@ -17,7 +17,7 @@ export class ReactionRepository extends DefaultCrudRepository<Reaction,
     constructor(
         @inject('datasources.mongo') dataSource: MongoDataSource,
         @repository(UserRepository) public userRepository: UserRepository,
-        @repository.getter('AreaRepository') areaRepositoryGetter: Getter<AreaRepository>
+        @repository.getter('AreaRepository') areaRepositoryGetter: Getter<AreaRepository>,
     ) {
         super(Reaction, dataSource);
         this.area = this.createBelongsToAccessorFor('area', areaRepositoryGetter);
@@ -26,13 +26,10 @@ export class ReactionRepository extends DefaultCrudRepository<Reaction,
 
     async getReactionOwnerID(reactionID: string): Promise<string | null> {
         try {
-            const action = await this.findById(reactionID, {include: [{relation: 'area'}]});
-            if (!action)
+            const reaction = await this.findById(reactionID, {include: [{relation: 'area', scope: {include: [{relation: 'user'}]}}]});
+            if (!reaction || !reaction.area || !reaction.area.user)
                 return null;
-            const user = await this.userRepository.findOne({where: {email: action.area.ownerId}});
-            if (!user || !user.id)
-                return null;
-            return user.id;
+            return reaction.area.user.id;
         } catch (e) {
             return null;
         }

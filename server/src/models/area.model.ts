@@ -1,6 +1,7 @@
-import {Entity, model, property, hasMany, hasOne} from '@loopback/repository';
+import {Entity, model, property, hasMany, hasOne, belongsTo} from '@loopback/repository';
 import {Reaction} from './reaction.model';
 import {Action} from "./action.model";
+import {User} from "./user.model";
 
 @model({settings: {strictObjectIDCoercion: true}})
 export class Area extends Entity {
@@ -23,9 +24,7 @@ export class Area extends Entity {
     })
     enabled: boolean;
 
-    @property({
-        type: 'string',
-    })
+    @belongsTo(() => User, {name: 'user', keyTo: 'email'})
     ownerId?: string;
 
     @property({
