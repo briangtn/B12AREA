@@ -21,6 +21,12 @@ export class BullNameToIdMap extends Entity {
     AddOpts?: object;
 
     @property({
+        type: 'boolean',
+        required: false
+    })
+    canceled?: boolean;
+
+    @property({
         type: 'string',
         id: true,
         generated: true,

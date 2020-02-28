@@ -1,4 +1,4 @@
-import {LoginObject, PullingData, PullingJobObject, ServiceConfig} from "../../services-interfaces";
+import {DelayedJobObject, LoginObject, PullingData, PullingJobObject, ServiceConfig} from "../../services-interfaces";
 import config from './config.json';
 import axios from 'axios';
 import base64 from 'base-64'
@@ -12,12 +12,16 @@ import {User} from "../../models";
 import {UserProfile} from "@loopback/security";
 import * as qs from 'querystring'
 import {SPOTIFY_NEW_LIKED_SONG_PULLING_PREFIX, SPOTIFY_NEW_PLAYLIST_SONG_PULLING_PREFIX, SpotifyHelper} from './helper';
+import WorkerHelper from "../../WorkerHelper";
 
 const SPOTIFY_AUTHORIZE_BASE_URL = 'https://accounts.spotify.com/authorize';
 const SPOTIFY_TOKEN_EXCHANGE_BASE_URL = 'https://accounts.spotify.com/api/token';
 const SPOTIFY_CLIENT_ID = process.env.SPOTIFY_CLIENT_ID ?? "";
 const SPOTIFY_CLIENT_SECRET = process.env.SPOTIFY_CLIENT_SECRET ?? "";
 const API_URL : string = process.env.API_URL ?? "http://localhost:8080";
+
+const SPOTIFY_REFRESH_TOKENS_DELAYED_JOB = 'spotify_refreshUserTokensDelayedJob_';
+const SPOTIFY_REFRESH_TOKENS_DELAY = 5 * 60 * 1000; //5 minutes
 
 export default class ServiceController {
 
@@ -60,16 +64,12 @@ export default class ServiceController {
         }
 
         // Users refresh spotify tokens
-        //todo create DelayedJob instead
-        setInterval(() => {
-            userRepository.find().then((users) => {
-                for (const user of users) {
-                    if (user.services && user.services["spotify" as keyof typeof user.services]) {
-                        SpotifyHelper.refreshSpotifyUser(user, ctx).then().catch(() => {});
-                    }
-                }
-            }).catch(() => {});
-        }, 60 * 5 *  1000) // Refresh every 5 minutes
+        await WorkerHelper.AddDelayedJob({
+            service: 'spotify',
+            name: SPOTIFY_REFRESH_TOKENS_DELAYED_JOB,
+            triggerIn: SPOTIFY_REFRESH_TOKENS_DELAY,
+            jobData: {}
+        }, ctx);
     }
 
     static async login(params: LoginObject): Promise<string> {
@@ -168,6 +168,31 @@ export default class ServiceController {
             console.log(e);
             const codeParam = await this.exchangeCodeGenerator.generate({error: 'Failed to contact spotify api', info: {data: e.response.data, status: e.response.status, headers: e.response.headers}}, true);
             return this.response.redirect(stateData.url + '?code=' + codeParam);
+        }
+    }
+
+    static async refreshSpotifyTokens(ctx: Context) {
+        const userRepository: UserRepository = await ctx.get('repositories.UserRepository');
+        userRepository.find().then((users) => {
+            for (const user of users) {
+                if (user.services && user.services["spotify" as keyof typeof user.services]) {
+                    SpotifyHelper.refreshSpotifyUser(user, ctx).then().catch(() => {});
+                }
+            }
+        }).then(async () => {
+            await WorkerHelper.AddDelayedJob({
+                service: 'spotify',
+                name: SPOTIFY_REFRESH_TOKENS_DELAYED_JOB,
+                triggerIn: SPOTIFY_REFRESH_TOKENS_DELAY,
+                jobData: {}
+            }, ctx);
+        }).catch(() => {});
+    }
+
+    static async processDelayedJob(data: DelayedJobObject, ctx: Context) {
+        if (data.name === SPOTIFY_REFRESH_TOKENS_DELAYED_JOB) {
+            console.log('Refreshing spotify tokens');
+            await this.refreshSpotifyTokens(ctx);
         }
     }
 

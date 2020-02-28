@@ -4,6 +4,7 @@ import {AreaApplication} from "./application";
 import WorkerHelper from "./WorkerHelper";
 import {BullNameToIdMapRepository} from "./repositories";
 import axios from "axios";
+import {BullNameToIdMap} from "./models";
 
 export class Worker {
 
@@ -27,7 +28,7 @@ export class Worker {
             console.error(`Failed to process job:`, e);
         });
         WorkerHelper.getDelayedJobQueue().process(async job => {
-            await this.processDelayedJob(job.data);
+            await this.processDelayedJob(job.id.toString(), job.data);
         }).catch(e => {
             console.error(`Failed to process delayed job:`, e);
         });
@@ -52,22 +53,33 @@ export class Worker {
         }
     }
 
-    public async processDelayedJob(data: DelayedJobObject) {
-        console.debug(`Starting to process delayed job [delayed_${data.service}_${data.name}], data: ${JSON.stringify(data)}`);
+    public async processDelayedJob(jobId: string, data: DelayedJobObject) {
+        console.debug(`Starting to process delayed job [delayed_${data.service}_${data.name}(${jobId})], data: ${JSON.stringify(data)}`);
         try {
             const bullNameToIdRepository: BullNameToIdMapRepository = await this.application.get('repositories.BullNameToIdMapRepository');
-            await bullNameToIdRepository.deleteAll({
-                JobName: `delayed_${data.service}_${data.name}`
+            const bullNameToIdMap: BullNameToIdMap|null = await bullNameToIdRepository.findOne({
+                where: {
+                    JobId: jobId
+                }
             });
+            if (!bullNameToIdMap) {
+                console.debug(`Job [delayed_${data.service}_${data.name}(${jobId})] : was not found so it was ignored`);
+                return;
+            }
+            await bullNameToIdRepository.deleteById(bullNameToIdMap.id);
+            if (bullNameToIdMap.canceled) {
+                console.debug(`Job [delayed_${data.service}_${data.name}(${jobId})] : was canceled in database, skipping`);
+                return;
+            }
             const module = await import('./area-services/' + data.service + '/controller');
             const controller = module.default;
             if (!controller.processDelayedJob) {
-                console.error(`Failed to process job [delayed_${data.service}_${data.name}] : A delayed job was queued but service doesn't have a processDelayedJob static method`);
+                console.error(`Failed to process job [delayed_${data.service}_${data.name}(${jobId})] : A delayed job was queued but service doesn't have a processDelayedJob static method`);
             } else {
                 await controller.processDelayedJob(data, this.application);
             }
         } catch (e) {
-            console.error(`Failed to process job [delayed_${data.service}_${data.name}] :`, e);
+            console.error(`Failed to process job [delayed_${data.service}_${data.name}(${jobId})] :`, e);
         }
     }
 

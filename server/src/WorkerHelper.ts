@@ -174,7 +174,16 @@ export default class WorkerHelper {
             const bullNameToIdRepository: BullNameToIdMapRepository = await ctx.get('repositories.BullNameToIdMapRepository');
             const bullNameToId: BullNameToIdMap|null = await bullNameToIdRepository.findOne({
                 where: {
-                    JobName: jobName
+                    and: [
+                        {
+                            JobName: jobName
+                        },
+                        {
+                            canceled: {
+                                neq: true
+                            }
+                        }
+                    ]
                 }
             });
             if (!bullNameToId)
@@ -189,16 +198,25 @@ export default class WorkerHelper {
         try {
             const bullNameToIdRepository: BullNameToIdMapRepository = await ctx.get('repositories.BullNameToIdMapRepository');
             const job: Job<DelayedJobObject>|null = await this.delayedJobQueue.getJob(jobId);
-            if (!job)
-                return null;
-            await job.remove();
-            await bullNameToIdRepository.deleteAll({
+            await bullNameToIdRepository.updateAll({canceled: true},{
                 JobId: jobId
             });
+            if (!job)
+                return null;
             return job.data;
         } catch (e) {
             return null;
         }
+    }
+
+    private static async RemoveDelayedJobByName(jobName: string, ctx: Context) {
+        try {
+            const bullNameToIdRepository: BullNameToIdMapRepository = await ctx.get('repositories.BullNameToIdMapRepository');
+            await bullNameToIdRepository.updateAll({canceled: true},{
+                JobName: jobName
+            });
+            // eslint-disable-next-line no-empty
+        } catch (e) {}
     }
 
     private static async RemovePullingJobById(jobId: string, ctx: Context): Promise<PullingJobObject|null> {
@@ -223,7 +241,7 @@ export default class WorkerHelper {
         const jobName = `delayed_${job.service}_${job.name}`;
         const existingJobId: string|null = await this.GetJobIdFromJobName(jobName, ctx);
         if (existingJobId) {
-            await this.RemoveDelayedJobById(existingJobId, ctx);
+            await this.RemoveDelayedJobByName(`delayed_${job.service}_${job.name}`, ctx);
         }
         let jobDelay = 0;
         if (job.triggerIn) {
@@ -238,12 +256,11 @@ export default class WorkerHelper {
         });
     }
 
-    public static async RemoveDelayedJob(service: string, jobName: string, ctx: Context): Promise<DelayedJobObject|null> {
+    public static async RemoveDelayedJob(service: string, jobName: string, ctx: Context) {
         const existingJobId: string|null = await this.GetJobIdFromJobName(`delayed_${service}_${jobName}`, ctx);
         if (existingJobId) {
-            return this.RemoveDelayedJobById(existingJobId, ctx);
+            await this.RemoveDelayedJobByName(`delayed_${service}_${jobName}`, ctx);
         }
-        return null;
     }
 
     public static async AddPullingJob(job: PullingJobObject, ctx: Context) {
