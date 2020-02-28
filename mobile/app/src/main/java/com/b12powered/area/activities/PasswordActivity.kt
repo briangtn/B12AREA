@@ -10,6 +10,7 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import com.b12powered.area.R
 import com.b12powered.area.api.ApiClient
 
@@ -58,6 +59,28 @@ class PasswordActivity : AppCompatActivity() {
 
         btnValidationPassword.setOnClickListener {
             submitValidationPassword(token)
+        }
+
+        onBackPressedDispatcher.addCallback(object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                val intent = Intent(this@PasswordActivity, LoginActivity::class.java)
+                finish()
+                startActivity(intent)
+            }
+        })
+    }
+
+    /**
+     * Get the api url currently stored in local storage or its default value
+     *
+     * @return The api url
+     */
+    private fun getCurrentApiUrl() : String {
+        val sharedPreferences = getSharedPreferences(getString(R.string.storage_name), Context.MODE_PRIVATE)
+        return if (sharedPreferences.contains(getString(R.string.api_url_key))) {
+            sharedPreferences.getString(getString(R.string.api_url_key), null)!!
+        } else {
+            System.getenv("API_HOST") ?: "https://dev.api.area.b12powered.com"
         }
 
     }

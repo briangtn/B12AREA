@@ -729,4 +729,42 @@ export class UserController {
         return {token};
     }
 
+    @get('/impersonate/{id}', {
+        security: OPERATION_SECURITY_SPEC,
+        responses: {
+            '200': {
+                description: 'JWT token returned',
+                content: {
+                    'application/json': {
+                        schema: {
+                            type: 'object',
+                            properties: {
+                                token: {
+                                    type: 'string',
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+            '404': response404('User with id not foud'),
+            '401': response401()
+        },
+    })
+    @authenticate('jwt-all')
+    @authorize({allowedRoles: ['admin']})
+    async impersonate(@param.path.string('id') id: string) {
+        const user = await this.userRepository.findById(id);
+
+        if (!user) {
+            throw new HttpErrors.NotFound('User with this id not found');
+        }
+        const token = await this.tokenService.generateToken({
+            email: user.email,
+            require2fa: false,
+            validated2fa: true
+        } as CustomUserProfile);
+        return {token};
+    }
+
 }

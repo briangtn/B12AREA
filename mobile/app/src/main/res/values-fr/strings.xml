@@ -69,4 +69,6 @@
     <string name="edit_reaction">Editer les paramètres de la réaction</string>
     <string name="confirm_exit">Voulez-vous vraiment quitter cette page ?</string>
     <string name="exit_area_message">Cette action vous ramènera à la page d\'accueil. Votre area sera enregistrée.</string>
+    <string name="exit_app">Voulez-vous quitter l\'application ?</string>
+    <string name="already_visited">already_visited</string>
 </resources>

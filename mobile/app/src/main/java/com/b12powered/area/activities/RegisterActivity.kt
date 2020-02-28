@@ -1,6 +1,8 @@
 package com.b12powered.area.activities
 
+import android.app.AlertDialog
 import android.content.Context
+import android.content.DialogInterface
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -9,6 +11,7 @@ import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import com.b12powered.area.R
 import com.b12powered.area.api.ApiClient
 import com.b12powered.area.fragments.SettingsFragment
@@ -37,7 +40,15 @@ class RegisterActivity : AppCompatActivity() {
             val intent = Intent(this, HomeActivity::class.java)
             finish()
             startActivity(intent)
+        } else if (sharedPreferences.contains(getString(R.string.already_visited))) {
+            val intent = Intent(this, LoginActivity::class.java)
+            finish()
+            startActivity(intent)
         }
+
+        val editor = sharedPreferences.edit()
+        editor.putBoolean(getString(R.string.already_visited), true)
+        editor.apply()
 
         val etConfirmPassword = findViewById<EditText>(R.id.confirm_password)
 
@@ -75,6 +86,12 @@ class RegisterActivity : AppCompatActivity() {
         twitter_button.setOnClickListener {
             oauth("twitter")
         }
+
+        onBackPressedDispatcher.addCallback(object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                showDialog()
+            }
+        })
     }
 
     /**
@@ -160,4 +177,22 @@ class RegisterActivity : AppCompatActivity() {
             }
     }
 
+    /**
+     * Show a dialog asking the user if they want to exit the application
+     */
+    private fun showDialog() {
+        val builder = AlertDialog.Builder(this)
+        val dialogClickListener = DialogInterface.OnClickListener { dialog, which ->
+            when(which) {
+                DialogInterface.BUTTON_POSITIVE -> finishAffinity()
+                DialogInterface.BUTTON_NEGATIVE -> dialog.dismiss()
+            }
+        }
+        builder
+            .setTitle(getString(R.string.exit_app))
+            .setPositiveButton(getString(R.string.yes), dialogClickListener)
+            .setNegativeButton(getString(R.string.no), dialogClickListener)
+            .create()
+            .show()
+    }
 }
