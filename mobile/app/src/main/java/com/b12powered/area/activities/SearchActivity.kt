@@ -1,14 +1,19 @@
 package com.b12powered.area.activities
 
+import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import com.b12powered.area.R
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
 import com.b12powered.area.Status
 import com.b12powered.area.api.ApiClient
 import com.b12powered.area.fragments.ServiceFragment
+import com.b12powered.area.fragments.ToolbarFragment
 import com.b12powered.area.toObject
+import kotlinx.android.synthetic.main.activity_home.*
 
 /**
  * The activity where every available service to which the user can subscribe
@@ -79,6 +84,15 @@ class SearchActivity : AppCompatActivity() {
                     ).show()
                 }
             }
+
+        onBackPressedDispatcher.addCallback(object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                (supportFragmentManager.findFragmentById(R.id.toolbar_fragment) as ToolbarFragment).setCurrentActivity(ToolbarFragment.Activity.HOME)
+                val intent = Intent(this@SearchActivity, HomeActivity::class.java)
+                startActivity(intent)
+                overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
+            }
+        })
     }
 
 }
