@@ -2,26 +2,19 @@ package com.b12powered.area.api
 
 import android.content.Context
 import android.net.Uri
-import android.util.Log
 import androidx.core.net.toUri
 import com.android.volley.*
 import com.android.volley.toolbox.BasicNetwork
 import com.android.volley.toolbox.DiskBasedCache
 import com.android.volley.toolbox.HurlStack
 import com.android.volley.toolbox.StringRequest
-<<<<<<< HEAD
 import com.b12powered.area.*
 import com.google.gson.Gson
-import com.google.gson.JsonArray
 import org.json.JSONArray
-=======
 import com.b12powered.area.About
 import com.b12powered.area.Area
 import com.b12powered.area.User
 import com.b12powered.area.toObject
-import com.google.gson.Gson
-import com.google.gson.JsonObject
->>>>>>> origin/130-create-area
 import org.json.JSONObject
 
 /**
