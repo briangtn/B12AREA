@@ -19,6 +19,9 @@ import Snackbar from "@material-ui/core/Snackbar";
 import { changeApiUrl } from "../actions/api.action";
 
 import Utilities from '../utils/Utilities';
+import Cookies from "universal-cookie";
+
+const cookies = new Cookies();
 
 interface Props {
     history: {
@@ -29,7 +32,8 @@ interface Props {
         loginButton: string
     },
     token: string,
-    api_url: string
+    api_url: string,
+    changeApiUrl: any
 }
 
 interface State {
@@ -77,22 +81,29 @@ class ResetPassword extends Component<Props, State> {
     };
 
     componentDidMount() {
-        if (this.props.token)
+        if (this.props.token) {
             this.props.history.push('/');
-        // TODO Set api URL
+            return;
+        }
+
+        const newApiUrl: string | null = Utilities.getQueryParameter(window.location.href, 'api_url');
         const queryToken: string | null = Utilities.getQueryParameter(window.location.href, 'token');
+
+        this.props.changeApiUrl(newApiUrl);
+        cookies.set('api_url', newApiUrl);
+
         if (queryToken)
             this.setState({ resetToken: queryToken });
     }
 
     keyPress = (e: any) => {
         if (e.keyCode === 13) {
-            const toClick: HTMLElement | null = document.getElementById('resetPassword')
+            const toClick: HTMLElement | null = document.getElementById('resetPassword');
 
             if (toClick)
                 toClick.click();
         }
-    }
+    };
 
     onSubmit = (e: React.FormEvent) => {
         const { password, confirmPassword, resetToken } = this.state;

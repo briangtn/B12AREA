@@ -107,7 +107,7 @@ class Footer extends Component<Props, State> {
                         </Grid>
                     </Grid>
                     ) : (
-                        { currentApiTypography }
+                        <div>{ currentApiTypography }</div>
                     )}
                     <Dialog
                         open={this.state.dialogOpened}
