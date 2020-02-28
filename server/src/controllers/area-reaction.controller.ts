@@ -164,26 +164,6 @@ export class AreaReactionController {
         const area = await this.areaRepository.findById(id);
         this.areaRepository.checkArea(area, this.user);
 
-        const dbReaction = await this.reactionRepository.findById(reactionId);
-
-        let controller;
-        try {
-            controller = await this.resolveReactionController(dbReaction.serviceReaction);
-        } catch (e) {
-            throw new HttpErrors.BadRequest('Reaction not found');
-        }
-
-        let result : OperationStatus;
-        try {
-            result = await controller.updateReaction(dbReaction.id!, dbReaction.options, reaction.options, this.ctx);
-        } catch (e) {
-            throw new HttpErrors.BadRequest('Failed to update action in service');
-        }
-        if (!result.success) {
-            throw new HttpErrors.BadRequest(result.error);
-        }
-        reaction.options = result.options;
-
         await this.areaRepository.reactions(id).patch(reaction, {
             id: reactionId,
             and: where

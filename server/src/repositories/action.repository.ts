@@ -1,4 +1,11 @@
-import {DefaultCrudRepository, repository, BelongsToAccessor} from '@loopback/repository';
+import {
+    DefaultCrudRepository,
+    repository,
+    BelongsToAccessor,
+    Condition,
+    AndClause,
+    OrClause, AnyObject, Count
+} from '@loopback/repository';
 import {Action, ActionRelations, Area} from '../models';
 import {MongoDataSource} from '../datasources';
 import {inject, Getter} from '@loopback/core';
@@ -61,5 +68,15 @@ export class ActionRepository extends DefaultCrudRepository<Action,
 
     async emptyActionData(actionID: string) {
         await this.updateById(actionID, {data: {}});
+    }
+
+    deleteAll(where?: Condition<Action> | AndClause<Action> | OrClause<Action>, options?: AnyObject): Promise<Count> {
+        console.log("Call delete hook for ", where);
+        return super.deleteAll(where, options);
+    }
+
+    deleteById(id: typeof Action.prototype.id, options?: AnyObject): Promise<void> {
+        console.log("Call delete hook for ", id);
+        return super.deleteById(id, options);
     }
 }

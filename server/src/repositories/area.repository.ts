@@ -15,7 +15,6 @@ import {UserProfile} from "@loopback/security";
 export class AreaRepository extends DefaultCrudRepository<Area,
     typeof Area.prototype.id,
     AreaRelations> {
-
     public readonly reactions: HasManyRepositoryFactory<Reaction, typeof Area.prototype.id>;
 
     public readonly action: HasOneRepositoryFactory<Action, typeof Area.prototype.id>;

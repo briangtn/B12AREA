@@ -1,4 +1,11 @@
-import {BelongsToAccessor, DefaultCrudRepository, repository} from '@loopback/repository';
+import {
+    AndClause, AnyObject,
+    BelongsToAccessor,
+    Condition, Count, DeepPartial,
+    DefaultCrudRepository,
+    OrClause,
+    repository
+} from '@loopback/repository';
 import {Area, Reaction, ReactionRelations} from '../models';
 import {MongoDataSource} from '../datasources';
 import {Getter, inject} from '@loopback/core';
@@ -11,11 +18,11 @@ import {Context} from "@loopback/context";
 type IdReaction = typeof Reaction.prototype.id;
 type FilterReaction = Condition<Reaction> | AndClause<Reaction> | OrClause<Reaction>;
 type WhereOrIdReaction =  FilterReaction | IdReaction;
+type UpdateReaction = Partial<Reaction> | { [P in keyof Reaction]?: DeepPartial<Reaction[P]> };
 
 export class ReactionRepository extends DefaultCrudRepository<Reaction,
     typeof Reaction.prototype.id,
     ReactionRelations> {
-
     public readonly area: BelongsToAccessor<
         Area,
         typeof Reaction.prototype.id
@@ -66,7 +73,28 @@ export class ReactionRepository extends DefaultCrudRepository<Reaction,
         }
     }
 
-    async beforeUpdate(where?: WhereOrIdReaction, options?: AnyObject) : Promise<void> {
+    async beforeUpdate(data: UpdateReaction, where?: WhereOrIdReaction, options?: AnyObject) : Promise<OperationStatus> {
+        const dbReaction = await this.getByWhereOrId(where);
+        if (!dbReaction)
+            throw new Error('Could not fetch reaction');
+
+        let controller;
+        try {
+            controller = await this.resolveReactionController(dbReaction.serviceReaction);
+        } catch (e) {
+            throw new HttpErrors.BadRequest('Reaction not found');
+        }
+
+        let result : OperationStatus;
+        try {
+            result = await controller.updateReaction(dbReaction.id!, dbReaction.options, data.options, this.ctx);
+        } catch (e) {
+            throw new HttpErrors.BadRequest('Failed to update action in service');
+        }
+        if (!result.success) {
+            throw new HttpErrors.BadRequest(result.error);
+        }
+        return result;
     }
 
     async beforeCreate(where?: WhereOrIdReaction, options?: AnyObject) : Promise<void> {
@@ -109,6 +137,27 @@ export class ReactionRepository extends DefaultCrudRepository<Reaction,
     deleteAll(where?: FilterReaction, options?: AnyObject): Promise<Count> {
         return this.beforeDelete(where, options).then(() => {
             return super.deleteAll(where as FilterReaction, options);
+        }).catch((err) => {
+            console.error(err);
+            return err;
+        });
+    }
+
+
+    updateAll(data: UpdateReaction | Reaction, where?: FilterReaction, options?: AnyObject): Promise<Count> {
+        return this.beforeUpdate(data, where, options).then((operationStatus: OperationStatus) => {
+            data.options = operationStatus.options;
+            return super.updateAll(data, where as FilterReaction, options);
+        }).catch((err) => {
+            console.error(err);
+            return err;
+        });
+    }
+
+    updateById(id: typeof Reaction.prototype.id, data: UpdateReaction | Reaction, options?: AnyObject): Promise<void> {
+        return this.beforeUpdate(data, id, options).then((operationStatus: OperationStatus) => {
+            data.options = operationStatus.options;
+            return super.updateById(id, data, options);
         }).catch((err) => {
             console.error(err);
             return err;
