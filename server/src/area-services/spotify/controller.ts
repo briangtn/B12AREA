@@ -20,7 +20,7 @@ const SPOTIFY_CLIENT_ID = process.env.SPOTIFY_CLIENT_ID ?? "";
 const SPOTIFY_CLIENT_SECRET = process.env.SPOTIFY_CLIENT_SECRET ?? "";
 const API_URL : string = process.env.API_URL ?? "http://localhost:8080";
 
-const SPOTIFY_REFRESH_TOKENS_DELAYED_JOB = 'spotify_refreshUserTokensDelayedJob_';
+const SPOTIFY_REFRESH_TOKENS_DELAYED_JOB = 'spotify_refreshUserTokensDelayedJob';
 const SPOTIFY_REFRESH_TOKENS_DELAY = 5 * 60 * 1000; //5 minutes
 
 export default class ServiceController {
