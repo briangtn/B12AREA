@@ -14,6 +14,7 @@ import TwoFactorAuthentication from "../components/profile/TwoFactorAuthenticati
 import ChangePassword from "../components/profile/ChangePassword";
 import GoogleIcon from "../components/icons/GoogleIcon";
 import TwitterIcon from '@material-ui/icons/Twitter';
+import SupervisorAccountIcon from '@material-ui/icons/SupervisorAccount';
 
 import Grid from '@material-ui/core/Grid';
 
@@ -68,14 +69,6 @@ class Profile extends Component<Props, State> {
         fakey: '',
         authServices: [],
         roles: []
-    };
-
-    onChange: React.ChangeEventHandler<HTMLInputElement> = (e) => {
-        const {id, value} = e.currentTarget;
-
-        if (id === 'fakey' && (value.length === 7 || isNaN(value as any)))
-            return;
-        this.setState({[id]: value} as unknown as Pick<State, keyof State>);
     };
 
     componentDidMount(): void {
@@ -155,11 +148,12 @@ class Profile extends Component<Props, State> {
                             }
                         </Grid>
                     </div>
-                    { (this.state.roles.includes('admin')) ?
+                    {
+                        (this.state.roles.includes('admin')) ?
                         <Link
                             to={{pathname: '/admin'}}
                         >
-                            <Button id="getStarted" color="primary"><Translator sentence="goToAdmin" /></Button>
+                            <Button startIcon={<SupervisorAccountIcon />} style={{marginTop: '10px'}} id="getStarted" color="primary"><Translator sentence="goToAdmin" /></Button>
                         </Link>
                         :
                         <div></div>
