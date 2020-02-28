@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.EditText
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import com.b12powered.area.R
 import com.b12powered.area.api.ApiClient
@@ -29,6 +30,14 @@ class ForgotPasswordActivity : AppCompatActivity() {
         validation_email_button.setOnClickListener {
             submitEmail()
         }
+
+        onBackPressedDispatcher.addCallback(object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                val intent = Intent(this@ForgotPasswordActivity, LoginActivity::class.java)
+                finish()
+                startActivity(intent)
+            }
+        })
     }
 
     /**

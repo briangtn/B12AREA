@@ -10,6 +10,7 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import com.b12powered.area.R
 import com.b12powered.area.api.ApiClient
 
@@ -60,6 +61,13 @@ class PasswordActivity : AppCompatActivity() {
             submitValidationPassword(token)
         }
 
+        onBackPressedDispatcher.addCallback(object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                val intent = Intent(this@PasswordActivity, LoginActivity::class.java)
+                finish()
+                startActivity(intent)
+            }
+        })
     }
 
     /**
