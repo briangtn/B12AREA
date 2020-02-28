@@ -1,5 +1,4 @@
 import {bind, Context} from '@loopback/core';
-import axios from 'axios';
 import {OperationStatus} from '../services-interfaces';
 import WorkerHelper from "../WorkerHelper";
 

@@ -20,7 +20,7 @@ async function startAsWorker(app: AreaApplication)
 {
     const worker = new Worker(app);
     worker.boot();
-    worker.start();
+    await worker.start();
     console.log(`Worker started with redis host: ${process.env.REDIS_HOST}`);
 }
 
