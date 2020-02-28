@@ -2,7 +2,7 @@ import {
     DefaultCrudRepository,
     repository,
     HasManyRepositoryFactory,
-    HasOneRepositoryFactory, AnyObject, Condition, AndClause, OrClause, Count
+    HasOneRepositoryFactory, AnyObject, Condition, AndClause, OrClause, Count,
     BelongsToAccessor,
 } from '@loopback/repository';
 import {Area, AreaRelations, Reaction, Action, User} from '../models';
