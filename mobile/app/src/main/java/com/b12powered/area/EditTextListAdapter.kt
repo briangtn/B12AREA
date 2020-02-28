@@ -9,6 +9,12 @@ import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.EditText
 
+/**
+ * A custom adapter, used to inflate list of EditText in ListView
+ *
+ * @param context The context from where the [EditTextListAdapter] is created
+ * @param editModelArrayList The array list of [EditModel], encapsulating EditText's values, to add to ListView
+ */
 class EditTextListAdapter(private val context: Context, private val editModelArrayList: ArrayList<EditModel>) : BaseAdapter() {
 
     override fun getCount(): Int {
@@ -23,6 +29,17 @@ class EditTextListAdapter(private val context: Context, private val editModelArr
         return 0
     }
 
+    /**
+     * Override method getView
+     *
+     * This method inflate the custom EditText layout in the view, and set its properties :
+     *  - hint : The hint to display in the text field
+     *  - onChange callback : Used in order to automatically trigger value update, as it is impossible to get EditText value by id, since they all have the same generic id
+     *
+     * @param position The position of the current EditText in the ListView
+     * @param convertView The view in which the current EditText is inflated
+     * @param parent The parent view group of the [convertView]
+     */
     override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
         val holder = ViewHolder()
         val view: View
@@ -47,6 +64,9 @@ class EditTextListAdapter(private val context: Context, private val editModelArr
         return view
     }
 
+    /**
+     * A custom class used to encapsulate [EditText] to make it accessible through view's tag object
+     */
     private class ViewHolder {
         lateinit var editText: EditText
     }

@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".activities.ServiceInformationActivity">
+    tools:context=".activities.AreaCreationActivity">
 
     <TextView
         android:id="@+id/service_name"
@@ -30,6 +30,6 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/service_name"></LinearLayout>
+        app:layout_constraintTop_toBottomOf="@+id/service_name" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

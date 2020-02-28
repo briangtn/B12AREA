@@ -21,8 +21,21 @@ import com.bumptech.glide.Glide
 import kotlinx.android.synthetic.main.fragment_service.*
 
 
+/**
+ * A fragment displaying clickable service in order to subscribe to it
+ *
+ * @param service The service to show
+ */
 class ServiceFragment(private val service: Service) : Fragment() {
     companion object {
+
+        /**
+         * This method return a new instance of [ServiceFragment]
+         *
+         * @param service The service to show
+         *
+         * @return A new instance of [ServiceFragment]
+         */
         fun newInstance(service: Service): ServiceFragment {
             return ServiceFragment(service)
         }
@@ -30,6 +43,11 @@ class ServiceFragment(private val service: Service) : Fragment() {
 
     private var isFlipped = false
 
+    /**
+     * Override method onCreateView
+     *
+     * Set the appropriate layout to the current fragment
+     */
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -40,6 +58,11 @@ class ServiceFragment(private val service: Service) : Fragment() {
         return inflater.inflate(R.layout.fragment_service, container, false)
     }
 
+    /**
+     * Override method onViewCreated
+     *
+     * Load service image from url
+     */
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         Glide.with(this)
             .load(service.icon)
@@ -62,6 +85,9 @@ class ServiceFragment(private val service: Service) : Fragment() {
         super.onViewCreated(view, savedInstanceState)
     }
 
+    /**
+     * Show a dialog asking the user if they want to subscribe to the service
+     */
     private fun showDialog() {
         val builder = AlertDialog.Builder(context)
         val dialogClickListener = DialogInterface.OnClickListener { _, which ->
@@ -79,6 +105,9 @@ class ServiceFragment(private val service: Service) : Fragment() {
             .show()
     }
 
+    /**
+     * Make a subscribeService request to api. If the call is successful, redirect the user to the service's oauth page, if not display a toast with the error
+     */
     private fun subscribeService() {
         ApiClient(context!!)
             .loginService(service.name, "area://search") { uri, message ->
@@ -95,6 +124,9 @@ class ServiceFragment(private val service: Service) : Fragment() {
             }
     }
 
+    /**
+     * Set a flip animation to service card
+     */
     private fun flipCard() {
         val objectAnimator1 = ObjectAnimator.ofFloat(view, "scaleX", 1f, 0f)
         val objectAnimator2 = ObjectAnimator.ofFloat(view, "scaleX", 0f, 1f)

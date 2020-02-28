@@ -3,22 +3,38 @@ package com.b12powered.area.fragments
 import android.app.AlertDialog
 import android.content.DialogInterface
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.ListView
 import android.widget.TextView
-import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
 import com.b12powered.area.*
-import com.b12powered.area.activities.ServiceInformationActivity
-import kotlinx.android.synthetic.main.fragment_add_area.*
+import com.b12powered.area.activities.AreaCreationActivity
 
+/**
+ * The fragment where the user can select a new action/reaction
+ *
+ * This class set a clickable list of actions/reactions, depending on user's services
+ *
+ * @param service The current service
+ * @param area The current area
+ * @param step The current step of the area creation
+ */
 class SelectAreaFragment(private val service: Service, private val area: Area, private val step: AreaCreationStatus) : Fragment() {
     companion object {
+
+        /**
+         * This method return a new instance of [SelectAreaFragment]
+         *
+         * @param service The current service
+         * @param area The current area
+         * @param step The current step of the area creation
+         *
+         * @return A new instance of [SelectAreaFragment]
+         */
         fun newInstance(service: Service, area: Area, step: AreaCreationStatus): SelectAreaFragment {
             return SelectAreaFragment(service, area, step)
         }
@@ -26,6 +42,11 @@ class SelectAreaFragment(private val service: Service, private val area: Area, p
 
     private lateinit var listView: ListView
 
+    /**
+     * Override method onCreateView
+     *
+     * Set the appropriate layout to the current fragment
+     */
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -34,6 +55,11 @@ class SelectAreaFragment(private val service: Service, private val area: Area, p
         return inflater.inflate(R.layout.fragment_select_area, container, false)
     }
 
+    /**
+     * Override method onCreate
+     *
+     * Set a custom callback to the back button
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -42,12 +68,17 @@ class SelectAreaFragment(private val service: Service, private val area: Area, p
                 if (step is AreaCreationStatus.ReactionAdded || step is AreaCreationStatus.AdditionalReactionAdded) {
                     showWarning()
                 } else {
-                    (activity!! as ServiceInformationActivity).goBack(area, step)
+                    (activity!! as AreaCreationActivity).goBack(area, step)
                 }
             }
         })
     }
 
+    /**
+     * Override method onViewCreated
+     *
+     * Set the fragment's custom title and set a custom list of actions/reactions for each service
+     */
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -63,7 +94,7 @@ class SelectAreaFragment(private val service: Service, private val area: Area, p
             is AreaCreationStatus.AreaCreated -> service.actions.map { action -> Pair(service.displayName, action) } as ArrayList<Pair<String, ActionReaction>>
             else -> {
                 val list: ArrayList<Pair<String, ActionReaction>> = ArrayList()
-                val services = (activity as ServiceInformationActivity).getServices()
+                val services = (activity as AreaCreationActivity).getServices()
                 services.forEach { service ->
                     service.reactions.forEach { reaction ->
                         list.add(Pair(service.displayName, reaction))
@@ -82,13 +113,13 @@ class SelectAreaFragment(private val service: Service, private val area: Area, p
         listView.setOnItemClickListener { _, _, position, _ ->
 
             if (step == AreaCreationStatus.ActionAdded) {
-                val serviceList = (activity as ServiceInformationActivity).getServices()
-                (activity as ServiceInformationActivity).setService(serviceList[serviceList.indexOfFirst { service ->
+                val serviceList = (activity as AreaCreationActivity).getServices()
+                (activity as AreaCreationActivity).setService(serviceList[serviceList.indexOfFirst { service ->
                     service.displayName == arList[position].first
                 }])
             }
 
-            (activity as ServiceInformationActivity).nextStep(area, arList[position].second, when(step) {
+            (activity as AreaCreationActivity).nextStep(area, arList[position].second, when(step) {
                 is AreaCreationStatus.AreaCreated -> AreaCreationStatus.ActionSelected
                 is AreaCreationStatus.ActionAdded -> AreaCreationStatus.ReactionSelected
                 else -> AreaCreationStatus.AdditionalReactionSelected
@@ -96,11 +127,14 @@ class SelectAreaFragment(private val service: Service, private val area: Area, p
         }
     }
 
+    /**
+     * Show a dialog warning the user that they will be redirected to home page and will exit the area creation process if they go back from this page
+     */
     private fun showWarning() {
         val builder = AlertDialog.Builder(context)
         val dialogClickListener = DialogInterface.OnClickListener { dialog, which ->
             when(which) {
-                DialogInterface.BUTTON_POSITIVE -> (activity as ServiceInformationActivity).finishArea()
+                DialogInterface.BUTTON_POSITIVE -> (activity as AreaCreationActivity).finishArea()
                 DialogInterface.BUTTON_NEGATIVE -> dialog.dismiss()
             }
         }

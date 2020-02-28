@@ -13,12 +13,33 @@ import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
 import com.b12powered.area.*
-import com.b12powered.area.activities.ServiceInformationActivity
+import com.b12powered.area.activities.AreaCreationActivity
 import com.b12powered.area.api.ApiClient
 import kotlinx.android.synthetic.main.fragment_create_area.*
 
+/**
+ * The fragment where the user can custom and add a new action/reaction to their current area
+ *
+ * This class set a list of input fields, in order to complete required parameters for the action/reaction to add, then request the api for addition
+ *
+ * @param service The current service
+ * @param area The current area
+ * @param ar The selected action/reaction
+ * @param step The current step of the area creation
+ */
 class AddAreaFragment(private val service: Service, private val area: Area, private val ar: ActionReaction, private val step: AreaCreationStatus) : Fragment() {
     companion object {
+
+        /**
+         * This method return a new instance of [AddAreaFragment]
+         *
+         * @param service The current service
+         * @param area The current area
+         * @param ar The selected action/reaction
+         * @param step The current step of the area creation
+         *
+         * @return A new instance of [AddAreaFragment]
+         */
         fun newInstance(service: Service, area: Area, ar: ActionReaction, step: AreaCreationStatus): AddAreaFragment {
             return AddAreaFragment(service, area, ar, step)
         }
@@ -26,6 +47,11 @@ class AddAreaFragment(private val service: Service, private val area: Area, priv
 
     private lateinit var listView: ListView
 
+    /**
+     * Override method onCreateView
+     *
+     * Set the appropriate layout to the current fragment
+     */
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -34,16 +60,26 @@ class AddAreaFragment(private val service: Service, private val area: Area, priv
         return inflater.inflate(R.layout.fragment_add_area, container, false)
     }
 
+    /**
+     * Override method onCreate
+     *
+     * Set a custom callback to the back button
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         requireActivity().onBackPressedDispatcher.addCallback(object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
-                (activity!! as ServiceInformationActivity).goBack(area, step)
+                (activity!! as AreaCreationActivity).goBack(area, step)
             }
         })
     }
 
+    /**
+     * Override method onViewCreated
+     *
+     * Set the fragment's custom title and set a custom list of EditText for each action/reaction's parameter
+     */
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -64,6 +100,11 @@ class AddAreaFragment(private val service: Service, private val area: Area, priv
         }
     }
 
+    /**
+     * Init an ArrayList of [EditModel] from the action/reaction configSchema
+     *
+     * @return A list of initialized [EditModel]
+     */
     private fun initList(): ArrayList<EditModel> {
         val list: ArrayList<EditModel> = ArrayList()
 
@@ -75,6 +116,11 @@ class AddAreaFragment(private val service: Service, private val area: Area, priv
         return list
     }
 
+    /**
+     * Check if the required action/reaction's parameters are valid, submit [addAction]/[addReaction] if they are, show a toast if not
+     *
+     * @param editModelArrayList The list of [EditModel] to get the values from
+     */
     private fun submit(editModelArrayList: ArrayList<EditModel>) {
         val options: HashMap<String, Any> = HashMap()
 
@@ -98,22 +144,28 @@ class AddAreaFragment(private val service: Service, private val area: Area, priv
         }
     }
 
+    /**
+     * Make a addAction request to api, using [options]. If thee call is successful, go to the next step of the area creation process, if not display a toast with the error and go back to the selection step
+     */
     private fun addAction(options: HashMap<String, Any>) {
         ApiClient(activity!!)
             .addAction(area.id, service.name + ".A." + ar.name, options) { success, response ->
                 if (success) {
-                    (activity as ServiceInformationActivity).nextStep(area, null, AreaCreationStatus.ActionAdded)
+                    (activity as AreaCreationActivity).nextStep(area, null, AreaCreationStatus.ActionAdded)
                 } else {
                     Toast.makeText(
                         context,
                         response,
                         Toast.LENGTH_SHORT
                     ).show()
-                    (activity!! as ServiceInformationActivity).goBack(area, step)
+                    (activity!! as AreaCreationActivity).goBack(area, step)
                 }
             }
     }
 
+    /**
+     * Make a addReaction request to api, using [options]. If thee call is successful, call [showDialog], if not display a toast with the error and go back to the selection step
+     */
     private fun addReaction(options: HashMap<String, Any>) {
         Log.d("addReaction", "adding reaction")
         ApiClient(activity!!)
@@ -126,20 +178,23 @@ class AddAreaFragment(private val service: Service, private val area: Area, priv
                         response,
                         Toast.LENGTH_SHORT
                     ).show()
-                    (activity!! as ServiceInformationActivity).goBack(area, step)
+                    (activity!! as AreaCreationActivity).goBack(area, step)
                 }
             }
     }
 
+    /**
+     * Show a dialog asking the user if they want to add a new reaction to their area, or if they want to exit now
+     */
     private fun showDialog() {
         val builder = AlertDialog.Builder(context)
         val dialogClickListener = DialogInterface.OnClickListener { _, which ->
             when(which) {
-                DialogInterface.BUTTON_POSITIVE -> (activity as ServiceInformationActivity).nextStep(area, null, when(step) {
+                DialogInterface.BUTTON_POSITIVE -> (activity as AreaCreationActivity).nextStep(area, null, when(step) {
                     is AreaCreationStatus.ReactionSelected -> AreaCreationStatus.ReactionAdded
                     else -> AreaCreationStatus.AdditionalReactionAdded
                 })
-                DialogInterface.BUTTON_NEGATIVE -> (activity as ServiceInformationActivity).finishArea()
+                DialogInterface.BUTTON_NEGATIVE -> (activity as AreaCreationActivity).finishArea()
             }
         }
         builder
