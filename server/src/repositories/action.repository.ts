@@ -2,7 +2,6 @@ import {DefaultCrudRepository, repository, BelongsToAccessor} from '@loopback/re
 import {Action, ActionRelations, Area} from '../models';
 import {MongoDataSource} from '../datasources';
 import {inject, Getter} from '@loopback/core';
-import {UserRepository} from './user.repository';
 import {AreaRepository} from './area.repository';
 
 export class ActionRepository extends DefaultCrudRepository<Action,
@@ -16,9 +15,7 @@ export class ActionRepository extends DefaultCrudRepository<Action,
 
     constructor(
         @inject('datasources.mongo') dataSource: MongoDataSource,
-        @repository(UserRepository) public userRepository: UserRepository,
-        @repository.getter('AreaRepository')
-        areaRepositoryGetter: Getter<AreaRepository>
+        @repository.getter('AreaRepository') areaRepositoryGetter: Getter<AreaRepository>
     ) {
         super(Action, dataSource);
         this.area = this.createBelongsToAccessorFor('area', areaRepositoryGetter);

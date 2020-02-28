@@ -2,7 +2,6 @@ import {BelongsToAccessor, DefaultCrudRepository, repository} from '@loopback/re
 import {Area, Reaction, ReactionRelations} from '../models';
 import {MongoDataSource} from '../datasources';
 import {Getter, inject} from '@loopback/core';
-import {UserRepository} from "./user.repository";
 import {AreaRepository} from "./area.repository";
 
 export class ReactionRepository extends DefaultCrudRepository<Reaction,
@@ -16,7 +15,6 @@ export class ReactionRepository extends DefaultCrudRepository<Reaction,
 
     constructor(
         @inject('datasources.mongo') dataSource: MongoDataSource,
-        @repository(UserRepository) public userRepository: UserRepository,
         @repository.getter('AreaRepository') areaRepositoryGetter: Getter<AreaRepository>,
     ) {
         super(Reaction, dataSource);
