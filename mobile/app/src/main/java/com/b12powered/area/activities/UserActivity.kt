@@ -172,10 +172,10 @@ class UserActivity : AppCompatActivity() {
      * Log out the current user
      */
     private fun logout() {
-        val sharedPreferences = getSharedPreferences("com.b12powered.area", Context.MODE_PRIVATE)
+        val sharedPreferences = getSharedPreferences(getString(R.string.storage_name), Context.MODE_PRIVATE)
         val editor = sharedPreferences.edit()
 
-        editor.remove("jwt-token")
+        editor.remove(getString(R.string.token_key))
         editor.apply()
         val intent = Intent(this, LoginActivity::class.java)
         finish()

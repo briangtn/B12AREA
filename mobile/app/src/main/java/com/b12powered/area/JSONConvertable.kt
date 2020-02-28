@@ -96,10 +96,6 @@ data class Areas(
     @SerializedName("action") val actions: ActionDetails
 ) : JSONConvertable
 
-data class AreaList(
-    val listArea : List<Areas>
-) : JSONConvertable
-
 data class About(
     @SerializedName("client") val client: Client,
     @SerializedName("server") val server: Server

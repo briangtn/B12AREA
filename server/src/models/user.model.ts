@@ -4,7 +4,7 @@ import {Area} from './area.model';
 @model({
     settings: {
         strictObjectIDCoercion: true,
-        hiddenProperties: ['password', 'validationToken', 'resetToken', 'twoFactorAuthenticationSecret'],
+        hiddenProperties: ['password', 'validationToken', 'resetToken', 'twoFactorAuthenticationSecret', 'services'],
         indexes: {
             uniqueEmail: {
                 keys: {
@@ -48,6 +48,13 @@ export class User extends Entity {
         default: {},
     })
     services?: object;
+
+    @property({
+        type: 'array',
+        itemType: 'string',
+        required: false
+    })
+    servicesList?: string[];
 
     @property({
         type: 'string',

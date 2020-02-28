@@ -1,10 +1,10 @@
-import {DefaultCrudRepository, repository, HasManyRepositoryFactory} from '@loopback/repository';
-import {User, UserRelations, Area} from '../models';
+import {DefaultCrudRepository, HasManyRepositoryFactory, repository, juggler} from '@loopback/repository';
+import {Area, User, UserRelations} from '../models';
 import {MongoDataSource} from '../datasources';
-import {inject, Getter} from '@loopback/core';
+import {Getter, inject} from '@loopback/core';
 import {AreaRepository} from './area.repository';
 import {EmailManager, RandomGeneratorManager} from '../services';
-import {UserProfile} from "@loopback/security";
+import {UserProfile} from '@loopback/security';
 import * as url from 'url';
 
 export type Credentials = {
@@ -26,6 +26,16 @@ export class UserRepository extends DefaultCrudRepository<User,
         super(User, dataSource);
         this.areas = this.createHasManyRepositoryFactoryFor('areas', areaRepositoryGetter,);
         this.registerInclusionResolver('areas', this.areas.inclusionResolver);
+    }
+    
+    toEntity<R extends User>(model: juggler.PersistedModel) {
+        const entity: R & {servicesList: string[]} = super.toEntity(model);
+
+        if (!entity.services) {
+            entity.servicesList = [];
+        }
+        entity.servicesList = Object.keys(entity.services!);
+        return entity;
     }
 
     async validateEmail(userId: string): Promise<User | null> {

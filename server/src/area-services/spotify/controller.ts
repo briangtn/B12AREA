@@ -36,11 +36,20 @@ export default class ServiceController {
 
         // Start pulling's for new playlist song actions
         for (const action of actions) {
-            console.log(action.id);
             const ownerId  = await actionRepository.getActionOwnerID(action.id?.toString()!);
             if (!ownerId)
                 continue;
             await SpotifyHelper.startNewPlaylistSongPulling(action.id!, ownerId, ctx);
+        }
+
+        const likedSongActions = await actionRepository.find({where: {serviceAction: 'spotify.A.new_liked_song'}});
+
+        // Start pulling's for new playlist song actions
+        for (const action of likedSongActions) {
+            const ownerId  = await actionRepository.getActionOwnerID(action.id?.toString()!);
+            if (!ownerId)
+                continue;
+            await SpotifyHelper.startNewLikedSongPulling(action.id!, ownerId, ctx);
         }
 
         // Run first refresh for spotify tokens
@@ -84,7 +93,7 @@ export default class ServiceController {
         spotifyRedirectUrl += ('?client_id=' + SPOTIFY_CLIENT_ID);
         spotifyRedirectUrl += ('&response_type=code');
         spotifyRedirectUrl += ('&redirect_uri=' + endApiRedirectUrl);
-        spotifyRedirectUrl += ('&scope=user-read-private user-read-email');
+        spotifyRedirectUrl += ('&scope=user-read-private user-read-email user-modify-playback-state user-library-read user-read-playback-state playlist-modify-public playlist-modify-private');
         spotifyRedirectUrl += ('&state=' + state);
         return spotifyRedirectUrl;
     }

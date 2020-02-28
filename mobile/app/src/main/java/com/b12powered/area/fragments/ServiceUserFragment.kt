@@ -9,14 +9,14 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.b12powered.area.R
 import com.b12powered.area.Service
-import com.b12powered.area.activities.ServiceInformationActivity
+import com.b12powered.area.activities.AreaCreationActivity
 import com.bumptech.glide.Glide
 import kotlinx.android.synthetic.main.fragment_service_user.*
 
-class ServiceUserFragment(private val service: Service) : Fragment() {
+class ServiceUserFragment(private val serviceList: ArrayList<Service>, private val service: Service) : Fragment() {
     companion object {
-        fun newInstance(service: Service): ServiceUserFragment {
-            return ServiceUserFragment(service)
+        fun newInstance(serviceList: ArrayList<Service>, service: Service): ServiceUserFragment {
+            return ServiceUserFragment(serviceList, service)
         }
     }
 
@@ -39,9 +39,9 @@ class ServiceUserFragment(private val service: Service) : Fragment() {
         view.setBackgroundColor(Color.parseColor(service.color))
         super.onViewCreated(view, savedInstanceState)
         view.setOnClickListener {
-            println(service.name)
-            val intent = Intent(context, ServiceInformationActivity::class.java)
-            intent.putExtra("serviceName", service.name)
+            val intent = Intent(context, AreaCreationActivity::class.java)
+            intent.putExtra("serviceList", serviceList.map { service -> service.toJSON() } as ArrayList)
+            intent.putExtra("service", service.toJSON())
             startActivity(intent)
         }
     }

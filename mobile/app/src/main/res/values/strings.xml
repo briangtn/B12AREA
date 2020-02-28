@@ -48,4 +48,24 @@
     <string name="success_new_password">New password successfully set !</string>
     <string name="subscribe_service">Subscribe to this service ?</string>
     <string name="subscribe_service_message">Do you want to subscribe to</string>
+    <string name="storage_name">com.b12powered.area</string>
+    <string name="token_key">jwt-token</string>
+    <string name="api_url_key">api_url</string>
+    <string name="area_name">Area name</string>
+    <string name="active_at_creation">Active at creation</string>
+    <string name="submit">Submit</string>
+    <string name="create_area">Create new area</string>
+    <string name="empty_area_name">Area name cannot be empty</string>
+    <string name="add_action">Add action to your area</string>
+    <string name="edit_action">Edit action parameters</string>
+    <string name="next">Next</string>
+    <string name="missing_parameter">Missing parameter</string>
+    <string name="area_added">Area successfully added !</string>
+    <string name="new_reaction_message">Do you want to add another reaction to this area ?</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="add_reaction">Add reaction to your area</string>
+    <string name="edit_reaction">Edit reaction parameters</string>
+    <string name="confirm_exit">Do you really want to exit this page ?</string>
+    <string name="exit_area_message">This action will take you back to homepage. Your area will still be saved.</string>
 </resources>
