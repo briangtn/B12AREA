@@ -1,0 +1,46 @@
+{
+  "displayName": "New / Updated Video",
+  "description": "Triggered on a new Video uploaded or updated by a specific channel.",
+  "configSchema": [
+    {
+      "name": "channel",
+      "description": "The id of the channel to be notified of new video",
+      "type": "string",
+      "required": true
+    }
+  ],
+  "placeholders": [
+    {
+      "name": "videoId",
+      "description": "The id of the video that was uploaded / updated"
+    },
+    {
+      "name": "channelId",
+      "description": "The id of the channel that uploaded / updated the video"
+    },
+    {
+      "name": "title",
+      "description": "The title of the video that was uploaded / updated"
+    },
+    {
+      "name": "link",
+      "description": "The link to the video that was uploaded / updated"
+    },
+    {
+      "name": "authorName",
+      "description": "The name of author that uploaded / updated the video"
+    },
+    {
+      "name": "authorLink",
+      "description": "The link to the channel that uploaded / updated the video"
+    },
+    {
+      "name": "published",
+      "description": "The publish date of the video"
+    },
+    {
+      "name": "updated",
+      "description": "The date when the video was updated for the last time"
+    }
+  ]
+}

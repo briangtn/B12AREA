@@ -16,6 +16,7 @@ import {JWTAllAuthenticationStrategy, JWT2FAAuthenticationStrategy} from "./auth
 import {SECURITY_SCHEME_SPEC} from "./utils/security-specs";
 import {AuthorizationComponent, AuthorizationTags} from '@loopback/authorization';
 import * as fs from 'fs';
+import {XmlBodyParser} from './body-parser'
 
 export interface PackageInfo {
     name: string;
@@ -53,6 +54,8 @@ export class AreaApplication extends BootMixin(
         this.component(RestExplorerComponent);
         this.component(AuthenticationComponent);
         this.component(AuthorizationComponent);
+
+        this.bodyParser(XmlBodyParser);
 
         registerAuthenticationStrategy(this, JWTAllAuthenticationStrategy);
         registerAuthenticationStrategy(this, JWT2FAAuthenticationStrategy);
@@ -133,7 +136,6 @@ export class AreaApplication extends BootMixin(
                     class AreaActions extends module.default {
 
                     }
-
                     this.controller(AreaActions, dir);
                 }).catch(error => {
                     return console.error(error);

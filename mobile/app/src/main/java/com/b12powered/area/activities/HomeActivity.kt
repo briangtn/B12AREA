@@ -10,10 +10,13 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.auth0.android.jwt.JWT
 import com.b12powered.area.R
+import com.b12powered.area.Service
 import com.b12powered.area.User
 import com.b12powered.area.api.ApiClient
+import com.b12powered.area.fragments.ServiceUserFragment
 import com.b12powered.area.toObject
 import java.util.*
+import kotlin.collections.ArrayList
 
 /**
  * The activity where the user can have all services
@@ -24,6 +27,7 @@ class HomeActivity : AppCompatActivity() {
 
     private lateinit var handler: Handler
     private lateinit var currentUser: User
+    private var serviceList: ArrayList<Service> = ArrayList()
 
     /**
      * Override method onCreate
@@ -60,6 +64,7 @@ class HomeActivity : AppCompatActivity() {
         } else {
             checkTokenValidity()
         }
+        findSubscribeService()
 
         handler = Handler(Looper.getMainLooper())
 
@@ -90,9 +95,55 @@ class HomeActivity : AppCompatActivity() {
             }
         })
     }
+    
+    /**
+     * Find all subscribe service for the user
+     *
+     * Perform an API call on /me to get the current user and get all services he subscribe
+     */
+    private fun findSubscribeService() {
+        ApiClient(this)
+            .getUser { user, message ->
+                if (user != null) {
+                    ApiClient(this)
+                        .aboutJson { about, msg ->
+                            if (about !== null) {
+                                about.server.services.forEach { service ->
+                                    if (user.services.contains(service.name)) {
+                                        supportFragmentManager.beginTransaction()
+                                            .add(
+                                                R.id.home,
+                                                ServiceUserFragment.newInstance(serviceList, service)
+                                            )
+                                            .commit()
+                                        serviceList.add(service)
+                                    }
+                                }
+                            } else {
+                                Toast.makeText(
+                                    this,
+                                    msg,
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                        }
+                } else {
+                    Toast.makeText(
+                        this,
+                        message,
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    val intent = Intent(this, LoginActivity::class.java)
+                    finish()
+                    startActivity(intent)
+                }
+            }
+    }
 
+    /**
+     * Check the token validity
+     */
     private fun checkTokenValidity() {
-
         ApiClient(this)
             .getUser { user, message ->
                 if (user != null) {
@@ -116,5 +167,4 @@ class HomeActivity : AppCompatActivity() {
                 }
             }
     }
-
 }

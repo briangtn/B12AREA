@@ -115,7 +115,7 @@ export async function ActionFunction(params: TriggerObject, ctx: Context) {
                 try {
                     reactionPreparedData = await controller.prepareData(reaction.id!, ctx);
                 } catch (e) {
-                    console.error(`Failed to enqueue job for action id ${params.actionId}, reaction id ${reaction.id}: ${e}`);
+                    console.error(`Failed to enqueue job for action id ${params.actionId}, reaction id ${reaction.id}:`, e);
                     continue;
                 }
                 const dataPlaceholders = [

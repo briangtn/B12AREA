@@ -10,6 +10,7 @@ import com.android.volley.toolbox.DiskBasedCache
 import com.android.volley.toolbox.HurlStack
 import com.android.volley.toolbox.StringRequest
 import com.b12powered.area.About
+import com.b12powered.area.Area
 import com.b12powered.area.User
 import com.b12powered.area.toObject
 import com.google.gson.Gson
@@ -340,6 +341,71 @@ class ApiClient(private val context: Context) {
             } else {
                 completion.invoke(null, response.message)
             }
+        }
+    }
+
+    /**
+     * Build a createArea request wit [name] and [enabled] and perform it, then invoke [completion] with a Area object
+     */
+    fun createArea(name: String, enabled: Boolean, completion: (area: Area?, message: String) -> Unit) {
+        val route = ApiRoute.CreateArea(name, enabled, context)
+        this.performRequest(route) { success, response ->
+            if (success) {
+                val area: Area = response.json.toObject()
+                completion.invoke(area, "success")
+            } else {
+                completion.invoke(null, response.message)
+            }
+        }
+    }
+
+    /**
+     * Build a deleteArea request with [areaId] and perform it, then invoke [completion] with a boolean corresponding to the result of the call
+     */
+    fun deleteArea(areaId: String, completion: (success: Boolean, message: String) -> Unit) {
+        val route = ApiRoute.DeleteArea(areaId, context)
+        this.performRequest(route) { success, response ->
+            completion.invoke(success, response.message)
+        }
+    }
+
+    /**
+     * Build a addAction request with [areaId], [serviceAction] and [options] and perform it, then invoke [completion] with a boolean corresponding to the result of the call
+     */
+    fun addAction(areaId: String, serviceAction: String, options: HashMap<String, Any>, completion: (success: Boolean, message: String) -> Unit) {
+        val route = ApiRoute.AddAction(areaId, serviceAction, options, context)
+        this.performRequest(route) { success, response ->
+            completion.invoke(success, response.message)
+        }
+    }
+
+    /**
+     * Build a addReaction request with [areaId], [serviceReaction] and [options] and perform it, then invoke [completion] with a boolean corresponding to the result of the call
+     */
+    fun addReaction(areaId: String, serviceReaction: String, options: HashMap<String, Any>, completion: (success: Boolean, message: String) -> Unit) {
+        val route = ApiRoute.AddReaction(areaId, serviceReaction, options, context)
+        this.performRequest(route) { success, response ->
+            completion.invoke(success, response.message)
+        }
+    }
+
+    /**
+     * Build a deleteAction request with [areaId] and perform it, then invoke [completion] with a boolean corresponding to the result of the call
+     */
+    fun deleteAction(areaId: String, completion: (success: Boolean, message: String) -> Unit) {
+        val route = ApiRoute.DeleteAction(areaId, context)
+        this.performRequest(route) { success, response ->
+            completion.invoke(success, response.message)
+        }
+    }
+
+    /**
+     * Build a deleteReaction request with [areaId] and [reactionId] and perform it, then invoke [completion] with a boolean corresponding to the result of the call
+     */
+    fun deleteReaction(areaId: String, reactionId: String, completion: (success: Boolean, message: String) -> Unit) {
+        val route = ApiRoute.DeleteReaction(areaId, reactionId, context)
+        this.performRequest(route) { success, response ->
+            completion.invoke(success, response.message)
         }
     }
 }

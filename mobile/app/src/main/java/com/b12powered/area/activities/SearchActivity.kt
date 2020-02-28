@@ -10,9 +10,16 @@ import com.b12powered.area.api.ApiClient
 import com.b12powered.area.fragments.ServiceFragment
 import com.b12powered.area.toObject
 
-
+/**
+ * The activity where every available service to which the user can subscribe
+ */
 class SearchActivity : AppCompatActivity() {
 
+    /**
+     * Override method onCreate
+     *
+     * Set a custom fragment for every service currently not subscribed by the user
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_search)
