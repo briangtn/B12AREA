@@ -63,8 +63,10 @@ class Services extends Component<Props, State> {
     componentDidMount(): void {
         const { token, api_url } = this.props;
 
-        if (!token)
+        if (!token) {
             this.props.history.push('/');
+            return;
+        }
 
         fetch(`${api_url}/about.json`)
             .then(res => res.json())
