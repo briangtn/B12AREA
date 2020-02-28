@@ -75,26 +75,30 @@ class Footer extends Component<Props, State> {
 
         const isMobile: boolean = window.innerWidth <= 500;
 
+        const currentApiTypography = (
+            <Typography className={classes.footerText} variant="body1" gutterBottom>
+                {
+                    (this.props.language === 'en')
+                        ?
+                        `You are currently using the ${apiUrl.split('://')[1]} api, click`
+                        :
+                        `Actuellement vous utilisez l'api ${apiUrl.split('://')[1]}, cliquez`
+                }
+                &nbsp;
+                {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
+                <a onClick={this.handleChangeApiClick} href="#" style={{color: '#FFBE76'}}>{(this.props.language === 'en') ? 'here' : 'ici'}</a>
+                &nbsp;
+                {(this.props.language === 'en') ? 'to change.' : 'pour changer.'}
+            </Typography>
+        );
+
         if (isConnected)
             return (
                 <div className={classes.footer}>
                     {(!isMobile) ? (
                     <Grid container spacing={3}>
                         <Grid item xs={10}>
-                            <Typography className={classes.footerText} variant="body1" gutterBottom>
-                                {
-                                    (this.props.language === 'en')
-                                        ?
-                                        `You are currently using the ${apiUrl.split('://')[1]} api, click`
-                                        :
-                                        `Actuellement vous utilisez l'api ${apiUrl.split('://')[1]}, cliquez`
-                                }
-                                &nbsp;
-                                {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
-                                <a onClick={this.handleChangeApiClick} href="#" style={{color: '#FFBE76'}}>{(this.props.language === 'en') ? 'here' : 'ici'}</a>
-                                &nbsp;
-                                {(this.props.language === 'en') ? 'to change.' : 'pour changer.'}
-                            </Typography>
+                            { currentApiTypography }
                         </Grid>
                         <Grid item xs={2}>
                             <a href="/client.apk" target="_blank">
@@ -103,20 +107,7 @@ class Footer extends Component<Props, State> {
                         </Grid>
                     </Grid>
                     ) : (
-                        <Typography className={classes.footerText} variant="body1" gutterBottom>
-                            {
-                                (this.props.language === 'en')
-                                    ?
-                                    `You are currently using the ${apiUrl.split('://')[1]} api, click`
-                                    :
-                                    `Actuellement vous utilisez l'api ${apiUrl.split('://')[1]}, cliquez`
-                            }
-                            &nbsp;
-                            {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
-                            <a onClick={this.handleChangeApiClick} href="#" style={{color: '#FFBE76'}}>{(this.props.language === 'en') ? 'here' : 'ici'}</a>
-                            &nbsp;
-                            {(this.props.language === 'en') ? 'to change.' : 'pour changer.'}
-                        </Typography>
+                        { currentApiTypography }
                     )}
                     <Dialog
                         open={this.state.dialogOpened}
