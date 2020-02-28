@@ -174,6 +174,7 @@ export class YoutubeHelper {
             }
             dates = dates.sort();
             const delayToRefresh = dates[dates.length - 1].getTime() - new Date(Date.now()).getTime() - (1000 * 60 * 60);
+            //todo create DelayedJob instead
             setTimeout(() => {
                 this.postSubscribeWebhook(webhook, channelId).then(() => {}).catch(console.error);
             }, delayToRefresh);

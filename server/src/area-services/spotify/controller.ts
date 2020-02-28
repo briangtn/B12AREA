@@ -1,4 +1,4 @@
-import {LoginObject, ServiceConfig} from "../../services-interfaces";
+import {LoginObject, PullingData, PullingJobObject, ServiceConfig} from "../../services-interfaces";
 import config from './config.json';
 import axios from 'axios';
 import base64 from 'base-64'
@@ -11,7 +11,7 @@ import {ActionRepository, UserRepository} from '../../repositories';
 import {User} from "../../models";
 import {UserProfile} from "@loopback/security";
 import * as qs from 'querystring'
-import {SpotifyHelper} from './helper';
+import {SPOTIFY_NEW_LIKED_SONG_PULLING_PREFIX, SPOTIFY_NEW_PLAYLIST_SONG_PULLING_PREFIX, SpotifyHelper} from './helper';
 
 const SPOTIFY_AUTHORIZE_BASE_URL = 'https://accounts.spotify.com/authorize';
 const SPOTIFY_TOKEN_EXCHANGE_BASE_URL = 'https://accounts.spotify.com/api/token';
@@ -60,6 +60,7 @@ export default class ServiceController {
         }
 
         // Users refresh spotify tokens
+        //todo create DelayedJob instead
         setInterval(() => {
             userRepository.find().then((users) => {
                 for (const user of users) {
@@ -167,6 +168,21 @@ export default class ServiceController {
             console.log(e);
             const codeParam = await this.exchangeCodeGenerator.generate({error: 'Failed to contact spotify api', info: {data: e.response.data, status: e.response.status, headers: e.response.headers}}, true);
             return this.response.redirect(stateData.url + '?code=' + codeParam);
+        }
+    }
+
+    static async processPullingJob(data: PullingJobObject, ctx: Context): Promise<PullingData|null> {
+        try {
+            const parsedData = data.jobData as {actionID: string; userID: string;};
+            if (data.name.startsWith(SPOTIFY_NEW_PLAYLIST_SONG_PULLING_PREFIX)) {
+                return await SpotifyHelper.getNewPlaylistSongPullingData(parsedData.actionID, parsedData.userID, ctx);
+            } else if (data.name.startsWith(SPOTIFY_NEW_LIKED_SONG_PULLING_PREFIX)) {
+                return await SpotifyHelper.getNewLikedSongPullingData(parsedData.actionID, parsedData.userID, ctx);
+            } else {
+                return null;
+            }
+        } catch (e) {
+            return null;
         }
     }
 }
