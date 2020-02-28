@@ -44,10 +44,10 @@ class AreaCreationActivity : AppCompatActivity() {
 
         etServiceName.text = service.displayName
 
+
         supportFragmentManager.beginTransaction()
             .add(R.id.create_area_layout, CreateAreaFragment.newInstance())
             .commit()
-
     }
 
     /**

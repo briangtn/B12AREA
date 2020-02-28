@@ -1,18 +1,18 @@
 package com.b12powered.area.activities
 
+import android.content.Intent
 import android.os.Bundle
-import android.widget.EditText
-import android.widget.TextView
-import android.widget.Toast
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
-import com.b12powered.area.Area
-import com.b12powered.area.Areas
-import com.b12powered.area.R
+import com.b12powered.area.*
 import com.b12powered.area.api.ApiClient
+import com.b12powered.area.fragments.ServiceUserFragment
 
 class ServiceInformationActivity : AppCompatActivity() {
 
     private var _allAreasService : MutableList<Areas>? = mutableListOf()
+    private lateinit var listView: ListView
+
 
     /**
      * Override method onCreate
@@ -54,8 +54,39 @@ class ServiceInformationActivity : AppCompatActivity() {
     }
 
     private fun printAreas() {
-        _allAreasService?.forEach { item ->
+        listView = findViewById(R.id.list)
+        var list: ArrayList<String> = ArrayList()
 
+        _allAreasService?.forEach { item ->
+            var serviceAction = item.actions.serviceAction.substringAfterLast(".")
+            var actionOption = ""
+            var reactionOption = ""
+
+            if (item.actions.options != null) {
+                for ((key, value) in item.actions.options)
+                    actionOption = "$actionOption$key : $value\n"
+                list.add(serviceAction.plus(" \n\n") + actionOption)
+            } else {
+                list.add(serviceAction.plus("\n"))
+            }
+
+            if (item.reactions != null) {
+                item.reactions.forEach { second ->
+                    if (second.options != null) {
+                        for ((key, value) in second.options)
+                            reactionOption = "$reactionOption$key : $value\n"
+                        var reactionDetail = second.serviceReaction.substringAfterLast(".")
+                        var reactionName = second.serviceReaction.substringBefore(".")
+                        list.add(reactionName.plus("\t (") + reactionDetail.plus(")\n\n") + reactionOption)
+                    } else {
+                        var reactionDetail = second.serviceReaction.substringAfterLast(".")
+                        var reactionName = second.serviceReaction.substringBefore(".")
+                        list.add(reactionName.plus("\t (") + reactionDetail.plus(")"))
+                    }
+                }
+            }
         }
+        val adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, list)
+        listView.adapter = adapter
     }
 }

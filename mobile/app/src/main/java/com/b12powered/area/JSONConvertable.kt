@@ -2,6 +2,8 @@ package com.b12powered.area
 
 import com.google.gson.Gson
 import com.google.gson.annotations.SerializedName
+import com.google.gson.internal.LinkedTreeMap
+import org.json.JSONObject
 
 interface JSONConvertable {
     fun toJSON(): String = Gson().toJson(this)
@@ -75,7 +77,7 @@ data class ActionDetails(
     @SerializedName("id") val id : String,
     @SerializedName("serviceAction") val serviceAction : String,
     @SerializedName("areaId") val areaId : String,
-    @SerializedName("options") val options : Any,
+    @SerializedName("options") val options : HashMap<String, Any>,
     @SerializedName("data") val data : Any
 ) : JSONConvertable
 
@@ -83,7 +85,7 @@ data class ReactionDetails(
     @SerializedName("id") val id : String,
     @SerializedName("serviceReaction") val serviceReaction : String,
     @SerializedName("areaId") val areaId : String,
-    @SerializedName("options") val options : Any
+    @SerializedName("options") val options : HashMap<String, Any>
 ) : JSONConvertable
 
 data class Areas(
