@@ -1,6 +1,6 @@
 {
-  "displayName": "On new dm",
-  "description": "Triggered when the user receive a new Direct Message.",
+  "displayName": "On new mention",
+  "description": "Triggered when the user receive a new mentio,n.",
   "configSchema": [
     {
       "name": "from",

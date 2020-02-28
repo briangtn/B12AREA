@@ -3,7 +3,7 @@ import config from './config.json';
 import {param, get, Response, RestBindings, post, requestBody, put} from "@loopback/rest";
 import {Context, inject} from "@loopback/context";
 import {AreaAuthServiceService, ExchangeCodeGeneratorManager} from '../../services';
-import {HttpErrors, RequestBody} from "@loopback/rest";
+import {HttpErrors} from "@loopback/rest";
 import {UserRepository} from '../../repositories';
 import { repository } from "@loopback/repository";
 import {User} from '../../models';
@@ -150,7 +150,6 @@ export default class TwitterServiceController {
     async whook(@requestBody({}) request: {for_user_id: string}) {
         const users = await this.userRepository.find();
 
-        console.log("New webhook");
         for (const user of users) {
             const twitterID = (user.services! as {twitters: {twitterID: string}}).twitters.twitterID;
             if ('twitters' in user.services! && twitterID === request.for_user_id) {

@@ -3,14 +3,33 @@ import * as oauth from 'oauth';
 import {ActionRepository, UserRepository} from '../../repositories';
 import request from 'request';
 import NewDMActionController from './actions/on_new_dm/controller';
+import NewMentionActionController, {NewMentionTwitter} from './actions/on_mention/controller';
 
 const CONSUMER_KEY = process.env.TWITTER_CONSUMER_KEY ? process.env.TWITTER_CONSUMER_KEY :  "";
 const CONSUMER_SECRET = process.env.TWITTER_CONSUMER_SECRET ? process.env.TWITTER_CONSUMER_SECRET :  "";
 const WEBHOOK_URL = process.env.API_URL + '/services/twitters/webhook';
 
+async function onTweet(twitterDatas: object, actionID: string, options: object, userID: string, ctx: Context) {
+    if ('user_has_blocked' in twitterDatas) {
+        await NewMentionActionController.trigger(twitterDatas as NewMentionTwitter, actionID, options, userID, ctx);
+    } else {
+        //TODO: New tweet
+    }
+}
+
+interface EventSetting {
+    trigger: ((twitterDatas: object, actionID: string, options: object, userID: string, ctx: Context) => void),
+    actionName: string
+}
+
 const ACTION_EVENTS = {
     // eslint-disable-next-line @typescript-eslint/camelcase
-    direct_message_events: {trigger: NewDMActionController.trigger, actionName: 'on_new_dm'}
+    direct_message_events: {trigger: NewDMActionController.trigger, actionName: 'on_new_dm'},
+    // eslint-disable-next-line @typescript-eslint/camelcase
+    tweet_create_events: [
+        {trigger: onTweet, actionName: 'on_mention'}
+        //{trigger: NewTweetActionController.trigger, actionName: 'on_tweet'}
+    ]
 }
 
 export class TwitterHelper {
@@ -50,7 +69,6 @@ export class TwitterHelper {
     static createWebhook(ctx: Context) {
         // eslint-disable-next-line @typescript-eslint/no-misused-promises,no-async-promise-executor
         return new Promise(async (resolve, reject) => {
-            console.log("Whook", WEBHOOK_URL);
             request.post({
                 url: 'https://api.twitter.com/1.1/account_activity/all/develop/webhooks.json',
                 oauth: {
@@ -66,11 +84,8 @@ export class TwitterHelper {
                     url: WEBHOOK_URL
                 }
             }, (err, res, body) => {
-                console.log("Creating");
-
                 if (err)
                     return reject(err);
-                console.log("Created", body);
                 return resolve(body);
             });
         })
@@ -203,33 +218,40 @@ export class TwitterHelper {
 
     static async triggerActionEvent(twitterData: object, userMail: string, userID: string, ctx: Context) {
         const validEvents = Object.keys(ACTION_EVENTS);
-        const actionRepository: ActionRepository = await ctx.get('repositories.ActionRepository');
 
         for (const eventName of validEvents) {
             if (eventName in twitterData) {
                 const event = ACTION_EVENTS[eventName as keyof typeof ACTION_EVENTS];
 
-                const actions = await actionRepository.find({
-                    where: {
-                        serviceAction: 'twitters.A.on_new_dm'
-                    },
-                    include: [{
-                        relation: "area",
-                        scope: {
-                            where: {
-                                ownerId: userMail
-                            }
-                        }
-                    }]
-                });
-
-                console.log(actions);
-
-                for (const action of actions) {
-                    return event.trigger(twitterData[eventName as keyof typeof twitterData], action.id!, action.options!, userID, ctx);
+                if (!Array.isArray(event)) {
+                    return this.triggerAnAction(twitterData, event as EventSetting, userID, userMail, ctx);
+                }
+                for (const oneEvent of event) {
+                    this.triggerAnAction(twitterData, oneEvent as EventSetting, userID, userMail, ctx).then().catch((e) => {});
                 }
             }
         }
     }
 
+    static async triggerAnAction(twitterData: object, event: EventSetting, userID: string, userMail: string, ctx: Context) {
+        const actionRepository: ActionRepository = await ctx.get('repositories.ActionRepository');
+
+        const actions = await actionRepository.find({
+            where: {
+                serviceAction: `twitters.A.${event.actionName}`
+            },
+            include: [{
+                relation: "area",
+                scope: {
+                    where: {
+                        ownerId: userMail
+                    }
+                }
+            }]
+        });
+
+        for (const action of actions) {
+            return event.trigger(twitterData, action.id!, action.options!, userID, ctx);
+        }
+    }
 }

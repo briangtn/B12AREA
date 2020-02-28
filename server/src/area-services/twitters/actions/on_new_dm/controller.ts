@@ -34,7 +34,10 @@ interface NewDmOptions {
 
 export default class NewDMActionController {
 
-    static async createAction(userID: string, actionConfig: Object, ctx: Context): Promise<OperationStatus> {
+    static async createAction(userID: string, actionConfig: NewDmOptions, ctx: Context): Promise<OperationStatus> {
+        if (actionConfig.from && !actionConfig.from.startsWith('@')) {
+            return {success: false, error: "Invalid from name (must start with '@')"}
+        }
         return {success: true, options: actionConfig, data: {}};
     }
 
@@ -50,7 +53,8 @@ export default class NewDMActionController {
         return config as ActionConfig;
     }
 
-    static async trigger(twitterDatas: NewDMTwitterData[], actionID: string, options: NewDmOptions, userID: string, ctx: Context) {
+    static async trigger(baseData: {direct_message_events: NewDMTwitterData[]}, actionID: string, options: NewDmOptions, userID: string, ctx: Context) {
+        const twitterDatas = baseData.direct_message_events;
         const oauthObject = await TwitterHelper.getOauthObject(userID, ctx);
         const areaService: AreaService = await ctx.get('services.area');
 
@@ -73,7 +77,6 @@ export default class NewDMActionController {
                     return null;
                 if (options.from && options.from !== '@' + twitterUser.screen_name)
                     return null;
-                console.log("USER", twitterUser, "Body", body);
                 let placeholders = [
                     {
                         name: 'Author',
