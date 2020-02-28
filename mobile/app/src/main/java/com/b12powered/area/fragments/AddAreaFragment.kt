@@ -167,7 +167,6 @@ class AddAreaFragment(private val service: Service, private val area: Area, priv
      * Make a addReaction request to api, using [options]. If thee call is successful, call [showDialog], if not display a toast with the error and go back to the selection step
      */
     private fun addReaction(options: HashMap<String, Any>) {
-        Log.d("addReaction", "adding reaction")
         ApiClient(activity!!)
             .addReaction(area.id, service.name + ".R." + ar.name, options) { success, response ->
                 if (success) {
