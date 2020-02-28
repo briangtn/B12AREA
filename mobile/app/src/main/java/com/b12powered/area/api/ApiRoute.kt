@@ -142,6 +142,59 @@ sealed class ApiRoute(private var mainContext: Context) {
      */
     data class RefreshToken(var context: Context) : ApiRoute(context)
 
+    /**
+     * Data class for [CreateArea] route
+     *
+     * @param name The area name
+     * @param enabled If the area should be enabled at creation or not
+     * @param context The context of the call
+     */
+    data class CreateArea(var name: String, var enabled: Boolean, var context: Context) : ApiRoute(context)
+
+    /**
+     * Data class for [DeleteArea] route
+     *
+     * @param areaId The area id
+     * @param context The context of the call
+     */
+    data class DeleteArea(var areaId: String, var context: Context) : ApiRoute(context)
+
+    /**
+     * Data class for [AddAction] route
+     *
+     * @param areaId The area id
+     * @param serviceAction The string matching service and action name
+     * @param options An object containing action parameters
+     * @param context The context of the call
+     */
+    data class AddAction(var areaId: String, var serviceAction: String, var options: HashMap<String, Any>, var context: Context) : ApiRoute(context)
+
+    /**
+     * Data class for [DeleteAction] route
+     *
+     * @param areaId The area od
+     * @param context The context of the call
+     */
+    data class DeleteAction(var areaId: String, var context: Context) : ApiRoute(context)
+
+    /**
+     * Data class for [AddReaction] route
+     *
+     * @param areaId The area id
+     * @param serviceReaction The string matching service and reaction name
+     * @param options An object containing action parameters
+     * @param context The context of the call
+     */
+    data class AddReaction(var areaId: String, var serviceReaction: String, var options: HashMap<String, Any>, var context: Context) : ApiRoute(context)
+
+    /**
+     * Data class for [DeleteReaction] route
+     *
+     * @param areaId The area id
+     * @param reactionId The reaction id
+     * @param context The context of the call
+     */
+    data class DeleteReaction(var areaId: String, var reactionId: String, var context: Context) : ApiRoute(context)
 
     /**
      * Timeout of the api call
@@ -204,6 +257,12 @@ sealed class ApiRoute(private var mainContext: Context) {
                 is AboutJson -> "about.json"
                 is LoginService -> "services/login/${service}"
                 is RefreshToken -> "users/refreshToken"
+                is CreateArea -> "areas"
+                is DeleteArea -> "areas/${areaId}"
+                is AddAction -> "areas/${areaId}/action"
+                is AddReaction -> "areas/${areaId}/reactions"
+                is DeleteAction -> "areas/${areaId}/action"
+                is DeleteReaction -> "areas/${areaId}/reactions/${reactionId}"
                 else -> ""
             }}"
         }
@@ -230,6 +289,12 @@ sealed class ApiRoute(private var mainContext: Context) {
                 is RequestResetPassword -> Request.Method.POST
                 is ResetPassword -> Request.Method.PATCH
                 is LoginService -> Request.Method.POST
+                is CreateArea -> Request.Method.POST
+                is DeleteArea -> Request.Method.DELETE
+                is AddAction -> Request.Method.POST
+                is AddReaction -> Request.Method.POST
+                is DeleteAction -> Request.Method.DELETE
+                is DeleteReaction -> Request.Method.DELETE
                 else -> Request.Method.GET
             }
         }
@@ -265,7 +330,16 @@ sealed class ApiRoute(private var mainContext: Context) {
                     hashMapOf(Pair("token", token), Pair("password", password))
                 }
                 is PatchUser -> {
-                    hashMapOf(Pair("password", this.user.password), Pair("disable2FA", (!this.user.twoFactorAuthenticationEnabled)))
+                    hashMapOf(Pair("password", user.password), Pair("disable2FA", (!user.twoFactorAuthenticationEnabled)))
+                }
+                is CreateArea -> {
+                    hashMapOf(Pair("name", name), Pair("enabled", enabled))
+                }
+                is AddAction -> {
+                    hashMapOf(Pair("serviceAction", serviceAction), Pair("options", options))
+                }
+                is AddReaction -> {
+                    hashMapOf(Pair("serviceReaction", serviceReaction), Pair("options", options))
                 }
                 else -> hashMapOf()
             }
@@ -334,6 +408,24 @@ sealed class ApiRoute(private var mainContext: Context) {
                     hashMapOf(Pair("Authorization", "Bearer $token"))
                 }
                 is RefreshToken -> {
+                    hashMapOf(Pair("Authorization", "Bearer $token"))
+                }
+                is CreateArea -> {
+                    hashMapOf(Pair("Authorization", "Bearer $token"))
+                }
+                is DeleteArea -> {
+                    hashMapOf(Pair("Authorization", "Bearer $token"))
+                }
+                is AddAction -> {
+                    hashMapOf(Pair("Authorization", "Bearer $token"))
+                }
+                is AddReaction -> {
+                    hashMapOf(Pair("Authorization", "Bearer $token"))
+                }
+                is DeleteAction -> {
+                    hashMapOf(Pair("Authorization", "Bearer $token"))
+                }
+                is DeleteReaction -> {
                     hashMapOf(Pair("Authorization", "Bearer $token"))
                 }
                 else -> hashMapOf()
