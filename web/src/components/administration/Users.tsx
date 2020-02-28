@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
 
+import { connect } from 'react-redux';
+
 import { withStyles, createStyles, Theme, Snackbar } from "@material-ui/core";
 
 import Table from '@material-ui/core/Table';
@@ -33,12 +35,22 @@ import Select from '@material-ui/core/Select';
 import Grid from '@material-ui/core/Grid';
 
 import Alert from '../Alert';
+import {setAdminToken, setToken} from "../../actions/api.action";
+import Cookies from "universal-cookie";
+
+const cookies = new Cookies();
 
 interface Props {
     apiUrl: string,
     token: string,
     classes: {
         table: string
+    },
+    adminToken: string,
+    setToken: any,
+    setAdminToken:any,
+    history: {
+        push: any
     }
 }
 
@@ -69,6 +81,15 @@ interface User {
     twoFactorAuthenticationEnabled: boolean,
     authServices: AuthService[],
 }
+
+function mapDispatchToProps(dispatch: any) {
+    return { setToken: (token: object) => dispatch(setToken(token)), setAdminToken: (adminToken: object) => dispatch(setAdminToken(adminToken)) };
+}
+
+const mapStateToProps = (state: any) => {
+    return { normalToken: state.token, adminToken: state.adminToken };
+};
+
 
 const styles = (theme: Theme) => createStyles({
     table: {
@@ -123,8 +144,27 @@ class Users extends Component<Props, State> {
      *
      * @param e event triggered
      */
-    unpersonateClicked = (e: any) => {
+    impersonateClicked = (e: any) => {
+        const { apiUrl, token } = this.props;
+        const { users, userDetailIndex } = this.state;
+        const { id } = users[userDetailIndex];
 
+        fetch(`${apiUrl}/users/impersonate/${id}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        })
+            .then(res => res.json())
+            .then((data) => {
+                const { setToken, setAdminToken } = this.props;
+
+                cookies.set('admin_token', token);
+                cookies.set('token', data.token);
+                setToken(data.token);
+                setAdminToken(token);
+
+                this.props.history.push('/');
+
+                window.location.reload();
+            });
     };
 
     /**
@@ -338,10 +378,11 @@ class Users extends Component<Props, State> {
                                 variant="contained"
                                 color="primary"
                                 startIcon={<AdbIcon />}
-                                onClick={this.unpersonateClicked}
+                                onClick={this.impersonateClicked}
                                 style={{float: 'right'}}
+                                disabled={this.props.adminToken !== ''}
                             >
-                                Unpersonate
+                                Impersonate
                             </Button>
                         </Grid>
                     </Grid>
@@ -445,4 +486,4 @@ class Users extends Component<Props, State> {
     }
 };
 
-export default withStyles(styles)(Users);
+export default connect(mapStateToProps, mapDispatchToProps)(withStyles(styles)(Users));

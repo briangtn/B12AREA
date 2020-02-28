@@ -37,6 +37,7 @@ import ServiceDetails from './components/services/ServiceDetails';
 
 import EasterEgg from "./components/EasterEgg";
 import MobileWarner from "./components/MobileWarner";
+import InpersonateBar from "./components/InpersonateBar";
 
 interface Props {}
 
@@ -64,6 +65,7 @@ class RouterComponent extends React.Component<Props, State> {
         return (
             <Provider store={rootStore}>
                 <MuiThemeProvider theme={ this.state.theme }>
+                    <InpersonateBar />
                     <MobileWarner />
                     <EasterEgg />
                     <Router>
