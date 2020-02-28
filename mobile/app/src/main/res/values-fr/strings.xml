@@ -47,4 +47,26 @@
     <string name="successful_password_reset">Votre mot de passe a été réinitialisé avec succès !</string>
     <string name="password_reset_confirmation_message">Nous vous avons envoyé un email afin de définir votre nouveau mot de passe. Vérifiez vos spams si vous ne le voyez pas !</string>
     <string name="success_new_password">Nouveau mot de passe enregistré avec succès !</string>
+    <string name="subscribe_service">S\'abonner à ce service ?</string>
+    <string name="subscribe_service_message">"Voulez-vous vous abonner à "</string>
+    <string name="storage_name">com.b12powered.area</string>
+    <string name="token_key">jwt-token</string>
+    <string name="api_url_key">api_url</string>
+    <string name="area_name">Nom de l\'area</string>
+    <string name="active_at_creation">Activée à la création</string>
+    <string name="submit">Envoyer</string>
+    <string name="create_area">Créer une nouvelle area</string>
+    <string name="empty_area_name">Le nom de l\'area ne peut pas être vide</string>
+    <string name="add_action">Ajouter une action à votre area</string>
+    <string name="edit_action">Editer les paramètres de l\'action</string>
+    <string name="next">Suivant</string>
+    <string name="missing_parameter">Paramètre manquant</string>
+    <string name="area_added">Area ajoutée avec succès !</string>
+    <string name="new_reaction_message">Voulez-vous ajouter une autre réaction à cette area ?</string>
+    <string name="yes">Oui</string>
+    <string name="no">Non</string>
+    <string name="add_reaction">Ajouter une réaction à votre area</string>
+    <string name="edit_reaction">Editer les paramètres de la réaction</string>
+    <string name="confirm_exit">Voulez-vous vraiment quitter cette page ?</string>
+    <string name="exit_area_message">Cette action vous ramènera à la page d\'accueil. Votre area sera enregistrée.</string>
 </resources>

@@ -27,10 +27,6 @@ import Exit from "../../components/administration/Exit";
 
 import { setToken } from "../../actions/api.action";
 
-import Cookies from "universal-cookie";
-
-const cookies = new Cookies();
-
 const mapStateToProps = (state: any) => {
     return { api_url: state.api_url, token: state.token };
 };

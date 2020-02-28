@@ -67,12 +67,10 @@ interface State {
 
 const styles = (theme: Theme) => createStyles({
     field: {
-        marginTop: '20px',
-        width: '300px'
+        marginTop: '20px'
     },
     loginButton: {
         marginTop: '20px',
-        width: '200px'
     },
     imageButton: {
         backgroundColor: '#FFFFFF',
@@ -177,7 +175,7 @@ class Login extends Component<Props, State> {
             if (toClick)
                 toClick.click();
         }
-    }
+    };
 
     faKeyPress = (e: any) => {
         if (e.keyCode === 13) {
@@ -186,7 +184,7 @@ class Login extends Component<Props, State> {
             if (toClick)
                 toClick.click();
         }
-    }
+    };
 
     render() {
         const { email, password } = this.state;
@@ -195,67 +193,68 @@ class Login extends Component<Props, State> {
         return (
             <div>
                 <NavigationBar history={this.props.history} />
-                <Grid
-                    container
-                    spacing={0}
-                    direction='column'
-                    alignItems='center'
-                    justify='center'
-                    style={{ marginTop: '-50px', minHeight: '100vh', textAlign: 'center' }}
+                <div
+                    style={{
+                        position: 'absolute',
+                        paddingTop: '50px',
+                        left: '50%',
+                        transform: 'translate(-50%)',
+                        textAlign: 'center'
+                    }}
                 >
-                    <Grid item xs={3}>
-                        <Typography variant="h3" gutterBottom><Translator sentence="signin" /></Typography>
-                        <br />
-                        <TextField
-                            id="email"
-                            label="Email"
-                            variant="outlined"
-                            className={classes.field}
-                            value={email}
-                            onChange={this.onChange}
-                            onKeyDown={this.loginKeyPress}
-                            required
-                        />
-                        <br />
-                        <TextField
-                            id="password"
-                            label="Password"
-                            variant="outlined"
-                            type="password"
-                            className={classes.field}
-                            value={password}
-                            onChange={this.onChange}
-                            onKeyDown={this.loginKeyPress}
-                            required
-                        />
-                        <br />
-                        <br />
-                        <Link to={{ pathname: '/forgot' }} style={{ textDecoration: 'none', color: '#212121' }}>
-                            <Translator sentence="forgotPasswordLink" />
-                        </Link>
-                        <br />
-                        <Button
-                            id="signin"
-                            variant="contained"
-                            color="secondary"
-                            className={classes.loginButton}
-                            onClick={this.onSubmit}
-                        >
-                            <Translator sentence="signin" />
-                        </Button>
-                        <br />
-                        <OrDivider />
-                        <br />
-                        <Grid container spacing={3}>
-                            <Grid item xs={6}>
-                                <AuthButton token={null} history={this.props.history} apiUrl={this.props.api_url} serviceName="Google" serviceIcon={<GoogleIcon />} />
-                            </Grid>
-                            <Grid item xs={6}>
-                                <AuthButton token={null} history={this.props.history} apiUrl={this.props.api_url} serviceName="Twitter" serviceIcon={<TwitterIcon />} />
-                            </Grid>
+                    <Typography variant="h3" style={{textAlign: 'center'}} gutterBottom><Translator sentence="signin" /></Typography>
+                    <br />
+                    <TextField
+                        id="email"
+                        label="Email"
+                        variant="outlined"
+                        className={classes.field}
+                        value={email}
+                        onChange={this.onChange}
+                        onKeyDown={this.loginKeyPress}
+                        required
+                        fullWidth
+                    />
+                    <br />
+                    <TextField
+                        id="password"
+                        label="Password"
+                        variant="outlined"
+                        type="password"
+                        className={classes.field}
+                        value={password}
+                        onChange={this.onChange}
+                        onKeyDown={this.loginKeyPress}
+                        required
+                        fullWidth
+                    />
+                    <br />
+                    <br />
+                    <Link to={{ pathname: '/forgot' }} style={{ textDecoration: 'none', color: '#212121', textAlign: 'center' }}>
+                        <Translator sentence="forgotPasswordLink" />
+                    </Link>
+                    <br />
+                    <Button
+                        id="signin"
+                        variant="contained"
+                        color="secondary"
+                        className={classes.loginButton}
+                        onClick={this.onSubmit}
+                    >
+                        <Translator sentence="signin" />
+                    </Button>
+                    <br />
+                    <OrDivider />
+                    <br />
+                    <Grid container spacing={3}>
+                        <Grid item xs={6}>
+                            <AuthButton token={null} history={this.props.history} apiUrl={this.props.api_url} serviceName="Google" serviceIcon={<GoogleIcon />} />
+                        </Grid>
+                        <Grid item xs={6}>
+                            <AuthButton token={null} history={this.props.history} apiUrl={this.props.api_url} serviceName="Twitter" serviceIcon={<TwitterIcon />} />
                         </Grid>
                     </Grid>
-                </Grid>
+                </div>
                 <Dialog
                     open={this.state.faopen}
                     onClose={this.dialogClose}

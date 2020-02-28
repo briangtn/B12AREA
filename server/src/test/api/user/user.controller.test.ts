@@ -5,8 +5,9 @@ import {TestHelper} from "../../acceptance/test-helper";
 describe('/users', () => {
     const helper: TestHelper = new TestHelper();
 
-    let userId: string | undefined;
-    let userToken: string;
+    let adminId: string | undefined;
+    let adminToken: string;
+    let admin: User | undefined;
     const userData = {
         email: "test@test.fr",
         password: 'test'
@@ -17,9 +18,9 @@ describe('/users', () => {
     });
     beforeEach(async () => {
         await helper.userRepository.deleteAll();
-        const user = await helper.createUser(userData.email, userData.password, true);
-        userId = user.id;
-        userToken = await helper.getJWT(userData.email, userData.password);
+        admin = await helper.createUser(userData.email, userData.password, true);
+        adminId = admin.id;
+        adminToken = await helper.getJWT(userData.email, userData.password);
     });
 
     after(async () => {
@@ -163,7 +164,7 @@ describe('/users', () => {
         it('Should send a new token', async () => {
             const res = await helper.client
                 .get('/users/refreshToken')
-                .set('Authorization', 'Bearer ' + userToken)
+                .set('Authorization', 'Bearer ' + adminToken)
                 .expect(200);
             const body = res.body;
             expect(body.token).to.not.empty();
@@ -409,7 +410,7 @@ describe('/users', () => {
         it("Should send 404 User not found.", async () => {
             const res = await helper.client
                 .get('/users/invalidId')
-                .set('Authorization', 'Bearer ' + userToken)
+                .set('Authorization', 'Bearer ' + adminToken)
                 .send()
                 .expect(404);
             const error = JSON.parse(res.error.text);
@@ -420,7 +421,7 @@ describe('/users', () => {
             await helper.createUser('notadmin@notadmin.fr', 'notadmin', false);
             const currentUserToken = await helper.getJWT('notadmin@notadmin.fr', 'notadmin');
             const res = await helper.client
-                .get('/users/' + userId)
+                .get('/users/' + adminId)
                 .set('Authorization', 'Bearer ' + currentUserToken)
                 .send()
                 .expect(401);
@@ -430,7 +431,7 @@ describe('/users', () => {
 
         it('Should send 401 not logged in', async () => {
             const res = await helper.client
-                .get('/users/' + userId)
+                .get('/users/' + adminId)
                 .send()
                 .expect(401);
             const error = JSON.parse(res.error.text);
@@ -439,12 +440,12 @@ describe('/users', () => {
 
         it("Success", async () => {
             const res = await helper.client
-                .get('/users/' + userId)
-                .set('Authorization', 'Bearer ' + userToken)
+                .get('/users/' + adminId)
+                .set('Authorization', 'Bearer ' + adminToken)
                 .send()
                 .expect(200);
             const body = res.body;
-            expect(body.id).to.equal(JSON.parse(JSON.stringify(userId)));
+            expect(body.id).to.equal(JSON.parse(JSON.stringify(adminId)));
             expect(body.email).to.equal(userData.email);
         });
     });
@@ -459,7 +460,7 @@ describe('/users', () => {
         it("Should send 404 user not found", async () => {
             const res = await helper.client
                 .patch('/users/abcdef')
-                .set('Authorization', 'Bearer ' + userToken)
+                .set('Authorization', 'Bearer ' + adminToken)
                 .send({
                     email: 'test@test.fr'
                 })
@@ -471,7 +472,7 @@ describe('/users', () => {
         it('Should 409 email already in use', async () => {
             const res = await helper.client
                 .patch('/users/' + createdUser.id)
-                .set('Authorization', 'Bearer ' + userToken)
+                .set('Authorization', 'Bearer ' + adminToken)
                 .send({email: "test@test.fr", password: "p@22w0rd"})
                 .expect(409);
             const error = JSON.parse(res.error.text);
@@ -481,7 +482,7 @@ describe('/users', () => {
         it('Should send 400 invalid email', async () => {
             const res = await helper.client
                 .patch('/users/' + createdUser.id)
-                .set('Authorization', 'Bearer ' + userToken)
+                .set('Authorization', 'Bearer ' + adminToken)
                 .send({email: "testtest.fr", password: "p@22w0rd"})
                 .expect(400);
             const error = JSON.parse(res.error.text);
@@ -503,7 +504,7 @@ describe('/users', () => {
         it('Should edit the user password', async () => {
             const res = await helper.client
                 .patch('/users/' + createdUser.id)
-                .set('Authorization', 'Bearer ' + userToken)
+                .set('Authorization', 'Bearer ' + adminToken)
                 .send({password: "p@22w0rd"})
                 .expect(200);
             const body = res.body;
@@ -526,7 +527,7 @@ describe('/users', () => {
             await helper.userRepository.updateById(createdUser.id, {twoFactorAuthenticationEnabled: true});
             const res = await helper.client
                 .patch('/users/' + createdUser.id)
-                .set('Authorization', 'Bearer ' + userToken)
+                .set('Authorization', 'Bearer ' + adminToken)
                 .send({disable2FA: true})
                 .expect(200);
             const body = res.body;
@@ -539,7 +540,7 @@ describe('/users', () => {
         it('Should edit user email', async () => {
             const res = await helper.client
                 .patch('/users/' + createdUser.id)
-                .set('Authorization', 'Bearer ' + userToken)
+                .set('Authorization', 'Bearer ' + adminToken)
                 .send({email: 'yolo@yolo.fr'})
                 .expect(200);
             const body = res.body;
@@ -554,7 +555,7 @@ describe('/users', () => {
         it('Should edit user roles', async () => {
             const res = await helper.client
                 .patch('/users/' + createdUser.id)
-                .set('Authorization', 'Bearer ' + userToken)
+                .set('Authorization', 'Bearer ' + adminToken)
                 .send({role: ['user', 'admin']})
                 .expect(200);
             const body = res.body;
@@ -574,7 +575,7 @@ describe('/users', () => {
         it('Should send 409 email already in use', async () => {
             const res = await helper.client
                 .patch('/users/me')
-                .set('Authorization', 'Bearer ' + userToken)
+                .set('Authorization', 'Bearer ' + adminToken)
                 .send({email: createdUser.email, password: "p@22w0rd"})
                 .expect(409);
             const error = JSON.parse(res.error.text);
@@ -584,7 +585,7 @@ describe('/users', () => {
         it('Should send 400 invalid email', async () => {
             const res = await helper.client
                 .patch('/users/me')
-                .set('Authorization', 'Bearer ' + userToken)
+                .set('Authorization', 'Bearer ' + adminToken)
                 .send({email: "testtest.fr", password: "p@22w0rd"})
                 .expect(400);
             const error = JSON.parse(res.error.text);
@@ -594,7 +595,7 @@ describe('/users', () => {
         it('Should send 400 missing redirect url', async () => {
             const res = await helper.client
                 .patch('/users/me')
-                .set('Authorization', 'Bearer ' + userToken)
+                .set('Authorization', 'Bearer ' + adminToken)
                 .send({email: "moi@moi.fr", password: "p@22w0rd"})
                 .expect(400);
             const error = JSON.parse(res.error.text);
@@ -604,7 +605,7 @@ describe('/users', () => {
         it('Should send 401 not allowed to edit your own roles', async () => {
             const res = await helper.client
                 .patch('/users/me')
-                .set('Authorization', 'Bearer ' + userToken)
+                .set('Authorization', 'Bearer ' + adminToken)
                 .send({role: ['user']})
                 .expect(401);
             const error = JSON.parse(res.error.text);
@@ -623,7 +624,7 @@ describe('/users', () => {
         it('Should edit my password', async () => {
             const res = await helper.client
                 .patch('/users/me')
-                .set('Authorization', 'Bearer ' + userToken)
+                .set('Authorization', 'Bearer ' + adminToken)
                 .send({password: "p@22w0rd"})
                 .expect(200);
             const body = res.body;
@@ -637,7 +638,7 @@ describe('/users', () => {
             await helper.userRepository.updateById(createdUser.id, {twoFactorAuthenticationEnabled: true});
             const res = await helper.client
                 .patch('/users/me')
-                .set('Authorization', 'Bearer ' + userToken)
+                .set('Authorization', 'Bearer ' + adminToken)
                 .send({disable2FA: true})
                 .expect(200);
             const body = res.body;
@@ -650,7 +651,7 @@ describe('/users', () => {
         it('Should edit my email', async () => {
             const res = await helper.client
                 .patch('/users/me?redirectURL=http://localhost:8080')
-                .set('Authorization', 'Bearer ' + userToken)
+                .set('Authorization', 'Bearer ' + adminToken)
                 .send({email: 'yolo@yolo.fr'})
                 .expect(200);
             const body = res.body;
@@ -668,12 +669,12 @@ describe('/users', () => {
             const newUser = await helper.createUser('test@admin.fr', 'abcd', false);
             const res = await helper.client
                 .get('/users')
-                .set('Authorization', 'Bearer ' + userToken)
+                .set('Authorization', 'Bearer ' + adminToken)
                 .expect(200);
             const data = res.body;
             expect(data.length).to.be.eql(2);
             expect(data).containEql({
-                id: JSON.parse(JSON.stringify(userId)),
+                id: JSON.parse(JSON.stringify(adminId)),
                 email: userData.email,
                 role: ['user', 'admin'],
                 servicesList: [],
@@ -715,10 +716,10 @@ describe('/users', () => {
         it('Should return my profile', async () => {
             const res = await helper.client
                 .get('/users/me')
-                .set('Authorization', 'Bearer ' + userToken)
+                .set('Authorization', 'Bearer ' + adminToken)
                 .expect(200);
             const body = res.body;
-            expect(body.id).to.equal(JSON.parse(JSON.stringify(userId)));
+            expect(body.id).to.equal(JSON.parse(JSON.stringify(adminId)));
             expect(body.email).to.equal(userData.email);
             expect(body.role).containDeep(['user', 'admin']);
         });
@@ -740,7 +741,7 @@ describe('/users', () => {
 
             await helper.client
                 .del('/users/' + newUser.id)
-                .set('Authorization', 'Bearer ' + userToken)
+                .set('Authorization', 'Bearer ' + adminToken)
                 .send()
                 .expect(200);
 
@@ -751,12 +752,38 @@ describe('/users', () => {
             expect(userWithIdCount).to.be.eql(0);
         });
 
+        it('Should delete areas belonging to the user', async () => {
+            const newUser = await helper.createUser('test@b12.com', 'abcde');
+            const area = await helper.createArea(newUser, "Test AREA");
+
+            expect((await helper.userRepository.count({id: newUser.id})).count).to.be.equal(1);
+            expect((await helper.areaRepository.count({id: area.id})).count).to.be.equal(1);
+            await helper.client
+                .del('/users/' + newUser.id)
+                .set('Authorization', 'Bearer ' + adminToken)
+                .send()
+                .expect(200);
+            expect((await helper.userRepository.count({id: newUser.id})).count).to.be.equal(0);
+            expect((await helper.areaRepository.count({id: area.id})).count).to.be.equal(0);
+        });
+
+        it('Should delete areas belonging to the user even when using deleteAll', async () => {
+            const newUser = await helper.createUser('test@b12.com', 'abcde');
+            const area = await helper.createArea(newUser, "Test AREA");
+
+            expect((await helper.userRepository.count({id: newUser.id})).count).to.be.equal(1);
+            expect((await helper.areaRepository.count({id: area.id})).count).to.be.equal(1);
+            await helper.userRepository.deleteAll();
+            expect((await helper.userRepository.count({id: newUser.id})).count).to.be.equal(0);
+            expect((await helper.areaRepository.count({id: area.id})).count).to.be.equal(0);
+        });
+
         it("Should send 404 user not found", async () => {
             const startCount = (await helper.userRepository.count()).count;
 
             const res = await helper.client
                 .del('/users/test')
-                .set('Authorization', 'Bearer ' + userToken)
+                .set('Authorization', 'Bearer ' + adminToken)
                 .send()
                 .expect(404);
 

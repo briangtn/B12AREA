@@ -201,25 +201,28 @@ class Users extends Component<Props, State> {
                         {this.state.users
                         .slice(this.state.page * this.state.rowsPerPage, this.state.page * this.state.rowsPerPage + this.state.rowsPerPage)
                         .map((row: any, index: number) => (
-                            <TableRow hover key={index} onClick={this.onClickDetail.bind(this, index)}>
-                                <TableCell align="left">{row.id}</TableCell>
-                                <TableCell align="left">{row.email}</TableCell>
-                                <TableCell align="left">
-                                    {row.role.map((elem: string) => (
-                                        <ChipRole key={row.role.indexOf(elem)} role={elem} size="small" />
-                                    ))}
-                                </TableCell>
-                                <TableCell align="left">
-                                    <Button
-                                        variant="contained"
-                                        color="primary"
-                                        startIcon={<DetailsIcon />}
-                                        onClick={this.onClickDetail.bind(this, index)}
-                                    >
-                                        Details
-                                    </Button>
-                                </TableCell>
-                            </TableRow>
+                            (row.role !== undefined)
+                            ?
+                                <TableRow hover key={index} onClick={this.onClickDetail.bind(this, index)}>
+                                    <TableCell align="left">{row.id}</TableCell>
+                                    <TableCell align="left">{row.email}</TableCell>
+                                    <TableCell align="left">
+                                        {row.role.map((elem: string) => (
+                                            <ChipRole key={row.role.indexOf(elem)} role={elem} size="small" />
+                                        ))}
+                                    </TableCell>
+                                    <TableCell align="left">
+                                        <Button
+                                            variant="contained"
+                                            color="primary"
+                                            startIcon={<DetailsIcon />}
+                                            onClick={this.onClickDetail.bind(this, index)}
+                                        >
+                                            Details
+                                        </Button>
+                                    </TableCell>
+                                </TableRow>
+                            : ''
                         ))}
                         </TableBody>
                     </Table>

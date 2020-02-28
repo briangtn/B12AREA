@@ -1,0 +1,24 @@
+{
+  "displayName": "Post message in channel",
+  "description": "Post a new message in a teams channel",
+  "configSchema": [
+    {
+      "name": "teamsId",
+      "description": "The id of the teams team",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "channelId",
+      "description": "The id of the teams channel",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "message",
+      "description": "The message body content to post",
+      "type": "string",
+      "required": true
+    }
+  ]
+}

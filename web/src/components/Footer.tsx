@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
 
+import { connect } from 'react-redux';
+
 import { withStyles, createStyles, Theme } from "@material-ui/core";
 
 import Typography from '@material-ui/core/Typography';
@@ -14,6 +16,10 @@ const Transition: any = React.forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;
 });
 
+const mapStateToProps = (state: any) => {
+    return { language: state.language };
+};
+
 interface Props {
     classes: {
         footer: string,
@@ -21,7 +27,8 @@ interface Props {
     },
     isConnected: boolean,
     apiUrl: string,
-    reloadFunction: any
+    reloadFunction: any,
+    language: string
 }
 
 interface State {
@@ -31,9 +38,10 @@ interface State {
 const styles = (theme: Theme) => createStyles({
     footer: {
         width: '100%',
-        position: 'absolute',
+        position: 'fixed',
         marginTop: '20px',
-        backgroundColor: '#212121'
+        backgroundColor: '#212121',
+        bottom: '0'
     },
     footerText: {
         color: 'white',
@@ -57,15 +65,24 @@ class Footer extends Component<Props, State> {
 
     render() {
         const { classes, isConnected, apiUrl } = this.props;
-        //const { dialogOpened } = this.state;
+
 
         if (isConnected)
             return (
                 <div className={classes.footer}>
                     <Typography className={classes.footerText} variant="body1" gutterBottom>
-                        You are currently using the {apiUrl.split('://')[1]} api, click&nbsp;
-                        <a onClick={this.handleChangeApiClick} href="#" style={{color: '#FFBE76'}}>here</a>
-                        &nbsp;to change.
+                        {
+                            (this.props.language === 'en')
+                                ?
+                                `You are currently using the ${apiUrl.split('://')[1]} api, click`
+                                :
+                                `Actuellement vous utilisez l'api ${apiUrl.split('://')[1]}, cliquez`
+                        }
+                        &nbsp;
+                        {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
+                        <a onClick={this.handleChangeApiClick} href="#" style={{color: '#FFBE76'}}>{(this.props.language === 'en') ? 'here' : 'ici'}</a>
+                        &nbsp;
+                        {(this.props.language === 'en') ? 'to change.' : 'pour changer.'}
                     </Typography>
                     <Dialog
                         open={this.state.dialogOpened}
@@ -87,4 +104,4 @@ class Footer extends Component<Props, State> {
     }
 }
 
-export default withStyles(styles)(Footer);
+export default connect(mapStateToProps)(withStyles(styles)(Footer));

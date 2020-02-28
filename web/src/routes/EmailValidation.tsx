@@ -10,6 +10,8 @@ import Translator from "../components/Translator";
 
 import { changeApiUrl } from "../actions/api.action";
 
+import Utilities from "../utils/Utilities";
+
 import Cookies from "universal-cookie";
 
 const cookies = new Cookies();
@@ -37,17 +39,8 @@ class EmailValidation extends Component<Props, State> {
     componentDidMount(): void {
         if (this.props.token)
             return;
-        const getUrlParameter = (name : string) : string | null => {
-            const url = window.location.href;
-            name = name.replace(/[\]]/g, '\\$&');
-            let regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
-                results = regex.exec(url);
-            if (!results) return null;
-            if (!results[2]) return '';
-            return decodeURIComponent(results[2].replace(/\+/g, ' '));
-        };
-        let token : string | null = getUrlParameter('token');
-        const newApiUrl: string | null = getUrlParameter('api_url');
+        let token : string | null = Utilities.getQueryParameter(window.location.href, 'token');
+        const newApiUrl: string | null = Utilities.getQueryParameter(window.location.href, 'api_url');
         this.props.changeApiUrl(newApiUrl);
         cookies.set('api_url', newApiUrl);
         fetch(`${newApiUrl}/users/validate?token=${token}`, {
