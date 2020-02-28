@@ -212,26 +212,6 @@ export class AreaReactionController {
         });
         if (count.count <= 0)
             throw new HttpErrors.NotFound("Reaction not found");
-
-        const dbReaction = await this.reactionRepository.findById(reactionId);
-
-        let controller;
-        try {
-            controller = await this.resolveReactionController(dbReaction.serviceReaction);
-        } catch (e) {
-            throw new HttpErrors.BadRequest('Reaction not found');
-        }
-
-        let result : OperationStatus;
-        try {
-            result = await controller.deleteReaction(dbReaction.id!, dbReaction.options, this.ctx);
-        } catch (e) {
-            throw new HttpErrors.BadRequest('Failed to update action in service');
-        }
-        if (!result.success) {
-            throw new HttpErrors.BadRequest(result.error);
-        }
-
         return this.areaRepository.reactions(id).delete({
             id: reactionId,
             and: where
