@@ -29,6 +29,7 @@ export class AreaRepository extends DefaultCrudRepository<Area,
         @inject('datasources.mongo') dataSource: MongoDataSource,
         @repository.getter('ReactionRepository') protected reactionRepositoryGetter: Getter<ReactionRepository>,
         @repository.getter('ActionRepository') protected actionRepositoryGetter: Getter<ActionRepository>,
+        @repository.getter('UserRepository') protected userRepositoryGetter: Getter<UserRepository>,
     ) {
         super(Area, dataSource);
         this.action = this.createHasOneRepositoryFactoryFor('action', actionRepositoryGetter,);
