@@ -28,7 +28,7 @@ export class TestHelper {
     async initTestHelper(): Promise<void> {
         if (this.hasBeenInit)
             throw new Error("TestHelper isn't supposed to be initialized twice");
-        const appWithClient: AppWithClient = await TestHelper.setupApplication().then();
+        const appWithClient: AppWithClient = await TestHelper.setupApplication();
 
         this.app = appWithClient.app;
         this.client = appWithClient.client;
