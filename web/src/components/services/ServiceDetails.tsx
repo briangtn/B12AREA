@@ -538,7 +538,7 @@ class ServiceDetails extends Component<Props, State> {
                             </ExpansionPanelActions>
                         </ExpansionPanel>
                     ))}
-                <div style={{ marginTop: '20px'}} />
+                <div style={{ marginTop: '50px'}} />
                 </div>
                 <Dialog
                     open={this.state.dialogOpened}
