@@ -120,34 +120,6 @@ export class TwitterHelper {
         })
     }
 
-    static createWebhookFromTwitterClient(token: string, tokenSecret: string) {
-        // eslint-disable-next-line @typescript-eslint/no-misused-promises,no-async-promise-executor
-        return new Promise(async (resolve, reject) => {
-            request.post({
-                url: 'https://api.twitter.com/1.1/account_activity/all/develop/webhooks.json',
-                oauth: {
-                    // eslint-disable-next-line @typescript-eslint/camelcase
-                    consumer_key: CONSUMER_KEY,
-                    // eslint-disable-next-line @typescript-eslint/camelcase
-                    consumer_secret: CONSUMER_SECRET,
-                    token,
-                    // eslint-disable-next-line @typescript-eslint/camelcase
-                    token_secret: tokenSecret
-                },
-                headers: {
-                    'Content-type': 'application/x-www-form-urlencoded'
-                },
-                form: {
-                    url: WEBHOOK_URL
-                }
-            }, (err, res, body) => {
-                if (err)
-                    return reject(err);
-                return resolve(body);
-            });
-        })
-    }
-
     static getCurrentWebhook(ctx: Context) {
         // eslint-disable-next-line @typescript-eslint/no-misused-promises,no-async-promise-executor
         return new Promise(async (resolve, reject) => {
@@ -239,10 +211,6 @@ export class TwitterHelper {
 
     static getWebhookUrl() {
         return WEBHOOK_URL;
-    }
-
-    static getActionsEvents() {
-        return ACTION_EVENTS;
     }
 
     static async triggerActionEvent(twitterData: object, userMail: string, userID: string, ctx: Context) {

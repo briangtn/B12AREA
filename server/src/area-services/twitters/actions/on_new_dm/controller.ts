@@ -41,7 +41,10 @@ export default class NewDMActionController {
         return {success: true, options: actionConfig, data: {}};
     }
 
-    static async updateAction(actionID: string, oldActionConfig: Object, newActionConfig: Object, ctx: Context): Promise<OperationStatus> {
+    static async updateAction(actionID: string, oldActionConfig: Object, newActionConfig: NewDmOptions, ctx: Context): Promise<OperationStatus> {
+        if (newActionConfig.from && !newActionConfig.from.startsWith('@')) {
+            return {success: false, error: "Invalid from name (must start with '@')"}
+        }
         return {success: true, options: newActionConfig};
     }
 

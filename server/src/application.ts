@@ -165,7 +165,7 @@ export class AreaApplication extends BootMixin(
 
     }
 
-    public async beforeStart() {
+    public async afterStart() {
         for (const Class of this.areaServicesControllers) {
             try {
                 await Class.start(this);

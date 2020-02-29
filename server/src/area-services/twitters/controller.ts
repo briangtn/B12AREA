@@ -114,11 +114,6 @@ export default class TwitterServiceController {
                         const dataParsed = JSON.parse(data as string);
 
                         try {
-                            try {
-                                await TwitterHelper.createWebhookFromTwitterClient(accessToken, accessTokenSecret);
-                            } catch (e) {
-                                console.error(e);
-                            }
                             await this.userRepository.addService(dataTyped.userID, {
                                 accessToken: accessToken,
                                 accessTokenSecret: accessTokenSecret,

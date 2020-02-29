@@ -8,21 +8,24 @@ export interface NewTweet {
     tweet_create_events: Tweet[]
 }
 
-interface NewMentionOptions {
+interface NewTweetOptions {
     from?: string,
     mustMatch?: string
 }
 
 export default class NewTweetActionController {
 
-    static async createAction(userID: string, actionConfig: NewMentionOptions, ctx: Context): Promise<OperationStatus> {
+    static async createAction(userID: string, actionConfig: NewTweetOptions, ctx: Context): Promise<OperationStatus> {
         if (actionConfig.from && !actionConfig.from.startsWith('@')) {
             return {success: false, error: "Invalid from name (must start with '@')"}
         }
         return {success: true, options: actionConfig, data: {}};
     }
 
-    static async updateAction(actionID: string, oldActionConfig: Object, newActionConfig: Object, ctx: Context): Promise<OperationStatus> {
+    static async updateAction(actionID: string, oldActionConfig: Object, newActionConfig: NewTweetOptions, ctx: Context): Promise<OperationStatus> {
+        if (newActionConfig.from && !newActionConfig.from.startsWith('@')) {
+            return {success: false, error: "Invalid from name (must start with '@')"}
+        }
         return {success: true, options: newActionConfig};
     }
 
@@ -34,7 +37,7 @@ export default class NewTweetActionController {
         return config as ActionConfig;
     }
 
-    static async trigger(rawData: NewTweet, actionID: string, options: NewMentionOptions, userID: string, eventData: EventSetting, ctx: Context) {
+    static async trigger(rawData: NewTweet, actionID: string, options: NewTweetOptions, userID: string, eventData: EventSetting, ctx: Context) {
         const twitterDatas = rawData.tweet_create_events;
         const oauthObject = await TwitterHelper.getOauthObject(userID, ctx);
         const areaService: AreaService = await ctx.get('services.area');
