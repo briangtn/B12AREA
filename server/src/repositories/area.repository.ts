@@ -17,7 +17,6 @@ import {UserRepository} from "./user.repository";
 export class AreaRepository extends DefaultCrudRepository<Area,
     typeof Area.prototype.id,
     AreaRelations> {
-
     public readonly reactions: HasManyRepositoryFactory<Reaction, typeof Area.prototype.id>;
 
     public readonly action: HasOneRepositoryFactory<Action, typeof Area.prototype.id>;
@@ -47,32 +46,21 @@ export class AreaRepository extends DefaultCrudRepository<Area,
         }
     }
 
-    deleteById(id: typeof Area.prototype.id, options?: AnyObject): Promise<void> {
-        return new Promise((resolve, reject) => {
-            this.action(id).delete().then(() => {
-            }).catch((err) => {
-                reject(err);
-            });
-            this.reactions(id).delete().then(() => {
-            }).catch((err) => {
-                reject(err);
-            });
-            super.deleteById(id, options).then(() => {
-                resolve();
-            }).catch((err) => {
-                reject(err);
-            });
-        });
+    async deleteById(id: typeof Area.prototype.id, options?: AnyObject): Promise<void> {
+        const area = await this.findById(id, options);
+        await this.action(area.id).delete();
+        await this.reactions(area.id).delete();
+        return super.deleteById(id, options);
     }
 
     async deleteAll(where?: Condition<Area> | AndClause<Area> | OrClause<Area>, options?: AnyObject): Promise<Count> {
         const areas = await this.find({
             where: where
         }, options);
-        areas.forEach((area) => {
-            this.action(area.id).delete().then().catch(console.error);
-            this.reactions(area.id).delete().then().catch(console.error);
-        });
+        for (const area of areas) {
+            await this.action(area.id).delete();
+            await this.reactions(area.id).delete();
+        }
         return super.deleteAll(where, options);
     }
 }
