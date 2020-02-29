@@ -5,7 +5,7 @@ import { withStyles, createStyles, Theme } from "@material-ui/core";
 import Card from '@material-ui/core/Card';
 import CardHeader from '@material-ui/core/CardHeader';
 import Avatar from '@material-ui/core/Avatar';
-import { red, green, blue } from '@material-ui/core/colors';
+import { red, green } from '@material-ui/core/colors';
 import Clock from "../Clock";
 
 import PersonIcon from '@material-ui/icons/Person';
