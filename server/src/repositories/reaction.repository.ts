@@ -13,6 +13,7 @@ import {AreaRepository} from "./area.repository";
 import {HttpErrors} from "@loopback/rest/dist";
 import {OperationStatus} from "../services-interfaces";
 import {Context} from "@loopback/context";
+import {UserRepository} from "./user.repository";
 
 type IdReaction = typeof Reaction.prototype.id;
 type FilterReaction = Condition<Reaction> | AndClause<Reaction> | OrClause<Reaction>;
