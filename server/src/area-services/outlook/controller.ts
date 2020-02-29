@@ -1,14 +1,15 @@
-import {LoginObject, ServiceConfig} from "../../services-interfaces";
+import {DelayedJobObject, LoginObject, ServiceConfig} from "../../services-interfaces";
 import config from './config.json';
 import {Context, inject} from "@loopback/context";
 import {ExchangeCodeGeneratorManager} from "../../services";
-import {UserRepository} from "../../repositories";
+import {ActionRepository, UserRepository} from "../../repositories";
 import {User} from "../../models";
 import {get, param, Response, RestBindings} from "@loopback/rest";
 import {UserProfile} from "@loopback/security";
 import {HttpErrors} from "@loopback/rest/dist";
-import {OutlookHelper, OutlookTokens} from "./helper";
+import {OUTLOOK_DELAYED_JOB_REFRESH_SUBSCRIPTION, OutlookHelper, OutlookTokens} from "./helper";
 import {repository} from "@loopback/repository";
+import {OutlookSubscriptionResource} from "./outlookApiResources";
 
 export default class ServiceController {
 
@@ -20,6 +21,18 @@ export default class ServiceController {
 
     static async start(ctx: Context): Promise<void> {
         console.log('Starting outlook service');
+        const actionRepository: ActionRepository = await ctx.get('repositories.ActionRepository');
+
+        // Start pulling's for new messages in channels
+        const newMessagesInChannelActions = await actionRepository.find({where: {serviceAction: 'outlook.A.new_email'}});
+
+        for (const action of newMessagesInChannelActions) {
+            const ownerId  = await actionRepository.getActionOwnerID(action.id?.toString()!);
+            const subscription: OutlookSubscriptionResource | null = await actionRepository.getActionData(action.id!) as OutlookSubscriptionResource | null;
+            if (!ownerId || !subscription)
+                continue;
+            OutlookHelper.startSubscriptionRefreshDelayedJob(action.id!, ownerId, subscription, ctx);
+        }
     }
 
     static async login(params: LoginObject): Promise<string> {
@@ -100,5 +113,24 @@ export default class ServiceController {
 
     static async getConfig(): Promise<ServiceConfig> {
         return config;
+    }
+
+    static async processDelayedJob(data: DelayedJobObject, ctx: Context) {
+        if (data.name.startsWith(OUTLOOK_DELAYED_JOB_REFRESH_SUBSCRIPTION)) {
+            await this.processRefreshSubscriptionJob(data, ctx);
+        }
+    }
+
+    static async processRefreshSubscriptionJob(data: DelayedJobObject, ctx: Context) {
+        let subscription: OutlookSubscriptionResource = data.jobData.subscription;
+        const ownerId: string = data.jobData.ownerId;
+        const actionId: string = data.jobData.actionId;
+        const tokens: OutlookTokens = await OutlookHelper.getTokensForUserId(ownerId, ctx);
+        subscription = await OutlookHelper.refreshMessageReceivedSubscription(subscription, tokens);
+        const actionRepository: ActionRepository = await ctx.get('repositories.ActionRepository');
+        await actionRepository.updateById(actionId, {
+            data: subscription
+        });
+        OutlookHelper.startSubscriptionRefreshDelayedJob(actionId, ownerId, subscription, ctx);
     }
 }

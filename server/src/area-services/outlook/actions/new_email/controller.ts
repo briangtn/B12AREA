@@ -36,11 +36,22 @@ export default class ActionController {
         @repository(ActionRepository) private actionRepository: ActionRepository
     ) {}
 
-    @post('/webhook/new_email')
+    @post('/webhook')
     async webhook(
-        @requestBody() body : RawNewEmailNotification,
-        @param.path.string('validationToken') validationToken?: string
+        @requestBody({
+            required: false,
+            content: {
+                'text/plain': {
+                    schema: {
+                        type: 'string'
+                    }
+                },
+                'application/json': {}
+            }
+        }) body : RawNewEmailNotification,
+        @param.query.string('validationToken') validationToken?: string
     ) {
+        console.log('WEBHOOK:', validationToken, body);
         if (validationToken) {
             this.response.set('Content-type', 'text/plain');
             this.response.status(200).send(validationToken);
@@ -92,8 +103,9 @@ export default class ActionController {
 
         let subscription: OutlookSubscriptionResource;
         try {
-            subscription = await OutlookHelper.registerNewMessageReceivedSubscription(`${API_URL}/services/outlook/webhook/new_email`, tokens);
+            subscription = await OutlookHelper.registerNewMessageReceivedSubscription(`${API_URL}/services/outlook/actions/new_email/webhook`, tokens);
         } catch (e) {
+            console.log(e);
             return { success: false, error: 'Failed to create subscription', details: e };
         }
 
@@ -120,7 +132,7 @@ export default class ActionController {
         }
         try {
             const subscription: OutlookSubscriptionResource = (await actionRepository.getActionData(actionID))! as OutlookSubscriptionResource;
-            OutlookHelper.startSubscriptionRefreshTimeout(subscription, ctx);
+            OutlookHelper.startSubscriptionRefreshDelayedJob(actionID, userID, subscription, ctx);
         } catch (e) {
             return { success: false, error: "An error occurred", details: e };
         }
@@ -128,23 +140,61 @@ export default class ActionController {
     }
 
     static async updateAction(actionId: string, oldActionConfig: Object, newActionConfig: Object, ctx: Context): Promise<OperationStatus> {
-        // If successful
-        //todo stop refresh to
-        return { success: true, options: { thisShouldContains: "data to be stored" } };
-        // If an error occurs
-        // return { success: false, error: 'Error returned to front end', details: { backEndDebugDetails: "this is just an example details it is not required" } };
-    }
-
-    static async updateActionFinished(actionID: string, userID: string, actionConfig: Object, ctx: Context): Promise<OperationStatus> {
-        //todo start refresh to => probably need to stop recreating it if expires or fail
-        return {success: true}
+        const castedActionConfig: OutlookNewEmailOptions = newActionConfig as OutlookNewEmailOptions;
+        let areaService : AreaService | undefined = undefined;
+        let actionRepository : ActionRepository | undefined = undefined;
+        try {
+            areaService = await ctx.get('services.area');
+            actionRepository = await ctx.get('repositories.ActionRepository');
+        } catch (e) {
+            return { success: false, error: "Failed to resolve from context", details: e };
+        }
+        if (!areaService || !actionRepository) {
+            return { success: false, error: "Failed to resolve from context" };
+        }
+        const configValidation = areaService.validateConfigSchema(castedActionConfig, config.configSchema);
+        if (!configValidation.success)
+            return configValidation;
+        try {
+            const subscription: OutlookSubscriptionResource = (await actionRepository.getActionData(actionId))! as OutlookSubscriptionResource;
+            return {
+                success: true,
+                options: {
+                    onlySender: castedActionConfig.onlySender,
+                    onlyObjectMatch: castedActionConfig.onlyObjectMatch,
+                    onlyBodyMatch: castedActionConfig.onlyBodyMatch
+                },
+                data: subscription
+            };
+        } catch (e) {
+            return { success: false, error: "An error occurred", details: e };
+        }
     }
 
     static async deleteAction(actionId: string, actionConfig: Object, ctx: Context): Promise<OperationStatus> {
-        // If successful
-        return { success: true, options: { thisShouldContains: "data to be stored" } };
-        // If an error occurs
-        // return { success: false, error: 'Error returned to front end', details: { backEndDebugDetails: "this is just an example details it is not required" } };
+        let actionRepository : ActionRepository | undefined = undefined;
+        try {
+            actionRepository = await ctx.get('repositories.ActionRepository');
+        } catch (e) {
+            return { success: false, error: "Failed to resolve repositories", details: e };
+        }
+        if (!actionRepository)
+            return { success: false, error: "Failed to resolve repositories" };
+        const subscription: OutlookSubscriptionResource = (await actionRepository.getActionData(actionId))! as OutlookSubscriptionResource;
+        let tokens: OutlookTokens;
+        try {
+            const ownerId = (await actionRepository.getActionOwnerID(actionId))!;
+            tokens = await OutlookHelper.getTokensForUserId(ownerId, ctx);
+        } catch (e) {
+            return { success: false, error: 'Failed to refresh outlook tokens', details: e };
+        }
+        try {
+            OutlookHelper.stopSubscriptionRefreshDelayedJob(subscription, ctx);
+            await OutlookHelper.deleteSubscription(subscription, tokens);
+        } catch (e) {
+            return { success: false, error: "Failed to delete outlook subscription", details: e };
+        }
+        return { success: true, options: actionConfig };
     }
 
     static async getConfig(): Promise<ActionConfig> {

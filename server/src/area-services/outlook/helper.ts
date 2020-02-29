@@ -6,6 +6,7 @@ import {ActionRepository, UserRepository} from "../../repositories";
 import {OutlookEmailResource, OutlookSubscriptionResource} from "./outlookApiResources";
 import {ActionFunction} from "../../services-interfaces";
 import {AreaService} from "../../services";
+import WorkerHelper from "../../WorkerHelper";
 
 const OUTLOOK_CLIENT_ID : string = process.env.OUTLOOK_CLIENT_ID ?? "";
 const OUTLOOK_CLIENT_SECRET : string = process.env.OUTLOOK_CLIENT_SECRET ?? "";
@@ -24,6 +25,7 @@ const API_URL : string = process.env.API_URL ?? "http://localhost:8080";
 const OUTLOOK_REDIRECT_URL = `${API_URL}/services/outlook/oauth`;
 
 const OUTLOOK_MESSAGE_SUBSCRIPTION_MAX_EXPIRATION = 4230; //in minutes
+export const OUTLOOK_DELAYED_JOB_REFRESH_SUBSCRIPTION = 'outlook_refreshSubscription_';
 
 export class OutlookException {
     constructor(error: string, info: object = {}) {
@@ -50,8 +52,6 @@ export interface OutlookNewEmailOptions {
 }
 
 export class OutlookHelper {
-
-    static subscriptionRefreshStarted = {};
 
     public static generateLoginRedirectUrlWithoutState() : string {
         return `${OUTLOOK_AUTHORIZE_URL}?client_id=${OUTLOOK_CLIENT_ID}&response_type=code&redirect_uri=${encodeURI(OUTLOOK_REDIRECT_URL)}&response_mode=query&scope=${encodeURI(OUTLOOK_FORMATTED_SCOPE)}`;
@@ -151,23 +151,31 @@ export class OutlookHelper {
         }
     }
 
-    public static startSubscriptionRefreshTimeout(subscription: OutlookSubscriptionResource, ctx: Context) {
+    public static startSubscriptionRefreshDelayedJob(actionId: string, ownerId: string, subscription: OutlookSubscriptionResource, ctx: Context) {
         const expirationDate = new Date(subscription.expirationDateTime);
         const now = new Date();
-        if (now >= expirationDate)
-            return;
-            //refresh token now
-        const id = setInterval(() => {
-            //todo refresh subscription
-        }, 1000);
-        OutlookHelper.subscriptionRefreshStarted[subscription.id as keyof typeof AreaService.pullingStarted] = id as never;
+        const jobName = OUTLOOK_DELAYED_JOB_REFRESH_SUBSCRIPTION + subscription.id;
+        if (now >= expirationDate) {
+            WorkerHelper.AddDelayedJob({
+                service: 'outlook',
+                name: jobName,
+                triggerIn: 1000,
+                jobData: {subscription, ownerId, actionId}
+            }, ctx).catch((e) => {console.error(`Failed to add delayed job ${jobName}:`, e)});
+        } else {
+            WorkerHelper.AddDelayedJob({
+                service: 'outlook',
+                name: jobName,
+                triggerIn: new Date(expirationDate.getTime() - 12 * 60 * 60 * 1000).getTime(),
+                jobData: {subscription, ownerId, actionId}
+            }, ctx).catch((e) => {console.error(`Failed to add delayed job ${jobName}:`, e)});
+        }
     }
 
-    public static stopSubscriptionRefreshTimeout(subscription: OutlookSubscriptionResource) {
-        const to = AreaService.pullingStarted[subscription.id as keyof typeof AreaService.pullingStarted];
-
-        clearInterval(to);
-        delete AreaService.pullingStarted[subscription.id as keyof typeof AreaService.pullingStarted];
+    public static stopSubscriptionRefreshDelayedJob(subscription: OutlookSubscriptionResource, ctx: Context) {
+        const jobName = OUTLOOK_DELAYED_JOB_REFRESH_SUBSCRIPTION + subscription.id;
+        WorkerHelper.RemoveDelayedJob('outlook', jobName, ctx)
+            .catch((e) => {console.error(`Failed to remove delayed job ${jobName}`, e)});
     }
 
     public static async registerNewMessageReceivedSubscription(notificationUrl: string, outlookTokens: OutlookTokens, state = "ignored", specificInbox?: string): Promise<OutlookSubscriptionResource> {
@@ -189,13 +197,23 @@ export class OutlookHelper {
                     'Authorization': `${outlookTokens.token_type} ${outlookTokens.access_token}`
                 }
             }) as {data: OutlookSubscriptionResource};
-            return response.data;
+            return {
+                changeType: response.data.changeType,
+                notificationUrl: response.data.notificationUrl,
+                resource: response.data.resource,
+                expirationDateTime: response.data.expirationDateTime,
+                clientState: response.data.clientState,
+                id: response.data.id,
+                applicationId: response.data.applicationId,
+                creatorId: response.data.creatorId,
+                latestSupportedTlsVersion: response.data.latestSupportedTlsVersion,
+            };
         } catch (e) {
             throw new OutlookException('Failed to register new subscription', {data: e.response.data, status: e.response.status, headers: e.response.headers});
         }
     }
 
-    public static async updateMessageReceivedSubscription(subscription: OutlookSubscriptionResource, outlookTokens: OutlookTokens): Promise<OutlookSubscriptionResource> {
+    public static async refreshMessageReceivedSubscription(subscription: OutlookSubscriptionResource, outlookTokens: OutlookTokens): Promise<OutlookSubscriptionResource> {
         const UPDATE_SUBSCRIPTION_URL = `https://graph.microsoft.com/v1.0/subscriptions/${subscription.id}`;
         const now = new Date();
 
@@ -217,7 +235,17 @@ export class OutlookHelper {
                     'Authorization': `${outlookTokens.token_type} ${outlookTokens.access_token}`
                 }
             }) as {data: OutlookSubscriptionResource};
-            return response.data;
+            return {
+                changeType: response.data.changeType,
+                notificationUrl: response.data.notificationUrl,
+                resource: response.data.resource,
+                expirationDateTime: response.data.expirationDateTime,
+                clientState: response.data.clientState,
+                id: response.data.id,
+                applicationId: response.data.applicationId,
+                creatorId: response.data.creatorId,
+                latestSupportedTlsVersion: response.data.latestSupportedTlsVersion,
+            };
         } catch (e) {
             throw new OutlookException('Failed to update subscription', {data: e.response.data, status: e.response.status, headers: e.response.headers});
         }
@@ -241,7 +269,7 @@ export class OutlookHelper {
         let areaService: AreaService | undefined = undefined;
         try {
             actionRepository = await ctx.get('repositories.ActionRepository');
-            areaService = await ctx.get('services.AreaService');
+            areaService = await ctx.get('services.area');
         } catch (e) {
             throw new OutlookException('Could not resolve repositories in given context', e);
         }
@@ -262,18 +290,21 @@ export class OutlookHelper {
                 }
             }) as {data: OutlookEmailResource};
             const email: OutlookEmailResource = result.data;
-            if (options.onlySender && email.sender.emailAddress.address !== options.onlySender)
+            if (options.onlySender && email.sender.emailAddress.address !== options.onlySender) {
                 return;
+            }
             if (options.onlyObjectMatch) {
-                const re = new RegExp(options.onlyObjectMatch);
-                if (!re.test(email.subject))
+                const re = new RegExp(options.onlyObjectMatch, 'gs');
+                if (!re.test(email.subject)) {
                     return;
+                }
                 placeholders = placeholders.concat(areaService.createRegexPlaceholders(email.subject, options.onlyObjectMatch, 'ObjectMatches'));
             }
             if (options.onlyBodyMatch) {
-                const re = new RegExp(options.onlyBodyMatch);
-                if (!re.test(email.body.content))
+                const re = new RegExp(options.onlyBodyMatch, 'gs');
+                if (!re.test(email.body.content)) {
                     return;
+                }
                 placeholders = placeholders.concat(areaService.createRegexPlaceholders(email.body.content, options.onlyBodyMatch, 'BodyMatches'));
             }
             placeholders = placeholders.concat([
