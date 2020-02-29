@@ -4,7 +4,7 @@ import {Context} from "@loopback/context";
 import {User} from "../../models";
 import {ActionRepository, UserRepository} from "../../repositories";
 import {AreaService} from "../../services";
-import {ActionFunction} from "../../services-interfaces";
+import {ActionFunction, PullingData} from "../../services-interfaces";
 import {TeamsAPIChatMessageReaction, TeamsAPIChatMessageResource, TeamsAPIUserResource} from "./teamsApiResources";
 
 const TEAMS_CLIENT_ID : string = process.env.TEAMS_CLIENT_ID ?? "";
@@ -24,13 +24,13 @@ const TEAMS_FORMATTED_SCOPE : string = TEAMS_SCOPES.join(' ');
 const API_URL : string = process.env.API_URL ?? "http://localhost:8080";
 const TEAMS_REDIRECT_URL = `${API_URL}/services/teams/oauth`;
 
-const TEAMS_NEW_MESSAGE_IN_CHANNEL_PULLING_PREFIX = 'teams_newMessageInChannel_';
+export const TEAMS_NEW_MESSAGE_IN_CHANNEL_PULLING_PREFIX = 'teams_newMessageInChannel_';
 const TEAMS_NEW_MESSAGE_IN_CHANNEL_PULLING_DELTA = 30; //in seconds
-const TEAMS_NEW_REACT_ON_MESSAGE_PULLING_PREFIX = 'teams_newReactOnMessage_';
+export const TEAMS_NEW_REACT_ON_MESSAGE_PULLING_PREFIX = 'teams_newReactOnMessage_';
 const TEAMS_NEW_REACT_ON_MESSAGE_PULLING_DELTA = 30; //in seconds
 
 export class TeamsException {
-    constructor(error: string, info: object) {
+    constructor(error: string, info: object = {}) {
         this.error = error;
         this.info = info;
     }
@@ -190,7 +190,7 @@ export class TeamsHelper {
         return `https://graph.microsoft.com/beta/teams/${actionOptions.teamId}/channels/${actionOptions.channelId}/messages/delta?filter=lastModifiedDateTime gt ${lastPulledDate}`
     }
 
-    public static async startNewMessageInChannelPulling(actionID: string, userID: string, ctx: Context) {
+    public static async getNewMessageInChannelPullingData(actionID: string, userID: string, ctx: Context): Promise<PullingData> {
         const areaService: AreaService = await ctx.get('services.area');
         const userRepository: UserRepository = await ctx.get('repositories.UserRepository');
         const actionRepository: ActionRepository = await ctx.get('repositories.ActionRepository');
@@ -203,11 +203,14 @@ export class TeamsHelper {
         const actionOptions: TeamsNewMessageInChannelOptions = (await actionRepository.getActionSettings(actionID))! as TeamsNewMessageInChannelOptions;
 
         if (!tokens || !tokens.access_token)
-            return;
-        areaService.startPulling(
-            this.getNewMessageInChannelPullingUrl,
-            {headers: {Authorization: 'Bearer ' + tokens.access_token}},
-            async (data: {value: TeamsAPIChatMessageResource[]}) => {
+            throw new TeamsException('Failed to retrieve tokens');
+        const pullingUrl = await this.getNewMessageInChannelPullingUrl(actionID, ctx);
+        if (!pullingUrl)
+            throw new TeamsException('Failed to retrieve pulling url');
+        return {
+            url: pullingUrl,
+            params: {headers: {Authorization: 'Bearer ' + tokens.access_token}},
+            diffFunction: async (data: { value: TeamsAPIChatMessageResource[] }) => {
                 const diff = [];
                 const actionData: TeamsNewMessageInChannelData = (await actionRepository.getActionData(actionID))! as TeamsNewMessageInChannelData;
 
@@ -226,9 +229,10 @@ export class TeamsHelper {
                 }
                 await actionRepository.setActionData(actionID, {lastPulled: new Date().toISOString()});
                 return diff;
-            }, async (data: TeamsAPIChatMessageResource[]) => {
+            },
+            onDiff: async (data: TeamsAPIChatMessageResource[]) => {
                 for (const chatMessage of data) {
-                    let placeholders: Array<{name: string, value: string}> = [
+                    let placeholders: Array<{ name: string, value: string }> = [
                         {
                             name: "Author",
                             value: chatMessage.from.user?.displayName!
@@ -259,17 +263,11 @@ export class TeamsHelper {
                         placeholders: placeholders
                     }, ctx)
                 }
-            }, TEAMS_NEW_MESSAGE_IN_CHANNEL_PULLING_DELTA, TEAMS_NEW_MESSAGE_IN_CHANNEL_PULLING_PREFIX + actionID, actionID, ctx);
+            }
+        };
     }
 
-    public static async stopNewMessageInChannelPulling(actionID: string, ctx: Context) {
-        const areaService: AreaService = await ctx.get('services.area');
-
-        areaService.stopPulling(TEAMS_NEW_MESSAGE_IN_CHANNEL_PULLING_PREFIX + actionID);
-    }
-
-    public static async startNewReactOnMessagePulling(actionID: string, userID: string, ctx: Context) {
-        const areaService: AreaService = await ctx.get('services.area');
+    public static async getNewReactOnMessagePullingData(actionID: string, userID: string, ctx: Context): Promise<PullingData> {
         const userRepository: UserRepository = await ctx.get('repositories.UserRepository');
         const actionRepository: ActionRepository = await ctx.get('repositories.ActionRepository');
 
@@ -281,11 +279,11 @@ export class TeamsHelper {
         const actionOptions: TeamsNewReactOnMessageOptions = (await actionRepository.getActionSettings(actionID))! as TeamsNewReactOnMessageOptions;
 
         if (!tokens || !tokens.access_token)
-            return;
-        areaService.startPulling(
-            `https://graph.microsoft.com/beta/teams/${actionOptions.teamId}/channels/${actionOptions.channelId}/messages/${actionOptions.messageId}`,
-            {headers: {Authorization: 'Bearer ' + tokens.access_token}},
-            async (data: TeamsAPIChatMessageResource) => {
+            throw new TeamsException('Failed to retrieve tokens');
+        return {
+            url: `https://graph.microsoft.com/beta/teams/${actionOptions.teamId}/channels/${actionOptions.channelId}/messages/${actionOptions.messageId}`,
+            params: {headers: {Authorization: 'Bearer ' + tokens.access_token}},
+            diffFunction: async (data: TeamsAPIChatMessageResource) => {
                 const diff = [];
                 const actionData: TeamsNewReactOnMessageData = (await actionRepository.getActionData(actionID))! as TeamsNewReactOnMessageData;
 
@@ -304,7 +302,8 @@ export class TeamsHelper {
                 }
                 await actionRepository.setActionData(actionID, {lastPulled: new Date().toISOString()});
                 return diff;
-            }, async (data: {message: TeamsAPIChatMessageResource, react: TeamsAPIChatMessageReaction}[]) => {
+            },
+            onDiff: async (data: {message: TeamsAPIChatMessageResource, react: TeamsAPIChatMessageReaction}[]) => {
                 for (const pair of data) {
                     let authorName = '';
                     const teamsUser: TeamsAPIUserResource|null = await this.getTeamsUserFromUserId(tokens, pair.react.user.user?.id);
@@ -338,13 +337,28 @@ export class TeamsHelper {
                         placeholders: placeholders
                     }, ctx)
                 }
-            }, TEAMS_NEW_REACT_ON_MESSAGE_PULLING_DELTA, TEAMS_NEW_REACT_ON_MESSAGE_PULLING_PREFIX + actionID);
+            }
+        };
+    }
+
+    public static async startNewMessageInChannelPulling(actionID: string, userID: string, ctx: Context) {
+        const areaService: AreaService = await ctx.get('services.area');
+        await areaService.startPulling(TEAMS_NEW_MESSAGE_IN_CHANNEL_PULLING_DELTA, TEAMS_NEW_MESSAGE_IN_CHANNEL_PULLING_PREFIX + actionID, 'teams', ctx, {actionID, userID});
+    }
+
+    public static async stopNewMessageInChannelPulling(actionID: string, ctx: Context) {
+        const areaService: AreaService = await ctx.get('services.area');
+        await areaService.stopPulling(TEAMS_NEW_MESSAGE_IN_CHANNEL_PULLING_PREFIX + actionID, 'teams', ctx);
+    }
+
+    public static async startNewReactOnMessagePulling(actionID: string, userID: string, ctx: Context) {
+        const areaService: AreaService = await ctx.get('services.area');
+        await areaService.startPulling(TEAMS_NEW_REACT_ON_MESSAGE_PULLING_DELTA, TEAMS_NEW_REACT_ON_MESSAGE_PULLING_PREFIX + actionID, 'teams', ctx, {actionID, userID});
     }
 
     public static async stopNewReactOnMessagePulling(actionID: string, ctx: Context) {
         const areaService: AreaService = await ctx.get('services.area');
-
-        areaService.stopPulling(TEAMS_NEW_REACT_ON_MESSAGE_PULLING_PREFIX + actionID);
+        await areaService.stopPulling(TEAMS_NEW_REACT_ON_MESSAGE_PULLING_PREFIX + actionID, 'teams', ctx);
     }
 
     public static getClientId() : string {

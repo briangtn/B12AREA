@@ -19,7 +19,7 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Switch from '@material-ui/core/Switch';
 import Divider from '@material-ui/core/Divider';
 import Alert from '../Alert';
-import Tooltip from '@material-ui/core/Tooltip';
+import HtmlTooltip from "./HtmlTooltip";
 
 import { IAction, IReaction, IPlaceHolder } from "../../interfaces/IService.interface";
 
@@ -70,14 +70,6 @@ const styles = (theme: Theme) => createStyles({
         maxWidth: 'none',
     },
 });
-
-const HtmlTooltip = withStyles(theme => ({
-    tooltip: {
-        color: 'white',
-        maxWidth: 'none',
-        fontSize: theme.typography.pxToRem(12)
-    },
-}))(Tooltip);
 
 class AddAreaStepper extends Component<Props, State> {
     state: State = {
@@ -131,21 +123,13 @@ class AddAreaStepper extends Component<Props, State> {
     };
 
     configSchemaChange = (argGroupName: string, key: any, e: any, isAction: boolean) => {
-        const { configSchemaActions, configSchemaReactions } = this.state;
+        const configSchema: any = (isAction ? this.state.configSchemaActions : this.state.configSchemaReactions);
 
-        if (isAction) {
-            if (typeof configSchemaActions[argGroupName][e.target.id] === "boolean")
-                configSchemaActions[argGroupName][e.target.id] = e.target.checked;
-            else
-                configSchemaActions[argGroupName][e.target.id] = e.target.value;
-            this.setState({[key]: configSchemaActions} as unknown as Pick<State, keyof State>);
-        } else {
-            if (typeof configSchemaReactions[argGroupName][e.target.id] === "boolean")
-                configSchemaReactions[argGroupName][e.target.id] = e.target.checked;
-            else
-                configSchemaReactions[argGroupName][e.target.id] = e.target.value;
-            this.setState({[key]: configSchemaReactions} as unknown as Pick<State, keyof State>);
-        }
+        if (typeof configSchema[argGroupName][e.target.id] === "boolean")
+            configSchema[argGroupName][e.target.id] = e.target.checked;
+        else
+            configSchema[argGroupName][e.target.id] = e.target.value;
+        this.setState({ [key]: configSchema } as unknown as Pick<State, keyof State>);
     };
 
     displayConfigSchema = (argGroupName: string, configSchema: any, key: any, isAction: boolean, placeholder: IPlaceHolder[] | null = null) => {

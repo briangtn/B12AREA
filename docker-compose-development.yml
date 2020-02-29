@@ -56,14 +56,17 @@ services:
     restart: unless-stopped
     environment:
       - REDIS_HOST=redis
+      - DB_HOST=db
     env_file:
       - .env
     volumes:
       - ./server:/server
     networks:
       - "redis-tier"
+      - "db-tier"
     depends_on:
       - redis
+      - db
 
   db:
     image: "mongo:4.0.14"

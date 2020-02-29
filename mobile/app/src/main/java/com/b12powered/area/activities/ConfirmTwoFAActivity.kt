@@ -30,8 +30,6 @@ class ConfirmTwoFAActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_confirm_two_fa)
 
-        val etAuthenticationCode = findViewById<EditText>(R.id.authentication_code)
-
         val etSecret = findViewById<TextView>(R.id.secret)
 
         val secret = intent.getStringExtra("secret")
@@ -41,7 +39,7 @@ class ConfirmTwoFAActivity : AppCompatActivity() {
         copy_button.setOnClickListener {
 
             val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-            var myClip: ClipData = ClipData.newPlainText("note_copy", secret)
+            val myClip: ClipData = ClipData.newPlainText("note_copy", secret)
             clipboard.setPrimaryClip(myClip)
             Toast.makeText(
                 applicationContext, "Text Copied",
@@ -50,14 +48,14 @@ class ConfirmTwoFAActivity : AppCompatActivity() {
         }
 
         submit_button.setOnClickListener {
-            submitCode(secret)
+            submitCode()
         }
     }
 
     /**
      * Check code validity. Call [validate2fa] method if code is valid, reset input field if not
      */
-    private fun submitCode(secret: String) {
+    private fun submitCode() {
         val etAuthenticationCode = findViewById<EditText>(R.id.authentication_code)
 
         etAuthenticationCode.clearFocus()

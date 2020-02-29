@@ -37,6 +37,9 @@ import FormControl from "@material-ui/core/FormControl";
 import TextField from "@material-ui/core/TextField";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Switch from "@material-ui/core/Switch";
+import {IArea, IPlaceHolder} from "../../interfaces/IService.interface";
+
+import HtmlTooltip from "./HtmlTooltip";
 
 interface Props {
     token: string,
@@ -60,7 +63,7 @@ interface Props {
 }
 
 interface State {
-    areas: Area[],
+    areas: IArea[],
     info: any,
     dialogOpened: boolean,
     availableActions: any,
@@ -68,16 +71,6 @@ interface State {
     chosenArea: number,
     selectedReaction: any,
     configSchemaReaction: any
-}
-
-interface Area {
-    data: any;
-    enabled: boolean;
-    id: string;
-    name: string;
-    ownerId: string;
-    action: any;
-    reactions: any[];
 }
 
 const mapStateToProps = (state: any) => {
@@ -146,33 +139,59 @@ class ServiceDetails extends Component<Props, State> {
     };
 
     displayConfigSchema = (configSchema: any) => {
-        const { configSchemaReaction } = this.state;
+        const { areas, chosenArea, configSchemaReaction } = this.state;
         const { name, type, required } = configSchema;
+        const currentArea: any = areas[chosenArea];
+        let placeholders: IPlaceHolder[] | null = null;
+        let currentActionInfos = this.state.availableActions.filter((available: any) => {
+            const splitted: string[] = currentArea.action.serviceAction.split('.');
 
-        if (type === "string") {
-            return (
-                <TextField
-                    label={name}
-                    required={required}
-                    id={name}
-                    type={type}
-                    value={configSchemaReaction[this.state.selectedReaction.name][name]}
-                    onChange={(e) => this.configSchemaChange(e)}
-                    fullWidth
-                />
+            return available.name === splitted[splitted.length - 1];
+        })[0];
+
+        if (currentArea.action) {
+            placeholders = currentActionInfos.placeholders;
+        }
+
+        let placeHolderComponent: any = null;
+
+        if (placeholders) {
+            placeHolderComponent = (
+                <React.Fragment>
+                    <p><b>Placeholders:</b></p>
+                    {placeholders.map((holder: IPlaceHolder, index: number) => <p key={index}>{`{${holder.name}}: ${holder.description}`}</p>)}
+                </React.Fragment>
             )
-        } else if (type === "number") {
-            return (
-                <TextField
-                    label={name}
-                    required={required}
-                    id={name}
-                    type={type}
-                    value={configSchemaReaction[this.state.selectedReaction.name][name]}
-                    onChange={(e) => this.configSchemaChange(e)}
-                    fullWidth
-                />
-            )
+        }
+
+        if (type === "string" || type === "number") {
+            if (placeholders) {
+                return (
+                    <HtmlTooltip title={placeHolderComponent}>
+                        <TextField
+                            label={name}
+                            required={required}
+                            id={name}
+                            type={type}
+                            value={configSchemaReaction[this.state.selectedReaction.name][name]}
+                            onChange={(e) => this.configSchemaChange(e)}
+                            fullWidth
+                        />
+                    </HtmlTooltip>
+                )
+            } else {
+                return (
+                    <TextField
+                        label={name}
+                        required={required}
+                        id={name}
+                        type={type}
+                        value={configSchemaReaction[this.state.selectedReaction.name][name]}
+                        onChange={(e) => this.configSchemaChange(e)}
+                        fullWidth
+                    />
+                )
+            }
         } else if (type === "boolean") {
             return (
                 <FormControlLabel
@@ -272,7 +291,7 @@ class ServiceDetails extends Component<Props, State> {
             .then((data) => {
                 const {info} = this.state;
 
-                const tmpAreaArray = data.filter((reaction: Area) => (!reaction.action || !reaction.reactions) || (reaction.action.serviceAction.split('.')[0] === info.name));
+                const tmpAreaArray = data.filter((area: any) => (!area.action || !area.reactions) || (area.action.serviceAction.split('.')[0] === info.name));
                 this.setState({areas: tmpAreaArray});
             });
 
@@ -320,7 +339,7 @@ class ServiceDetails extends Component<Props, State> {
                     }}
                 >
                     <Typography variant="h3" className={classes.section} gutterBottom><b><Translator sentence="myActions" /> - { info.displayName }</b></Typography>
-                    {areas.map((area: Area, index: number) => (
+                    {areas.map((area: any, index: number) => (
                         <ExpansionPanel key={areas.indexOf(area)}>
                             <ExpansionPanelSummary
                                 expandIcon={<ExpandMoreIcon />}
@@ -352,24 +371,26 @@ class ServiceDetails extends Component<Props, State> {
                                 }
                             </ExpansionPanelDetails>
                             <ExpansionPanelDetails className={classes.details}>
+                                <div>
+                                    <Grid container spacing={3}>
+                                        <Grid item xs={6}>
+                                            <Typography variant="h5" gutterBottom>
+                                                <b>Reaction(s)</b>
+                                            </Typography>
+                                        </Grid>
+                                        <Grid item xs={6}>
+                                            <IconButton value={areas.indexOf(area)} onClick={this.openDialog} style={{float: 'right', zIndex: 100, position: 'relative'}} aria-label="settings" color="primary">
+                                                <AddIcon />
+                                            </IconButton>
+                                        </Grid>
+                                    </Grid>
+                                    <Divider />
+                                </div>
                             {
                                 (area.reactions) ?
                                     <div>
-                                        <Grid container spacing={3}>
-                                            <Grid item xs={6}>
-                                                <Typography variant="h5" gutterBottom>
-                                                    <b>Reaction(s)</b>
-                                                </Typography>
-                                            </Grid>
-                                            <Grid item xs={6}>
-                                                <IconButton value={areas.indexOf(area)} onClick={this.openDialog} style={{float: 'right', zIndex: 100, position: 'relative'}} aria-label="settings" color="primary">
-                                                    <AddIcon />
-                                                </IconButton>
-                                            </Grid>
-                                        </Grid>
-                                        <Divider />
                                         <br />
-                                        {area.reactions.map((reaction) => (
+                                        {area.reactions.map((reaction: any) => (
                                             <div key={area.reactions.indexOf(reaction)} className={classes.details}>
                                                 <Grid container spacing={3}>
                                                     <Grid item xs={6}>
@@ -437,7 +458,7 @@ class ServiceDetails extends Component<Props, State> {
                         </FormControl>
                         <br />
                         {
-                            (this.state.selectedReaction !== 0)
+                            (this.state.selectedReaction !== 0 && Object.keys(this.state.selectedReaction).length > 0)
                             ?
                                 (
                                     <div>

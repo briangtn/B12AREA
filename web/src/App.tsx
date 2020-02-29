@@ -52,12 +52,6 @@ interface State {
     services: any
 }
 
-interface Services {
-    name: string,
-    icon: any,
-    xs: boolean | 6 | 4 | "auto" | 10 | 1 | 2 | 3 | 5 | 7 | 8 | 9 | 11 | 12 | undefined
-}
-
 const styles = (theme: Theme) => createStyles({
     gridContent: {
         padding: theme.spacing(10),
@@ -78,7 +72,8 @@ const styles = (theme: Theme) => createStyles({
     hero: {
         backgroundColor: '#FFBE76',
         width: '100%',
-        marginTop: '75px'
+        marginTop: '75px',
+        marginBottom: '75px'
     },
     heroContent: {
         textAlign: 'center',
@@ -112,6 +107,12 @@ class App extends Component<Props, State> {
         services: []
     };
 
+    /**
+     * Function triggered when a user type his email address
+     * inside the quick form
+     *
+     * @param e event triggered
+     */
     onEmailEnter: React.ChangeEventHandler<HTMLInputElement> = (e) => {
         this.setState({ email: e.currentTarget.value });
     };
@@ -119,13 +120,19 @@ class App extends Component<Props, State> {
     componentDidMount(): void {
         const { token } = this.props;
 
-        if (token && token !== undefined && token !== "undefined") {
+        if (token && token !== "undefined") {
             this.props.history.push('/services');
         } else {
             this.fetchServices(this.props.api_url);
         }
     }
 
+    /**
+     * Fetch services inside the about.json of the API
+     * to get informations about the different services of the API.
+     *
+     * @param api_url url of the api
+     */
     fetchServices(api_url: string): void {
         this.setState({ services: [] });
         fetch(`${api_url}/about.json`)
@@ -147,6 +154,12 @@ class App extends Component<Props, State> {
             });
     }
 
+    /**
+     * Function to handle the keyPress of enter key to pass
+     * to the next step
+     *
+     * @param e event triggered
+     */
     keyPress = (e: any) => {
         if (e.keyCode === 13) {
             const toClick: HTMLElement | null = document.getElementById('getStarted');

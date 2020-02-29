@@ -1,19 +1,22 @@
 package com.b12powered.area.activities
 
+import android.app.AlertDialog
 import android.content.Context
+import android.content.DialogInterface
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import com.auth0.android.jwt.JWT
-import com.b12powered.area.R
-import com.b12powered.area.User
+import com.b12powered.area.*
 import com.b12powered.area.api.ApiClient
-import com.b12powered.area.toObject
+import com.b12powered.area.fragments.ServiceUserFragment
 import java.util.*
+import kotlin.collections.ArrayList
 
 /**
  * The activity where the user can have all services
@@ -24,6 +27,7 @@ class HomeActivity : AppCompatActivity() {
 
     private lateinit var handler: Handler
     private lateinit var currentUser: User
+    private var serviceList: ArrayList<Service> = ArrayList()
 
     /**
      * Override method onCreate
@@ -60,6 +64,7 @@ class HomeActivity : AppCompatActivity() {
         } else {
             checkTokenValidity()
         }
+        findSubscribeService()
 
         handler = Handler(Looper.getMainLooper())
 
@@ -89,10 +94,62 @@ class HomeActivity : AppCompatActivity() {
                 handler.postDelayed(this, 60000)
             }
         })
+
+        onBackPressedDispatcher.addCallback(object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                showDialog()
+            }
+        })
+    }
+    
+    /**
+     * Find all subscribe service for the user
+     *
+     * Perform an API call on /me to get the current user and get all services he subscribe
+     */
+    private fun findSubscribeService() {
+        ApiClient(this)
+            .getUser { user, message ->
+                if (user != null) {
+                    ApiClient(this)
+                        .aboutJson { about, msg ->
+                            if (about !== null) {
+                                about.server.services.forEach { service ->
+                                    if (user.services.contains(service.name)) {
+                                        supportFragmentManager.beginTransaction()
+                                            .add(
+                                                R.id.home,
+                                                ServiceUserFragment.newInstance(serviceList, service)
+                                            )
+                                            .commit()
+                                        serviceList.add(service)
+                                    }
+                                }
+                            } else {
+                                Toast.makeText(
+                                    this,
+                                    msg,
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                        }
+                } else {
+                    Toast.makeText(
+                        this,
+                        message,
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    val intent = Intent(this, LoginActivity::class.java)
+                    finish()
+                    startActivity(intent)
+                }
+            }
     }
 
+    /**
+     * Check the token validity
+     */
     private fun checkTokenValidity() {
-
         ApiClient(this)
             .getUser { user, message ->
                 if (user != null) {
@@ -117,4 +174,22 @@ class HomeActivity : AppCompatActivity() {
             }
     }
 
+    /**
+     * Show a dialog asking the user if they want to exit the application
+     */
+    private fun showDialog() {
+        val builder = AlertDialog.Builder(this)
+        val dialogClickListener = DialogInterface.OnClickListener { dialog, which ->
+            when(which) {
+                DialogInterface.BUTTON_POSITIVE -> finishAffinity()
+                DialogInterface.BUTTON_NEGATIVE -> dialog.dismiss()
+            }
+        }
+        builder
+            .setTitle(getString(R.string.exit_app))
+            .setPositiveButton(getString(R.string.yes), dialogClickListener)
+            .setNegativeButton(getString(R.string.no), dialogClickListener)
+            .create()
+            .show()
+    }
 }

@@ -1,6 +1,6 @@
 import {bind, Context} from '@loopback/core';
-import axios from 'axios';
 import {OperationStatus} from '../services-interfaces';
+import WorkerHelper from "../WorkerHelper";
 
 export interface ConfigSchemaElement {
     name: string,
@@ -12,56 +12,20 @@ export interface ConfigSchemaElement {
 @bind({tags: {namespace: "services", name: "area"}})
 export class AreaService {
 
-    static pullingStarted = {};
-
     constructor() {}
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    startPulling(url: string | ((actionId?: string, ctx?: Context) => Promise<string|undefined>), params: object, diffFunction: (data: any) => Promise<any[] | null>, onDiff: (diff: any[]) => Promise<void>, interval: number, name: string, actionId?: string, ctx?: Context): NodeJS.Timeout {
-        const id = setInterval(() => {
-            if (typeof url === "string") {
-                axios.get(url, params).then((res) => {
-                    diffFunction(res.data).then(async (diff) => {
-                        if (diff == null || diff.length <= 0)
-                            return;
-                        await onDiff(diff);
-                    }).catch((err) => {});
-                }).catch((err) => {
-                });
-            } else {
-                url(actionId, ctx).then((parsedUrl: string|undefined) => {
-                    if (!parsedUrl) {
-                        console.error(`A pulling was enqueued with an url function but missing actionId or context. ActionId: ${actionId}`);
-                        return;
-                    }
-                    axios.get(parsedUrl, params).then((res) => {
-                        diffFunction(res.data).then(async (diff) => {
-                            if (diff == null || diff.length <= 0)
-                                return;
-                            await onDiff(diff);
-                        }).catch((err) => {});
-                    }).catch((err) => {
-                    });
-                }).catch((err) => {
-                });
-            }
-        }, interval * 1000);
-        AreaService.pullingStarted[name as keyof typeof AreaService.pullingStarted] = id as never;
-        return id;
+    async startPulling(interval: number, name: string, service: string, ctx: Context, data?: any) {
+        await WorkerHelper.AddPullingJob({
+            triggerEvery: interval * 1000,
+            name: name,
+            service: service,
+            jobData: data
+        }, ctx);
     }
 
-    stopPulling(name: string) {
-        const to = AreaService.pullingStarted[name as keyof typeof AreaService.pullingStarted];
-
-        clearInterval(to);
-        delete AreaService.pullingStarted[name as keyof typeof AreaService.pullingStarted];
-    }
-
-    stopPullingStartWith(start: string) {
-        for (const key of Object.keys(AreaService.pullingStarted)) {
-            if (key.startsWith(start))
-                this.stopPulling(key);
-        }
+    async stopPulling(name: string, service: string, ctx: Context) {
+        await WorkerHelper.RemovePullingJob(service, name, ctx);
     }
 
     validateConfigSchema(data: object, model: ConfigSchemaElement[]): OperationStatus {
