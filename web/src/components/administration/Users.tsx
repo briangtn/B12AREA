@@ -28,6 +28,8 @@ import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
+import IconButton from '@material-ui/core/IconButton';
+import FilterListIcon from '@material-ui/icons/FilterList';
 
 import MenuItem from '@material-ui/core/MenuItem';
 import Select from '@material-ui/core/Select';
@@ -37,6 +39,8 @@ import Grid from '@material-ui/core/Grid';
 import Alert from '../Alert';
 import {setAdminToken, setToken} from "../../actions/api.action";
 import Cookies from "universal-cookie";
+import TextField from "@material-ui/core/TextField";
+import Menu from "@material-ui/core/Menu";
 
 const cookies = new Cookies();
 
@@ -56,6 +60,7 @@ interface Props {
 
 interface State {
     users: User[],
+    unfilteredUsers: User[],
     rowsPerPage: number,
     page: number,
     userDetail: boolean,
@@ -65,7 +70,10 @@ interface State {
     alertListMessage: string,
     alertDetail: boolean,
     alertDetailMessage: string,
-    availableRoles: string[]
+    availableRoles: string[],
+    filterEnabled: { name: string, component: any }[],
+    filterMenuAnchor: any,
+    filterParameters: any
 }
 
 interface AuthService {
@@ -100,6 +108,7 @@ const styles = (theme: Theme) => createStyles({
 class Users extends Component<Props, State> {
     state: State = {
         users: [],
+        unfilteredUsers: [],
         rowsPerPage: 10,
         page: 0,
         userDetail: false,
@@ -109,7 +118,10 @@ class Users extends Component<Props, State> {
         alertListMessage: '',
         alertDetail: false,
         alertDetailMessage: '',
-        availableRoles: []
+        availableRoles: [],
+        filterEnabled: [],
+        filterMenuAnchor: null,
+        filterParameters: {}
     };
 
     /**
@@ -127,7 +139,7 @@ class Users extends Component<Props, State> {
         })
         .then(res => res.json())
         .then((data) => {
-            this.setState({ users: data });
+            this.setState({ users: data, unfilteredUsers: data });
         });
 
         fetch(`${apiUrl}/users/availableRoles`, {
@@ -139,6 +151,69 @@ class Users extends Component<Props, State> {
         });
     }
 
+    filterOnChange = (e: any) => {
+        const { filterParameters, unfilteredUsers } = this.state;
+
+        filterParameters[e.currentTarget.id] = e.currentTarget.value;
+        const filteredUsers: User[] = unfilteredUsers.filter((user: User) => {
+            return (user[e.currentTarget.id as keyof User] as string).indexOf(filterParameters[e.currentTarget.id]) !== -1
+        });
+        this.setState({ filterParameters: filterParameters, users: filteredUsers });
+    };
+
+    /**
+     * Component to filter the email address
+     */
+    filterComponent = () => {
+        const { filterEnabled, filterMenuAnchor, filterParameters } = this.state;
+        const filterAvailable: { name: string, component: any }[] = [
+            { name: 'Email', component: <TextField id="email" label="Email" onChange={this.filterOnChange} value={filterParameters['email']} /> }
+        ];
+
+        const filterToDisplay = [];
+
+        for (let filter of filterAvailable) {
+            let exist = false;
+            for (let filterEnable of filterEnabled) {
+                if (filter.name === filterEnable.name)
+                    exist = true;
+            }
+            if (!exist)
+                filterToDisplay.push(filter);
+        }
+
+        return (
+            <div>
+                <Grid container spacing={3}>
+                    <Grid item xs="auto">
+                      <IconButton onClick={(e: any) => { this.setState({ filterMenuAnchor: e.currentTarget })} }>
+                        <FilterListIcon />
+                      </IconButton>
+                    </Grid>
+                    { filterEnabled.map((curFilter, index) => (
+                        <Grid item xs="auto" key={index}>
+                            {curFilter.component}
+                        </Grid>
+                    ))}
+                </Grid>
+                <Menu
+                    id="simple-menu"
+                    anchorEl={filterMenuAnchor as any}
+                    keepMounted
+                    open={Boolean(filterMenuAnchor)}
+                    onClose={(e: any) => this.setState({ filterMenuAnchor: null })}
+                >
+                    { filterToDisplay.map((filter, index) => (
+                        <MenuItem
+                            key={index}
+                            onClick={(e) => { this.setState(prevState => ({ filterEnabled: [...prevState.filterEnabled, filter], filterMenuAnchor: null })) }}>
+                            { filter.name }
+                        </MenuItem>
+                    )) }
+                </Menu>
+            </div>
+        );
+    };
     /**
      * Function called when the admin press the unpersonate button
      *
@@ -305,6 +380,7 @@ class Users extends Component<Props, State> {
         if (!this.state.userDetail) {
             return (
                 <div>
+                    { this.filterComponent() }
                     <Table className={classes.table} aria-label="simple table">
                         <TableHead>
                             <TableRow>
