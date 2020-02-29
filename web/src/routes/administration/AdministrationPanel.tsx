@@ -118,6 +118,8 @@ const styles = (theme: Theme) => createStyles({
         marginLeft: -240,
     },
     contentShift: {
+        flexGrow: 1,
+        padding: theme.spacing(3),
         transition: theme.transitions.create('margin', {
             easing: theme.transitions.easing.easeOut,
             duration: theme.transitions.duration.enteringScreen,

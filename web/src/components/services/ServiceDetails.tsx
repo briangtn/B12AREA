@@ -357,8 +357,12 @@ class ServiceDetails extends Component<Props, State> {
                 } else {
                     const {info} = this.state;
 
-                    const tmpAreaArray = data.filter((area: any) => (area.action.serviceAction.split('.')[0] === info.name));
-                    this.setState({areas: tmpAreaArray});
+                    if (data.action) {
+                        const tmpAreaArray = data.filter((area: any) => (area.action.serviceAction.split('.')[0] === info.name));
+                        this.setState({areas: tmpAreaArray});
+                    } else {
+                        this.setState({areas: data});
+                    }
 
                     fetch(`${api_url}/about.json`)
                         .then(res => res.json())
