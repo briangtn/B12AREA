@@ -30,11 +30,12 @@ export default class ActionController {
     }
 
     static async updateAction(actionID: string, oldActionConfig: Object, newActionConfig: Object, ctx: Context): Promise<OperationStatus> {
+        const configTyped = newActionConfig as {id: string};
         const actionRepository: ActionRepository = await ctx.get('repositories.ActionRepository');
 
         await SpotifyHelper.stopNewPlaylistSongPulling(actionID, ctx);
         await SpotifyHelper.startNewPlaylistSongPulling(actionID, (await actionRepository.getActionOwnerID(actionID))!, ctx);
-        return {success: true};
+        return {success: true, options: {id: configTyped.id}};
     }
 
     static async deleteAction(actionID: string, actionConfig: Object, ctx: Context): Promise<OperationStatus> {
