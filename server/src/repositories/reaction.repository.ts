@@ -131,14 +131,14 @@ export class ReactionRepository extends DefaultCrudRepository<Reaction,
             let controller;
             try {
                 controller = await this.resolveReactionController(reaction.serviceReaction);
+            // eslint-disable-next-line no-empty
             } catch (e) {
-                throw new HttpErrors.BadRequest('Reaction not found');
             }
 
             try {
                 result = await controller.deleteReaction(reaction.id!, reaction.options, this.ctx);
+            // eslint-disable-next-line no-empty
             } catch (e) {
-                throw new HttpErrors.BadRequest('Failed to delete reaction in service');
             }
             if (!result.success) {
                 throw new HttpErrors.BadRequest(result.error);

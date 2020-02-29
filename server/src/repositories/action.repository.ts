@@ -153,14 +153,13 @@ export class ActionRepository extends DefaultCrudRepository<Action,
             let controller;
             try {
                 controller = await this.resolveActionController(action.serviceAction);
-            } catch (e) {
-                throw new HttpErrors.BadRequest('Action not found');
-            }
+            // eslint-disable-next-line no-empty
+            } catch (e) {}
 
             try {
                 result = await controller.deleteAction(action.id!, action.options, this.ctx);
+            // eslint-disable-next-line no-empty
             } catch (e) {
-                throw new HttpErrors.BadRequest('Failed to delete action in service');
             }
             if (!result.success) {
                 throw new HttpErrors.BadRequest(result.error);

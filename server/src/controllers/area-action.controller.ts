@@ -175,6 +175,7 @@ export class AreaActionController {
         try {
             controller = await this.resolveActionController(area.action.serviceAction);
         } catch (e) {
+            // Dont put a NotFound error, the type of action is not found (not the entity)
             throw new HttpErrors.BadRequest('Action not found');
         }
         let result : OperationStatus;
@@ -228,7 +229,7 @@ export class AreaActionController {
         try {
             controller = await this.resolveActionController(area.action.serviceAction);
         } catch (e) {
-            throw new HttpErrors.BadRequest('Action not found');
+            throw new HttpErrors.NotFound('Action not found');
         }
         let result : OperationStatus;
         try {
