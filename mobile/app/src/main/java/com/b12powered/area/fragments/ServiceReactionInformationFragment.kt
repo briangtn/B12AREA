@@ -20,9 +20,9 @@ import com.b12powered.area.api.ApiClient
  *
  * This class set a clickable list of reaction, depending on action type
  *
- * @param list Current action details
+ * @param listActionDetails Current action details
  */
-class ServiceReactionInformationFragment(private val list: Pair<String, ActionDetails>) : Fragment() {
+class ServiceReactionInformationFragment(private val listActionDetails: Pair<String, ActionDetails>) : Fragment() {
 
     private var _allAreasService : MutableList<Areas>? = mutableListOf()
     private lateinit var listView: ListView
@@ -33,12 +33,12 @@ class ServiceReactionInformationFragment(private val list: Pair<String, ActionDe
         /**
          * This method return a new instance of [ServiceReactionInformationFragment]
          *
-         * @param list The current action details
+         * @param listActionDetails The current action details
          *
          * @return A new instance of [ServiceReactionInformationFragment]
          */
-        fun newInstance(list: Pair<String, ActionDetails>): ServiceReactionInformationFragment {
-            return ServiceReactionInformationFragment(list)
+        fun newInstance(listActionDetails: Pair<String, ActionDetails>): ServiceReactionInformationFragment {
+            return ServiceReactionInformationFragment(listActionDetails)
         }
     }
 
@@ -79,7 +79,7 @@ class ServiceReactionInformationFragment(private val list: Pair<String, ActionDe
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        var serviceName = list.second.serviceAction.substringBefore(".")
+        var serviceName = listActionDetails.second.serviceAction.substringBefore(".")
         getAreasReaction(serviceName)
     }
 
@@ -117,42 +117,42 @@ class ServiceReactionInformationFragment(private val list: Pair<String, ActionDe
      * Function for print all the current reaction linked with a specific action type
      */
     private fun printAreasReaction() {
-        var liste: ArrayList<Pair<String, ReactionDetails>> = ArrayList()
+        var listReactionDetails: ArrayList<Pair<String, ReactionDetails>> = ArrayList()
         listView = view!!.findViewById(R.id.list)
         var reactionOption = ""
 
         _allAreasService?.forEach { item ->
-            if (item.actions.id == list.second.id) {
-                item.reactions.forEach { second ->
+            if (item.actions.id == listActionDetails.second.id) {
+                item.reactions.forEach { reaction ->
                     numberReaction++
-                    if (second.options != null) {
-                        for ((key, value) in second.options)
+                    if (reaction.options != null) {
+                        for ((key, value) in reaction.options)
                             reactionOption = "$reactionOption$key : $value\n"
-                        var reactionDetail = second.serviceReaction.substringAfterLast(".")
-                        var reactionName = second.serviceReaction.substringBefore(".")
-                        liste.add(
+                        var reactionDetail = reaction.serviceReaction.substringAfterLast(".")
+                        var reactionName = reaction.serviceReaction.substringBefore(".")
+                        listReactionDetails.add(
                             Pair(
                                 reactionName.plus("\t (") + reactionDetail.plus(")\n\n") + reactionOption,
-                                second
+                                reaction
                             )
                         )
                     } else {
-                        var reactionDetail = second.serviceReaction.substringAfterLast(".")
-                        var reactionName = second.serviceReaction.substringBefore(".")
-                        liste.add(
+                        var reactionDetail = reaction.serviceReaction.substringAfterLast(".")
+                        var reactionName = reaction.serviceReaction.substringBefore(".")
+                        listReactionDetails.add(
                             Pair(
                                 reactionName.plus("\t (") + reactionDetail.plus(")"),
-                                second
+                                reaction
                             )
                         )
                     }
                 }
             }
         }
-        val adapter = ArrayAdapter(context!!, android.R.layout.simple_list_item_1, liste.map { item -> item.first })
+        val adapter = ArrayAdapter(context!!, android.R.layout.simple_list_item_1, listReactionDetails.map { item -> item.first })
         listView.adapter = adapter
         listView.setOnItemClickListener { _, _, position, _ ->
-            showDialog(liste[position])
+            showDialog(listReactionDetails[position])
         }
     }
 
@@ -161,14 +161,14 @@ class ServiceReactionInformationFragment(private val list: Pair<String, ActionDe
      *
      * Function for showing a dialog to the user
      *
-     * @param liste current reaction selected
+     * @param listReactionDetails current reaction selected
      */
-    private fun showDialog(liste: Pair<String, ReactionDetails>) {
+    private fun showDialog(listReactionDetails: Pair<String, ReactionDetails>) {
         val builder = AlertDialog.Builder(context)
-        var serviceReactionName = liste.second.serviceReaction.substringBefore(".")
+        var serviceReactionName = listReactionDetails.second.serviceReaction.substringBefore(".")
         val dialogClickListener = DialogInterface.OnClickListener { dialog, which ->
             when (which) {
-                DialogInterface.BUTTON_POSITIVE -> deleteReaction(liste)
+                DialogInterface.BUTTON_POSITIVE -> deleteReaction(listReactionDetails)
                 DialogInterface.BUTTON_NEGATIVE -> dialog.dismiss()
             }
         }
@@ -196,7 +196,7 @@ class ServiceReactionInformationFragment(private val list: Pair<String, ActionDe
                     if (numberReaction == 0) {
                         (activity as ServiceInformationActivity).refreshView()
                     } else {
-                        (activity as ServiceInformationActivity).changeView(list)
+                        (activity as ServiceInformationActivity).changeView(listActionDetails)
                     }
                 } else {
                     Toast.makeText(

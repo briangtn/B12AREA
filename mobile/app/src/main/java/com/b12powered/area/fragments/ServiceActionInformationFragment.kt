@@ -98,7 +98,7 @@ class ServiceActionInformationFragment(private val serviceName: String) : Fragme
      */
     private fun printAreasAction() {
         listView = view!!.findViewById(R.id.list)
-        var list: ArrayList<Pair<String, ActionDetails>> = ArrayList()
+        var listActionDetails: ArrayList<Pair<String, ActionDetails>> = ArrayList()
 
         _allAreasService?.forEach { item ->
             var serviceAction = item.actions.serviceAction.substringAfterLast(".")
@@ -107,36 +107,36 @@ class ServiceActionInformationFragment(private val serviceName: String) : Fragme
             if (item.actions.options != null) {
                 for ((key, value) in item.actions.options)
                     actionOption = "$actionOption$key : $value\n"
-                list.add(Pair(serviceAction.plus("\n\n") + actionOption, item.actions))
+                listActionDetails.add(Pair(serviceAction.plus("\n\n") + actionOption, item.actions))
             } else {
-                list.add(Pair(serviceAction.plus("\n"), item.actions))
+                listActionDetails.add(Pair(serviceAction.plus("\n"), item.actions))
             }
         }
-        val adapter = ArrayAdapter(context!!, android.R.layout.simple_list_item_1, list.map { item -> item.first })
+        val adapter = ArrayAdapter(context!!, android.R.layout.simple_list_item_1, listActionDetails.map { item -> item.first })
         listView.adapter = adapter
 
         listView.setOnItemClickListener { _, _, position, _ ->
-            showDialog(haveReaction(list[position]), list[position])
+            showDialog(haveReaction(listActionDetails[position]), listActionDetails[position])
         }
     }
 
     /**
      * Function for switch fragment and show all reactions about an action
      *
-     * @param list current action selected
+     * @param listActionDetails current action selected
      */
-    private fun showReactionService(list: Pair<String, ActionDetails>) {
-        (activity as ServiceInformationActivity).changeView(list)
+    private fun showReactionService(listActionDetails: Pair<String, ActionDetails>) {
+        (activity as ServiceInformationActivity).changeView(listActionDetails)
     }
 
     /**
      * Function for delete an areas
      *
-     * @param list current action with areasId to delete
+     * @param listActionDetails current action with areasId to delete
      */
-    private fun deleteAreas(list : Pair<String, ActionDetails>) {
+    private fun deleteAreas(listActionDetails: Pair<String, ActionDetails>) {
         ApiClient(context!!)
-            .deleteArea(list.second.areaId) { success, message ->
+            .deleteArea(listActionDetails.second.areaId) { success, message ->
                 if (success) {
                     (activity!! as ServiceInformationActivity).refreshView()
                 } else {
@@ -153,16 +153,16 @@ class ServiceActionInformationFragment(private val serviceName: String) : Fragme
      * Function for showing a dialog when click on specific action
      *
      * @param haveReaction True if the action have Reaction false otherwise
-     * @param list The current actionDetails clicked
+     * @param listActionDetails The current actionDetails clicked
      */
-    private fun showDialog(haveReaction: Boolean, list : Pair<String, ActionDetails>) {
+    private fun showDialog(haveReaction: Boolean, listActionDetails: Pair<String, ActionDetails>) {
         val builder = AlertDialog.Builder(context)
         if (haveReaction) {
             val dialogClickListener = DialogInterface.OnClickListener { dialog, which ->
                 when(which) {
                     DialogInterface.BUTTON_NEUTRAL -> dialog.dismiss()
-                    DialogInterface.BUTTON_POSITIVE -> showReactionService(list)
-                    DialogInterface.BUTTON_NEGATIVE -> deleteAreas(list)
+                    DialogInterface.BUTTON_POSITIVE -> showReactionService(listActionDetails)
+                    DialogInterface.BUTTON_NEGATIVE -> deleteAreas(listActionDetails)
                 }
             }
             builder
@@ -176,7 +176,7 @@ class ServiceActionInformationFragment(private val serviceName: String) : Fragme
         } else {
             val dialogClickListener = DialogInterface.OnClickListener { dialog, which ->
                 when(which) {
-                    DialogInterface.BUTTON_POSITIVE -> deleteAreas(list)
+                    DialogInterface.BUTTON_POSITIVE -> deleteAreas(listActionDetails)
                     DialogInterface.BUTTON_NEGATIVE -> dialog.dismiss()
                 }
             }
@@ -187,22 +187,21 @@ class ServiceActionInformationFragment(private val serviceName: String) : Fragme
                 .setNegativeButton(getString(R.string.cancel), dialogClickListener)
                 .create()
                 .show()
-
         }
     }
 
     /**
      * Function for checking if a action have reaction
      *
-     * @param [list] the current action Clicked
+     * @param [listActionDetails] the current action Clicked
      * @return true if action contains reaction false otherwise
      */
-    private fun haveReaction(list : Pair<String, ActionDetails>) : Boolean {
+    private fun haveReaction(listActionDetails: Pair<String, ActionDetails>) : Boolean {
         _allAreasService?.forEach { item ->
-            if (item.actions.serviceAction == list.second.serviceAction) {
+            if (item.actions.serviceAction == listActionDetails.second.serviceAction) {
                 if (item.reactions != null) {
                     item.reactions.forEach { second ->
-                        if (list.second.areaId == second.areaId)
+                        if (listActionDetails.second.areaId == second.areaId)
                             return true
                     }
                 }

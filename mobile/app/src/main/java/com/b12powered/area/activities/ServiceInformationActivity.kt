@@ -12,10 +12,13 @@ import com.b12powered.area.fragments.ServiceActionInformationFragment
 import com.b12powered.area.fragments.ServiceReactionInformationFragment
 import com.b12powered.area.fragments.ServiceUserFragment
 
+/**
+ * This class is use for handling fragment print action information and reaction too
+ *
+ * This class use supportFragmentManager for handling switching fragment
+ */
 class ServiceInformationActivity : AppCompatActivity() {
 
-    private var _allAreasService : MutableList<Areas>? = mutableListOf()
-    private lateinit var listView: ListView
     private var serviceName: String = ""
 
     /**
@@ -36,12 +39,20 @@ class ServiceInformationActivity : AppCompatActivity() {
             .commit()
     }
 
-    fun changeView(list: Pair<String, ActionDetails>) {
+    /**
+     * Function for changing fragment for print Reaction Details
+     *
+     * @param listActionDetails for send the current action selected to the next fragment
+     */
+    fun changeView(listActionDetails: Pair<String, ActionDetails>) {
         supportFragmentManager.beginTransaction()
-            .replace(R.id.create_action_list, ServiceReactionInformationFragment.newInstance(list))
+            .replace(R.id.create_action_list, ServiceReactionInformationFragment.newInstance(listActionDetails))
             .commit()
     }
 
+    /**
+     * Function for resfresh the current view
+     */
     fun refreshView() {
         intent = Intent(this, ServiceInformationActivity::class.java)
         intent.putExtra("serviceName", serviceName)
