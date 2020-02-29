@@ -88,7 +88,6 @@ class UserActivity : AppCompatActivity() {
                     _user = user
                     etEmail.hint = _user.email
                     _faActivated = _user.twoFactorAuthenticationEnabled
-                    println(_faActivated)
                     for (i in user.role) {
                         if (etUserRole.text == null) {
                             etUserRole.text = i
