@@ -69,8 +69,8 @@ export class AreaRepository extends DefaultCrudRepository<Area,
             where: where
         }, options);
         for (const area of areas) {
-            this.action(area.id).delete().then().catch(console.error);
-            this.reactions(area.id).delete().then().catch(console.error);
+            await this.action(area.id).delete();
+            await this.reactions(area.id).delete();
         }
         return super.deleteAll(where, options);
     }
