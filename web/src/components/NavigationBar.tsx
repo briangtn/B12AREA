@@ -21,6 +21,10 @@ import Divider from "@material-ui/core/Divider";
 import {setToken} from "../actions/api.action";
 
 import Cookies from "universal-cookie";
+import ListItemIcon from "@material-ui/core/ListItemIcon";
+
+import AccountCircleIcon from '@material-ui/icons/AccountCircle';
+import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 
 const cookies = new Cookies();
 
@@ -133,9 +137,19 @@ class NavigationBar extends Component <Props, State> {
                         open={Boolean(this.state.anchorEl)}
                         onClose={this.handleClose}
                     >
-                        <MenuItem id='profile' onClick={this.handleClose}><Translator sentence="profile" /></MenuItem>
+                        <MenuItem id='profile' onClick={this.handleClose}>
+                            <ListItemIcon>
+                                <AccountCircleIcon />
+                            </ListItemIcon>
+                            <Translator sentence="profile" />
+                        </MenuItem>
                         <Divider />
-                        <MenuItem id='logout' onClick={this.handleClose}><Translator sentence="logOut" /></MenuItem>
+                        <MenuItem id='logout' onClick={this.handleClose}>
+                            <ListItemIcon>
+                                <ExitToAppIcon />
+                            </ListItemIcon>
+                            <Translator sentence="logOut" />
+                        </MenuItem>
                     </Menu>
                 </div>
             );

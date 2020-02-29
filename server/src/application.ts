@@ -128,7 +128,7 @@ export class AreaApplication extends BootMixin(
 
         fs.readdir(path.join(baseDir), (err, dirs) => {
             if (err)
-                return console.error(err);
+                dirs = [];
             for (const dirIndex in dirs) {
                 const dir = dirs[dirIndex];
                 import(baseDir + dir + '/controller').then(module => {
@@ -165,7 +165,7 @@ export class AreaApplication extends BootMixin(
 
     }
 
-    public async beforeStart() {
+    public async afterStart() {
         for (const Class of this.areaServicesControllers) {
             try {
                 await Class.start(this);

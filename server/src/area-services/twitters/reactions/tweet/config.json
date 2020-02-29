@@ -1,0 +1,12 @@
+{
+  "displayName": "Tweet",
+  "description": "Send a new tweet to your profile",
+  "configSchema": [
+    {
+      "name": "content",
+      "description": "The content of the tweet",
+      "type": "string",
+      "required": true
+    }
+  ]
+}

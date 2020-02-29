@@ -95,6 +95,7 @@
     "@types/ejs": "^3.0.0",
     "@types/mongodb": "^3.3.16",
     "@types/node": "^10.17.13",
+    "@types/request": "^2.48.4",
     "@typescript-eslint/eslint-plugin": "^2.15.0",
     "@typescript-eslint/parser": "^2.15.0",
     "eslint": "^6.8.0",
@@ -103,6 +104,7 @@
     "eslint-plugin-mocha": "^6.2.2",
     "mocha": "^7.0.0",
     "prettier": "^1.19.1",
+    "request": "^2.88.2",
     "source-map-support": "^0.5.16",
     "testcontainers": "^2.2.0",
     "typescript": "~3.7.4"

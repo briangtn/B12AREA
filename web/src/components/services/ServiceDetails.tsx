@@ -39,10 +39,14 @@ import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Switch from "@material-ui/core/Switch";
 import {IArea, IPlaceHolder} from "../../interfaces/IService.interface";
 
+import AddAreaStepper from "./AddAreaStepper";
 import HtmlTooltip from "./HtmlTooltip";
-import {setToken} from "../../actions/api.action";
+
+import { setToken } from "../../actions/api.action";
 import Cookies from "universal-cookie";
 import ArrowBackIosIcon from "@material-ui/icons/ArrowBackIos";
+import Alert from "../Alert";
+import Snackbar from "@material-ui/core/Snackbar";
 
 const cookies = new Cookies();
 
@@ -77,7 +81,10 @@ interface State {
     availableReactions: any,
     chosenArea: number,
     selectedReaction: any,
-    configSchemaReaction: any
+    configSchemaReaction: any,
+    addAreaDialog: boolean,
+    error: boolean,
+    errorMessage: string
 }
 
 const mapStateToProps = (state: any) => {
@@ -122,7 +129,10 @@ class ServiceDetails extends Component<Props, State> {
         availableReactions: [],
         chosenArea: 0,
         selectedReaction: 0,
-        configSchemaReaction: {}
+        configSchemaReaction: {},
+        addAreaDialog: false,
+        error: false,
+        errorMessage: ''
     };
 
     backClicked = (e: any) => {
@@ -173,11 +183,13 @@ class ServiceDetails extends Component<Props, State> {
      */
     displayConfigSchema = (configSchema: any) => {
         const { areas, chosenArea, configSchemaReaction } = this.state;
-        const { name, type, required } = configSchema;
+        const { name, type, required, description } = configSchema;
         const currentArea: any = areas[chosenArea];
         let placeholders: IPlaceHolder[] | null = null;
 
         let currentActionInfos = this.state.availableActions.filter((available: any) => {
+            if (!currentArea.action)
+                return true;
             const splitted: string[] = currentArea.action.serviceAction.split('.');
 
             return available.name === splitted[splitted.length - 1];
@@ -192,6 +204,7 @@ class ServiceDetails extends Component<Props, State> {
         if (placeholders) {
             placeHolderComponent = (
                 <React.Fragment>
+                    <i><u>{`${name}:`}</u> {`${description}`}</i>
                     <p><b>Placeholders:</b></p>
                     {placeholders.map((holder: IPlaceHolder, index: number) => <p key={index}>{`{${holder.name}}: ${holder.description}`}</p>)}
                 </React.Fragment>
@@ -293,7 +306,13 @@ class ServiceDetails extends Component<Props, State> {
         })
             .then(res => res.json())
             .then((data) => {
-                window.location.reload();
+                const { error } = data;
+
+                if (error) {
+                    this.setState({ error: true, errorMessage: `${error.name}: ${error.message}`});
+                } else {
+                    window.location.reload();
+                }
             });
     };
 
@@ -339,6 +358,14 @@ class ServiceDetails extends Component<Props, State> {
             });
     };
 
+    addAreaDialogClose = (e: any) => {
+        this.setState({ addAreaDialog: false });
+    };
+
+    addAreaDialogOpen = (e: any) => {
+        this.setState({  addAreaDialog: true });
+    };
+
     componentDidMount() {
         const { token, api_url } = this.props;
 
@@ -357,7 +384,11 @@ class ServiceDetails extends Component<Props, State> {
                 } else {
                     const {info} = this.state;
 
-                    const tmpAreaArray = data.filter((area: any) => (area.action.serviceAction.split('.')[0] === info.name));
+                    const tmpAreaArray = data.filter((area: any) => {
+                        if (!area.action)
+                            return true;
+                        return (area.action.serviceAction.split('.')[0] === info.name)
+                    });
                     this.setState({areas: tmpAreaArray});
 
                     fetch(`${api_url}/about.json`)
@@ -393,6 +424,7 @@ class ServiceDetails extends Component<Props, State> {
     render() {
         const { classes } = this.props;
         const { areas, info } = this.state;
+        const infoFromProps = this.props.location.state.info;
 
         return (
             <div>
@@ -413,6 +445,9 @@ class ServiceDetails extends Component<Props, State> {
                     }}
                 >
                     <Typography variant="h3" className={classes.section} gutterBottom><b><Translator sentence="myActions" /> - { info.displayName }</b></Typography>
+                    <Button onClick={this.addAreaDialogOpen} style={{ marginBottom: '10px' }} variant="outlined" fullWidth>
+                        <AddIcon />
+                    </Button>
                     {areas.map((area: any, index: number) => (
                         <ExpansionPanel key={areas.indexOf(area)}>
                             <ExpansionPanelSummary
@@ -504,6 +539,7 @@ class ServiceDetails extends Component<Props, State> {
                             </ExpansionPanelActions>
                         </ExpansionPanel>
                     ))}
+                <div style={{ marginTop: '50px'}} />
                 </div>
                 <Dialog
                     open={this.state.dialogOpened}
@@ -526,7 +562,7 @@ class ServiceDetails extends Component<Props, State> {
                                 autoWidth
                             >
                                 {this.state.availableReactions.map((elem: any, index: number) => (
-                                    <MenuItem key={index} value={elem}>{`${elem.name} - ${elem.description}`}</MenuItem>
+                                    <MenuItem key={index} value={elem}>{`${elem.displayName} - ${elem.description}`}</MenuItem>
                                 ))}
                             </Select>
                         </FormControl>
@@ -553,6 +589,16 @@ class ServiceDetails extends Component<Props, State> {
                             <Translator sentence="save" />
                         </Button>
                     </DialogActions>
+                    <Snackbar open={this.state.error} autoHideDuration={6000} onClose={(e: any) => { this.setState({ error: true }) }}>
+                        <Alert onClose={(e: any) => { this.setState({ error: true }) }} severity={"error"}>
+                            { this.state.errorMessage }
+                        </Alert>
+                    </Snackbar>
+                </Dialog>
+                <Dialog open={this.state.addAreaDialog} onClose={this.addAreaDialogClose} aria-labelledby="form-dialog-title">
+                    <DialogContent>
+                        <AddAreaStepper history={this.props.history} serviceName={infoFromProps.name} actions={infoFromProps.actions} reactions={infoFromProps.reactions} closeFunction={this.addAreaDialogClose} needToRefresh={true} />
+                    </DialogContent>
                 </Dialog>
             </div>
         );
