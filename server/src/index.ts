@@ -6,8 +6,8 @@ export {AreaApplication};
 
 async function startAsAPI(app: AreaApplication)
 {
-    await app.beforeStart();
     await app.start();
+    await app.afterStart();
 
     const url = app.restServer.url;
     console.log(`Server is running at ${url}`);

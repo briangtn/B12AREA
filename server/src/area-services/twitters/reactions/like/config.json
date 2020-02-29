@@ -1,0 +1,12 @@
+{
+  "displayName": "Like",
+  "description": "Like something",
+  "configSchema": [
+    {
+      "name": "id",
+      "description": "The id of the tweet to like",
+      "type": "string",
+      "required": true
+    }
+  ]
+}

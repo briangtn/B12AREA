@@ -31,10 +31,11 @@ export class AreaService {
     validateConfigSchema(data: object, model: ConfigSchemaElement[]): OperationStatus {
         for (const modelElement of model) {
             const existInConfig = Object.keys(data).indexOf(modelElement.name) !== -1;
-            if (modelElement.required && !existInConfig) {
+            const element = data[modelElement.name as keyof typeof data];
+            if (modelElement.required && (!existInConfig || !element)) {
                 return {success: false, error: `Missing ${modelElement.name} in config`};
             }
-            if (existInConfig && typeof data[modelElement.name as keyof typeof data] !== modelElement.type) {
+            if (existInConfig && typeof element !== modelElement.type) {
                 return {success: false, error: `Invalid type for ${modelElement.name} (${typeof data[modelElement.name as keyof typeof data]} is not ${modelElement.type}`};
             }
         }

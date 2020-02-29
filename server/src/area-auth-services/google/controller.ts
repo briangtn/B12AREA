@@ -90,7 +90,6 @@ export default class GoogleController {
                     });
                 }).catch(async (err) => {
                     try {
-                        console.log(dataFromCode);
                         const responseCode = await this.exchangeCodeGenerator.generate({
                             error: 'Problem when fetching google.com',
                             info: err.config
