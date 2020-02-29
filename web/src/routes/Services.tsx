@@ -18,6 +18,10 @@ import { setServices } from "../actions/services.action";
 
 import { IService } from '../interfaces/IService.interface';
 import IAbout from "../interfaces/IAbout.interface";
+import {setToken} from "../actions/api.action";
+import Cookies from "universal-cookie";
+
+const cookies = new Cookies();
 
 interface Props {
     token: string,
@@ -29,7 +33,8 @@ interface Props {
         section: string
     },
     setServices: any,
-    services: any
+    services: any,
+    setToken: any
 }
 
 interface State {
@@ -43,7 +48,7 @@ const mapStateToProps = (state: any) => {
 };
 
 function mapDispatchToProps(dispatch: any) {
-    return { setServices: (token: object) => dispatch(setServices(token)) };
+    return { setServices: (token: object) => dispatch(setServices(token)), setToken: (token: object) => dispatch(setToken(token)) };
 }
 
 const styles = (theme: Theme) => createStyles({
@@ -81,23 +86,36 @@ class Services extends Component<Props, State> {
                 fetch(`${api_url}/users/me`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 })
-                .then(res => res.json())
+                .then((res) => res.json())
                 .then((data) => {
-                    const { servicesList } = data;
-                    const aboutServices = dataAbout['server']['services'];
+                    const { error } = data;
 
-                    const registeredServices: IService[] = [];
-                    const availableServices: IService[] = [];
+                    if (error) {
+                        const { statusCode } = error;
 
-                    for (let aboutService of aboutServices) {
-                        if (servicesList.includes(aboutService.name))
-                            registeredServices.push(aboutService);
-                        else
-                            availableServices.push(aboutService);
+                        if (statusCode === 401) {
+                            cookies.set('token',  '');
+                            this.props.setToken('');
+                            this.props.history.push('/');
+                            return;
+                        }
+                    } else {
+                        const {servicesList} = data;
+                        const aboutServices = dataAbout['server']['services'];
+
+                        const registeredServices: IService[] = [];
+                        const availableServices: IService[] = [];
+
+                        for (let aboutService of aboutServices) {
+                            if (servicesList.includes(aboutService.name))
+                                registeredServices.push(aboutService);
+                            else
+                                availableServices.push(aboutService);
+                        }
+
+                        this.props.setServices(registeredServices);
+                        this.setState({registeredServices: registeredServices, availableServices: availableServices});
                     }
-
-                    this.props.setServices(registeredServices);
-                    this.setState({ registeredServices: registeredServices, availableServices: availableServices });
                 })
             })
     }
