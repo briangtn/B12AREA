@@ -90,7 +90,6 @@ class ServiceActionInformationFragment(private val serviceName: String) : Fragme
             }
     }
 
-
     /**
      * Function printAreasAction
      *

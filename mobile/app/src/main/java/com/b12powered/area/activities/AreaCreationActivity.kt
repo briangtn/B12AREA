@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import com.b12powered.area.*
 import com.b12powered.area.api.ApiClient
@@ -20,6 +21,7 @@ class AreaCreationActivity : AppCompatActivity() {
 
     private lateinit var serviceList: ArrayList<Service>
     private lateinit var service: Service
+    private lateinit var currentArea: Area
 
     /**
      * Override method onCreate
@@ -32,6 +34,8 @@ class AreaCreationActivity : AppCompatActivity() {
 
         val jsonServiceList = intent.getStringArrayListExtra("serviceList")
         val jsonService = intent.getStringExtra("service")
+        val jsonArea = intent.getStringExtra("area")
+
         if (jsonService == null) {
             val intent = Intent(this, HomeActivity::class.java)
             finish()
@@ -48,6 +52,18 @@ class AreaCreationActivity : AppCompatActivity() {
         supportFragmentManager.beginTransaction()
             .add(R.id.create_area_layout, CreateAreaFragment.newInstance())
             .commit()
+
+        onBackPressedDispatcher.addCallback(object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                val intent = Intent(this@AreaCreationActivity, ServiceInformationActivity::class.java)
+                finish()
+                startActivity(intent)
+            }
+        })
+        if (jsonArea !== null) {
+            currentArea = jsonArea.toObject()
+            nextStep(currentArea, null, AreaCreationStatus.ReactionAdded)
+        }
     }
 
     /**
