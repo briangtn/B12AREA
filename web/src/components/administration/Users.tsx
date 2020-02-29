@@ -155,7 +155,9 @@ class Users extends Component<Props, State> {
         const { filterParameters, unfilteredUsers } = this.state;
 
         filterParameters[e.currentTarget.id] = e.currentTarget.value;
-        const filteredUsers: User[] = unfilteredUsers.filter((user: User) => (user[e.currentTarget.id as keyof User] as string).indexOf(filterParameters[e.currentTarget.id]) !== -1);
+        const filteredUsers: User[] = unfilteredUsers.filter((user: User) => {
+            return (user[e.currentTarget.id as keyof User] as string).indexOf(filterParameters[e.currentTarget.id]) !== -1
+        });
         this.setState({ filterParameters: filterParameters, users: filteredUsers });
     };
 
