@@ -1,7 +1,7 @@
 import { Context } from "@loopback/core";
 import config from './config.json';
 import {ActionConfig, ActionFunction, OperationStatus} from '../../../../services-interfaces';
-import {TwitterHelper, Tweet} from '../../helper';
+import {TwitterHelper, Tweet, EventSetting} from '../../helper';
 import {AreaService} from '../../../../services';
 
 export interface NewMentionTwitter {
@@ -34,7 +34,7 @@ export default class NewMentionActionController {
         return config as ActionConfig;
     }
 
-    static async trigger(rawData: NewMentionTwitter, actionID: string, options: NewMentionOptions, userID: string, ctx: Context) {
+    static async trigger(rawData: NewMentionTwitter, actionID: string, options: NewMentionOptions, userID: string, eventData: EventSetting, ctx: Context) {
         const twitterDatas = rawData.tweet_create_events;
         const oauthObject = await TwitterHelper.getOauthObject(userID, ctx);
         const areaService: AreaService = await ctx.get('services.area');

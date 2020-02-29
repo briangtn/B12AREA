@@ -11,11 +11,11 @@ const CONSUMER_KEY = process.env.TWITTER_CONSUMER_KEY ? process.env.TWITTER_CONS
 const CONSUMER_SECRET = process.env.TWITTER_CONSUMER_SECRET ? process.env.TWITTER_CONSUMER_SECRET :  "";
 const WEBHOOK_URL = process.env.API_URL + '/services/twitters/webhook';
 
-async function onTweet(twitterDatas: object, actionID: string, options: object, userID: string, ctx: Context) {
-    if ('user_has_blocked' in twitterDatas) {
-        await NewMentionActionController.trigger(twitterDatas as NewMentionTwitter, actionID, options, userID, ctx);
-    } else {
-        await NewTweetActionController.trigger(twitterDatas as NewTweet, actionID, options, userID, ctx);
+async function onTweet(twitterDatas: object, actionID: string, options: object, userID: string, event: EventSetting, ctx: Context) {
+    if (event.actionName === 'on_mention' && 'user_has_blocked' in twitterDatas && twitterDatas['user_has_blocked' as keyof object] !== undefined) {
+        await NewMentionActionController.trigger(twitterDatas as NewMentionTwitter, actionID, options, userID, event, ctx);
+    } else if (event.actionName === 'on_tweet') {
+        await NewTweetActionController.trigger(twitterDatas as NewTweet, actionID, options, userID, event, ctx);
     }
 }
 
@@ -44,8 +44,8 @@ export interface Tweet {
     place: TwitterPlace
 }
 
-interface EventSetting {
-    trigger: ((twitterDatas: object, actionID: string, options: object, userID: string, ctx: Context) => Promise<void>),
+export interface EventSetting {
+    trigger: ((twitterDatas: object, actionID: string, options: object, userID: string, event: EventSetting, ctx: Context) => Promise<void>),
     actionName: string
 }
 
@@ -282,7 +282,7 @@ export class TwitterHelper {
         });
 
         for (const action of actions) {
-            event.trigger(twitterData, action.id!, action.options!, userID, ctx).then().catch(e => {});
+            event.trigger(twitterData, action.id!, action.options!, userID, event, ctx).then().catch(e => {});
         }
     }
 }

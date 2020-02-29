@@ -1,7 +1,7 @@
 import { Context } from "@loopback/core";
 import config from './config.json';
 import {ActionConfig, ActionFunction, OperationStatus} from '../../../../services-interfaces';
-import {TwitterHelper} from '../../helper';
+import {EventSetting, TwitterHelper} from '../../helper';
 import {UserRepository} from '../../../../repositories';
 import {User} from '../../../../models';
 
@@ -35,7 +35,7 @@ export default class NewFollowerActionController {
         return config as ActionConfig;
     }
 
-    static async trigger(rawData: NewFollower, actionID: string, options: NewMentionOptions, userID: string, ctx: Context) {
+    static async trigger(rawData: NewFollower, actionID: string, options: NewMentionOptions, userID: string, eventData: EventSetting, ctx: Context) {
         const twitterDatas = rawData.follow_events;
         const oauthObject = await TwitterHelper.getOauthObject(userID, ctx);
         const userRepository: UserRepository = await ctx.get('repositories.UserRepository');

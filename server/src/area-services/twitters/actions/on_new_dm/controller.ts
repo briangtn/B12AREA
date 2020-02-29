@@ -1,7 +1,7 @@
 import { Context } from "@loopback/core";
 import config from './config.json';
 import {ActionConfig, ActionFunction, OperationStatus} from '../../../../services-interfaces';
-import {TwitterHelper} from '../../helper';
+import {EventSetting, TwitterHelper} from '../../helper';
 import request from 'request';
 import {AreaService} from '../../../../services';
 
@@ -53,7 +53,7 @@ export default class NewDMActionController {
         return config as ActionConfig;
     }
 
-    static async trigger(baseData: {direct_message_events: NewDMTwitterData[]}, actionID: string, options: NewDmOptions, userID: string, ctx: Context) {
+    static async trigger(baseData: {direct_message_events: NewDMTwitterData[]}, actionID: string, options: NewDmOptions, userID: string, eventData: EventSetting, ctx: Context) {
         const twitterDatas = baseData.direct_message_events;
         const oauthObject = await TwitterHelper.getOauthObject(userID, ctx);
         const areaService: AreaService = await ctx.get('services.area');

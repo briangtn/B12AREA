@@ -149,7 +149,6 @@ export default class TwitterServiceController {
     async whook(@requestBody({}) request: {for_user_id: string}) {
         const users = await this.userRepository.find();
 
-        console.log("Webhook", request);
         for (const user of users) {
             const twitterID = (user.services! as {twitters: {twitterID: string}}).twitters.twitterID;
             if ('twitters' in user.services! && twitterID === request.for_user_id) {
