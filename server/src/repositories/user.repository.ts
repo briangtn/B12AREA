@@ -36,27 +36,18 @@ export class UserRepository extends DefaultCrudRepository<User,
         this.registerInclusionResolver('areas', this.areas.inclusionResolver);
     }
 
-    deleteById(id: typeof User.prototype.id, options?: AnyObject): Promise<void> {
-        return new Promise((resolve, reject) => {
-            this.areas(id).delete().then(() => {
-            }).catch((err) => {
-                reject(err);
-            });
-            super.deleteById(id, options).then(() => {
-                resolve();
-            }).catch((err) => {
-                reject(err);
-            });
-        });
+    async deleteById(id: typeof User.prototype.id, options?: AnyObject): Promise<void> {
+        await this.areas(id).delete();
+        return super.deleteById(id, options);
     }
 
     async deleteAll(where?: Condition<User> | AndClause<User> | OrClause<User>, options?: AnyObject): Promise<Count> {
         const users = await this.find({
             where: where
         }, options);
-        users.forEach((user) => {
-            this.areas(user.id).delete().then().catch(console.error);
-        });
+        for (const user of users) {
+            await this.areas(user.id).delete();
+        }
         return super.deleteAll(where, options);
     }
 
