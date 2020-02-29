@@ -330,7 +330,10 @@ sealed class ApiRoute(private var mainContext: Context) {
                     hashMapOf(Pair("token", token), Pair("password", password))
                 }
                 is PatchUser -> {
-                    hashMapOf(Pair("password", user.password), Pair("disable2FA", (!user.twoFactorAuthenticationEnabled)))
+                    if (user.password.isEmpty())
+                        hashMapOf<String, Any>(Pair("disable2FA", (!user.twoFactorAuthenticationEnabled)))
+                    else
+                        hashMapOf<String, Any>(Pair("password", user.password))
                 }
                 is CreateArea -> {
                     hashMapOf(Pair("name", name), Pair("enabled", enabled))

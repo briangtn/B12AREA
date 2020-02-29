@@ -22,7 +22,7 @@ import kotlinx.android.synthetic.main.activity_user.*
 class UserActivity : AppCompatActivity() {
 
     private var _faActivated: Boolean = false
-    private var _user: User = User("", "", "", "", listOf(""), listOf(""), !false, !false)
+    private lateinit var _user: User
 
     /**
      * Override method onCreate
@@ -37,23 +37,7 @@ class UserActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_user)
 
-        val disable2fa: String = getString(R.string.disable_two_fa)
-
-        val activate2fa: String = getString(R.string.activate_two_fa)
-
         emailUser()
-
-        if (_faActivated) {
-            activate_two_fa_button.text = disable2fa
-            activate_two_fa_button.setOnClickListener {
-                disable2fa()
-            }
-        } else {
-            activate_two_fa_button.text = activate2fa
-            activate_two_fa_button.setOnClickListener {
-                activate2fa()
-            }
-        }
 
         log_out.setOnClickListener {
             logout()
@@ -73,6 +57,24 @@ class UserActivity : AppCompatActivity() {
         })
     }
 
+    private fun show2fa() {
+        val disable2fa: String = getString(R.string.disable_two_fa)
+
+        val activate2fa: String = getString(R.string.activate_two_fa)
+
+        if (_faActivated)
+            activate_two_fa_button.text = disable2fa
+        else
+            activate_two_fa_button.text = activate2fa
+        activate_two_fa_button.setOnClickListener {
+            if (_faActivated)
+                disable2fa()
+            else
+                activate2fa()
+        }
+
+    }
+
     /**
      * Print the email of the user currently connected
      */
@@ -85,7 +87,8 @@ class UserActivity : AppCompatActivity() {
                     val etEmail = findViewById<EditText>(R.id.email)
                     _user = user
                     etEmail.hint = _user.email
-                    _faActivated = _user.require2fa
+                    _faActivated = _user.twoFactorAuthenticationEnabled
+                    println(_faActivated)
                     for (i in user.role) {
                         if (etUserRole.text == null) {
                             etUserRole.text = i
@@ -93,6 +96,7 @@ class UserActivity : AppCompatActivity() {
                             etUserRole.text = etUserRole.text.toString() + " " + i
                         }
                     }
+                    show2fa()
                 } else {
                     Toast.makeText(
                         this,
@@ -129,15 +133,16 @@ class UserActivity : AppCompatActivity() {
      * Disable the 2fa
      */
     private fun disable2fa() {
-        val newUser = User(_user.id, _user.email, "", "", _user.role, _user.services, false, _user.twoFactorAuthenticationEnabled)
+        val newUser = User(_user.id, _user.email, "", "", _user.role, _user.services, _user.require2fa, false)
 
         ApiClient(this)
             .patchUser(newUser) { user, message ->
                 if (user != null) {
+                    val activate2fa: String = getString(R.string.activate_two_fa)
+                    activate_two_fa_button.text = activate2fa
+                    _faActivated = false
                     _user = user
-                    val intent = Intent(this, UserActivity::class.java)
-                    finish()
-                    startActivity(intent)
+
                 } else {
                     Toast.makeText(
                         this,
