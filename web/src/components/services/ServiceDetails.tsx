@@ -39,8 +39,10 @@ import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Switch from "@material-ui/core/Switch";
 import {IArea, IPlaceHolder} from "../../interfaces/IService.interface";
 
+import AddAreaStepper from "./AddAreaStepper";
 import HtmlTooltip from "./HtmlTooltip";
-import {setToken} from "../../actions/api.action";
+
+import { setToken } from "../../actions/api.action";
 import Cookies from "universal-cookie";
 import ArrowBackIosIcon from "@material-ui/icons/ArrowBackIos";
 
@@ -77,7 +79,8 @@ interface State {
     availableReactions: any,
     chosenArea: number,
     selectedReaction: any,
-    configSchemaReaction: any
+    configSchemaReaction: any,
+    addAreaDialog: boolean
 }
 
 const mapStateToProps = (state: any) => {
@@ -122,7 +125,8 @@ class ServiceDetails extends Component<Props, State> {
         availableReactions: [],
         chosenArea: 0,
         selectedReaction: 0,
-        configSchemaReaction: {}
+        configSchemaReaction: {},
+        addAreaDialog: false
     };
 
     backClicked = (e: any) => {
@@ -339,6 +343,14 @@ class ServiceDetails extends Component<Props, State> {
             });
     };
 
+    addAreaDialogClose = (e: any) => {
+        this.setState({ addAreaDialog: false });
+    };
+
+    addAreaDialogOpen = (e: any) => {
+        this.setState({  addAreaDialog: true });
+    };
+
     componentDidMount() {
         const { token, api_url } = this.props;
 
@@ -397,6 +409,7 @@ class ServiceDetails extends Component<Props, State> {
     render() {
         const { classes } = this.props;
         const { areas, info } = this.state;
+        const infoFromProps = this.props.location.state.info;
 
         return (
             <div>
@@ -417,6 +430,9 @@ class ServiceDetails extends Component<Props, State> {
                     }}
                 >
                     <Typography variant="h3" className={classes.section} gutterBottom><b><Translator sentence="myActions" /> - { info.displayName }</b></Typography>
+                    <Button onClick={this.addAreaDialogOpen} style={{ marginBottom: '10px' }} variant="outlined" fullWidth>
+                        <AddIcon />
+                    </Button>
                     {areas.map((area: any, index: number) => (
                         <ExpansionPanel key={areas.indexOf(area)}>
                             <ExpansionPanelSummary
@@ -508,6 +524,7 @@ class ServiceDetails extends Component<Props, State> {
                             </ExpansionPanelActions>
                         </ExpansionPanel>
                     ))}
+                <div style={{ marginTop: '20px'}} />
                 </div>
                 <Dialog
                     open={this.state.dialogOpened}
@@ -557,6 +574,11 @@ class ServiceDetails extends Component<Props, State> {
                             <Translator sentence="save" />
                         </Button>
                     </DialogActions>
+                </Dialog>
+                <Dialog open={this.state.addAreaDialog} onClose={this.addAreaDialogClose} aria-labelledby="form-dialog-title">
+                    <DialogContent>
+                        <AddAreaStepper history={this.props.history} serviceName={infoFromProps.name} actions={infoFromProps.actions} reactions={infoFromProps.reactions} closeFunction={this.addAreaDialogClose} needToRefresh={true} />
+                    </DialogContent>
                 </Dialog>
             </div>
         );

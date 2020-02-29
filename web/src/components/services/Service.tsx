@@ -142,7 +142,7 @@ class Service extends Component<Props, State> {
                 </Box>
                 <Dialog open={this.state.addDialogOpened} onClose={this.handleDialogClose} aria-labelledby="form-dialog-title">
                     <DialogContent>
-                        <AddAreaStepper serviceName={info.name} actions={info.actions} reactions={info.reactions} closeFunction={this.handleDialogClose} />
+                        <AddAreaStepper serviceName={info.name} actions={info.actions} reactions={info.reactions} closeFunction={this.handleDialogClose} needToRefresh={false} history={this.props.history} />
                     </DialogContent>
                 </Dialog>
             </div>
