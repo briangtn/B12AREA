@@ -3,11 +3,11 @@ export interface ApiKey {
 }
 
 export interface BaseID {
-    baseID: string
+    baseId: string
 }
 
 export interface TableID {
-    tableID: string
+    tableId: string
 }
 
 export interface BaseConfig extends ApiKey, BaseID {}

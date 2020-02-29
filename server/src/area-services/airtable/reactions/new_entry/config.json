@@ -3,7 +3,7 @@
   "description": "This action creates an entry in a Airtable base",
   "configSchema": [
     {
-      "name": "apikey",
+      "name": "apiKey",
       "description": "The User APIKEY",
       "type": "string",
       "required": true
@@ -20,7 +20,7 @@
       "type": "string",
       "required": true
     }, {
-      "name": "tableID",
+      "name": "tableId",
       "description": "The table of the base into which you want to insert entry",
       "type": "string",
       "required": true

@@ -2,9 +2,9 @@ import {applyPlaceholders, OperationStatus, ReactionConfig, WorkableObject} from
 import config from './config.json';
 import {Context} from "@loopback/context";
 import {NewEntryConfig, NewEntryParsed} from "../../interfaces";
-import Airtable from "airtable";
 import {ReactionRepository, UserRepository} from "../../../../repositories";
 import {Reaction} from "../../../../models";
+import Airtable from "airtable";
 
 export default class ReactionController {
     static async trigger(params: WorkableObject): Promise<void> {
@@ -16,15 +16,12 @@ export default class ReactionController {
         };
 
         dataParsed.entryToCreate = JSON.parse(dataReplaced);
-        console.log(dataReplaced);
-        console.log("Parsed");
-        console.log(dataParsed);
 
-        const base = new Airtable({apiKey: dataParsed.apiKey}).base(dataParsed.baseID);
-
-        base(dataParsed.tableID).create({
-            "fields": dataParsed.entryToCreate
-        }).then(console.log).catch(console.error);
+        new Airtable({apiKey: dataParsed.apiKey}).base(dataParsed.baseId)(dataParsed.tableId).create(dataParsed.entryToCreate)
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            .catch((err: any) =>{
+                console.error(err);
+            });
     }
 
     static async prepareData(reactionId: string, ctx: Context): Promise<object> {
@@ -43,14 +40,13 @@ export default class ReactionController {
         const reaction: Reaction = await reactionRepository.findById(reactionId);
         const reactionConfig : NewEntryConfig = reaction.options as NewEntryConfig;
 
-        console.log(reactionConfig);
         return reactionConfig
     }
 
     static async createReaction(userId: string, reactionConfig: Object, ctx: Context): Promise<OperationStatus> {
         const reactionOptions : NewEntryConfig = reactionConfig as NewEntryConfig;
 
-        if (reactionOptions.data === "" || reactionOptions.apiKey === "" || reactionOptions.baseID === "")
+        if (reactionOptions.data === "" || reactionOptions.apiKey === "" || reactionOptions.baseId === "")
             return { success: false, error: 'Error in options'};
         return { success: true, options: reactionOptions };
     }
@@ -59,9 +55,9 @@ export default class ReactionController {
         const oldReactionOptions : NewEntryConfig = oldReactionConfig as NewEntryConfig;
         const newReactionOptions : NewEntryConfig = newReactionConfig as NewEntryConfig;
 
-        if (newReactionOptions.data === "" || newReactionOptions.apiKey === "" || newReactionOptions.baseID === "")
+        if (newReactionOptions.data === "" || newReactionOptions.apiKey === "" || newReactionOptions.baseId === "" || newReactionOptions.tableId === "")
             return { success: false, error: 'Error in new options'};
-        if (oldReactionOptions.data === "" || oldReactionOptions.apiKey === "" || oldReactionOptions.baseID === "")
+        if (oldReactionOptions.data === "" || oldReactionOptions.apiKey === "" || oldReactionOptions.baseId === "" || oldReactionOptions.tableId === "")
             return { success: false, error: 'Error in old options'};
         return { success: true, options: newReactionOptions };
     }
