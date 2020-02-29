@@ -48,7 +48,7 @@ export default class TwitterServiceController {
 
             consumer.getOAuthRequestToken(async (err, token, secret) => {
                 if (err) {
-                    console.log("Error", err);
+                    console.error(err);
                     reject(err);
                 } else {
                     await exchangeCodeGenerator.updateData(state, {url: params.redirectUrl, token, secret, userID: user.id});
@@ -92,7 +92,7 @@ export default class TwitterServiceController {
                             }, true);
                             this.response.redirect(dataTyped.url + '?code=' + responseCode);
                         } catch (e) {
-                            console.log(e);
+                            console.error(e);
                             reject(e);
                         }
                         return;
@@ -106,7 +106,7 @@ export default class TwitterServiceController {
                                 }, true);
                                 this.response.redirect(dataTyped.url + '?code=' + responseCode);
                             } catch (e) {
-                                console.log(e);
+                                console.error(e);
                                 reject(e);
                             }
                             return;
@@ -116,11 +116,9 @@ export default class TwitterServiceController {
                         try {
                             try {
                                 const subscribeData = await TwitterHelper.createWebhookFromTwitterClient(accessToken, accessTokenSecret);
-                                console.log(subscribeData);
                             } catch (e) {
                                 console.error(e);
                             }
-                            console.log(data);
                             await this.userRepository.addService(dataTyped.userID, {
                                 accessToken: accessToken,
                                 accessTokenSecret: accessTokenSecret,
@@ -139,7 +137,7 @@ export default class TwitterServiceController {
                     return this.response.redirect(dataTyped.url + '?code=' + codeParam);
                 });
             }).catch((err) => {
-                console.log(err);
+                console.error(err);
                 resolve(err);
             });
         });
