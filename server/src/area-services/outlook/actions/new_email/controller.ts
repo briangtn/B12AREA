@@ -51,7 +51,6 @@ export default class ActionController {
         }) body : RawNewEmailNotification,
         @param.query.string('validationToken') validationToken?: string
     ) {
-        console.log('WEBHOOK:', validationToken, body);
         if (validationToken) {
             this.response.set('Content-type', 'text/plain');
             this.response.status(200).send(validationToken);

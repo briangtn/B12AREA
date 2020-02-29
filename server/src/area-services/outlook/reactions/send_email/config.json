@@ -1,0 +1,50 @@
+{
+  "displayName": "Send email",
+  "description": "This reaction will send an email as you",
+  "configSchema": [
+    {
+      "name": "sendTo",
+      "description": "A comma (',') separated list of recipient",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "sendCc",
+      "description": "A comma (',') separated list of cc recipient",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "sendBcc",
+      "description": "A comma (',') separated list of bcc recipient",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "sendSubject",
+      "description": "The subject of the new mail",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "sendBody",
+      "description": "The body of the new mail",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "sendBodyType",
+      "description": "The body type of the new mail. Should be 'text' or 'html'",
+      "type": "string",
+      "required": false,
+      "default": "text"
+    },
+    {
+      "name": "sendSaveToSentItem",
+      "description": "Should the sent email appear in sent item box",
+      "type": "boolean",
+      "required": false,
+      "default": true
+    }
+  ]
+}

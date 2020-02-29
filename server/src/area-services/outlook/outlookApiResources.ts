@@ -30,3 +30,29 @@ export interface OutlookEmailResource {
     sender: OutlookEmailSenderResource;
     subject: string;
 }
+
+export interface OutlookSendEmailRequestResource {
+    message: {
+        subject: string;
+        body: {
+            contentType: string;
+            content: string;
+        };
+        toRecipients: {
+            emailAddress: {
+                address: string;
+            };
+        }[];
+        ccRecipients: {
+            emailAddress: {
+                address: string;
+            };
+        }[];
+        bccRecipients: {
+            emailAddress: {
+                address: string;
+            };
+        }[];
+    };
+    saveToSentItems: boolean
+}

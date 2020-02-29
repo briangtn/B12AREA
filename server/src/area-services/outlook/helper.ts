@@ -3,7 +3,11 @@ import * as qs from "querystring";
 import {Context} from "@loopback/context";
 import {User} from "../../models";
 import {ActionRepository, UserRepository} from "../../repositories";
-import {OutlookEmailResource, OutlookSubscriptionResource} from "./outlookApiResources";
+import {
+    OutlookEmailResource,
+    OutlookSendEmailRequestResource,
+    OutlookSubscriptionResource
+} from "./outlookApiResources";
 import {ActionFunction} from "../../services-interfaces";
 import {AreaService} from "../../services";
 import WorkerHelper from "../../WorkerHelper";
@@ -49,6 +53,16 @@ export interface OutlookNewEmailOptions {
     onlySender?: string;
     onlyObjectMatch?: string;
     onlyBodyMatch?: string;
+}
+
+export interface ServiceSendEmailData {
+    sendTo: string,
+    sendCc?: string,
+    sendBcc?: string,
+    sendSubject: string,
+    sendBody: string,
+    sendBodyType?: string,
+    sendSaveToSentItem?: boolean
 }
 
 export class OutlookHelper {
@@ -185,7 +199,7 @@ export class OutlookHelper {
             const now = new Date().getTime();
             const expirationDateTime = new Date(now + OUTLOOK_MESSAGE_SUBSCRIPTION_MAX_EXPIRATION * 60 * 1000);
             const response: {data: OutlookSubscriptionResource} = await axios.post(REGISTER_NEW_SUBSCRIPTION_URL, {
-                changeType: 'updated',
+                changeType: 'created',
                 notificationUrl: notificationUrl,
                 resource: RESSOURCE_VALUE,
                 expirationDateTime: expirationDateTime.toISOString(),
@@ -329,6 +343,55 @@ export class OutlookHelper {
             actionId: actionId,
             placeholders: placeholders
         }, ctx);
+    }
+
+    public static async sendEmail(sendEmailData: ServiceSendEmailData, tokens: OutlookTokens) {
+        const parsedEmail = this.outlookSendEmailDataToOutlookData(sendEmailData);
+        try {
+            await axios.post(`https://graph.microsoft.com/v1.0/me/sendMail`, parsedEmail, {
+                headers: {
+                    Authorization: `${tokens.token_type} ${tokens.access_token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+        } catch (e) {
+            throw new OutlookException('Failed to send email: ', {data: e.response.data, status: e.response.status, headers: e.response.headers});
+        }
+    }
+
+    public static outlookSendEmailDataToOutlookData(sendEmailData: ServiceSendEmailData): OutlookSendEmailRequestResource {
+        if (sendEmailData.sendBodyType === undefined)
+            sendEmailData.sendBodyType = 'text';
+        if (sendEmailData.sendSaveToSentItem === undefined)
+            sendEmailData.sendSaveToSentItem = true;
+        const toRecipients = sendEmailData.sendTo.split(',').map((recipient) => {
+            return {emailAddress: {address: recipient}}
+        });
+        let ccRecipients: {emailAddress: {address: string}}[] = [];
+        if (sendEmailData.sendCc) {
+            ccRecipients = sendEmailData.sendCc.split(',').map((recipient) => {
+                return {emailAddress: {address: recipient}}
+            });
+        }
+        let bccRecipients: {emailAddress: {address: string}}[] = [];
+        if (sendEmailData.sendBcc) {
+            bccRecipients = sendEmailData.sendBcc.split(',').map((recipient) => {
+                return {emailAddress: {address: recipient}}
+            });
+        }
+        return {
+            message: {
+                subject: sendEmailData.sendSubject,
+                body: {
+                    contentType: sendEmailData.sendBodyType,
+                    content: sendEmailData.sendBody
+                },
+                toRecipients: toRecipients,
+                ccRecipients: ccRecipients,
+                bccRecipients: bccRecipients,
+            },
+            saveToSentItems: sendEmailData.sendSaveToSentItem
+        }
     }
 
     public static getClientId() : string {
