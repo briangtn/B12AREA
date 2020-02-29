@@ -20,16 +20,13 @@ export default class ReactionController {
         const options: FetchOptions = params.reactionOptions as FetchOptions;
         const url = applyPlaceholders(options.url, params.actionPlaceholders);
 
-        console.log("1");
         let queryObjectString = undefined;
         if (options.queryObject)
             queryObjectString = applyPlaceholders(options.queryObject, params.actionPlaceholders);
-        console.log("2");
 
         let bodyString = undefined;
         if (options.body)
             bodyString = applyPlaceholders(options.body, params.actionPlaceholders);
-        console.log("3");
 
         let queryString = "";
         if (queryObjectString) {
@@ -41,7 +38,6 @@ export default class ReactionController {
                 return;
             }
         }
-        console.log("4");
 
         let body = {};
         if (bodyString) {
@@ -52,17 +48,13 @@ export default class ReactionController {
                 return;
             }
         }
-        console.log("4");
 
         const finalUrl = url + queryString;
 
         if (['POST', 'PUT', 'PATCH'].indexOf(options.method) >= 0) {
-            console.log("EDIT");
-            axios[options.method.toLowerCase() as keyof typeof axios](finalUrl, body).then(console.log).catch((e) => console.error);
+            axios[options.method.toLowerCase() as keyof typeof axios](finalUrl, body).then().catch((e) => console.debug);
         } else if (['GET', 'DELETE'].indexOf(options.method) >= 0) {
-            console.log("GET", options.method.toLowerCase(), finalUrl);
-
-            axios[options.method.toLowerCase() as keyof typeof axios](finalUrl).then(() => console.log("qsd")).catch((e) => console.error);
+            axios[options.method.toLowerCase() as keyof typeof axios](finalUrl).then().catch((e) => console.debug);
         }
     }
 
@@ -99,17 +91,7 @@ export default class ReactionController {
     }
 
     static async deleteReaction(reactionId: string, reactionConfig: FetchOptions, ctx: Context): Promise<OperationStatus> {
-        const areaService: AreaService = await ctx.get('services.area');
-        let validation = areaService!.validateConfigSchema(reactionConfig, config.configSchema);
-        if (!validation.success) {
-            return validation;
-        }
-        validation = this.validateOptions(reactionConfig);
-        if (!validation.success) {
-            return validation;
-        }
-
-        return {success: true, options: reactionConfig};
+        return {success: true};
     }
 
     static async getConfig(): Promise<ReactionConfig> {
