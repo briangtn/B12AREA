@@ -26,6 +26,9 @@ import Users from "../../components/administration/Users";
 import Exit from "../../components/administration/Exit";
 
 import { setToken } from "../../actions/api.action";
+import Cookies from "universal-cookie";
+
+const cookies = new Cookies();
 
 const mapStateToProps = (state: any) => {
     return { api_url: state.api_url, token: state.token };
@@ -140,10 +143,19 @@ class AdministrationPanel extends Component<Props, State> {
             })
             .then(res => res.json())
             .then((data) => {
-                const { role } = data;
+                const { error } = data;
 
-                if (!role.includes('admin'))
+                if (error) {
+                    cookies.set('token',  '');
+                    this.props.setToken('');
                     this.props.history.push('/');
+                    return;
+                } else {
+                    const {role} = data;
+
+                    if (!role.includes('admin'))
+                        this.props.history.push('/');
+                }
             })
         }
     }
