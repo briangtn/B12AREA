@@ -11,9 +11,7 @@ import Typography from "@material-ui/core/Typography";
 import Translator from "../components/Translator";
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
-import Snackbar from "@material-ui/core/Snackbar";
 import IError from "../interfaces/IError.interface";
-import Alert from "../components/Alert";
 
 interface Props {
     history: {
@@ -56,6 +54,12 @@ class ForgotPassword extends Component<Props, State> {
         resetted: false
     };
 
+    /**
+     * Function called when a user type inside a text field
+     * verify if the email is correct.
+     *
+     * @param e
+     */
     onChange: React.ChangeEventHandler<HTMLInputElement> = (e) => {
         const { id, value } = e.currentTarget;
 
@@ -66,6 +70,11 @@ class ForgotPassword extends Component<Props, State> {
         this.setState({ [id]: value } as unknown as Pick<State, keyof State>);
     };
 
+    /**
+     * Function called when a user press enter inside a text field
+     *
+     * @param e event triggered
+     */
     keyPress = (e: any) => {
         if (e.keyCode === 13) {
             const toClick: HTMLElement | null = document.getElementById('resetPassword')
@@ -75,6 +84,12 @@ class ForgotPassword extends Component<Props, State> {
         }
     };
 
+    /**
+     * Function called when the user enter his email address then
+     * press the reset password button.
+     *
+     * @param e event triggered
+     */
     onSubmit = (e: React.FormEvent) => {
         const { email, emailError } = this.state;
 

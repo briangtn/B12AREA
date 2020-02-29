@@ -150,15 +150,15 @@ class AdministrationPanel extends Component<Props, State> {
 
     handleDrawerOpen = (e: any) => {
         this.setState({ open: true });
-    }
+    };
 
     handleDrawerClose = (e: any) => {
         this.setState({ open: false });
-    }
+    };
 
     onClick(index: any, event: any) {
         this.setState({ currentComponentIndex: index, open: false });
-    }
+    };
 
     render() {
         const { classes } = this.props;
@@ -166,9 +166,10 @@ class AdministrationPanel extends Component<Props, State> {
 
         const routes: Route[] = [
             { name: 'Home', icon: <HomeIcon />, component: <Summary apiUrl={this.props.api_url} token={this.props.token} /> },
-            { name: 'Users', icon: <AccountCircleIcon />, component: <Users apiUrl={this.props.api_url} token={this.props.token} /> },
+            { name: 'Users', icon: <AccountCircleIcon />, component: <Users apiUrl={this.props.api_url} history={this.props.history} token={this.props.token} /> },
             { name: 'Exit', icon: <ExitToAppIcon />, component: <Exit history={this.props.history} />}
-        ]
+        ];
+
         return (
             <div className={classes.root}>
                 <AppBar

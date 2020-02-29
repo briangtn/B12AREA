@@ -9,7 +9,6 @@ import {
 import {Area, Reaction, ReactionRelations} from '../models';
 import {MongoDataSource} from '../datasources';
 import {Getter, inject} from '@loopback/core';
-import {UserRepository} from "./user.repository";
 import {AreaRepository} from "./area.repository";
 import {HttpErrors} from "@loopback/rest/dist";
 import {OperationStatus} from "../services-interfaces";
@@ -44,13 +43,10 @@ export class ReactionRepository extends DefaultCrudRepository<Reaction,
 
     async getReactionOwnerID(reactionID: string): Promise<string | null> {
         try {
-            const action = await this.findById(reactionID, {include: [{relation: 'area'}]});
-            if (!action)
+            const reaction = await this.findById(reactionID, {include: [{relation: 'area', scope: {include: [{relation: 'user'}]}}]});
+            if (!reaction || !reaction.area || !reaction.area.user)
                 return null;
-            const user = await this.userRepository.findOne({where: {email: action.area.ownerId}});
-            if (!user || !user.id)
-                return null;
-            return user.id;
+            return reaction.area.user.id;
         } catch (e) {
             return null;
         }

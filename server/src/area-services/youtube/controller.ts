@@ -1,4 +1,4 @@
-import {LoginObject, ServiceConfig} from "../../services-interfaces";
+import {DelayedJobObject, LoginObject, ServiceConfig} from "../../services-interfaces";
 import config from './config.json';
 import {param, get, Response, RestBindings} from "@loopback/rest";
 import {Context, inject} from "@loopback/context";
@@ -8,8 +8,12 @@ import {Action, User} from "../../models";
 import {repository} from "@loopback/repository";
 import {NewVideoConfig, NewVideoData, TokensResponse} from "./interfaces";
 import {YoutubeHelper} from "./YoutubeHelper";
+import WorkerHelper from "../../WorkerHelper";
 
 const API_URL : string = process.env.API_URL ?? "http://localhost:8080";
+
+export const YOUTUBE_DELAYED_JOB_INITIAL_WEBHOOK_UPDATE = 'youtube_initialWebhookUpdate_';
+export const YOUTUBE_DELAYED_JOB_POST_SUBSCRIBE_WEBHOOK = 'youtube_postSubscribeWebhook_';
 
 export default class ServiceController {
     static serviceName = 'youtube';
@@ -34,11 +38,14 @@ export default class ServiceController {
             const channelId = (action.options as NewVideoConfig).channel;
             const webhook = (action.data as NewVideoData).webHookUrl;
             if (!webhook.startsWith(API_URL)) {
-                setTimeout(() => {
-                    YoutubeHelper.updateWebhookAPIURL(action, channelId, ctx);
-                }, 2000);
+                WorkerHelper.AddDelayedJob({
+                    service: 'youtube',
+                    name: YOUTUBE_DELAYED_JOB_INITIAL_WEBHOOK_UPDATE + action.id,
+                    jobData: {actionId: action.id},
+                    triggerIn: 2000
+                }, ctx).catch((e) => {console.error(`Failed to add delayed job ${YOUTUBE_DELAYED_JOB_INITIAL_WEBHOOK_UPDATE + action.id} for action ${action.id}`, e)});
             } else {
-                YoutubeHelper.prepareRefreshWebhook(channelId, webhook);
+                YoutubeHelper.prepareRefreshWebhook(channelId, webhook, ctx);
             }
         }
     }
@@ -109,5 +116,16 @@ export default class ServiceController {
 
     static async getConfig(): Promise<ServiceConfig> {
         return config;
+    }
+
+    static async processDelayedJob(data: DelayedJobObject, ctx: Context) {
+        if (data.name.startsWith(YOUTUBE_DELAYED_JOB_INITIAL_WEBHOOK_UPDATE)) {
+            const actionRepository : ActionRepository = await ctx.get('repositories.ActionRepository');
+            const action = await actionRepository.findById(data.jobData.actionId);
+            const channelId = (action.options as NewVideoConfig).channel;
+            YoutubeHelper.updateWebhookAPIURL(action, channelId, ctx);
+        } else if (data.name.startsWith(YOUTUBE_DELAYED_JOB_POST_SUBSCRIBE_WEBHOOK)) {
+            YoutubeHelper.postSubscribeWebhook(data.jobData.webhook, data.jobData.channelId, ctx).then(() => {}).catch(console.error);
+        }
     }
 }

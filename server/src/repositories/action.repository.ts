@@ -51,13 +51,10 @@ export class ActionRepository extends DefaultCrudRepository<Action,
 
     async getActionOwnerID(actionID: string): Promise<string | null> {
         try {
-            const action = await this.findById(actionID, {include: [{relation: 'area'}]});
-            if (!action)
+            const action = await this.findById(actionID, {include: [{relation: 'area', scope: {include: [{relation: 'user'}]}}]});
+            if (!action || !action.area || !action.area.user)
                 return null;
-            const user = await this.userRepository.findOne({where: {email: action.area.ownerId}});
-            if (!user || !user.id)
-                return null;
-            return user.id;
+            return action.area.user.id;
         } catch (e) {
             return null;
         }
