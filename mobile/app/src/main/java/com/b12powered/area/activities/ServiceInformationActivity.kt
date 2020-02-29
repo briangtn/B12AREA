@@ -32,7 +32,7 @@ class ServiceInformationActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_service_information)
 
-        serviceName = intent.getStringExtra("serviceName")
+        serviceName = intent.getStringExtra("serviceName")!!
 
         val etServiceName = findViewById<TextView>(R.id.service_name)
 
@@ -90,13 +90,25 @@ class ServiceInformationActivity : AppCompatActivity() {
         ApiClient(this)
             .aboutJson { about, message ->
                 if (about !== null) {
-                    about.server.services.forEach { service ->
-                        if (service.name == serviceName) {
-                            _service = service
+                    ApiClient(this)
+                        .getUser { user, msg ->
+                            if (user !== null) {
+                                about.server.services.forEach { service ->
+                                    if (service.name == serviceName) {
+                                        _service = service
+                                    }
+                                    if (user.services.contains(service.name)) {
+                                        serviceList.add(service)
+                                    }
+                                }
+                            } else {
+                                Toast.makeText(
+                                    this,
+                                    msg,
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
                         }
-                        serviceList.add(service)
-                    }
-
                 } else {
                     Toast.makeText(
                         this,
