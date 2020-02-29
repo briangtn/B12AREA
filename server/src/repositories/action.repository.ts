@@ -6,7 +6,7 @@ import {
     AndClause,
     OrClause, AnyObject, Count, DeepPartial
 } from '@loopback/repository';
-import {ActionRelations, Area, Action} from '../models';
+import {ActionRelations, Area, Action, ActionWithRelations} from '../models';
 import {MongoDataSource} from '../datasources';
 import {inject, Getter, Context} from '@loopback/core';
 import {UserRepository} from './user.repository';
@@ -31,9 +31,7 @@ export class ActionRepository extends DefaultCrudRepository<Action,
 
     constructor(
         @inject('datasources.mongo') dataSource: MongoDataSource,
-        @repository(UserRepository) public userRepository: UserRepository,
-        @repository.getter('AreaRepository')
-        areaRepositoryGetter: Getter<AreaRepository>,
+        @repository.getter('AreaRepository') areaRepositoryGetter: Getter<AreaRepository>,
         @inject.context() private ctx: Context,
     ) {
         super(Action, dataSource);
@@ -84,45 +82,44 @@ export class ActionRepository extends DefaultCrudRepository<Action,
         return module.default;
     }
 
-    private async getByWhereOrId(where: WhereOrIdAction) {
-        if (typeof where === typeof Action.prototype.id) {
-            return this.findById(where as typeof Action.prototype.id);
+    private async getByWhereOrId(where?: WhereOrIdAction, options?: AnyObject) : Promise<ActionWithRelations[]> {
+        if (typeof where === typeof Action.prototype.id && typeof where != "undefined") {
+            return [await this.findById(where as typeof Action.prototype.id, options)];
         } else {
-            return this.findOne({
+            return this.find({
                 where: where as Condition<Action> | AndClause<Action> | OrClause<Action>
-            });
+            }, options);
         }
     }
 
     async beforeUpdate(data: PartialAction, where?: WhereOrIdAction, options?: AnyObject) : Promise<OperationStatus> {
-        const dbAction = await this.getByWhereOrId(where);
-        if (!dbAction)
-            throw new Error('Could not fetch action');
+        const actions = await this.getByWhereOrId(where, options);
+        let result : OperationStatus = {success: true};
+        for (const action of actions) {
+            let controller;
+            try {
+                controller = await this.resolveActionController(action.serviceAction);
+            } catch (e) {
+                throw new HttpErrors.BadRequest('Action not found');
+            }
 
-        let controller;
-        try {
-            controller = await this.resolveActionController(dbAction.serviceAction);
-        } catch (e) {
-            throw new HttpErrors.BadRequest('Action not found');
-        }
-
-        let result : OperationStatus;
-        try {
-            result = await controller.updateAction(dbAction.id!, dbAction.options, data.options, this.ctx);
-        } catch (e) {
-            throw new HttpErrors.BadRequest('Failed to update action in service');
-        }
-        if (!result.success) {
-            throw new HttpErrors.BadRequest(result.error);
+            try {
+                result = await controller.updateAction(action.id!, action.options, data.options, this.ctx);
+            } catch (e) {
+                throw new HttpErrors.BadRequest('Failed to update action in service');
+            }
+            if (!result.success) {
+                throw new HttpErrors.BadRequest(result.error);
+            }
         }
         return result;
     }
 
     async beforeCreate(action: PartialAction, options?: AnyObject) : Promise<OperationStatus> {
-        console.log(action);
         const areaRepository : AreaRepository = await this.ctx.get('repositories.AreaRepository');
+        const userRepository : UserRepository = await this.ctx.get('repositories.UserRepository');
         const userEmail = (await areaRepository.findById(action.areaId)).ownerId;
-        const user = await this.userRepository.findOne({
+        const user = await userRepository.findOne({
             where: {
                 email: userEmail
             }
@@ -150,25 +147,24 @@ export class ActionRepository extends DefaultCrudRepository<Action,
 
 
     async beforeDelete(where?: WhereOrIdAction, options?: AnyObject) : Promise<OperationStatus> {
-        const action = await this.getByWhereOrId(where);
-        if (!action)
-            throw new Error('Could not fetch action');
+        const actions = await this.getByWhereOrId(where, options);
+        let result : OperationStatus = {success: true};
+        for (const action of actions) {
+            let controller;
+            try {
+                controller = await this.resolveActionController(action.serviceAction);
+            } catch (e) {
+                throw new HttpErrors.BadRequest('Action not found');
+            }
 
-        let controller;
-        try {
-            controller = await this.resolveActionController(action.serviceAction);
-        } catch (e) {
-            throw new HttpErrors.BadRequest('Action controller not found');
-        }
-
-        let result : OperationStatus;
-        try {
-            result = await controller.deleteAction(action.id!, action.options, this.ctx);
-        } catch (e) {
-            throw new HttpErrors.BadRequest('Failed to update action in service');
-        }
-        if (!result.success) {
-            throw new HttpErrors.BadRequest(result.error);
+            try {
+                result = await controller.deleteAction(action.id!, action.options, this.ctx);
+            } catch (e) {
+                throw new HttpErrors.BadRequest('Failed to delete action in service');
+            }
+            if (!result.success) {
+                throw new HttpErrors.BadRequest(result.error);
+            }
         }
         return result;
     }

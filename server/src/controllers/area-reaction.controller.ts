@@ -27,7 +27,6 @@ import {authenticate} from "@loopback/authentication";
 import {response200Schema} from "./specs/doc.specs";
 import {NewReactionInArea} from "./specs/area.specs";
 import {HttpErrors} from "@loopback/rest/dist";
-import {OperationStatus} from "../services-interfaces";
 import {OPERATION_SECURITY_SPEC} from "../utils/security-specs";
 
 @authenticate('jwt-all')

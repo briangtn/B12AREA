@@ -6,7 +6,7 @@ import {
     OrClause,
     repository
 } from '@loopback/repository';
-import {Area, Reaction, ReactionRelations} from '../models';
+import {Action, Area, Reaction, ReactionRelations, ReactionWithRelations} from '../models';
 import {MongoDataSource} from '../datasources';
 import {Getter, inject} from '@loopback/core';
 import {AreaRepository} from "./area.repository";
@@ -33,7 +33,6 @@ export class ReactionRepository extends DefaultCrudRepository<Reaction,
 
     constructor(
         @inject('datasources.mongo') dataSource: MongoDataSource,
-        @repository(UserRepository) public userRepository: UserRepository,
         @repository.getter('AreaRepository') areaRepositoryGetter: Getter<AreaRepository>,
         @inject.context() private ctx: Context,
     ) {
@@ -61,45 +60,44 @@ export class ReactionRepository extends DefaultCrudRepository<Reaction,
         return module.default;
     }
 
-    private async getByWhereOrId(where: WhereOrIdReaction) {
-        if (typeof where === typeof Reaction.prototype.id) {
-            return this.findById(where as typeof Reaction.prototype.id);
+    private async getByWhereOrId(where?: WhereOrIdReaction, options?: AnyObject) : Promise<ReactionWithRelations[]> {
+        if (typeof where === typeof Action.prototype.id && typeof where != "undefined") {
+            return [await this.findById(where as typeof Action.prototype.id, options)];
         } else {
-            return this.findOne({
-                where: where as Condition<Reaction> | AndClause<Reaction> | OrClause<Reaction>
-            });
+            return this.find({
+                where: where as FilterReaction
+            }, options);
         }
     }
 
     async beforeUpdate(data: PartialReaction, where?: WhereOrIdReaction, options?: AnyObject) : Promise<OperationStatus> {
-        const dbReaction = await this.getByWhereOrId(where);
-        if (!dbReaction)
-            throw new Error('Could not fetch reaction');
+        const reactions = await this.getByWhereOrId(where, options);
+        let result : OperationStatus = {success: true};
+        for (const reaction of reactions) {
+            let controller;
+            try {
+                controller = await this.resolveReactionController(reaction.serviceReaction);
+            } catch (e) {
+                throw new HttpErrors.BadRequest('Reaction not found');
+            }
 
-        let controller;
-        try {
-            controller = await this.resolveReactionController(dbReaction.serviceReaction);
-        } catch (e) {
-            throw new HttpErrors.BadRequest('Reaction not found');
-        }
-
-        let result : OperationStatus;
-        try {
-            result = await controller.updateReaction(dbReaction.id!, dbReaction.options, data.options, this.ctx);
-        } catch (e) {
-            throw new HttpErrors.BadRequest('Failed to update action in service');
-        }
-        if (!result.success) {
-            throw new HttpErrors.BadRequest(result.error);
+            try {
+                result = await controller.updateReaction(reaction.id!, reaction.options, data.options, this.ctx);
+            } catch (e) {
+                throw new HttpErrors.BadRequest('Failed to update reaction in service');
+            }
+            if (!result.success) {
+                throw new HttpErrors.BadRequest(result.error);
+            }
         }
         return result;
     }
 
     async beforeCreate(reaction: PartialReaction, options?: AnyObject) : Promise<OperationStatus> {
-        console.log(reaction);
         const areaRepository : AreaRepository = await this.ctx.get('repositories.AreaRepository');
+        const userRepository : UserRepository = await this.ctx.get('repositories.UserRepository');
         const userEmail = (await areaRepository.findById(reaction.areaId)).ownerId;
-        const user = await this.userRepository.findOne({
+        const user = await userRepository.findOne({
             where: {
                 email: userEmail
             }
@@ -127,25 +125,24 @@ export class ReactionRepository extends DefaultCrudRepository<Reaction,
 
 
     async beforeDelete(where?: WhereOrIdReaction, options?: AnyObject) : Promise<OperationStatus> {
-        const reaction = await this.getByWhereOrId(where);
-        if (!reaction)
-            throw new Error('Could not fetch reaction');
+        const reactions = await this.getByWhereOrId(where, options);
+        let result : OperationStatus = {success: true};
+        for (const reaction of reactions) {
+            let controller;
+            try {
+                controller = await this.resolveReactionController(reaction.serviceReaction);
+            } catch (e) {
+                throw new HttpErrors.BadRequest('Reaction not found');
+            }
 
-        let controller;
-        try {
-            controller = await this.resolveReactionController(reaction.serviceReaction);
-        } catch (e) {
-            throw new HttpErrors.BadRequest('Reaction controller not found');
-        }
-
-        let result : OperationStatus;
-        try {
-            result = await controller.deleteReaction(reaction.id!, reaction.options, this.ctx);
-        } catch (e) {
-            throw new HttpErrors.BadRequest('Failed to update action in service');
-        }
-        if (!result.success) {
-            throw new HttpErrors.BadRequest(result.error);
+            try {
+                result = await controller.deleteReaction(reaction.id!, reaction.options, this.ctx);
+            } catch (e) {
+                throw new HttpErrors.BadRequest('Failed to delete reaction in service');
+            }
+            if (!result.success) {
+                throw new HttpErrors.BadRequest(result.error);
+            }
         }
         return result;
     }
