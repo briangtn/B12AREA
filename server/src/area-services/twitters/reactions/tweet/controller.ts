@@ -5,7 +5,7 @@ import {ReactionRepository} from '../../../../repositories';
 import {AreaService} from '../../../../services';
 import {TwitterHelper} from '../../helper';
 import request from 'request';
-import url from 'url';
+import querystring from 'querystring';
 
 interface TweetOptions {
     content: string
@@ -17,7 +17,8 @@ export default class ReactionController {
         const options : TweetOptions = params.reactionOptions as TweetOptions;
         const content = applyPlaceholders(options.content, params.actionPlaceholders);
         const oauth = (params.reactionPreparedData as {oauth: {consumer_key: string, consumer_secret: string, token: string, token_secret: string}}).oauth;
-        const urlToSend = 'https://api.twitter.com/1.1/statuses/update.json?status=' + url.format(content) + '&auto_populate_reply_metadata=true';
+        const query = querystring.stringify({status: content});
+        const urlToSend = 'https://api.twitter.com/1.1/statuses/update.json?' + query;
         request.post({url: urlToSend, oauth: oauth}, (err, data, body) => {
             if (err)
                 return console.error(err);
