@@ -182,7 +182,6 @@ class Users extends Component<Props, State> {
                 filterToDisplay.push(filter);
         }
 
-        console.log(filterToDisplay);
         return (
             <div>
                 <Grid container spacing={3}>
