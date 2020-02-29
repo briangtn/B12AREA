@@ -280,6 +280,8 @@ deploy-production-api:
     - sed -i "s/__TEAMS_CLIENT_SECRET__/`echo -ne ${PROD_TEAMS_CLIENT_SECRET} | base64 -w 0`/" area.api.secrets.yaml
     - sed -i "s/__TEAMS_TENANT_ID__/`echo -ne ${PROD_TEAMS_TENANT_ID} | base64 -w 0`/" area.api.secrets.yaml
     - sed -i "s/__YOUTUBE_API_KEY__/`echo -ne ${PROD_YOUTUBE_API_KEY} | base64 -w 0`/" area.api.secrets.yaml
+    - sed -i "s/__OUTLOOK_CLIENT_ID__/`echo -ne ${PROD_OUTLOOK_CLIENT_ID} | base64 -w 0`/" area.api.secrets.yaml
+    - sed -i "s/__OUTLOOK_CLIENT_SECRET__/`echo -ne ${PROD_OUTLOOK_CLIENT_SECRET} | base64 -w 0`/" area.api.secrets.yaml
     - sed -i "s/__INGRESS_HOST__/${DEPLOYMENT_HOST}/" area.api.ingress.yaml
     - kubectl apply -f area.api.configmap.yaml -f area.api.secrets.yaml
     - kubectl apply -f area.api.deployment.yaml
@@ -333,6 +335,8 @@ deploy-production-worker:
     - sed -i "s/__TEAMS_CLIENT_SECRET__/`echo -ne ${PROD_TEAMS_CLIENT_SECRET} | base64 -w 0`/" area.worker.secrets.yaml
     - sed -i "s/__TEAMS_TENANT_ID__/`echo -ne ${PROD_TEAMS_TENANT_ID} | base64 -w 0`/" area.worker.secrets.yaml
     - sed -i "s/__YOUTUBE_API_KEY__/`echo -ne ${PROD_YOUTUBE_API_KEY} | base64 -w 0`/" area.worker.secrets.yaml
+    - sed -i "s/__OUTLOOK_CLIENT_ID__/`echo -ne ${PROD_OUTLOOK_CLIENT_ID} | base64 -w 0`/" area.worker.secrets.yaml
+    - sed -i "s/__OUTLOOK_CLIENT_SECRET__/`echo -ne ${PROD_OUTLOOK_CLIENT_SECRET} | base64 -w 0`/" area.worker.secrets.yaml
     - kubectl apply -f area.worker.configmap.yaml -f area.worker.secrets.yaml
     - kubectl apply -f area.worker.deployment.yaml
 
@@ -501,6 +505,8 @@ deploy-development-api:
     - sed -i "s/__TEAMS_CLIENT_SECRET__/`echo -ne ${DEV_TEAMS_CLIENT_SECRET} | base64 -w 0`/" area.api.secrets.yaml
     - sed -i "s/__TEAMS_TENANT_ID__/`echo -ne ${DEV_TEAMS_TENANT_ID} | base64 -w 0`/" area.api.secrets.yaml
     - sed -i "s/__YOUTUBE_API_KEY__/`echo -ne ${DEV_YOUTUBE_API_KEY} | base64 -w 0`/" area.api.secrets.yaml
+    - sed -i "s/__OUTLOOK_CLIENT_ID__/`echo -ne ${DEV_OUTLOOK_CLIENT_ID} | base64 -w 0`/" area.api.secrets.yaml
+    - sed -i "s/__OUTLOOK_CLIENT_SECRET__/`echo -ne ${DEV_OUTLOOK_CLIENT_SECRET} | base64 -w 0`/" area.api.secrets.yaml
     - sed -i "s/__INGRESS_HOST__/${DEPLOYMENT_HOST}/" area.api.ingress.yaml
     - kubectl apply -f area.api.configmap.yaml -f area.api.secrets.yaml
     - kubectl apply -f area.api.deployment.yaml
@@ -554,6 +560,8 @@ deploy-development-worker:
     - sed -i "s/__TEAMS_CLIENT_SECRET__/`echo -ne ${DEV_TEAMS_CLIENT_SECRET} | base64 -w 0`/" area.worker.secrets.yaml
     - sed -i "s/__TEAMS_TENANT_ID__/`echo -ne ${DEV_TEAMS_TENANT_ID} | base64 -w 0`/" area.worker.secrets.yaml
     - sed -i "s/__YOUTUBE_API_KEY__/`echo -ne ${DEV_YOUTUBE_API_KEY} | base64 -w 0`/" area.worker.secrets.yaml
+    - sed -i "s/__OUTLOOK_CLIENT_ID__/`echo -ne ${DEV_OUTLOOK_CLIENT_ID} | base64 -w 0`/" area.worker.secrets.yaml
+    - sed -i "s/__OUTLOOK_CLIENT_SECRET__/`echo -ne ${DEV_OUTLOOK_CLIENT_SECRET} | base64 -w 0`/" area.worker.secrets.yaml
     - kubectl apply -f area.worker.configmap.yaml -f area.worker.secrets.yaml
     - kubectl apply -f area.worker.deployment.yaml
 
