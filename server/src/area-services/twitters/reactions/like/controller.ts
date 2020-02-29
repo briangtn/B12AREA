@@ -13,8 +13,8 @@ interface TweetOptions {
 export default class ReactionController {
 
     static async trigger(params: WorkableObject): Promise<void> {
-        const playlistAddOptions : TweetOptions = params.reactionOptions as TweetOptions;
-        const id = applyPlaceholders(playlistAddOptions.id, params.actionPlaceholders);
+        const options : TweetOptions = params.reactionOptions as TweetOptions;
+        const id = applyPlaceholders(options.id, params.actionPlaceholders);
         const oauth = (params.reactionPreparedData as {oauth: {consumer_key: string, consumer_secret: string, token: string, token_secret: string}}).oauth;
         request.post({url: `https://api.twitter.com/1.1/favorites/create.json?id=${id}`, oauth: oauth}, (err) => {
             if (err)

@@ -58,6 +58,7 @@ export default class NewDMActionController {
         const oauthObject = await TwitterHelper.getOauthObject(userID, ctx);
         const areaService: AreaService = await ctx.get('services.area');
 
+        console.log("Trigger...");
         if (!oauthObject)
             return;
         for (const event of twitterDatas) {
@@ -73,6 +74,8 @@ export default class NewDMActionController {
                     return null;
                 }
                 const twitterUser: {screen_name: string, name: string} = JSON.parse(body)[0];
+                console.log("Trigger...", options);
+
                 if (options.mustMatch && !(new RegExp(options.mustMatch).test(event.message_create.message_data.text)))
                     return null;
                 if (options.from && options.from !== '@' + twitterUser.screen_name)

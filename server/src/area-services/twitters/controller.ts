@@ -23,10 +23,8 @@ export default class TwitterServiceController {
     }
 
     static async start(ctx: Context): Promise<void> {
-        console.log("Twitters service loaded");
 
         const currentWebhook = await TwitterHelper.getCurrentWebhook(ctx) as {id: string, url: string};
-        console.log(currentWebhook, TwitterHelper.getWebhookUrl());
         if (currentWebhook && currentWebhook.url !== TwitterHelper.getWebhookUrl()) {
             await TwitterHelper.refreshWebhook(currentWebhook.id,  ctx);
         } else if (!currentWebhook) {
@@ -151,8 +149,7 @@ export default class TwitterServiceController {
     async whook(@requestBody({}) request: {for_user_id: string}) {
         const users = await this.userRepository.find();
 
-        console.log("Trigger", request);
-
+        console.log("Webhook", request);
         for (const user of users) {
             const twitterID = (user.services! as {twitters: {twitterID: string}}).twitters.twitterID;
             if ('twitters' in user.services! && twitterID === request.for_user_id) {
@@ -163,7 +160,6 @@ export default class TwitterServiceController {
 
     @get('/webhook')
     async whookChallenge(@param.query.string('crc_token') crcToken?: string) {
-        console.log("CRC", crcToken);
         if (!crcToken)
             throw new HttpErrors.BadRequest('Please provide a crc_token params');
 

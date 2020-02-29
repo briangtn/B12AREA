@@ -45,7 +45,7 @@ export interface Tweet {
 }
 
 interface EventSetting {
-    trigger: ((twitterDatas: object, actionID: string, options: object, userID: string, ctx: Context) => void),
+    trigger: ((twitterDatas: object, actionID: string, options: object, userID: string, ctx: Context) => Promise<void>),
     actionName: string
 }
 
@@ -253,10 +253,12 @@ export class TwitterHelper {
                 const event = ACTION_EVENTS[eventName as keyof typeof ACTION_EVENTS];
 
                 if (!Array.isArray(event)) {
-                    return this.triggerAnAction(twitterData, event as EventSetting, userID, userMail, ctx);
-                }
-                for (const oneEvent of event) {
-                    this.triggerAnAction(twitterData, oneEvent as EventSetting, userID, userMail, ctx).then().catch((e) => {});
+                    this.triggerAnAction(twitterData, event as EventSetting, userID, userMail, ctx).then().catch(e => {});
+                } else {
+                    for (const oneEvent of event) {
+                        this.triggerAnAction(twitterData, oneEvent as EventSetting, userID, userMail, ctx).then().catch((e) => {
+                        });
+                    }
                 }
             }
         }
@@ -280,7 +282,7 @@ export class TwitterHelper {
         });
 
         for (const action of actions) {
-            return event.trigger(twitterData, action.id!, action.options!, userID, ctx);
+            event.trigger(twitterData, action.id!, action.options!, userID, ctx).then().catch(e => {});
         }
     }
 }

@@ -7,16 +7,21 @@ import {TwitterHelper} from '../../helper';
 import request from 'request';
 
 interface TweetOptions {
-    id: string
+    name: string
+    follow: boolean,
+    enableNotifications: boolean
 }
 
 export default class ReactionController {
 
     static async trigger(params: WorkableObject): Promise<void> {
         const options : TweetOptions = params.reactionOptions as TweetOptions;
-        const id = applyPlaceholders(options.id, params.actionPlaceholders);
+        const name = applyPlaceholders(options.name, params.actionPlaceholders);
         const oauth = (params.reactionPreparedData as {oauth: {consumer_key: string, consumer_secret: string, token: string, token_secret: string}}).oauth;
-        request.post({url: `https://api.twitter.com/1.1/statuses/retweet/${id}.json`, oauth: oauth}, (err) => {
+        let url = `https://api.twitter.com/1.1/friendships/create.json?screen_name=${name}&follow=${options.enableNotifications}`;
+        if (!options.follow)
+            url = `https://api.twitter.com/1.1/friendships/destroy.json?screen_name=${name}`;
+        request.post({url, oauth: oauth}, (err, data, body) => {
             if (err)
                 return console.error(err);
         })

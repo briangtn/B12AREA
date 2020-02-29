@@ -14,9 +14,8 @@ interface TweetOptions {
 export default class ReactionController {
 
     static async trigger(params: WorkableObject): Promise<void> {
-        console.log("Trigger", JSON.stringify(params, null, 4));
-        const playlistAddOptions : TweetOptions = params.reactionOptions as TweetOptions;
-        const content = applyPlaceholders(playlistAddOptions.content, params.actionPlaceholders);
+        const options : TweetOptions = params.reactionOptions as TweetOptions;
+        const content = applyPlaceholders(options.content, params.actionPlaceholders);
         const oauth = (params.reactionPreparedData as {oauth: {consumer_key: string, consumer_secret: string, token: string, token_secret: string}}).oauth;
         const urlToSend = 'https://api.twitter.com/1.1/statuses/update.json?status=' + url.format(content) + '&auto_populate_reply_metadata=true';
         request.post({url: urlToSend, oauth: oauth}, (err, data, body) => {
