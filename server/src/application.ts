@@ -128,7 +128,7 @@ export class AreaApplication extends BootMixin(
 
         fs.readdir(path.join(baseDir), (err, dirs) => {
             if (err)
-                return console.error(err);
+                dirs = [];
             for (const dirIndex in dirs) {
                 const dir = dirs[dirIndex];
                 import(baseDir + dir + '/controller').then(module => {
