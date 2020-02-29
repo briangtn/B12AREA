@@ -68,10 +68,10 @@ export class AreaRepository extends DefaultCrudRepository<Area,
         const areas = await this.find({
             where: where
         }, options);
-        areas.forEach((area) => {
+        for (const area of areas) {
             this.action(area.id).delete().then().catch(console.error);
             this.reactions(area.id).delete().then().catch(console.error);
-        });
+        }
         return super.deleteAll(where, options);
     }
 }
