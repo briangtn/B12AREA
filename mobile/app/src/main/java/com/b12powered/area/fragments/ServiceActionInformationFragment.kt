@@ -107,9 +107,9 @@ class ServiceActionInformationFragment(private val serviceName: String) : Fragme
             if (item.actions.options != null) {
                 for ((key, value) in item.actions.options)
                     actionOption = "$actionOption$key : $value\n"
-                listActionDetails.add(Pair(serviceAction.plus("\n\n") + actionOption, item.actions))
+                listActionDetails.add(Pair(item.name.plus("  (") + serviceAction.plus(")\n\n") + actionOption, item.actions))
             } else {
-                listActionDetails.add(Pair(serviceAction.plus("\n"), item.actions))
+                listActionDetails.add(Pair(item.name.plus("  (") + serviceAction.plus(")\n\n"), item.actions))
             }
         }
         val adapter = ArrayAdapter(context!!, android.R.layout.simple_list_item_1, listActionDetails.map { item -> item.first })
@@ -182,7 +182,7 @@ class ServiceActionInformationFragment(private val serviceName: String) : Fragme
             }
             builder
                 .setTitle(serviceName)
-                .setMessage(getString(R.string.what_you_want))
+                .setMessage(getString(R.string.what_you_want).plus("\n") + getString(R.string.no_reaction))
                 .setPositiveButton(getString(R.string.delete_areas), dialogClickListener)
                 .setNegativeButton(getString(R.string.cancel), dialogClickListener)
                 .create()

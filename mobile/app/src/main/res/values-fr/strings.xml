@@ -73,4 +73,5 @@
     <string name="show_reactions">Montrer les réactions</string>
     <string name="what_you_want">Que voulez-vous ?</string>
     <string name="delete_reaction">Voulez-vous vraiment supprimer cette réaction ?</string>
+    <string name="no_reaction">( Vous n\'avez aucune réaction pour cette action )</string>
 </resources>

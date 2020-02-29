@@ -68,8 +68,6 @@ class ApiClient(private val context: Context) {
         }
         request.retryPolicy = DefaultRetryPolicy(route.timeout, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT)
         request.setShouldCache(false)
-        println("request url = ")
-        println(request.url)
         getRequestQueue().add(request)
     }
 
