@@ -82,6 +82,7 @@
     "oauth": "^0.9.15",
     "sha256": "^0.2.0",
     "speakeasy": "^2.0.0",
+    "twitter-text": "^3.0.1",
     "validator": "^12.1.0"
   },
   "devDependencies": {

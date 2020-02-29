@@ -86,21 +86,6 @@ class PasswordActivity : AppCompatActivity() {
     }
 
     /**
-     * Get the api url currently stored in local storage or its default value
-     *
-     * @return The api url
-     */
-    private fun getCurrentApiUrl() : String {
-        val sharedPreferences = getSharedPreferences(getString(R.string.storage_name), Context.MODE_PRIVATE)
-        return if (sharedPreferences.contains(getString(R.string.api_url_key))) {
-            sharedPreferences.getString(getString(R.string.api_url_key), null)!!
-        } else {
-            System.getenv("API_HOST") ?: "https://dev.api.area.b12powered.com"
-        }
-
-    }
-
-    /**
      * Check password parameters validity. Call [changePassword] method if parameters are valid, reset input fields if they are not
      */
     private fun submitValidationPassword(token: String) {
