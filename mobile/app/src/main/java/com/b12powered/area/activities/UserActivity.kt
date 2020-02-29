@@ -176,7 +176,14 @@ class UserActivity : AppCompatActivity() {
                 etConfirmNewPassword.error = getString(R.string.different_password)
             }
         }
-        if (newPassword.isNotEmpty() && newConfirmPassword.isNotEmpty() && newPassword.toString() == newConfirmPassword.toString()) {
+
+        val newPasswordValue = newPassword.toString()
+        val newConfirmPasswordValue = newConfirmPassword.toString()
+
+        newPassword.clear()
+        newConfirmPassword.clear()
+
+        if (newPasswordValue.isNotEmpty() && newConfirmPasswordValue.isNotEmpty() && newPasswordValue == newConfirmPasswordValue) {
             changePassword(newPassword.toString())
         }
     }
@@ -207,6 +214,11 @@ class UserActivity : AppCompatActivity() {
             .patchUser(newUser) { user, message ->
                 if (user != null) {
                     _user = user
+                    Toast.makeText(
+                        this,
+                        getString(R.string.success_new_password),
+                        Toast.LENGTH_SHORT
+                    ).show()
                 } else {
                     Toast.makeText(
                         this,
