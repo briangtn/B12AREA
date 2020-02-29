@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 
 import { connect } from 'react-redux';
 import {setAdminToken, setToken} from "../actions/api.action";
-import {Button, createStyles, Theme, withStyles} from "@material-ui/core";
+import {createStyles, Theme, withStyles} from "@material-ui/core";
 import Cookies from "universal-cookie";
 import Typography from "@material-ui/core/Typography";
 
@@ -58,6 +58,7 @@ class InpersonateBar extends Component<Props, State> {
             renderedText = (
                 <Typography variant="body1">
                     {'Vous êtes entrain de vous faire passer pour un autre utilisateur cliquez '}
+                    {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
                     <a onClick={this.unimpersonateClickEvent} href="#" style={{color: 'black'}}>ici</a>
                     {' pour arrêter'}
                 </Typography>
@@ -66,6 +67,7 @@ class InpersonateBar extends Component<Props, State> {
             renderedText = (
                 <Typography variant="body1">
                     {'You are impersonating someone click '}
+                    {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
                     <a onClick={this.unimpersonateClickEvent} href="#" style={{color: 'black'}}>here</a>
                     {' to stop'}
                 </Typography>
@@ -80,7 +82,7 @@ class InpersonateBar extends Component<Props, State> {
             );
         } else {
             return (
-                <div></div>
+                <div />
             )
         }
     }

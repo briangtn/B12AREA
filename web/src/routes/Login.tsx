@@ -296,7 +296,6 @@ class Login extends Component<Props, State> {
                             onChange={this.onChange}
                             onKeyDown={(e) => {this.enterKeyPress(e, "fa-submit")}}
                             fullWidth
-                            style={{ left: '15%' }}
                         />
                     </DialogContent>
                     <DialogActions>
