@@ -39,7 +39,7 @@
     <string name="user_change_password">Change my password</string>
     <string name="activate_two_fa">Activate double authentication</string>
     <string name="double_authentication">Double authentication</string>
-    <string name="copy">copy the link</string>
+    <string name="copy">Copy code</string>
     <string name="disable_two_fa">Disable double authentication</string>
     <string name="log_out">Log out</string>
     <string name="forgot_password">Forgot your password</string>
