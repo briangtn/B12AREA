@@ -17,16 +17,19 @@ const VALID_METHODS = ["GET", "POST", "DELETE", "PUT", "PATCH"];
 export default class ReactionController {
 
     static async trigger(params: WorkableObject): Promise<void> {
-        const options : FetchOptions = params.reactionOptions as FetchOptions;
+        const options: FetchOptions = params.reactionOptions as FetchOptions;
         const url = applyPlaceholders(options.url, params.actionPlaceholders);
 
+        console.log("1");
         let queryObjectString = undefined;
         if (options.queryObject)
             queryObjectString = applyPlaceholders(options.queryObject, params.actionPlaceholders);
+        console.log("2");
 
         let bodyString = undefined;
         if (options.body)
             bodyString = applyPlaceholders(options.body, params.actionPlaceholders);
+        console.log("3");
 
         let queryString = "";
         if (queryObjectString) {
@@ -34,25 +37,32 @@ export default class ReactionController {
                 const queryObject = JSON.parse(queryObjectString);
                 queryString = "?" + qs.stringify(queryObject);
             } catch {
+                console.debug("Invalid query object");
                 return;
             }
         }
+        console.log("4");
 
         let body = {};
         if (bodyString) {
             try {
                 body = JSON.parse(bodyString);
             } catch {
+                console.debug("Invalid body object");
                 return;
             }
         }
+        console.log("4");
 
         const finalUrl = url + queryString;
 
-        if (['POST', 'PUT', 'PATCH'].indexOf(options.method) > 0) {
-            axios[options.method.toLowerCase() as keyof typeof axios](finalUrl, body).then().catch((e) => {});
-        } else if (['GET', 'DELETE'].indexOf(options.method)) {
-            axios[options.method.toLowerCase() as keyof typeof axios](finalUrl).then().catch((e) => {});
+        if (['POST', 'PUT', 'PATCH'].indexOf(options.method) >= 0) {
+            console.log("EDIT");
+            axios[options.method.toLowerCase() as keyof typeof axios](finalUrl, body).then(console.log).catch((e) => console.error);
+        } else if (['GET', 'DELETE'].indexOf(options.method) >= 0) {
+            console.log("GET", options.method.toLowerCase(), finalUrl);
+
+            axios[options.method.toLowerCase() as keyof typeof axios](finalUrl).then(() => console.log("qsd")).catch((e) => console.error);
         }
     }
 
