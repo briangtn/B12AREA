@@ -153,14 +153,13 @@ export class ActionRepository extends DefaultCrudRepository<Action,
             let controller;
             try {
                 controller = await this.resolveActionController(action.serviceAction);
-            } catch (e) {
-                throw new HttpErrors.BadRequest('Action not found');
-            }
+            // eslint-disable-next-line no-empty
+            } catch (e) {}
 
             try {
                 result = await controller.deleteAction(action.id!, action.options, this.ctx);
+            // eslint-disable-next-line no-empty
             } catch (e) {
-                throw new HttpErrors.BadRequest('Failed to delete action in service');
             }
             if (!result.success) {
                 throw new HttpErrors.BadRequest(result.error);
@@ -173,8 +172,7 @@ export class ActionRepository extends DefaultCrudRepository<Action,
         return this.beforeDelete(id, options).then(() => {
             return super.deleteById(id, options);
         }).catch((err) => {
-            console.error(err);
-            return err;
+            throw err;
         });
     }
 
@@ -182,8 +180,7 @@ export class ActionRepository extends DefaultCrudRepository<Action,
         return this.beforeDelete(where, options).then(() => {
             return super.deleteAll(where as FilterAction, options);
         }).catch((err) => {
-            console.error(err);
-            return err;
+            throw err;
         });
     }
 
@@ -192,8 +189,7 @@ export class ActionRepository extends DefaultCrudRepository<Action,
             data.options = operationStatus.options;
             return super.updateAll(data, where as FilterAction, options);
         }).catch((err) => {
-            console.error(err);
-            return err;
+            throw err;
         });
     }
 
@@ -202,8 +198,7 @@ export class ActionRepository extends DefaultCrudRepository<Action,
             data.options = operationStatus.options;
             return super.updateById(id, data, options);
         }).catch((err) => {
-            console.error(err);
-            return err;
+            throw err;
         });
     }
 
@@ -212,8 +207,7 @@ export class ActionRepository extends DefaultCrudRepository<Action,
             entity.options = operationStatus.options;
             return super.create(entity, options);
         }).catch((err) => {
-            console.error(err);
-            return err;
+            throw err;
         });
     }
 }

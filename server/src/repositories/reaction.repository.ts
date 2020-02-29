@@ -131,14 +131,14 @@ export class ReactionRepository extends DefaultCrudRepository<Reaction,
             let controller;
             try {
                 controller = await this.resolveReactionController(reaction.serviceReaction);
+            // eslint-disable-next-line no-empty
             } catch (e) {
-                throw new HttpErrors.BadRequest('Reaction not found');
             }
 
             try {
                 result = await controller.deleteReaction(reaction.id!, reaction.options, this.ctx);
+            // eslint-disable-next-line no-empty
             } catch (e) {
-                throw new HttpErrors.BadRequest('Failed to delete reaction in service');
             }
             if (!result.success) {
                 throw new HttpErrors.BadRequest(result.error);
@@ -151,8 +151,7 @@ export class ReactionRepository extends DefaultCrudRepository<Reaction,
         return this.beforeDelete(id, options).then(() => {
             return super.deleteById(id, options);
         }).catch((err) => {
-            console.error(err);
-            return err;
+            throw err;
         });
     }
 
@@ -160,8 +159,7 @@ export class ReactionRepository extends DefaultCrudRepository<Reaction,
         return this.beforeDelete(where, options).then(() => {
             return super.deleteAll(where as FilterReaction, options);
         }).catch((err) => {
-            console.error(err);
-            return err;
+            throw err;
         });
     }
 
@@ -170,8 +168,7 @@ export class ReactionRepository extends DefaultCrudRepository<Reaction,
             data.options = operationStatus.options;
             return super.updateAll(data, where as FilterReaction, options);
         }).catch((err) => {
-            console.error(err);
-            return err;
+            throw err;
         });
     }
 
@@ -180,8 +177,7 @@ export class ReactionRepository extends DefaultCrudRepository<Reaction,
             data.options = operationStatus.options;
             return super.updateById(id, data, options);
         }).catch((err) => {
-            console.error(err);
-            return err;
+            throw err;
         });
     }
 
@@ -190,8 +186,7 @@ export class ReactionRepository extends DefaultCrudRepository<Reaction,
             entity.options = operationStatus.options;
             return super.create(entity, options);
         }).catch((err) => {
-            console.error(err);
-            return err;
+            throw err;
         });
     }
 }
