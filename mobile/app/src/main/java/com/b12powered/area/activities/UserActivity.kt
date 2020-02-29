@@ -37,9 +37,9 @@ class UserActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_user)
 
-        var disable2fa: String = getString(R.string.disable_two_fa)
+        val disable2fa: String = getString(R.string.disable_two_fa)
 
-        var activate2fa: String = getString(R.string.activate_two_fa)
+        val activate2fa: String = getString(R.string.activate_two_fa)
 
         emailUser()
 
@@ -164,13 +164,13 @@ class UserActivity : AppCompatActivity() {
         etNewPassword.error = null
         etConfirmNewPassword.error = null
 
-        if (newPassword.isEmpty()) {
-            etNewPassword.error = getString(R.string.no_password)
-        } else if (newConfirmPassword.isEmpty()) {
-            etConfirmNewPassword.error = getString(R.string.no_confirm_password)
-        } else if (newPassword.toString() != newConfirmPassword.toString()) {
-            etConfirmNewPassword.setText("")
-            etConfirmNewPassword.error = getString(R.string.different_password)
+        when {
+            newPassword.isEmpty() -> etNewPassword.error = getString(R.string.no_password)
+            newConfirmPassword.isEmpty() -> etConfirmNewPassword.error = getString(R.string.no_confirm_password)
+            newPassword.toString() != newConfirmPassword.toString() -> {
+                etConfirmNewPassword.setText("")
+                etConfirmNewPassword.error = getString(R.string.different_password)
+            }
         }
         if (newPassword.isNotEmpty() && newConfirmPassword.isNotEmpty() && newPassword.toString() == newConfirmPassword.toString()) {
             changePassword(newPassword.toString())
