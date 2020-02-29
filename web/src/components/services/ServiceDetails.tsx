@@ -183,7 +183,7 @@ class ServiceDetails extends Component<Props, State> {
      */
     displayConfigSchema = (configSchema: any) => {
         const { areas, chosenArea, configSchemaReaction } = this.state;
-        const { name, type, required } = configSchema;
+        const { name, type, required, description } = configSchema;
         const currentArea: any = areas[chosenArea];
         let placeholders: IPlaceHolder[] | null = null;
 
@@ -204,6 +204,7 @@ class ServiceDetails extends Component<Props, State> {
         if (placeholders) {
             placeHolderComponent = (
                 <React.Fragment>
+                    <i><u>{`${name}:`}</u> {`${description}`}</i>
                     <p><b>Placeholders:</b></p>
                     {placeholders.map((holder: IPlaceHolder, index: number) => <p key={index}>{`{${holder.name}}: ${holder.description}`}</p>)}
                 </React.Fragment>
