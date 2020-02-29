@@ -63,7 +63,7 @@ class SearchActivity : AppCompatActivity() {
                                 about.server.services.forEach { service ->
                                     if (!user.services.contains(service.name)) {
                                         supportFragmentManager.beginTransaction()
-                                            .add(R.id.search, ServiceFragment.newInstance(service))
+                                            .add(R.id.list_layout, ServiceFragment.newInstance(service))
                                             .commit()
                                     }
                                 }

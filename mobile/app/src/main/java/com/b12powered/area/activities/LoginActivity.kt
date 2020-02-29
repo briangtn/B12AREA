@@ -65,6 +65,11 @@ class LoginActivity : AppCompatActivity() {
         }
 
         go_to_register_button.setOnClickListener {
+            val editor = sharedPreferences.edit()
+
+            editor.remove(getString(R.string.already_visited))
+            editor.apply()
+
             val intent = Intent(this, RegisterActivity::class.java)
             finish()
             startActivity(intent)
