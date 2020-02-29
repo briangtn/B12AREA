@@ -177,16 +177,17 @@ class AddAreaStepper extends Component<Props, State> {
      */
     displayConfigSchema = (argGroupName: string, configSchema: any, key: any, isAction: boolean, placeholder: IPlaceHolder[] | null = null) => {
         const { configSchemaActions, configSchemaReactions } = this.state;
-        const { name, type, required } = configSchema;
+        const { name, type, required, description } = configSchema;
         let placeHolderString: any = null;
 
         if (placeholder) {
-                placeHolderString = (
-                    <React.Fragment>
-                        <p><b>Placeholders:</b></p>
-                        {placeholder.map((holder: IPlaceHolder, index: number) => <p key={index}>{`{${holder.name}}: ${holder.description}`}</p>)}
-                    </React.Fragment>
-                );
+            placeHolderString = (
+                <React.Fragment>
+                    <i><u>{`${name}:`}</u> {`${description}`}</i>
+                    <p><b>Placeholders:</b></p>
+                    {placeholder.map((holder: IPlaceHolder, index: number) => <p key={index}>{`{${holder.name}}: ${holder.description}`}</p>)}
+                </React.Fragment>
+            );
         }
         if (type === "string" || type === "number") {
             if (placeholder) {
