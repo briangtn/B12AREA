@@ -173,8 +173,7 @@ export class ActionRepository extends DefaultCrudRepository<Action,
         return this.beforeDelete(id, options).then(() => {
             return super.deleteById(id, options);
         }).catch((err) => {
-            console.error(err);
-            return err;
+            throw err;
         });
     }
 
@@ -182,8 +181,7 @@ export class ActionRepository extends DefaultCrudRepository<Action,
         return this.beforeDelete(where, options).then(() => {
             return super.deleteAll(where as FilterAction, options);
         }).catch((err) => {
-            console.error(err);
-            return err;
+            throw err;
         });
     }
 
@@ -192,8 +190,7 @@ export class ActionRepository extends DefaultCrudRepository<Action,
             data.options = operationStatus.options;
             return super.updateAll(data, where as FilterAction, options);
         }).catch((err) => {
-            console.error(err);
-            return err;
+            throw err;
         });
     }
 
@@ -202,8 +199,7 @@ export class ActionRepository extends DefaultCrudRepository<Action,
             data.options = operationStatus.options;
             return super.updateById(id, data, options);
         }).catch((err) => {
-            console.error(err);
-            return err;
+            throw err;
         });
     }
 
@@ -212,8 +208,7 @@ export class ActionRepository extends DefaultCrudRepository<Action,
             entity.options = operationStatus.options;
             return super.create(entity, options);
         }).catch((err) => {
-            console.error(err);
-            return err;
+            throw err;
         });
     }
 }

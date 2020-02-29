@@ -1,0 +1,30 @@
+{
+  "displayName": "Fetch",
+  "description": "Fetch a route",
+  "configSchema": [
+    {
+      "name": "method",
+      "description": "The call method must be GET / POST / DELETE / PUT / PATCH",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "url",
+      "description": "The url to fetch",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "queryObject",
+      "description": "query data to send json formated",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "body",
+      "description": "The JSON formated body to send (For POST / PUT & PATCH)",
+      "type": "string",
+      "required": false
+    }
+  ]
+}
