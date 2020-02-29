@@ -1,6 +1,5 @@
 package com.b12powered.area.fragments
 
-import android.content.Context
 import com.b12powered.area.R
 
 import android.view.MotionEvent
@@ -12,30 +11,25 @@ import android.view.View
 import android.view.LayoutInflater
 import android.widget.ImageButton
 import android.content.Intent
-import android.graphics.Color
 import android.graphics.PorterDuff
-import android.media.Image
-import android.view.animation.Animation
 import kotlinx.android.synthetic.main.fragment_toolbar.*
 
 import com.b12powered.area.activities.HomeActivity
 import com.b12powered.area.activities.SearchActivity
-import com.b12powered.area.activities.SearchActivity.*
 import com.b12powered.area.activities.UserActivity
-import com.google.android.material.animation.AnimationUtils
 
 class ToolbarFragment : Fragment() {
 
     private lateinit var rootLayout: View
 
-    private enum class Activites {
+    enum class Activity {
         SEARCH,
         USER,
         HOME
     }
 
     companion object {
-        private var currentActivity: Activites = Activites.HOME
+        private var currentActivity: Activity = Activity.HOME
     }
 
     override fun onCreateView(
@@ -43,7 +37,7 @@ class ToolbarFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         rootLayout = inflater.inflate(R.layout.fragment_toolbar, container, false)
-        if (activity is AppCompatActivity){
+        if (activity is AppCompatActivity) {
             val toolbar = view?.findViewById<androidx.appcompat.widget.Toolbar>(R.id.toolbar)
             (activity as AppCompatActivity).setSupportActionBar(toolbar)
         }
@@ -53,29 +47,33 @@ class ToolbarFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        searchbtnToolbar.findViewById<ImageButton>(R.id.searchbtnToolbar)
-        userbtnToolbar.findViewById<ImageButton>(R.id.userbtnToolbar)
-        homebtnToolbar.findViewById<ImageButton>(R.id.homebtnToolbar)
+        search_button_toolbar.findViewById<ImageButton>(R.id.search_button_toolbar)
+        user_button_toolbar.findViewById<ImageButton>(R.id.user_button_toolbar)
+        home_button_toolbar.findViewById<ImageButton>(R.id.home_button_toolbar)
 
-        handlingClickEffect(searchbtnToolbar, userbtnToolbar, homebtnToolbar)
+        handlingClickEffect(search_button_toolbar, user_button_toolbar, home_button_toolbar)
 
-        handlingClickListener(searchbtnToolbar, userbtnToolbar, homebtnToolbar)
+        handlingClickListener(search_button_toolbar, user_button_toolbar, home_button_toolbar)
     }
 
     private fun handlingClickEffect(searchBtnToolbar: ImageButton, userBtnToolbar: ImageButton, homeBtnToolbar: ImageButton) {
-        if (currentActivity == Activites.HOME) {
-            buttonEffect(searchbtnToolbar)
-            buttonEffect(userbtnToolbar)
-        } else if (currentActivity == Activites.SEARCH) {
-            buttonEffect(userbtnToolbar)
-            buttonEffect(homebtnToolbar)
-        } else {
-            buttonEffect(searchbtnToolbar)
-            buttonEffect(homebtnToolbar)
+        when(currentActivity) {
+            Activity.HOME -> {
+                buttonEffect(searchBtnToolbar)
+                buttonEffect(userBtnToolbar)
+            }
+            Activity.SEARCH -> {
+                buttonEffect(userBtnToolbar)
+                buttonEffect(homeBtnToolbar)
+            }
+            else -> {
+                buttonEffect(searchBtnToolbar)
+                buttonEffect(homeBtnToolbar)
+            }
         }
     }
 
-    fun buttonEffect(button: View) {
+    private fun buttonEffect(button: View) {
         button.setOnTouchListener { v, event ->
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
@@ -94,8 +92,8 @@ class ToolbarFragment : Fragment() {
     private fun handlingClickListener(searchBtnToolbar: ImageButton, userBtnToolbar: ImageButton, homeBtnToolbar: ImageButton) {
 
         searchBtnToolbar.setOnClickListener {
-            if (currentActivity != Activites.SEARCH) {
-                currentActivity = Activites.SEARCH
+            if (currentActivity != Activity.SEARCH) {
+                currentActivity = Activity.SEARCH
                 val intent = Intent(this@ToolbarFragment.context, SearchActivity::class.java)
                 startActivity(intent)
                 activity?.overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
@@ -103,8 +101,8 @@ class ToolbarFragment : Fragment() {
         }
 
         userBtnToolbar.setOnClickListener {
-            if (currentActivity != Activites.USER) {
-                currentActivity = Activites.USER
+            if (currentActivity != Activity.USER) {
+                currentActivity = Activity.USER
                 val intent = Intent(this@ToolbarFragment.context, UserActivity::class.java)
                 startActivity(intent)
                 activity?.overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
@@ -112,16 +110,20 @@ class ToolbarFragment : Fragment() {
         }
 
         homeBtnToolbar.setOnClickListener {
-            if (currentActivity != Activites.HOME) {
+            if (currentActivity != Activity.HOME) {
                 val intent = Intent(this@ToolbarFragment.context, HomeActivity::class.java)
                 startActivity(intent)
-                if (currentActivity == Activites.SEARCH) {
+                if (currentActivity == Activity.SEARCH) {
                     activity?.overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
                 } else {
                     activity?.overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
                 }
-                currentActivity = Activites.HOME
+                currentActivity = Activity.HOME
             }
         }
+    }
+
+    fun setCurrentActivity(activity: Activity) {
+        currentActivity = activity
     }
 }

@@ -60,7 +60,7 @@ export default class ActionController {
             actionId: action.id!,
             placeholders: [
                 {
-                    name: "videoID",
+                    name: "videoId",
                     value: video['yt:videoid'][0]
                 },
                 {

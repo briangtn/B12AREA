@@ -2,13 +2,14 @@ import {NewVideoData, TokensResponse} from "./interfaces";
 import axios from "axios";
 import {ActionRepository, UserRepository} from "../../repositories";
 import {Context} from "@loopback/context";
-import ServiceController from "./controller";
+import ServiceController, {YOUTUBE_DELAYED_JOB_POST_SUBSCRIBE_WEBHOOK} from "./controller";
 import {google} from "googleapis";
 import * as qs from "querystring";
 import {RandomGeneratorManager} from "../../services";
 import {Action} from "../../models";
 import {OperationStatus} from "../../services-interfaces";
 import DomParser from "dom-parser";
+import WorkerHelper from "../../WorkerHelper";
 
 const API_URL : string = process.env.API_URL ?? "http://localhost:8080";
 
@@ -90,7 +91,7 @@ export class YoutubeHelper {
         });
     }
 
-    public static async postSubscribeWebhook(webhookUrl: string, channelId: string): Promise<string> {
+    public static async postSubscribeWebhook(webhookUrl: string, channelId: string, ctx: Context): Promise<string> {
         const topicUrl = this.getTopicUrl(channelId);
 
         return new Promise<string>((resolve, reject) => {
@@ -100,7 +101,7 @@ export class YoutubeHelper {
                 }
             }).then(() => {
                 console.debug("[YOUTUBE SERVICE] WebHook subscription details", this.getInfosUrl(channelId, webhookUrl));
-                this.prepareRefreshWebhook(channelId, webhookUrl);
+                this.prepareRefreshWebhook(channelId, webhookUrl, ctx);
                 resolve(webhookUrl);
             }).catch(() => {
                 reject(`Could not setup webhook for ${topicUrl}`)
@@ -135,8 +136,8 @@ export class YoutubeHelper {
             }
         }
 
-        const res = await this.postSubscribeWebhook(webhookUrl, channelId);
-        this.prepareRefreshWebhook(channelId, webhookUrl);
+        const res = await this.postSubscribeWebhook(webhookUrl, channelId, ctx);
+        this.prepareRefreshWebhook(channelId, webhookUrl, ctx);
         return res;
     }
 
@@ -161,7 +162,7 @@ export class YoutubeHelper {
         });
     }
 
-    static prepareRefreshWebhook(channelId: string, webhook: string) {
+    static prepareRefreshWebhook(channelId: string, webhook: string, ctx: Context) {
         axios.get(YoutubeHelper.getInfosUrl(channelId, webhook)).then((res) => {
             const data = new DomParser().parseFromString(res.data).getElementsByTagName('dd');
             let dates: Date[] = [];
@@ -174,9 +175,12 @@ export class YoutubeHelper {
             }
             dates = dates.sort();
             const delayToRefresh = dates[dates.length - 1].getTime() - new Date(Date.now()).getTime() - (1000 * 60 * 60);
-            setTimeout(() => {
-                this.postSubscribeWebhook(webhook, channelId).then(() => {}).catch(console.error);
-            }, delayToRefresh);
+            WorkerHelper.AddDelayedJob({
+                service: 'youtube',
+                name: YOUTUBE_DELAYED_JOB_POST_SUBSCRIBE_WEBHOOK + channelId + '_' + webhook,
+                triggerIn: delayToRefresh <= 0 ? 2000 : delayToRefresh,
+                jobData: {channelId, webhook}
+            }, ctx).catch((e) => {console.error(`Failed to add delayed job ${YOUTUBE_DELAYED_JOB_POST_SUBSCRIBE_WEBHOOK + channelId + '_' + webhook}`, e)});
         }).catch((err) => {
             console.error(err);
         })

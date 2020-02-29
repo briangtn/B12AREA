@@ -1,11 +1,20 @@
 import {Context} from '@loopback/context'
 import {AreaService} from '../../services';
 import {UserRepository, ActionRepository} from '../../repositories';
-import {ActionFunction} from '../../services-interfaces';
+import {ActionFunction, PullingData} from '../../services-interfaces';
 import {User} from '../../models';
 import * as qs from 'querystring'
 import axios from 'axios';
 import base64 from 'base-64';
+
+export class SpotifyException {
+    constructor(error: string, info: object = {}) {
+        this.error = error;
+        this.info = info;
+    }
+    error: string;
+    info: object;
+}
 
 interface SpotifyExternalUrl {
     spotify: string
@@ -58,8 +67,8 @@ export interface AreaSpotifyTrack {
     uri: string
 }
 
-const SPOTIFY_NEW_PLAYLIST_SONG_PULLING_PREFIX = "spotify_newPlaylistSong_";
-const SPOTIFY_NEW_LIKED_SONG_PULLING_PREFIX = "spotify_newLikedSong_";
+export const SPOTIFY_NEW_PLAYLIST_SONG_PULLING_PREFIX = "spotify_newPlaylistSong_";
+export const SPOTIFY_NEW_LIKED_SONG_PULLING_PREFIX = "spotify_newLikedSong_";
 const SPOTIFY_TOKEN_EXCHANGE_BASE_URL = 'https://accounts.spotify.com/api/token';
 const SPOTIFY_CLIENT_ID = process.env.SPOTIFY_CLIENT_ID ?? "";
 const SPOTIFY_CLIENT_SECRET = process.env.SPOTIFY_CLIENT_SECRET ?? "";
@@ -115,8 +124,7 @@ export class SpotifyHelper {
 
     }
 
-    static async startNewPlaylistSongPulling(actionID: string, userID: string, ctx: Context) {
-        const areaService: AreaService = await ctx.get('services.area');
+    public static async getNewPlaylistSongPullingData(actionID: string, userID: string, ctx: Context): Promise<PullingData> {
         const userRepository: UserRepository = await ctx.get('repositories.UserRepository');
         const actionRepository: ActionRepository = await ctx.get('repositories.ActionRepository');
 
@@ -124,11 +132,11 @@ export class SpotifyHelper {
         const options: {id: string} = (await actionRepository.getActionSettings(actionID))! as {id: string};
 
         if (!serviceData || !serviceData.token)
-            return;
-        areaService.startPulling(
-            `https://api.spotify.com/v1/playlists/${options.id}/tracks`,
-            {headers: {Authorization: 'Bearer ' + serviceData.token}},
-            async (data: {items: SpotifyPlaylistTrack[]}) => {
+            throw new SpotifyException('Failed to retrieve tokens');
+        return {
+            url: `https://api.spotify.com/v1/playlists/${options.id}/tracks`,
+            params: {headers: {Authorization: 'Bearer ' + serviceData.token}},
+            diffFunction: async (data: {items: SpotifyPlaylistTrack[]}) => {
                 const tracks = data.items;
                 const diff = [];
                 const actionData = (await actionRepository.getActionData(actionID))! as {lastDate: string};
@@ -139,7 +147,8 @@ export class SpotifyHelper {
                     }
                 }
                 return diff;
-            }, async (tracks: AreaSpotifyTrack[]) => {
+            },
+            onDiff: async (tracks: AreaSpotifyTrack[]) => {
                 await actionRepository.setActionData(actionID, {lastDate: new Date().toISOString()});
 
                 for (const track of tracks) {
@@ -189,29 +198,22 @@ export class SpotifyHelper {
                         ]
                     }, ctx)
                 }
-
-            }, 30, SPOTIFY_NEW_PLAYLIST_SONG_PULLING_PREFIX + actionID)
+            }
+        };
     }
 
-    static async stopNewPlaylistSongPulling(actionID: string, ctx: Context) {
-        const areaService: AreaService = await ctx.get('services.area');
-
-        areaService.stopPulling(SPOTIFY_NEW_PLAYLIST_SONG_PULLING_PREFIX + actionID);
-    }
-
-    static async startNewLikedSongPulling(actionID: string, userID: string, ctx: Context) {
-        const areaService: AreaService = await ctx.get('services.area');
+    public static async getNewLikedSongPullingData(actionID: string, userID: string, ctx: Context): Promise<PullingData> {
         const userRepository: UserRepository = await ctx.get('repositories.UserRepository');
         const actionRepository: ActionRepository = await ctx.get('repositories.ActionRepository');
 
         const serviceData: {token: string} = await userRepository.getServiceInformation(userID, 'spotify') as {token: string};
 
         if (!serviceData || !serviceData.token)
-            return;
-        areaService.startPulling(
-            `https://api.spotify.com/v1/me/tracks`,
-            {headers: {Authorization: 'Bearer ' + serviceData.token}},
-            async (data: {items: SpotifyPlaylistTrack[]}) => {
+            throw new SpotifyException('Failed to retrieve tokens');
+        return {
+            url: `https://api.spotify.com/v1/me/tracks`,
+            params: {headers: {Authorization: 'Bearer ' + serviceData.token}},
+            diffFunction: async (data: {items: SpotifyPlaylistTrack[]}) => {
                 const tracks = data.items;
                 const diff = [];
                 const actionData = (await actionRepository.getActionData(actionID))! as {lastDate: string};
@@ -222,7 +224,8 @@ export class SpotifyHelper {
                     }
                 }
                 return diff;
-            }, async (tracks: AreaSpotifyTrack[]) => {
+            },
+            onDiff: async (tracks: AreaSpotifyTrack[]) => {
                 await actionRepository.setActionData(actionID, {lastDate: new Date().toISOString()});
 
                 for (const track of tracks) {
@@ -268,14 +271,28 @@ export class SpotifyHelper {
                         ]
                     }, ctx)
                 }
+            }
+        };
+    }
 
-            }, 30, SPOTIFY_NEW_LIKED_SONG_PULLING_PREFIX + actionID)
+    static async startNewPlaylistSongPulling(actionID: string, userID: string, ctx: Context) {
+        const areaService: AreaService = await ctx.get('services.area');
+        await areaService.startPulling(30, SPOTIFY_NEW_PLAYLIST_SONG_PULLING_PREFIX + actionID, 'spotify', ctx, {actionID, userID});
+    }
+
+    static async stopNewPlaylistSongPulling(actionID: string, ctx: Context) {
+        const areaService: AreaService = await ctx.get('services.area');
+        await areaService.stopPulling(SPOTIFY_NEW_PLAYLIST_SONG_PULLING_PREFIX + actionID, 'spotify', ctx);
+    }
+
+    static async startNewLikedSongPulling(actionID: string, userID: string, ctx: Context) {
+        const areaService: AreaService = await ctx.get('services.area');
+        await areaService.startPulling(30, SPOTIFY_NEW_LIKED_SONG_PULLING_PREFIX + actionID, 'spotify', ctx, {actionID, userID})
     }
 
     static async stopNewLikedSongPulling(actionID: string, ctx: Context) {
         const areaService: AreaService = await ctx.get('services.area');
-
-        areaService.stopPulling(SPOTIFY_NEW_LIKED_SONG_PULLING_PREFIX + actionID);
+        await areaService.stopPulling(SPOTIFY_NEW_LIKED_SONG_PULLING_PREFIX + actionID, 'spotify', ctx);
     }
 
     static parseSpotifyTrack(spotifyTrackVersion: SpotifyPlaylistTrack): AreaSpotifyTrack {

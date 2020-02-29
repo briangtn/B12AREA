@@ -11,6 +11,7 @@ import Typography from "@material-ui/core/Typography";
 import Translator from "../components/Translator";
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
+import IError from "../interfaces/IError.interface";
 
 interface Props {
     history: {
@@ -34,7 +35,6 @@ interface State {
 const styles = (theme: Theme) => createStyles({
     field: {
         marginTop: '20px',
-        width: '300px'
     },
     loginButton: {
         marginTop: '20px',
@@ -54,6 +54,12 @@ class ForgotPassword extends Component<Props, State> {
         resetted: false
     };
 
+    /**
+     * Function called when a user type inside a text field
+     * verify if the email is correct.
+     *
+     * @param e
+     */
     onChange: React.ChangeEventHandler<HTMLInputElement> = (e) => {
         const { id, value } = e.currentTarget;
 
@@ -64,6 +70,11 @@ class ForgotPassword extends Component<Props, State> {
         this.setState({ [id]: value } as unknown as Pick<State, keyof State>);
     };
 
+    /**
+     * Function called when a user press enter inside a text field
+     *
+     * @param e event triggered
+     */
     keyPress = (e: any) => {
         if (e.keyCode === 13) {
             const toClick: HTMLElement | null = document.getElementById('resetPassword')
@@ -71,8 +82,14 @@ class ForgotPassword extends Component<Props, State> {
             if (toClick)
                 toClick.click();
         }
-    }
+    };
 
+    /**
+     * Function called when the user enter his email address then
+     * press the reset password button.
+     *
+     * @param e event triggered
+     */
     onSubmit = (e: React.FormEvent) => {
         const { email, emailError } = this.state;
 
@@ -81,7 +98,7 @@ class ForgotPassword extends Component<Props, State> {
             return;
         }
         const { api_url } = this.props;
-        const redirectURL: string = `${window.location.protocol}//${window.location.host}/reset_password`;
+        const redirectURL: string = `${window.location.protocol}//${window.location.host}/reset_password?api_url=${api_url}`;
 
         fetch(`${api_url}/users/resetPassword`, {
             method: 'POST',
@@ -92,8 +109,7 @@ class ForgotPassword extends Component<Props, State> {
         .then((data) => {
             this.setState({ resetted: true });
         })
-        .catch((error) => {
-            console.log(error);
+        .catch((error: IError) => {
         })
     };
 
@@ -132,6 +148,7 @@ class ForgotPassword extends Component<Props, State> {
                         onKeyDown={this.keyPress}
                         error={this.state.emailError}
                         required
+                        fullWidth
                     />
                     <br />
                     <Button

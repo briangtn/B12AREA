@@ -33,16 +33,26 @@ interface Props {
     changeApiUrl: any
 }
 
-interface State {}
+interface State {
+    displayedMessage: string
+}
 
 class EmailValidation extends Component<Props, State> {
+    state: State = {
+        displayedMessage: (this.props.token) ? 'emailValidatedButConnected' : 'emailValidated'
+    };
+
     componentDidMount(): void {
-        if (this.props.token)
+        if (this.props.token) {
             return;
+        }
+
         let token : string | null = Utilities.getQueryParameter(window.location.href, 'token');
         const newApiUrl: string | null = Utilities.getQueryParameter(window.location.href, 'api_url');
+
         this.props.changeApiUrl(newApiUrl);
         cookies.set('api_url', newApiUrl);
+
         fetch(`${newApiUrl}/users/validate?token=${token}`, {
             method: 'PATCH',
         }).then((res) => {
@@ -66,7 +76,7 @@ class EmailValidation extends Component<Props, State> {
                 >
                     <Grid item xs={6}>
                         <Typography variant="h4" gutterBottom>
-                            <Translator sentence="emailValidated" />
+                            <Translator sentence={this.state.displayedMessage} />
                         </Typography>
                     </Grid>
                 </Grid>
