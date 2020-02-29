@@ -341,7 +341,6 @@ class ServiceDetails extends Component<Props, State> {
 
     componentDidMount() {
         const { token, api_url } = this.props;
-        const { info } = this.state;
 
         fetch(`${api_url}/areas?filter={"include": [{"relation":"action"},{"relation":"reactions"}]}`, {
             headers: {'Authorization': `Bearer ${token}`}
