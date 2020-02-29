@@ -14,6 +14,7 @@ import TwoFactorAuthentication from "../components/profile/TwoFactorAuthenticati
 import ChangePassword from "../components/profile/ChangePassword";
 import GoogleIcon from "../components/icons/GoogleIcon";
 import TwitterIcon from '@material-ui/icons/Twitter';
+import SupervisorAccountIcon from '@material-ui/icons/SupervisorAccount';
 
 import Grid from '@material-ui/core/Grid';
 
@@ -21,9 +22,18 @@ import AuthButton from "../components/AuthButton";
 
 import { Link } from 'react-router-dom';
 
+import {setToken} from "../actions/api.action";
+import Cookies from "universal-cookie";
+
+const cookies = new Cookies();
+
 const mapStateToProps = (state: any) => {
     return { api_url: state.api_url, token: state.token };
 };
+
+function mapDispatchToProps(dispatch: any) {
+    return { setToken: (token: object) => dispatch(setToken(token)) };
+}
 
 interface Props {
     history: {
@@ -34,7 +44,8 @@ interface Props {
         field: string
     },
     api_url: string,
-    token: string
+    token: string,
+    setToken: any
 }
 
 interface State {
@@ -70,31 +81,40 @@ class Profile extends Component<Props, State> {
         roles: []
     };
 
-    onChange: React.ChangeEventHandler<HTMLInputElement> = (e) => {
-        const {id, value} = e.currentTarget;
-
-        if (id === 'fakey' && (value.length === 7 || isNaN(value as any)))
-            return;
-        this.setState({[id]: value} as unknown as Pick<State, keyof State>);
-    };
-
     componentDidMount(): void {
         const { api_url, token } = this.props;
 
+        if (!token) {
+            this.props.history.push('/');
+            return;
+        }
         fetch(`${api_url}/users/me`, { headers: { 'Authorization': `Bearer ${token}` } })
         .then(res => res.json())
         .then(data => {
-            let tmp = [];
-            if (data.authServices)
-                for (let i of data.authServices) {
-                    tmp.push(i.name);
+            const { error } = data;
+
+            if (error) {
+                const { statusCode } = error;
+
+                if (statusCode === 401) {
+                    cookies.set('token',  '');
+                    this.props.setToken('');
+                    this.props.history.push('/');
+                    return;
                 }
-            this.setState({
-                email: data.email,
-                twoFactorAuthenticationEnabled: data.twoFactorAuthenticationEnabled,
-                authServices: tmp,
-                roles: data.role
-            });
+            } else {
+                let tmp = [];
+                if (data.authServices)
+                    for (let i of data.authServices) {
+                        tmp.push(i.name);
+                    }
+                this.setState({
+                    email: data.email,
+                    twoFactorAuthenticationEnabled: data.twoFactorAuthenticationEnabled,
+                    authServices: tmp,
+                    roles: data.role
+                });
+            }
         });
     }
 
@@ -155,11 +175,12 @@ class Profile extends Component<Props, State> {
                             }
                         </Grid>
                     </div>
-                    { (this.state.roles.includes('admin')) ?
+                    {
+                        (this.state.roles.includes('admin')) ?
                         <Link
                             to={{pathname: '/admin'}}
                         >
-                            <Button id="getStarted" color="primary"><Translator sentence="goToAdmin" /></Button>
+                            <Button startIcon={<SupervisorAccountIcon />} style={{marginTop: '10px'}} id="getStarted" color="primary"><Translator sentence="goToAdmin" /></Button>
                         </Link>
                         :
                         <div></div>
@@ -170,4 +191,4 @@ class Profile extends Component<Props, State> {
     }
 }
 
-export default connect(mapStateToProps)(withStyles(styles)(Profile));
+export default connect(mapStateToProps, mapDispatchToProps)(withStyles(styles)(Profile));

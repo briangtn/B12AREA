@@ -95,6 +95,11 @@ class Join extends Component<Props, State> {
         if (location.state) this.setState({email: (location.state.email) ? location.state.email : ''});
     }
 
+    /**
+     * Function called when the user type inside a text field
+     *
+     * @param e event triggered
+     */
     onChange: React.ChangeEventHandler<HTMLInputElement> = (e) => {
         const { id, value } = e.currentTarget;
 
@@ -107,6 +112,11 @@ class Join extends Component<Props, State> {
             this.setState({ email_error: 'false' });
     };
 
+    /**
+     * Function called when the user submit his registration
+     *
+     * @param e event triggered
+     */
     onSubmit = (e: React.FormEvent) => {
         const { email, password, confirm_password } = this.state; // Parameters
         let error : boolean = false;
@@ -161,10 +171,20 @@ class Join extends Component<Props, State> {
         }
     };
 
+    /**
+     * Function called when the user is closed
+     *
+     * @param e event triggered
+     */
     onClose = (e: React.SyntheticEvent): void => {
         this.setState({ error: 'false' });
     };
 
+    /**
+     * Function called on key press
+     *
+     * @param e event triggered
+     */
     keyPress = (e: any) => {
         if (e.keyCode === 13) {
             const toClick: HTMLElement | null = document.getElementById('signup')
@@ -172,7 +192,7 @@ class Join extends Component<Props, State> {
             if (toClick)
                 toClick.click();
         }
-    }
+    };
 
     render() {
         const { email, password, confirm_password, email_error} = this.state;
@@ -181,75 +201,77 @@ class Join extends Component<Props, State> {
         return (
             <div>
                 <NavigationBar history={this.props.history} />
-                <Grid
-                    container
-                    spacing={0}
-                    direction='column'
-                    alignItems='center'
-                    justify='center'
-                    style={{ marginTop: '-50px', minHeight: '100vh', textAlign: 'center' }}
+                <div
+                    style={{
+                        position: 'absolute',
+                        paddingTop: '50px',
+                        left: '50%',
+                        transform: 'translate(-50%)',
+                        textAlign: 'center'
+                    }}
                 >
-                    <Grid item xs={3}>
-                        <Typography variant="h3" gutterBottom><Translator sentence="signup" /></Typography>
-                        <br />
-                        <TextField
-                            id="email"
-                            label="Email"
-                            variant="outlined"
-                            className={classes.field}
-                            value={email}
-                            onChange={this.onChange}
-                            onKeyDown={this.keyPress}
-                            error={ (email_error !== 'false') }
-                            required
-                        />
-                        <br />
-                        <TextField
-                            id="password"
-                            label="Password"
-                            variant="outlined"
-                            type="password"
-                            onKeyDown={this.keyPress}
-                            className={classes.field}
-                            value={password}
-                            onChange={this.onChange}
-                            required
-                        />
-                        <br />
-                        <TextField
-                            id="confirm_password"
-                            label="Confirm Password"
-                            variant="outlined"
-                            type="password"
-                            onKeyDown={this.keyPress}
-                            className={classes.field}
-                            value={confirm_password}
-                            onChange={this.onChange}
-                            required
-                        />
-                        <br />
-                        <Button
-                            id="signup"
-                            variant="contained"
-                            color="secondary"
-                            className={classes.signupButton}
-                            onClick={this.onSubmit}
-                        >
-                            <Translator sentence="signup" />
-                        </Button>
-                        <br />
-                        <OrDivider />
-                        <br />
-                        <Grid container spacing={3}>
-                            <Grid item xs={6}>
-                                <AuthButton token={null} history={this.props.history} apiUrl={this.props.api_url} serviceName="Google" serviceIcon={<GoogleIcon />} />
-                            </Grid>
-                            <Grid item xs={6}>
-                                <AuthButton token={null} history={this.props.history} apiUrl={this.props.api_url} serviceName="Twitter" serviceIcon={<TwitterIcon />} />
-                            </Grid>
+                    <Typography variant="h3" gutterBottom><Translator sentence="signup" /></Typography>
+                    <br />
+                    <TextField
+                        id="email"
+                        label="Email"
+                        variant="outlined"
+                        className={classes.field}
+                        value={email}
+                        onChange={this.onChange}
+                        onKeyDown={this.keyPress}
+                        error={ (email_error !== 'false') }
+                        required
+                        fullWidth
+                    />
+                    <br />
+                    <TextField
+                        id="password"
+                        label="Password"
+                        variant="outlined"
+                        type="password"
+                        onKeyDown={this.keyPress}
+                        className={classes.field}
+                        value={password}
+                        onChange={this.onChange}
+                        required
+                        fullWidth
+                    />
+                    <br />
+                    <TextField
+                        id="confirm_password"
+                        label="Confirm Password"
+                        variant="outlined"
+                        type="password"
+                        onKeyDown={this.keyPress}
+                        className={classes.field}
+                        value={confirm_password}
+                        onChange={this.onChange}
+                        required
+                        fullWidth
+                    />
+                    <br />
+                    <Button
+                        id="signup"
+                        variant="contained"
+                        color="secondary"
+                        className={classes.signupButton}
+                        onClick={this.onSubmit}
+                    >
+                        <Translator sentence="signup" />
+                    </Button>
+                    <br />
+                    <OrDivider />
+                    <br />
+                    <Grid container spacing={3}>
+                        <Grid item xs={6}>
+                            <AuthButton token={null} history={this.props.history} apiUrl={this.props.api_url} serviceName="Google" serviceIcon={<GoogleIcon />} />
+                        </Grid>
+                        <Grid item xs={6}>
+                            <AuthButton token={null} history={this.props.history} apiUrl={this.props.api_url} serviceName="Twitter" serviceIcon={<TwitterIcon />} />
                         </Grid>
                     </Grid>
-                </Grid>
+                </div>
                 <Snackbar open={(this.state.error !== 'false')} autoHideDuration={6000} onClose={this.onClose}>
                     <Alert onClose={this.onClose} severity="error">
                         { this.state.errorMessage }

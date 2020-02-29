@@ -9,7 +9,9 @@ defaultAPI = (process.env.REACT_APP_API_URL !== undefined) ? process.env.REACT_A
 const initialState = {
     language: (cookies.get('language')) ? cookies.get('language') : 'fr',
     api_url: (cookies.get('api_url')) ? cookies.get('api_url') : defaultAPI,
-    token: (cookies.get('token')) ? cookies.get('token') : ''
+    token: (cookies.get('token')) ? cookies.get('token') : '',
+    adminToken: (cookies.get('admin_token')) ? cookies.get('admin_token') : '',
+    services: []
 };
 
 function rootReducer(state = initialState, action: any) {
@@ -19,6 +21,10 @@ function rootReducer(state = initialState, action: any) {
         return { ...state, api_url: action.payload };
     } else if (action.type === "SET_TOKEN") {
         return { ...state, token: action.payload };
+    } else if (action.type === "SET_SERVICES") {
+        return {...state, services: action.payload};
+    } else if (action.type === "SET_ADMIN_TOKEN") {
+        return { ...state, adminToken: action.payload };
     }
     return state;
 }

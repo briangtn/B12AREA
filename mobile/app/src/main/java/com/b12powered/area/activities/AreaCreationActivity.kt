@@ -77,29 +77,13 @@ class AreaCreationActivity : AppCompatActivity() {
             .replace(R.id.create_area_layout, when(step) {
                 is AreaCreationStatus.AreaCreated -> {
                     ApiClient(this)
-                        .deleteArea(area.id) { success, message ->
-                            if (!success) {
-                                Toast.makeText(
-                                    this,
-                                    message,
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                            }
-                        }
+                        .deleteArea(area.id) { _, _ -> }
                     CreateAreaFragment.newInstance()
                 }
                 is AreaCreationStatus.ActionSelected -> SelectAreaFragment.newInstance(service, area, AreaCreationStatus.AreaCreated)
                 is AreaCreationStatus.ActionAdded -> {
                     ApiClient(this)
-                        .deleteAction(area.id) { success, message ->
-                            if (!success) {
-                                Toast.makeText(
-                                    this,
-                                    message,
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                            }
-                        }
+                        .deleteAction(area.id) { _, _ -> }
                     SelectAreaFragment.newInstance(service, area, AreaCreationStatus.AreaCreated)
                 }
                 is AreaCreationStatus.ReactionSelected -> SelectAreaFragment.newInstance(service, area, AreaCreationStatus.ActionAdded)

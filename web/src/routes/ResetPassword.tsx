@@ -18,6 +18,7 @@ import Snackbar from "@material-ui/core/Snackbar";
 
 import { changeApiUrl } from "../actions/api.action";
 
+import Utilities from '../utils/Utilities';
 import Cookies from "universal-cookie";
 
 const cookies = new Cookies();
@@ -31,7 +32,8 @@ interface Props {
         loginButton: string
     },
     token: string,
-    api_url: string
+    api_url: string,
+    changeApiUrl: any
 }
 
 interface State {
@@ -72,40 +74,57 @@ class ResetPassword extends Component<Props, State> {
         errorMessage: ''
     };
 
+    /**
+     * Handle the change of a text field
+     *
+     * @param e event triggered
+     */
     onChange: React.ChangeEventHandler<HTMLInputElement> = (e) => {
         const { id, value } = e.currentTarget;
 
         this.setState({ [id]: value } as unknown as Pick<State, keyof State>);
     };
 
+    /**
+     * Fetch the api_url and the token inside the query parameters
+     * and stock it to change the current password to the new one.
+     */
     componentDidMount() {
-        const getUrlParameter = (name : string) : string | null => {
-            const url = window.location.href;
-            name = name.replace(/[\]]/g, '\\$&');
-            let regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
-                results = regex.exec(url);
-            if (!results) return null;
-            if (!results[2]) return '';
-            return decodeURIComponent(results[2].replace(/\+/g, ' '));
-        };
-
-        if (this.props.token)
+        if (this.props.token) {
             this.props.history.push('/');
-        // TODO Set api URL
-        const queryToken: string | null = getUrlParameter('token');
+            return;
+        }
+
+        const newApiUrl: string | null = Utilities.getQueryParameter(window.location.href, 'api_url');
+        const queryToken: string | null = Utilities.getQueryParameter(window.location.href, 'token');
+
+        this.props.changeApiUrl(newApiUrl);
+        cookies.set('api_url', newApiUrl);
+
         if (queryToken)
             this.setState({ resetToken: queryToken });
     }
 
+    /**
+     * Function triggered when a key is pressed
+     *
+     * @param e event triggered
+     */
     keyPress = (e: any) => {
         if (e.keyCode === 13) {
-            const toClick: HTMLElement | null = document.getElementById('resetPassword')
+            const toClick: HTMLElement | null = document.getElementById('resetPassword');
 
             if (toClick)
                 toClick.click();
         }
-    }
+    };
 
+    /**
+     * Function who calls the API to change the current password of
+     * the user
+     *
+     * @param e event triggered
+     */
     onSubmit = (e: React.FormEvent) => {
         const { password, confirmPassword, resetToken } = this.state;
         const { api_url } = this.props;
@@ -129,6 +148,11 @@ class ResetPassword extends Component<Props, State> {
         }
     };
 
+    /**
+     * Method called to close the alerts
+     *
+     * @param e event triggered
+     */
     onClose = (e: React.SyntheticEvent): void => {
         this.setState({ error: false });
     };

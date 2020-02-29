@@ -52,12 +52,6 @@ interface State {
     services: any
 }
 
-interface Services {
-    name: string,
-    icon: any,
-    xs: boolean | 6 | 4 | "auto" | 10 | 1 | 2 | 3 | 5 | 7 | 8 | 9 | 11 | 12 | undefined
-}
-
 const styles = (theme: Theme) => createStyles({
     gridContent: {
         padding: theme.spacing(10),
@@ -78,8 +72,8 @@ const styles = (theme: Theme) => createStyles({
     hero: {
         backgroundColor: '#FFBE76',
         width: '100%',
-        minHeight: '350px',
-        marginTop: theme.spacing(10)
+        marginTop: '75px',
+        marginBottom: '75px'
     },
     heroContent: {
         textAlign: 'center',
@@ -113,6 +107,12 @@ class App extends Component<Props, State> {
         services: []
     };
 
+    /**
+     * Function triggered when a user type his email address
+     * inside the quick form
+     *
+     * @param e event triggered
+     */
     onEmailEnter: React.ChangeEventHandler<HTMLInputElement> = (e) => {
         this.setState({ email: e.currentTarget.value });
     };
@@ -120,12 +120,19 @@ class App extends Component<Props, State> {
     componentDidMount(): void {
         const { token } = this.props;
 
-        if (token)
+        if (token && token !== "undefined") {
             this.props.history.push('/services');
-        else
+        } else {
             this.fetchServices(this.props.api_url);
+        }
     }
 
+    /**
+     * Fetch services inside the about.json of the API
+     * to get informations about the different services of the API.
+     *
+     * @param api_url url of the api
+     */
     fetchServices(api_url: string): void {
         this.setState({ services: [] });
         fetch(`${api_url}/about.json`)
@@ -139,7 +146,7 @@ class App extends Component<Props, State> {
                         name: service['name'],
                         description: service['description'],
                         icon: service['icon'],
-                        color: service['string']
+                        color: service['color']
                     };
                     tmp.push(tmpObject);
                 }
@@ -147,6 +154,12 @@ class App extends Component<Props, State> {
             });
     }
 
+    /**
+     * Function to handle the keyPress of enter key to pass
+     * to the next step
+     *
+     * @param e event triggered
+     */
     keyPress = (e: any) => {
         if (e.keyCode === 13) {
             const toClick: HTMLElement | null = document.getElementById('getStarted');
@@ -158,49 +171,63 @@ class App extends Component<Props, State> {
 
     render() {
         const { classes } = this.props;
+        const isMobile: boolean = window.innerWidth <= 500;
 
         return (
-            <div>
+            <div style={{ minHeight: '100%'}}>
                 <NavigationBar history={this.props.history} />
-                <Grid container spacing={3} style={{ width: '100%', margin: '0px'}}>
-                    <Grid item xs={6}>
-                        <Typography className={classes.gridContent} variant="h3" gutterBottom>
-                            {
-                                (this.props.language === 'fr') ?
-                                    <div><Typist>Connecte tes applications ensemble</Typist></div>
-                                    :
-                                    <Typist>Connect all your services together</Typist>
-                            }
-                        </Typography>
-                    </Grid>
-                    <Grid className={classes.quickForm} item xs={6}>
-                        <Paper component="form" className={classes.root} elevation={0}>
-                            <InputBase
-                                className={classes.input}
-                                placeholder="Enter your email"
-                                inputProps={{ 'aria-label': 'enter your email' }}
-                                value={this.state.email}
-                                onChange={this.onEmailEnter}
-                                onKeyDown={this.keyPress}
-                            />
-                            <Divider className={classes.divider} orientation="vertical" />
-                            <Link
-                                to={{pathname: '/join', state: { email: this.state.email }}}
-                                style={{ textDecoration: 'none', color: '#FFFFFF' }}>
-                                <Button id="getStarted" color="primary"><Translator sentence="getStarted" /></Button>
-                            </Link>
-                        </Paper>
-                        <OrDivider />
-                        <Grid container spacing={3} direction="row" alignItems="center" justify="center">
-                            <Grid item xs={6}>
-                                <AuthButton token={null} history={this.props.history} apiUrl={this.props.api_url} serviceName="Google" serviceIcon={<GoogleIcon />} />
-                            </Grid>
-                            <Grid item xs={6}>
-                                <AuthButton token={null} history={this.props.history} apiUrl={this.props.api_url} serviceName="Twitter" serviceIcon={<TwitterIcon />} />
+                {!isMobile ?
+                    (<Grid container spacing={3} style={{width: '100%', margin: '0px'}}>
+                        <Grid item xs={6}>
+                            <Typography className={classes.gridContent} variant="h3" gutterBottom>
+                                {
+                                    (this.props.language === 'fr') ?
+                                        <div><Typist>Connecte tes applications ensemble</Typist></div>
+                                        :
+                                        <Typist>Connect all your services together</Typist>
+                                }
+                            </Typography>
+                        </Grid>
+                        <Grid className={classes.quickForm} item xs={6}>
+                            <Paper component="form" className={classes.root} elevation={0}>
+                                <InputBase
+                                    className={classes.input}
+                                    placeholder="Enter your email"
+                                    inputProps={{'aria-label': 'enter your email'}}
+                                    value={this.state.email}
+                                    onChange={this.onEmailEnter}
+                                    onKeyDown={this.keyPress}
+                                />
+                                <Divider className={classes.divider} orientation="vertical"/>
+                                <Link
+                                    to={{pathname: '/join', state: {email: this.state.email}}}
+                                    style={{textDecoration: 'none', color: '#FFFFFF'}}>
+                                    <Button id="getStarted" color="primary"><Translator sentence="getStarted"/></Button>
+                                </Link>
+                            </Paper>
+                            <OrDivider/>
+                            <Grid container spacing={3} direction="row" alignItems="center" justify="center">
+                                <Grid item xs={6} style={{paddingLeft: '15px'}}>
+                                    <AuthButton token={null} history={this.props.history} apiUrl={this.props.api_url}
+                                                serviceName="Google" serviceIcon={<GoogleIcon/>}/>
+                                </Grid>
+                                <Grid item xs={6} style={{marginRight: '-30px'}}>
+                                    <AuthButton token={null} history={this.props.history} apiUrl={this.props.api_url}
+                                                serviceName="Twitter" serviceIcon={<TwitterIcon/>}/>
+                                </Grid>
                             </Grid>
                         </Grid>
-                    </Grid>
-                </Grid>
+                    </Grid>)
+                    :
+                    (<Typography className={classes.gridContent} variant="h3" gutterBottom>
+                        {
+                            (this.props.language === 'fr') ?
+                                <div><Typist>Connecte tes applications ensemble</Typist></div>
+                                :
+                                <Typist>Connect all your services together</Typist>
+                        }
+                    </Typography>)
+                }
                 <div className={classes.hero}>
                     <br />
                     <br />

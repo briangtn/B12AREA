@@ -37,9 +37,10 @@ export class AreasController {
         },
     })
     async getAreas(
-        @param.query.object('filter', getFilterSchemaFor(Area)) filter?: Filter<Area>
+        @param.query.object('filter', getFilterSchemaFor(Area)) filter?: Filter<Area>,
     ): Promise<Area[]> {
-        return this.areaRepository.find({where: {ownerId: this.user.email, and: filter}});
+        const myFilter = {where: {...filter?.where, ...{ownerId: this.user.email}}};
+        return this.areaRepository.find({...filter, ...myFilter});
     }
 
     @post('/', {

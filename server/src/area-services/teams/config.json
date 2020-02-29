@@ -1,0 +1,6 @@
+{
+  "displayName": "Teams",
+  "description": "A teams integration for the area project that allow you to detect messages, reactions and send messages and replies",
+  "icon": "https://i.imgur.com/aNAkMAT.png",
+  "color": "#5558AF"
+}

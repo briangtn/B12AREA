@@ -6,12 +6,12 @@ import com.b12powered.area.R
 import com.b12powered.area.api.ApiClient
 import android.widget.Toast
 import android.content.Intent
-import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import com.b12powered.area.User
-import com.b12powered.area.activities.LoginActivity
+import com.b12powered.area.fragments.ToolbarFragment
 import kotlinx.android.synthetic.main.activity_user.*
 
 /**
@@ -37,9 +37,9 @@ class UserActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_user)
 
-        var disable2fa: String = getString(R.string.disable_two_fa)
+        val disable2fa: String = getString(R.string.disable_two_fa)
 
-        var activate2fa: String = getString(R.string.activate_two_fa)
+        val activate2fa: String = getString(R.string.activate_two_fa)
 
         emailUser()
 
@@ -62,6 +62,15 @@ class UserActivity : AppCompatActivity() {
         change_password_button.setOnClickListener {
             submitChangePassword()
         }
+
+        onBackPressedDispatcher.addCallback(object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                (supportFragmentManager.findFragmentById(R.id.toolbar_fragment) as ToolbarFragment).setCurrentActivity(ToolbarFragment.Activity.HOME)
+                val intent = Intent(this@UserActivity, HomeActivity::class.java)
+                startActivity(intent)
+                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
+            }
+        })
     }
 
     /**
@@ -120,7 +129,7 @@ class UserActivity : AppCompatActivity() {
      * Disable the 2fa
      */
     private fun disable2fa() {
-        var newUser = User(_user.id, _user.email, "", "", _user.role, _user.services, false, _user.twoFactorAuthenticationEnabled)
+        val newUser = User(_user.id, _user.email, "", "", _user.role, _user.services, false, _user.twoFactorAuthenticationEnabled)
 
         ApiClient(this)
             .patchUser(newUser) { user, message ->
@@ -155,13 +164,13 @@ class UserActivity : AppCompatActivity() {
         etNewPassword.error = null
         etConfirmNewPassword.error = null
 
-        if (newPassword.isEmpty()) {
-            etNewPassword.error = getString(R.string.no_password)
-        } else if (newConfirmPassword.isEmpty()) {
-            etConfirmNewPassword.error = getString(R.string.no_confirm_password)
-        } else if (newPassword.toString() != newConfirmPassword.toString()) {
-            etConfirmNewPassword.setText("")
-            etConfirmNewPassword.error = getString(R.string.different_password)
+        when {
+            newPassword.isEmpty() -> etNewPassword.error = getString(R.string.no_password)
+            newConfirmPassword.isEmpty() -> etConfirmNewPassword.error = getString(R.string.no_confirm_password)
+            newPassword.toString() != newConfirmPassword.toString() -> {
+                etConfirmNewPassword.setText("")
+                etConfirmNewPassword.error = getString(R.string.different_password)
+            }
         }
         if (newPassword.isNotEmpty() && newConfirmPassword.isNotEmpty() && newPassword.toString() == newConfirmPassword.toString()) {
             changePassword(newPassword.toString())
@@ -177,16 +186,18 @@ class UserActivity : AppCompatActivity() {
 
         editor.remove(getString(R.string.token_key))
         editor.apply()
+
+        (supportFragmentManager.findFragmentById(R.id.toolbar_fragment) as ToolbarFragment).setCurrentActivity(ToolbarFragment.Activity.HOME)
         val intent = Intent(this, LoginActivity::class.java)
         finish()
         startActivity(intent)
     }
 
     /**
-     * Change the password of the current user with a [patch] request
+     * Change the password of the current user with a patchUser request
      */
     private fun changePassword(password: String) {
-        var newUser = User(_user.id, _user.email, password, "", _user.role, _user.services, _user.require2fa, _user.twoFactorAuthenticationEnabled)
+        val newUser = User(_user.id, _user.email, password, "", _user.role, _user.services, _user.require2fa, _user.twoFactorAuthenticationEnabled)
 
         ApiClient(this)
             .patchUser(newUser) { user, message ->

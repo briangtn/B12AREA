@@ -7,7 +7,7 @@
     tools:context=".activities.SearchActivity">
 
     <fragment
-        android:id="@+id/details_fragment"
+        android:id="@+id/toolbar_fragment"
         class="com.b12powered.area.fragments.ToolbarFragment"
         android:layout_width="match_parent"
         android:layout_height="50dp"/>

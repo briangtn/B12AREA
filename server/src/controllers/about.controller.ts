@@ -115,6 +115,8 @@ export class AboutController {
             } catch (e) {
             }
             for (const actionName of actionDirs) {
+                if (!fs.lstatSync(path.join(serviceActionsPath, actionName)).isDirectory())
+                    continue;
                 const newAction = new Action;
                 const actionControllerPath = path.join(serviceActionsPath, actionName, 'controller.js');
                 try {
@@ -152,6 +154,8 @@ export class AboutController {
             } catch (e) {
             }
             for (const reactionName of reactionDirs) {
+                if (!fs.lstatSync(path.join(serviceReactionsPath, reactionName)).isDirectory())
+                    continue;
                 const newReaction = new Reaction;
                 const reactionControllerPath = path.join(serviceReactionsPath, reactionName, 'controller.js');
                 try {

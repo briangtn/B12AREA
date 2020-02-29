@@ -14,6 +14,8 @@ import Translator from "../Translator";
 import Button from "@material-ui/core/Button";
 import TextField from "@material-ui/core/TextField";
 
+import Utilities from "../../utils/Utilities";
+
 interface State {
     open: boolean,
     fakey: string,
@@ -52,8 +54,14 @@ class TwoFactorAuthentication extends Component<Props, State> {
         alreadyActivated: false,
         error: false,
         errorMessage: ''
-    }
+    };
 
+    /**
+     * Function who handle changes inside text field
+     * with a security for the 2FA code
+     *
+     * @param e event triggered
+     */
     onChange: React.ChangeEventHandler<HTMLInputElement> = (e) => {
         const {id, value} = e.currentTarget;
 
@@ -62,10 +70,21 @@ class TwoFactorAuthentication extends Component<Props, State> {
         this.setState({[id]: value} as unknown as Pick<State, keyof State>);
     };
 
+    /**
+     * Handle the close of the dialog of 2FA
+     *
+     * @param e event triggered
+     */
     onClose = (e: any) => {
         this.setState({ open: false });
     };
 
+    /**
+     * Function called when the user clicked on "Activate 2FA"
+     * and his token is filled.
+     *
+     * @param e event triggered
+     */
     onSubmit = (e: React.FormEvent) => {
         const { id } = e.currentTarget;
         const { api_url, token } = this.props;
@@ -84,7 +103,8 @@ class TwoFactorAuthentication extends Component<Props, State> {
 
                 if (!error) {
                     this.setState({
-                        open: false
+                        open: false,
+                        alreadyActivated: true
                     });
                 } else {
                     this.setState({ error: true, errorMessage: `${error["message"]}`});
@@ -93,6 +113,11 @@ class TwoFactorAuthentication extends Component<Props, State> {
         }
     };
 
+    /**
+     * Event triggered when the user type enter key
+     *
+     * @param e event triggered
+     */
     keyPress = (e: any) => {
         if (e.keyCode === 13) {
             const toClick: HTMLElement | null = document.getElementById('fa-submit');
@@ -102,17 +127,14 @@ class TwoFactorAuthentication extends Component<Props, State> {
         }
     };
 
+    /**
+     * Function called when the user activate 2FA
+     * outside the dialog
+     *
+     * @param e event triggered
+     */
     onClick = (e: React.FormEvent) => {
         const { api_url, token } = this.props;
-
-        const getUrlParameter = (url : string, name : string) : string | null => {
-            name = name.replace(/[\]]/g, '\\$&');
-            let regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
-                results = regex.exec(url);
-            if (!results) return null;
-            if (!results[2]) return '';
-            return decodeURIComponent(results[2].replace(/\+/g, ' '));
-        };
 
         fetch(`${api_url}/users/2fa/activate`, {
             method: 'POST',
@@ -125,11 +147,20 @@ class TwoFactorAuthentication extends Component<Props, State> {
                 const otpUrl : string = data.otpauthUrl;
 
                 QRCode.toDataURL(otpUrl).then(url => {
-                    this.setState({ qrcode: url, open: true, fasecret: getUrlParameter(otpUrl, 'secret') });
+                    this.setState({
+                        qrcode: url,
+                        open: true,
+                        fasecret: Utilities.getQueryParameter(otpUrl, 'secret')
+                    });
                 });
             });
     };
 
+    /**
+     * Function called when the user wants to remove his 2FA
+     *
+     * @param e event triggered
+     */
     disableTwoFactorAuthentication = (e: React.FormEvent) => {
         const { api_url, token } = this.props;
 
@@ -156,10 +187,14 @@ class TwoFactorAuthentication extends Component<Props, State> {
         this.setState({ alreadyActivated: alreadyActivated });
     }
 
+    componentWillReceiveProps(nextProps: Readonly<Props>): void {
+        if (this.props.alreadyActivated !== nextProps.alreadyActivated)
+            this.setState({ alreadyActivated: nextProps.alreadyActivated });
+    }
+
     render() {
         const { classes } = this.props;
-        const { fakey } = this.state;
-        const { alreadyActivated } = this.props;
+        const { fakey, alreadyActivated } = this.state;
 
         if (!alreadyActivated)
             return (
