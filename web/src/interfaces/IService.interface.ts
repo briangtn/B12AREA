@@ -37,6 +37,7 @@ export interface IArea {
 
 export interface IService {
     name: string,
+    displayName: string,
     description: string,
     color: string,
     icon: string,

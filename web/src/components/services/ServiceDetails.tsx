@@ -40,6 +40,11 @@ import Switch from "@material-ui/core/Switch";
 import {IArea, IPlaceHolder} from "../../interfaces/IService.interface";
 
 import HtmlTooltip from "./HtmlTooltip";
+import {setToken} from "../../actions/api.action";
+import Cookies from "universal-cookie";
+import ArrowBackIosIcon from "@material-ui/icons/ArrowBackIos";
+
+const cookies = new Cookies();
 
 interface Props {
     token: string,
@@ -53,13 +58,15 @@ interface Props {
         heading: string,
         button: string,
         details: string,
-        formControl: string
+        formControl: string,
+        backButton: string
     },
     location: {
         state: {
             info: any
         }
-    }
+    },
+    setToken: any
 }
 
 interface State {
@@ -76,6 +83,10 @@ interface State {
 const mapStateToProps = (state: any) => {
     return { api_url: state.api_url, token: state.token, services: state.services };
 };
+
+function mapDispatchToProps(dispatch: any) {
+    return { setToken: (token: object) => dispatch(setToken(token)) };
+}
 
 const styles = (theme: Theme) => createStyles({
     section: {
@@ -96,13 +107,16 @@ const styles = (theme: Theme) => createStyles({
         fullWidth: 0,
         display: "flex",
         wrap: "nowrap"
+    },
+    backButton: {
+        margin: theme.spacing(2),
     }
 });
 
 class ServiceDetails extends Component<Props, State> {
     state: State = {
         areas: [],
-        info: (this.props.location.state.info) ? this.props.location.state.info : {},
+        info: (this.props.location.state) ? this.props.location.state.info : {},
         dialogOpened: false,
         availableActions: [],
         availableReactions: [],
@@ -111,6 +125,15 @@ class ServiceDetails extends Component<Props, State> {
         configSchemaReaction: {}
     };
 
+    backClicked = (e: any) => {
+        this.props.history.push('/services');
+    };
+
+    /**
+     * Function to handle the change of reaction
+     *
+     * @param e event triggered
+     */
     selectReactionChange = (e: any) => {
         let configSchemaReaction: any = {};
 
@@ -128,6 +151,11 @@ class ServiceDetails extends Component<Props, State> {
         this.setState({ selectedReaction: e.target.value, configSchemaReaction: configSchemaReaction });
     };
 
+    /**
+     * Change inside the config schema
+     *
+     * @param e event triggered
+     */
     configSchemaChange = (e: any) => {
         const { configSchemaReaction } = this.state;
 
@@ -138,11 +166,17 @@ class ServiceDetails extends Component<Props, State> {
         this.setState({configSchemaReaction: configSchemaReaction} as unknown as Pick<State, keyof State>);
     };
 
+    /**
+     * Display the config schema based on the action selected
+     *
+     * @param configSchema config schema of the reaction selected
+     */
     displayConfigSchema = (configSchema: any) => {
         const { areas, chosenArea, configSchemaReaction } = this.state;
         const { name, type, required } = configSchema;
         const currentArea: any = areas[chosenArea];
         let placeholders: IPlaceHolder[] | null = null;
+
         let currentActionInfos = this.state.availableActions.filter((available: any) => {
             const splitted: string[] = currentArea.action.serviceAction.split('.');
 
@@ -210,14 +244,29 @@ class ServiceDetails extends Component<Props, State> {
         }
     };
 
+    /**
+     * Close dialog of adding reactions
+     *
+     * @param e event triggered
+     */
     closeDialog = (e: any) => {
         this.setState({ dialogOpened: false, selectedReaction: {}, configSchemaReaction: {} });
     };
 
+    /**
+     * Open the dialog to add a new reaction
+     *
+     * @param e event triggered
+     */
     openDialog = (e:  any) => {
         this.setState({ dialogOpened: true, chosenArea: e.currentTarget.value });
     };
 
+    /**
+     * Function when the user submit his new reaction
+     *
+     * @param e event triggered
+     */
     saveReaction = (e: any) => {
         const { api_url, token } = this.props;
         const { configSchemaReaction } = this.state;
@@ -248,6 +297,11 @@ class ServiceDetails extends Component<Props, State> {
             });
     };
 
+    /**
+     * Function called when the user click on the deletion of an area
+     *
+     * @param e
+     */
     deleteAREA = (e: any) => {
         const { api_url, token } = this.props;
         const { areas } = this.state;
@@ -265,6 +319,11 @@ class ServiceDetails extends Component<Props, State> {
         });
     };
 
+    /**
+     * Function called when the user wants to delete a reaction
+     *
+     * @param e
+     */
     deleteReaction = (e: any) => {
         const { api_url, token } = this.props;
         const areaId: string = e.currentTarget.value.split(';')[0];
@@ -282,45 +341,53 @@ class ServiceDetails extends Component<Props, State> {
 
     componentDidMount() {
         const { token, api_url } = this.props;
-        const { info } = this.state;
 
         fetch(`${api_url}/areas?filter={"include": [{"relation":"action"},{"relation":"reactions"}]}`, {
             headers: {'Authorization': `Bearer ${token}`}
         })
             .then(res => res.json())
             .then((data) => {
-                const {info} = this.state;
+                const { error } = data;
 
-                const tmpAreaArray = data.filter((area: any) => (!area.action || !area.reactions) || (area.action.serviceAction.split('.')[0] === info.name));
-                this.setState({areas: tmpAreaArray});
+                if (error) {
+                    cookies.set('token',  '');
+                    this.props.setToken('');
+                    this.props.history.push('/');
+                    return;
+                } else {
+                    const {info} = this.state;
+
+                    const tmpAreaArray = data.filter((area: any) => (area.action.serviceAction.split('.')[0] === info.name));
+                    this.setState({areas: tmpAreaArray});
+
+                    fetch(`${api_url}/about.json`)
+                        .then(res => res.json())
+                        .then((data) => {
+                            const { services } = data.server;
+
+                            fetch(`${api_url}/users/me`, {
+                                headers: { 'Authorization': `Bearer ${token}` }
+                            })
+                                .then(res => res.json())
+                                .then((data) => {
+                                    const registeredServices = data.servicesList;
+
+                                    const availableActions = services.filter((service: any) => service.name === info.name)[0].actions;
+                                    const availableReactions = [];
+
+                                    for (let service of services)
+                                        if (registeredServices.includes(service.name)) {
+                                            for (let reaction of service.reactions) {
+                                                reaction['serviceName'] = service.name;
+                                                availableReactions.push(reaction);
+                                            }
+                                        }
+
+                                    this.setState({ availableActions: availableActions, availableReactions: availableReactions });
+                                });
+                        })
+                }
             });
-
-        fetch(`${api_url}/about.json`)
-            .then(res => res.json())
-            .then((data) => {
-                const { services } = data.server;
-
-                fetch(`${api_url}/users/me`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                })
-                    .then(res => res.json())
-                    .then((data) => {
-                        const registeredServices = data.servicesList;
-
-                        const availableActions = services.filter((service: any) => service.name === info.name)[0].actions;
-                        const availableReactions = [];
-
-                        for (let service of services)
-                            if (registeredServices.includes(service.name)) {
-                                for (let reaction of service.reactions) {
-                                    reaction['serviceName'] = service.name;
-                                    availableReactions.push(reaction);
-                                }
-                            }
-
-                        this.setState({ availableActions: availableActions, availableReactions: availableReactions });
-                    });
-            })
     }
 
     render() {
@@ -330,6 +397,13 @@ class ServiceDetails extends Component<Props, State> {
         return (
             <div>
                 <NavigationBar history={this.props.history} />
+                <Button
+                    startIcon={<ArrowBackIosIcon />}
+                    className={classes.backButton}
+                    onClick={this.backClicked}
+                >
+                    <Translator sentence="back" />
+                </Button>
                 <div
                     style={{
                         position: 'absolute',
@@ -485,4 +559,4 @@ class ServiceDetails extends Component<Props, State> {
     }
 }
 
-export default withStyles(styles)(connect(mapStateToProps)(ServiceDetails));
+export default connect(mapStateToProps, mapDispatchToProps)(withStyles(styles)(ServiceDetails));

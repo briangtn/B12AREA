@@ -26,6 +26,9 @@ import Users from "../../components/administration/Users";
 import Exit from "../../components/administration/Exit";
 
 import { setToken } from "../../actions/api.action";
+import Cookies from "universal-cookie";
+
+const cookies = new Cookies();
 
 const mapStateToProps = (state: any) => {
     return { api_url: state.api_url, token: state.token };
@@ -140,25 +143,34 @@ class AdministrationPanel extends Component<Props, State> {
             })
             .then(res => res.json())
             .then((data) => {
-                const { role } = data;
+                const { error } = data;
 
-                if (!role.includes('admin'))
+                if (error) {
+                    cookies.set('token',  '');
+                    this.props.setToken('');
                     this.props.history.push('/');
+                    return;
+                } else {
+                    const {role} = data;
+
+                    if (!role.includes('admin'))
+                        this.props.history.push('/');
+                }
             })
         }
     }
 
     handleDrawerOpen = (e: any) => {
         this.setState({ open: true });
-    }
+    };
 
     handleDrawerClose = (e: any) => {
         this.setState({ open: false });
-    }
+    };
 
     onClick(index: any, event: any) {
         this.setState({ currentComponentIndex: index, open: false });
-    }
+    };
 
     render() {
         const { classes } = this.props;
@@ -166,9 +178,10 @@ class AdministrationPanel extends Component<Props, State> {
 
         const routes: Route[] = [
             { name: 'Home', icon: <HomeIcon />, component: <Summary apiUrl={this.props.api_url} token={this.props.token} /> },
-            { name: 'Users', icon: <AccountCircleIcon />, component: <Users apiUrl={this.props.api_url} token={this.props.token} /> },
+            { name: 'Users', icon: <AccountCircleIcon />, component: <Users apiUrl={this.props.api_url} history={this.props.history} token={this.props.token} /> },
             { name: 'Exit', icon: <ExitToAppIcon />, component: <Exit history={this.props.history} />}
-        ]
+        ];
+
         return (
             <div className={classes.root}>
                 <AppBar

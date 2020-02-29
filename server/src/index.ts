@@ -4,12 +4,10 @@ import {Worker} from "./worker";
 
 export {AreaApplication};
 
-async function startAsAPI(options: ApplicationConfig)
+async function startAsAPI(app: AreaApplication)
 {
-    const app = new AreaApplication(options);
-    await app.boot();
-    await app.start();
-    await app.beforeStart();
+  await app.start();
+  await app.beforeStart();
 
     const url = app.restServer.url;
     console.log(`Server is running at ${url}`);
@@ -18,16 +16,19 @@ async function startAsAPI(options: ApplicationConfig)
     return app;
 }
 
-async function startAsWorker()
+async function startAsWorker(app: AreaApplication)
 {
-    const app = new Worker();
-    app.boot();
-    app.start();
+    const worker = new Worker(app);
+    worker.boot();
+    await worker.start();
     console.log(`Worker started with redis host: ${process.env.REDIS_HOST}`);
 }
 
 export async function main(options: ApplicationConfig = {})
 {
+    const app = new AreaApplication(options);
+    await app.boot();
+
     let runAsWorker = false;
     for (const arg of process.argv) {
         if (arg === 'worker') {
@@ -35,8 +36,8 @@ export async function main(options: ApplicationConfig = {})
         }
     }
     if (runAsWorker) {
-        return startAsWorker();
+        return startAsWorker(app);
     } else {
-        return startAsAPI(options);
+        return startAsAPI(app);
     }
 }

@@ -1,9 +1,14 @@
 import config from './config.json';
 import {Context, inject} from "@loopback/context";
-import {LoginObject, ServiceConfig} from "../../services-interfaces";
+import {LoginObject, PullingData, PullingJobObject, ServiceConfig} from "../../services-interfaces";
 import {ExchangeCodeGeneratorManager} from "../../services";
 import {get, param, Response, RestBindings} from "@loopback/rest";
-import {TeamsHelper, TeamsTokens} from "./helper";
+import {
+    TEAMS_NEW_MESSAGE_IN_CHANNEL_PULLING_PREFIX,
+    TEAMS_NEW_REACT_ON_MESSAGE_PULLING_PREFIX,
+    TeamsHelper,
+    TeamsTokens
+} from "./helper";
 import {ActionRepository, UserRepository} from "../../repositories";
 import {User} from "../../models";
 import {UserProfile} from "@loopback/security";
@@ -120,5 +125,20 @@ export default class ServiceController {
 
     static async getConfig(): Promise<ServiceConfig> {
         return config;
+    }
+
+    static async processPullingJob(data: PullingJobObject, ctx: Context): Promise<PullingData|null> {
+        try {
+            const parsedData = data.jobData as {actionID: string; userID: string;};
+            if (data.name.startsWith(TEAMS_NEW_MESSAGE_IN_CHANNEL_PULLING_PREFIX)) {
+                return await TeamsHelper.getNewMessageInChannelPullingData(parsedData.actionID, parsedData.userID, ctx);
+            } else if (data.name.startsWith(TEAMS_NEW_REACT_ON_MESSAGE_PULLING_PREFIX)) {
+                return await TeamsHelper.getNewReactOnMessagePullingData(parsedData.actionID, parsedData.userID, ctx);
+            } else {
+                return null;
+            }
+        } catch (e) {
+            return null;
+        }
     }
 }
