@@ -6,6 +6,7 @@ import com.b12powered.area.R
 import com.b12powered.area.api.ApiClient
 import android.widget.Toast
 import android.content.Intent
+import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
@@ -152,6 +153,9 @@ class UserActivity : AppCompatActivity() {
      * Check change password parameters validity
      */
     private fun submitChangePassword() {
+        val inputMethodManager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        inputMethodManager.hideSoftInputFromWindow(currentFocus!!.windowToken, 0)
+
         val etNewPassword = findViewById<EditText>(R.id.user_new_password)
         val etConfirmNewPassword = findViewById<EditText>(R.id.user_new_password_confirm)
 

@@ -9,6 +9,7 @@ import android.os.Bundle
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import com.b12powered.area.api.ApiClient
 import kotlinx.android.synthetic.main.activity_confirm_two_fa.*
@@ -50,6 +51,14 @@ class ConfirmTwoFAActivity : AppCompatActivity() {
         submit_button.setOnClickListener {
             submitCode()
         }
+
+        onBackPressedDispatcher.addCallback(object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                val intent = Intent(this@ConfirmTwoFAActivity, UserActivity::class.java)
+                finish()
+                startActivity(intent)
+            }
+        })
     }
 
     /**

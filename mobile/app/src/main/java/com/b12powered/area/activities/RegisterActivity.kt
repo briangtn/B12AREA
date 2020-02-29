@@ -54,10 +54,6 @@ class RegisterActivity : AppCompatActivity() {
 
         etConfirmPassword.setOnKeyListener(View.OnKeyListener { _, keyCode, event ->
             if (keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_UP) {
-                val inputMethodManager =
-                    getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-                inputMethodManager.hideSoftInputFromWindow(currentFocus!!.windowToken, 0)
-
                 submitForm()
                 return@OnKeyListener true
             }
@@ -98,6 +94,9 @@ class RegisterActivity : AppCompatActivity() {
      * Check register parameters validity. Call [register] method if parameters are valid, reset input fields if they are not
      */
     private fun submitForm() {
+        val inputMethodManager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        inputMethodManager.hideSoftInputFromWindow(currentFocus!!.windowToken, 0)
+
         val etEmail = findViewById<EditText>(R.id.email)
         val etPassword = findViewById<EditText>(R.id.password)
         val etConfirmPassword = findViewById<EditText>(R.id.confirm_password)
