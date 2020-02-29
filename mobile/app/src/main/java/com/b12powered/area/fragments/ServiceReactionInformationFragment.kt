@@ -24,7 +24,7 @@ import com.b12powered.area.api.ApiClient
  */
 class ServiceReactionInformationFragment(private val listActionDetails: Pair<String, ActionDetails>) : Fragment() {
 
-    private var _allAreasService : MutableList<Areas>? = mutableListOf()
+    private var _allAreasService : MutableList<Areas> = mutableListOf()
     private lateinit var listView: ListView
     private var numberReaction = 0
 
@@ -95,9 +95,9 @@ class ServiceReactionInformationFragment(private val listActionDetails: Pair<Str
                 if (areas !== null) {
                     areas.forEach { item ->
                         if (item.actions != null) {
-                            var actionName = item.actions.serviceAction.substringBefore(".")
+                            val actionName = item.actions.serviceAction.substringBefore(".")
                             if (actionName == serviceName)
-                                _allAreasService?.add(item)
+                                _allAreasService.add(item)
                         }
                     }
                     printAreasReaction()
@@ -121,7 +121,7 @@ class ServiceReactionInformationFragment(private val listActionDetails: Pair<Str
         listView = view!!.findViewById(R.id.list)
         var reactionOption = ""
 
-        _allAreasService?.forEach { item ->
+        _allAreasService.forEach { item ->
             if (item.actions.id == listActionDetails.second.id) {
                 item.reactions.forEach { reaction ->
                     numberReaction++

@@ -67,7 +67,7 @@ class CreateAreaFragment : Fragment() {
     /**
      * Override method onViewCreated
      *
-     * Set  eners to view's buttons and input fields
+     * Set listeners to view's buttons and input fields
      */
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
