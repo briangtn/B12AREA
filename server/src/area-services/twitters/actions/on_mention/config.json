@@ -17,20 +17,24 @@
   ],
   "placeholders": [
     {
+      "name": "Id",
+      "description": "The id of the tweet"
+    },
+    {
       "name": "Author",
-      "description": "The '@' of the author of the direct message (ex: @twitter)"
+      "description": "The '@' of the author of the tweet (ex: @twitter)"
     },
     {
       "name": "AuthorDisplayName",
-      "description": "The display name of the author of the direct message (ex: 'Twitter')"
+      "description": "The display name of the author of the tweet (ex: 'Twitter')"
     },
     {
       "name": "AuthorId",
-      "description": "The id of the author of the direct message"
+      "description": "The id of the author of the tweet"
     },
     {
       "name": "Message",
-      "description": "The author id of the direct message"
+      "description": "The content of tweet"
     },
     {
       "name": "Words[i]",

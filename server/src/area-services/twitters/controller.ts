@@ -26,6 +26,7 @@ export default class TwitterServiceController {
         console.log("Twitters service loaded");
 
         const currentWebhook = await TwitterHelper.getCurrentWebhook(ctx) as {id: string, url: string};
+        console.log(currentWebhook, TwitterHelper.getWebhookUrl());
         if (currentWebhook && currentWebhook.url !== TwitterHelper.getWebhookUrl()) {
             await TwitterHelper.refreshWebhook(currentWebhook.id,  ctx);
         } else if (!currentWebhook) {
@@ -149,6 +150,8 @@ export default class TwitterServiceController {
     @post('/webhook')
     async whook(@requestBody({}) request: {for_user_id: string}) {
         const users = await this.userRepository.find();
+
+        console.log("Trigger", request);
 
         for (const user of users) {
             const twitterID = (user.services! as {twitters: {twitterID: string}}).twitters.twitterID;

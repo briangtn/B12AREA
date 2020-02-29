@@ -5,15 +5,15 @@
   "placeholders": [
     {
       "name": "Follower",
-      "description": "The '@' of the author of the direct message (ex: @twitter)"
+      "description": "The '@' of of the user (ex: @twitter)"
     },
     {
       "name": "FollowerDisplayName",
-      "description": "The display name of the author of the direct message (ex: 'Twitter')"
+      "description": "The display name of the user (ex: 'Twitter')"
     },
     {
       "name": "FollowerId",
-      "description": "The id of the author of the direct message"
+      "description": "The id of the user"
     }
   ]
 }

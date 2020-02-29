@@ -1,0 +1,12 @@
+{
+  "displayName": "Retweet",
+  "description": "Retweet something",
+  "configSchema": [
+    {
+      "name": "id",
+      "description": "The id of the tweet to retweet",
+      "type": "string",
+      "required": true
+    }
+  ]
+}

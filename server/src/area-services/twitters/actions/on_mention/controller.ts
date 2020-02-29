@@ -48,6 +48,10 @@ export default class NewMentionActionController {
                 return null;
             let placeholders = [
                 {
+                    name: "Id",
+                    value: event.id_str
+                },
+                {
                     name: 'Author',
                     value: event.user.screen_name
                 },

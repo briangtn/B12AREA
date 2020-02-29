@@ -30,7 +30,7 @@
     },
     {
       "name": "Message",
-      "description": "The author id of the direct message"
+      "description": "The content of the direct message"
     },
     {
       "name": "Words[i]",
