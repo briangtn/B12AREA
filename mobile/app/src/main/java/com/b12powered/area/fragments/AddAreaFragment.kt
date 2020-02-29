@@ -3,6 +3,7 @@ package com.b12powered.area.fragments
 import android.app.AlertDialog
 import android.content.DialogInterface
 import android.os.Bundle
+import android.text.InputType
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -111,6 +112,10 @@ class AddAreaFragment(private val service: Service, private val area: Area, priv
         ar.configSchema.forEach { option ->
             val editModel = EditModel()
             editModel.setEditTextHint(option.name)
+            editModel.setEditTextInputType(when(option.type) {
+                "number" -> InputType.TYPE_CLASS_NUMBER
+                else -> InputType.TYPE_CLASS_TEXT
+            })
             list.add(editModel)
         }
         return list
@@ -134,7 +139,11 @@ class AddAreaFragment(private val service: Service, private val area: Area, priv
                 ).show()
                 return
             } else if (value.isNotEmpty()) {
-                options[ar.configSchema[editModelArrayList.indexOf(input)].name] = input.getEditTextValue()
+                options[ar.configSchema[editModelArrayList.indexOf(input)].name] = when(ar.configSchema[editModelArrayList.indexOf(input)].type) {
+                    "boolean" -> input.getEditTextValue().toBoolean()
+                    "number" -> input.getEditTextValue().toInt()
+                    else -> input.getEditTextValue()
+                }
             }
         }
 
