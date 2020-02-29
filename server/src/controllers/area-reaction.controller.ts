@@ -114,31 +114,6 @@ export class AreaReactionController {
         const area = await this.areaRepository.findById(id);
         this.areaRepository.checkArea(area, this.user);
 
-        let user : User | null = null;
-        try {
-            user = await this.resolveUserFromUserProfile(this.user);
-        } catch (e) {
-            throw new HttpErrors.InternalServerError('Failed to resolve user');
-        }
-        if (!user)
-            throw new HttpErrors.InternalServerError('Failed to resolve user');
-        let controller;
-        try {
-            controller = await this.resolveReactionController(reaction.serviceReaction);
-        } catch (e) {
-            throw new HttpErrors.BadRequest('Reaction not found');
-        }
-        let result : OperationStatus;
-        try {
-            result = await controller.createReaction(user.id!, reaction.options, this.ctx);
-        } catch (e) {
-            throw new HttpErrors.BadRequest('Failed to create reaction in service');
-        }
-        if (!result.success) {
-            throw new HttpErrors.BadRequest(result.error);
-        }
-        reaction.options = result.options;
-
         return this.areaRepository.reactions(id).create(reaction);
     }
 
