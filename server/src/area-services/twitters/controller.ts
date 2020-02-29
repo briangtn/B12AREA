@@ -115,7 +115,7 @@ export default class TwitterServiceController {
 
                         try {
                             try {
-                                const subscribeData = await TwitterHelper.createWebhookFromTwitterClient(accessToken, accessTokenSecret);
+                                await TwitterHelper.createWebhookFromTwitterClient(accessToken, accessTokenSecret);
                             } catch (e) {
                                 console.error(e);
                             }
