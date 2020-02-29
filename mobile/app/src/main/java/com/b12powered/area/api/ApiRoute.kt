@@ -271,7 +271,6 @@ sealed class ApiRoute(private var mainContext: Context) {
                 is AddReaction -> "areas/${areaId}/reactions"
                 is DeleteAction -> "areas/${areaId}/action"
                 is DeleteReaction -> "areas/${areaId}/reactions/${reactionId}"
-                else -> ""
             }}"
         }
 

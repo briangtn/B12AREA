@@ -65,7 +65,7 @@ class ServiceActionInformationFragment(private val serviceName: String) : Fragme
     /**
      * Function getAreasService
      *
-     * Make a getAreas request to the api, using [areas] for get all the action and reaction
+     * Make a getAreas request to the api, using areas for get all the action and reaction
      * @param [serviceName] get all action reaction about a specific service
      */
     private fun getAreasService(serviceName: String) {
@@ -97,10 +97,10 @@ class ServiceActionInformationFragment(private val serviceName: String) : Fragme
      */
     private fun printAreasAction() {
         listView = view!!.findViewById(R.id.list)
-        var listActionDetails: ArrayList<Pair<String, ActionDetails>> = ArrayList()
+        val listActionDetails: ArrayList<Pair<String, ActionDetails>> = ArrayList()
 
         _allAreasService?.forEach { item ->
-            var serviceAction = item.actions.serviceAction.substringAfterLast(".")
+            val serviceAction = item.actions.serviceAction.substringAfterLast(".")
             var actionOption = ""
 
             if (item.actions.options != null) {

@@ -65,9 +65,9 @@ class ServiceReactionInformationFragment(private val listActionDetails: Pair<Str
 
 
         requireActivity().onBackPressedDispatcher.addCallback(object : OnBackPressedCallback(true) {
-        override fun handleOnBackPressed() {
-            (activity!! as ServiceInformationActivity).refreshView()
-        }
+            override fun handleOnBackPressed() {
+                (activity!! as ServiceInformationActivity).refreshView()
+            }
         })
     }
 
@@ -79,14 +79,14 @@ class ServiceReactionInformationFragment(private val listActionDetails: Pair<Str
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        var serviceName = listActionDetails.second.serviceAction.substringBefore(".")
+        val serviceName = listActionDetails.second.serviceAction.substringBefore(".")
         getAreasReaction(serviceName)
     }
 
     /**
      * Function getAreasService
      *
-     * Make a getAreas request to the api, using [areas] for get all the action and reaction
+     * Make a getAreas request to the api, using areas for get all the action and reaction
      * @param [serviceName] get all action reaction about a specific service
      */
     private fun getAreasReaction(serviceName: String) {
@@ -117,7 +117,7 @@ class ServiceReactionInformationFragment(private val listActionDetails: Pair<Str
      * Function for print all the current reaction linked with a specific action type
      */
     private fun printAreasReaction() {
-        var listReactionDetails: ArrayList<Pair<String, ReactionDetails>> = ArrayList()
+        val listReactionDetails: ArrayList<Pair<String, ReactionDetails>> = ArrayList()
         listView = view!!.findViewById(R.id.list)
         var reactionOption = ""
 
@@ -128,8 +128,8 @@ class ServiceReactionInformationFragment(private val listActionDetails: Pair<Str
                     if (reaction.options != null) {
                         for ((key, value) in reaction.options)
                             reactionOption = "$reactionOption$key : $value\n"
-                        var reactionDetail = reaction.serviceReaction.substringAfterLast(".")
-                        var reactionName = reaction.serviceReaction.substringBefore(".")
+                        val reactionDetail = reaction.serviceReaction.substringAfterLast(".")
+                        val reactionName = reaction.serviceReaction.substringBefore(".")
                         listReactionDetails.add(
                             Pair(
                                 reactionName.plus("\t (") + reactionDetail.plus(")\n\n") + reactionOption,
@@ -137,8 +137,8 @@ class ServiceReactionInformationFragment(private val listActionDetails: Pair<Str
                             )
                         )
                     } else {
-                        var reactionDetail = reaction.serviceReaction.substringAfterLast(".")
-                        var reactionName = reaction.serviceReaction.substringBefore(".")
+                        val reactionDetail = reaction.serviceReaction.substringAfterLast(".")
+                        val reactionName = reaction.serviceReaction.substringBefore(".")
                         listReactionDetails.add(
                             Pair(
                                 reactionName.plus("\t (") + reactionDetail.plus(")"),
@@ -165,7 +165,7 @@ class ServiceReactionInformationFragment(private val listActionDetails: Pair<Str
      */
     private fun showDialog(listReactionDetails: Pair<String, ReactionDetails>) {
         val builder = AlertDialog.Builder(context)
-        var serviceReactionName = listReactionDetails.second.serviceReaction.substringBefore(".")
+        val serviceReactionName = listReactionDetails.second.serviceReaction.substringBefore(".")
         val dialogClickListener = DialogInterface.OnClickListener { dialog, which ->
             when (which) {
                 DialogInterface.BUTTON_POSITIVE -> deleteReaction(listReactionDetails)
