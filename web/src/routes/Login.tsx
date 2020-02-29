@@ -97,6 +97,11 @@ class Login extends Component<Props, State> {
             this.props.history.push('/services');
     }
 
+    /**
+     * Function called when a user type inside a text field
+     *
+     * @param e event triggered
+     */
     onChange: React.ChangeEventHandler<HTMLInputElement> = (e) => {
         const { id, value } = e.currentTarget;
 
@@ -105,14 +110,31 @@ class Login extends Component<Props, State> {
         this.setState({ [id]: value } as unknown as Pick<State, keyof State>);
     };
 
+    /**
+     * Function called when the user wants to close the dialog
+     * of 2FA Authentication
+     *
+     * @param e event triggered
+     */
     dialogClose = (e: React.SyntheticEvent): void => {
         this.setState({ faopen: false });
     };
 
+    /**
+     * Function called when the Alert box is closed
+     *
+     * @param e event triggered
+     */
     onClose = (e: React.SyntheticEvent): void => {
         this.setState({ error: 'false' });
     };
 
+    /**
+     * Function called when the user submit his 2FA Authentication called
+     * then finish the login.
+     *
+     * @param e event triggered
+     */
     dialogSubmit = (e: React.FormEvent) => {
         const { fakey, tmptoken } = this.state;
         const { api_url } = this.props;
@@ -138,6 +160,12 @@ class Login extends Component<Props, State> {
             });
     };
 
+    /**
+     * Function called when the user finished to enter his username
+     * and password, then verify if the user has the 2FA activated.
+     *
+     * @param e event triggered
+     */
     onSubmit = (e: React.FormEvent) => {
         const { api_url } = this.props;
         const { email, password } = this.state;
@@ -168,18 +196,15 @@ class Login extends Component<Props, State> {
         });
     };
 
-    loginKeyPress = (e: any) => {
+    /**
+     * Function called when the user type the enter key
+     *
+     * @param e event triggered
+     * @param buttonId name of the button to click
+     */
+    enterKeyPress = (e: any, buttonId: string) => {
         if (e.keyCode === 13) {
-            const toClick: HTMLElement | null = document.getElementById('signin')
-
-            if (toClick)
-                toClick.click();
-        }
-    };
-
-    faKeyPress = (e: any) => {
-        if (e.keyCode === 13) {
-            const toClick: HTMLElement | null = document.getElementById('fa-submit')
+            const toClick: HTMLElement | null = document.getElementById(buttonId);
 
             if (toClick)
                 toClick.click();
@@ -211,7 +236,7 @@ class Login extends Component<Props, State> {
                         className={classes.field}
                         value={email}
                         onChange={this.onChange}
-                        onKeyDown={this.loginKeyPress}
+                        onKeyDown={(e) => {this.enterKeyPress(e, "signin")}}
                         required
                         fullWidth
                     />
@@ -224,7 +249,7 @@ class Login extends Component<Props, State> {
                         className={classes.field}
                         value={password}
                         onChange={this.onChange}
-                        onKeyDown={this.loginKeyPress}
+                        onKeyDown={(e) => {this.enterKeyPress(e, "signin")}}
                         required
                         fullWidth
                     />
@@ -269,7 +294,7 @@ class Login extends Component<Props, State> {
                             className={classes.field}
                             value={this.state.fakey}
                             onChange={this.onChange}
-                            onKeyDown={this.faKeyPress}
+                            onKeyDown={(e) => {this.enterKeyPress(e, "fa-submit")}}
                             fullWidth
                             style={{ left: '15%' }}
                         />

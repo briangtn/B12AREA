@@ -95,6 +95,11 @@ class Join extends Component<Props, State> {
         if (location.state) this.setState({email: (location.state.email) ? location.state.email : ''});
     }
 
+    /**
+     * Function called when the user type inside a text field
+     *
+     * @param e event triggered
+     */
     onChange: React.ChangeEventHandler<HTMLInputElement> = (e) => {
         const { id, value } = e.currentTarget;
 
@@ -107,6 +112,11 @@ class Join extends Component<Props, State> {
             this.setState({ email_error: 'false' });
     };
 
+    /**
+     * Function called when the user submit his registration
+     *
+     * @param e event triggered
+     */
     onSubmit = (e: React.FormEvent) => {
         const { email, password, confirm_password } = this.state; // Parameters
         let error : boolean = false;
@@ -161,10 +171,20 @@ class Join extends Component<Props, State> {
         }
     };
 
+    /**
+     * Function called when the user is closed
+     *
+     * @param e event triggered
+     */
     onClose = (e: React.SyntheticEvent): void => {
         this.setState({ error: 'false' });
     };
 
+    /**
+     * Function called on key press
+     *
+     * @param e event triggered
+     */
     keyPress = (e: any) => {
         if (e.keyCode === 13) {
             const toClick: HTMLElement | null = document.getElementById('signup')
@@ -172,7 +192,7 @@ class Join extends Component<Props, State> {
             if (toClick)
                 toClick.click();
         }
-    }
+    };
 
     render() {
         const { email, password, confirm_password, email_error} = this.state;

@@ -74,12 +74,21 @@ class ResetPassword extends Component<Props, State> {
         errorMessage: ''
     };
 
+    /**
+     * Handle the change of a text field
+     *
+     * @param e event triggered
+     */
     onChange: React.ChangeEventHandler<HTMLInputElement> = (e) => {
         const { id, value } = e.currentTarget;
 
         this.setState({ [id]: value } as unknown as Pick<State, keyof State>);
     };
 
+    /**
+     * Fetch the api_url and the token inside the query parameters
+     * and stock it to change the current password to the new one.
+     */
     componentDidMount() {
         if (this.props.token) {
             this.props.history.push('/');
@@ -96,6 +105,11 @@ class ResetPassword extends Component<Props, State> {
             this.setState({ resetToken: queryToken });
     }
 
+    /**
+     * Function triggered when a key is pressed
+     *
+     * @param e event triggered
+     */
     keyPress = (e: any) => {
         if (e.keyCode === 13) {
             const toClick: HTMLElement | null = document.getElementById('resetPassword');
@@ -105,6 +119,12 @@ class ResetPassword extends Component<Props, State> {
         }
     };
 
+    /**
+     * Function who calls the API to change the current password of
+     * the user
+     *
+     * @param e event triggered
+     */
     onSubmit = (e: React.FormEvent) => {
         const { password, confirmPassword, resetToken } = this.state;
         const { api_url } = this.props;
@@ -128,6 +148,11 @@ class ResetPassword extends Component<Props, State> {
         }
     };
 
+    /**
+     * Method called to close the alerts
+     *
+     * @param e event triggered
+     */
     onClose = (e: React.SyntheticEvent): void => {
         this.setState({ error: false });
     };

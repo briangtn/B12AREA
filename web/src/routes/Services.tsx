@@ -60,11 +60,18 @@ class Services extends Component<Props, State> {
         about: null
     };
 
+    /**
+     * Function where the about.json is fetched and a list of
+     * services where the user is not registered is created,
+     * and a list of registered services.
+     */
     componentDidMount(): void {
         const { token, api_url } = this.props;
 
-        if (!token)
+        if (!token) {
             this.props.history.push('/');
+            return;
+        }
 
         fetch(`${api_url}/about.json`)
             .then(res => res.json())
