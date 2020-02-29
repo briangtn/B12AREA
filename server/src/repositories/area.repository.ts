@@ -46,22 +46,11 @@ export class AreaRepository extends DefaultCrudRepository<Area,
         }
     }
 
-    deleteById(id: typeof Area.prototype.id, options?: AnyObject): Promise<void> {
-        return new Promise((resolve, reject) => {
-            this.action(id).delete().then(() => {
-            }).catch((err) => {
-                reject(err);
-            });
-            this.reactions(id).delete().then(() => {
-            }).catch((err) => {
-                reject(err);
-            });
-            super.deleteById(id, options).then(() => {
-                resolve();
-            }).catch((err) => {
-                reject(err);
-            });
-        });
+    async deleteById(id: typeof Area.prototype.id, options?: AnyObject): Promise<void> {
+        const area = await this.findById(id, options);
+        await this.action(area.id).delete();
+        await this.reactions(area.id).delete();
+        return super.deleteById(id, options);
     }
 
     async deleteAll(where?: Condition<Area> | AndClause<Area> | OrClause<Area>, options?: AnyObject): Promise<Count> {
