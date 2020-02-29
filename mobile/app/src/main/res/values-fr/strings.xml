@@ -74,4 +74,6 @@
     <string name="what_you_want">Que voulez-vous ?</string>
     <string name="delete_reaction">Voulez-vous vraiment supprimer cette réaction ?</string>
     <string name="no_reaction">( Vous n\'avez aucune réaction pour cette action )</string>
+    <string name="exit_app">Voulez-vous quitter l\'application ?</string>
+    <string name="already_visited">already_visited</string>
 </resources>

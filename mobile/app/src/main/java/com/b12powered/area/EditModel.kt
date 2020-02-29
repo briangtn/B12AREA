@@ -1,11 +1,14 @@
 package com.b12powered.area
 
+import android.text.InputType
+
 /**
  * A class needed by [EditTextListAdapter] to allow EditText's value edition even after inflating the adapter in view
  */
 class EditModel {
     private lateinit var editTextValue: String
     private lateinit var editTextHint: String
+    private var editTextInputType: Int = InputType.TYPE_CLASS_TEXT
 
     /**
      * [editTextValue] getter
@@ -45,5 +48,23 @@ class EditModel {
      */
     fun setEditTextHint(value: String) {
         editTextHint = value
+    }
+
+    /**
+     * [editTextInputType] getter
+     *
+     * @return The [editTextInputType]
+     */
+    fun getEditTextInputType(): Int {
+        return editTextInputType
+    }
+
+    /**
+     * [editTextInputType] setter
+     *
+     * @param value The new value to assign to [editTextInputType]
+     */
+    fun setEditTextInputType(value: Int) {
+        editTextInputType = value
     }
 }

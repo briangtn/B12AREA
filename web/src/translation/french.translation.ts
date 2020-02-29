@@ -1,7 +1,7 @@
 const french = {
     save: "Sauvegarder",
     cancel: "Annuler",
-    signin: "Se connecter",
+    signin: "Connexion",
     signup: "S'enregistrer",
     enterEmail: "Entrez votre email",
     getStarted: "Commencer",
@@ -25,8 +25,22 @@ const french = {
     forgotPasswordLink: "Mot de passe oublié",
     resetPassword: "Réinitialiser mon mot de passe",
     resetPasswordEmailSent: "Pour continuer, veuillez suivre les instructions envoyées par mail",
-    resetPasswordConfirmation: "Votre mot de passe a été réinitialiser, veuillez vous connecter.",
-    goToAdmin: "Panneau d'administration"
+    resetPasswordConfirmation: "Votre mot de passe a été réinitialisé, veuillez vous connecter.",
+    goToAdmin: "Panneau d'administration",
+    myServices: "Mes services enregistrés",
+    /**
+     * Add services translation
+     */
+    addServices: "Ajouter un service",
+    addServicesSubtitle: "Pour vous enregistrer à un nouveau services, renseignez les champs ci-dessous",
+    myActions: "Mes AREA",
+    delete: "Supprimer",
+    addReactions: "Ajouter une reaction",
+    addReactionsDescription: "Veuillez renseigner les informations, pour ajouter une nouvelle reaction à votre AREA",
+    logOut: "Se déconnecter",
+    profile: "Mon profil",
+    emailValidatedButConnected: "Veuillez vous déconnecter pour valider votre email",
+    back: "Retour"
 };
 
 export default french;

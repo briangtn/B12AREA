@@ -1,20 +1,20 @@
 package com.b12powered.area.activities
 
+import android.app.AlertDialog
 import android.content.Context
+import android.content.DialogInterface
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import com.auth0.android.jwt.JWT
-import com.b12powered.area.R
-import com.b12powered.area.Service
-import com.b12powered.area.User
+import com.b12powered.area.*
 import com.b12powered.area.api.ApiClient
 import com.b12powered.area.fragments.ServiceUserFragment
-import com.b12powered.area.toObject
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -94,6 +94,12 @@ class HomeActivity : AppCompatActivity() {
                 handler.postDelayed(this, 60000)
             }
         })
+
+        onBackPressedDispatcher.addCallback(object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                showDialog()
+            }
+        })
     }
     
     /**
@@ -166,5 +172,24 @@ class HomeActivity : AppCompatActivity() {
                     startActivity(intent)
                 }
             }
+    }
+
+    /**
+     * Show a dialog asking the user if they want to exit the application
+     */
+    private fun showDialog() {
+        val builder = AlertDialog.Builder(this)
+        val dialogClickListener = DialogInterface.OnClickListener { dialog, which ->
+            when(which) {
+                DialogInterface.BUTTON_POSITIVE -> finishAffinity()
+                DialogInterface.BUTTON_NEGATIVE -> dialog.dismiss()
+            }
+        }
+        builder
+            .setTitle(getString(R.string.exit_app))
+            .setPositiveButton(getString(R.string.yes), dialogClickListener)
+            .setNegativeButton(getString(R.string.no), dialogClickListener)
+            .create()
+            .show()
     }
 }
