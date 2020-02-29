@@ -3,14 +3,20 @@
   "description": "This action is triggered when a specific field is updated",
   "configSchema": [
     {
-      "name": "APIKey",
+      "name": "apiKey",
       "description": "The User APIKEY",
       "type": "string",
       "required": true
     },
     {
-      "name": "Base ID",
-      "description": "The ID of the base to watch for new entries",
+      "name": "baseId",
+      "description": "The ID of the base into which insert the data",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "tableId",
+      "description": "The table of the base into which you want to insert entry",
       "type": "string",
       "required": true
     }

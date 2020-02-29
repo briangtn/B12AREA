@@ -1,8 +1,9 @@
-import {LoginObject, ServiceConfig} from "../../services-interfaces";
+import {LoginObject, PullingData, PullingJobObject, ServiceConfig} from "../../services-interfaces";
 import config from './config.json';
 import {Context} from "@loopback/context";
 import {ExchangeCodeGeneratorManager} from "../../services";
 import {UserRepository} from "../../repositories";
+import {AirtableHelper} from "./Airtable.helper";
 
 export default class ServiceController {
     static serviceName = 'airtable';
@@ -30,5 +31,17 @@ export default class ServiceController {
 
     static async getConfig(): Promise<ServiceConfig> {
         return config;
+    }
+
+    static async processPullingJob(data: PullingJobObject, ctx: Context): Promise<PullingData|null> {
+        try {
+            if (data.name.startsWith(AirtableHelper.AIRTABLE_PULLING_PREFRIX_FIELD_UPDATE)) {
+                return await AirtableHelper.processFieldUpdatePooling(data, ctx);
+            } else {
+                return null;
+            }
+        } catch (e) {
+            return null;
+        }
     }
 }
