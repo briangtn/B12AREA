@@ -115,7 +115,7 @@ class AddServices extends Component<Props, State> {
         const { dialogOpened, selectedService } = this.state;
 
         const serviceChoices = availableServices.map((service: any) => (
-            <MenuItem key={availableServices.indexOf(service)} value={service.name}>{service.name.charAt(0).toUpperCase() + service.name.slice(1)}</MenuItem>
+            <MenuItem key={availableServices.indexOf(service)} value={service.name}>{service.displayName}</MenuItem>
         ));
 
         return (

@@ -21,7 +21,7 @@ interface Props {
     api_url: string,
     token: string,
     setToken: any
-};
+}
 
 interface State {}
 
@@ -31,11 +31,11 @@ interface JWTDecoded {
     iat: number,
     require2fa: boolean,
     validated2fa: boolean
-};
+}
 
 class TokenRefresher extends Component<Props, State> {
     private intervalID: any;
-    private refreshDifferentMS: number;
+    private readonly refreshDifferentMS: number;
 
     constructor(props: Props) {
         super(props);
@@ -44,6 +44,10 @@ class TokenRefresher extends Component<Props, State> {
         this.refreshDifferentMS = 1000;
     }
 
+    /**
+     * Function called every [refreshDifferentMS] to
+     * refresh the JWT token of the user
+     */
     refreshToken = () => {
         const { token, api_url } = this.props;
 
@@ -66,21 +70,27 @@ class TokenRefresher extends Component<Props, State> {
                 })
             }
         }
-    }
+    };
 
+    /**
+     * Set the interval to refresh the token
+     */
     componentDidMount() {
         this.intervalID = setInterval(() => {
             this.refreshToken();
         }, 1000);
     }
 
+    /**
+     * Clear the interval to delay the interval
+     */
     componentWillUnmount() {
         clearInterval(this.intervalID);
     }
 
     render() {
         return (
-            <div></div>
+            <div/>
         );
     }
 }
