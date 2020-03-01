@@ -83,16 +83,19 @@ export class ActionRepository extends DefaultCrudRepository<Action,
     }
 
     private async getByWhereOrId(where?: WhereOrIdAction, options?: AnyObject) : Promise<ActionWithRelations[]> {
-        if (typeof where === typeof Action.prototype.id && typeof where != "undefined") {
-            return [await this.findById(where as typeof Action.prototype.id, options)];
-        } else {
+        if (typeof where === "string") {
+            return [await this.findById(where, options)];
+        } else if (where !== undefined) {
             return this.find({
-                where: where as Condition<Action> | AndClause<Action> | OrClause<Action>
+                where: where
             }, options);
+        } else {
+            return this.find({}, options);
         }
     }
 
     async beforeUpdate(data: PartialAction, where?: WhereOrIdAction, options?: AnyObject) : Promise<OperationStatus> {
+        console.log(data);
         const actions = await this.getByWhereOrId(where, options);
         let result : OperationStatus = {success: true};
         for (const action of actions) {
@@ -107,7 +110,15 @@ export class ActionRepository extends DefaultCrudRepository<Action,
             }
 
             try {
-                result = await controller.updateAction(action.id!, action.options, data.options, this.ctx);
+                if (data.options) {
+                    console.log('nooooon');
+                    result = await controller.updateAction(action.id!, action.options, data.options, this.ctx);
+                } else {
+                    if (data.data)
+                        result = {success: true, options: action.options, data: data.data};
+                    else
+                        result = {success: true, options: action.options, data: action.data};
+                }
             } catch (e) {
                 throw new HttpErrors.BadRequest('Failed to update action in service');
             }
@@ -189,6 +200,7 @@ export class ActionRepository extends DefaultCrudRepository<Action,
     updateAll(data: PartialAction | Action, where?: FilterAction, options?: AnyObject): Promise<Count> {
         return this.beforeUpdate(data, where, options).then((operationStatus: OperationStatus) => {
             data.options = operationStatus.options;
+            data.data = operationStatus.data;
             return super.updateAll(data, where as FilterAction, options);
         }).catch((err) => {
             throw err;
@@ -196,12 +208,7 @@ export class ActionRepository extends DefaultCrudRepository<Action,
     }
 
     updateById(id: typeof Action.prototype.id, data: PartialAction | Action, options?: AnyObject): Promise<void> {
-        return this.beforeUpdate(data, id, options).then((operationStatus: OperationStatus) => {
-            data.options = operationStatus.options;
-            return super.updateById(id, data, options);
-        }).catch((err) => {
-            throw err;
-        });
+        return super.updateById(id, data, options);
     }
 
     create(entity: PartialAction | Action, options?: AnyObject): Promise<Action> {

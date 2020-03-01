@@ -106,8 +106,11 @@ export class Worker {
                 if (diff == null || diff.length <= 0)
                     return;
                 await pullingData.onDiff(diff);
-            }).catch((err) => {});
+            }).catch((err) => {
+                console.error('Error in diff function', err);
+            });
         }).catch((err) => {
+            console.error(`Error while fetching ${pullingData.url}`);
         });
     }
 }

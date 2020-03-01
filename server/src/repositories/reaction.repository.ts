@@ -61,12 +61,14 @@ export class ReactionRepository extends DefaultCrudRepository<Reaction,
     }
 
     private async getByWhereOrId(where?: WhereOrIdReaction, options?: AnyObject) : Promise<ReactionWithRelations[]> {
-        if (typeof where === typeof Action.prototype.id && typeof where != "undefined") {
-            return [await this.findById(where as typeof Action.prototype.id, options)];
-        } else {
+        if (typeof where === "string") {
+            return [await this.findById(where, options)];
+        } else if (where !== undefined) {
             return this.find({
-                where: where as FilterReaction
+                where: where
             }, options);
+        } else {
+            return this.find({}, options);
         }
     }
 
@@ -85,7 +87,14 @@ export class ReactionRepository extends DefaultCrudRepository<Reaction,
             }
 
             try {
-                result = await controller.updateReaction(reaction.id!, reaction.options, data.options, this.ctx);
+                if (data.options) {
+                    result = await controller.updateReaction(reaction.id!, reaction.options, data.options, this.ctx);
+                } else {
+                    if (data.data)
+                        result = {success: true, options: reaction.options, data: data.data};
+                    else
+                        result = {success: true, options: reaction.options, data: reaction.data};
+                }
             } catch (e) {
                 throw new HttpErrors.BadRequest('Failed to update reaction in service');
             }
@@ -176,12 +185,7 @@ export class ReactionRepository extends DefaultCrudRepository<Reaction,
     }
 
     updateById(id: typeof Reaction.prototype.id, data: PartialReaction | Reaction, options?: AnyObject): Promise<void> {
-        return this.beforeUpdate(data, id, options).then((operationStatus: OperationStatus) => {
-            data.options = operationStatus.options;
-            return super.updateById(id, data, options);
-        }).catch((err) => {
-            throw err;
-        });
+        return super.updateById(id, data, options);
     }
 
     create(entity: PartialReaction | Reaction, options?: AnyObject): Promise<Reaction> {

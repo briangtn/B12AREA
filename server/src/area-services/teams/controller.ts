@@ -138,6 +138,7 @@ export default class ServiceController {
                 return null;
             }
         } catch (e) {
+            console.error('Teams pulling error:', e);
             return null;
         }
     }
