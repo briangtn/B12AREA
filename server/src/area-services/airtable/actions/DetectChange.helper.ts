@@ -2,7 +2,7 @@ import {Context, inject} from "@loopback/context";
 import {OperationStatus} from "../../../services-interfaces";
 import {AreaService} from "../../../services";
 import {AirtableHelper, DiffHandler} from "../Airtable.helper";
-import {Record} from "../interfaces";
+import {BaseConfig, Record} from "../interfaces";
 import {isDeepStrictEqual} from "util";
 
 export enum AIRTABLE_PREFIX_ENUM {
@@ -29,8 +29,17 @@ export default class DetectChangesHelper {
         }
     }
 
+    private static checkConfig(actionConfig: Object) : boolean {
+        const config : BaseConfig = actionConfig as BaseConfig;
+
+        return !(config.tableId === "" || config.baseId === "" || config.apiKey === "");
+    }
+
     static async createActionFinished(actionID: string, userID: string, actionConfig: Object, ctx: Context, prefix: AIRTABLE_PREFIX_ENUM): Promise<OperationStatus> {
         const areaService: AreaService = await ctx.get('services.area');
+        if (!this.checkConfig(actionConfig)) {
+            return { success: false, error: "Invalid configuration" };
+        }
         try {
             await areaService.startPulling(30, this.getPrefix(prefix) + actionID, AirtableHelper.serviceName, ctx, {
                 ...actionConfig,
@@ -44,6 +53,9 @@ export default class DetectChangesHelper {
 
     static async updateAction(actionId: string, oldActionConfig: Object, newActionConfig: Object, ctx: Context, prefix: AIRTABLE_PREFIX_ENUM): Promise<OperationStatus> {
         const areaService: AreaService = await ctx.get('services.area');
+        if (!this.checkConfig(newActionConfig)) {
+            return { success: false, error: "Invalid configuration" };
+        }
         try {
             await areaService.stopPulling(this.getPrefix(prefix) + actionId, AirtableHelper.serviceName, ctx);
 
