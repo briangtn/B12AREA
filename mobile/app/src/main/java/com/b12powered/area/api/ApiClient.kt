@@ -2,6 +2,7 @@ package com.b12powered.area.api
 
 import android.content.Context
 import android.net.Uri
+import android.util.Log
 import androidx.core.net.toUri
 import com.android.volley.*
 import com.android.volley.toolbox.BasicNetwork
@@ -339,7 +340,7 @@ class ApiClient(private val context: Context) {
                 val areas = ArrayList<Areas>()
                 val array = JSONArray(response.json)
 
-                for (i in  0 until array.length() - 1) {
+                for (i in  0 until array.length()) {
                     areas.add(array.get(i).toString().toObject())
                 }
                 completion.invoke(areas, "success")

@@ -50,21 +50,6 @@ class CreateAreaFragment : Fragment() {
     }
 
     /**
-     * Override method onCreate
-     *
-     * Set a custom callback to the back button
-     */
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        requireActivity().onBackPressedDispatcher.addCallback(object : OnBackPressedCallback(true) {
-            override fun handleOnBackPressed() {
-                (activity!! as AreaCreationActivity).finishArea()
-            }
-        })
-    }
-
-    /**
      * Override method onViewCreated
      *
      * Set listeners to view's buttons and input fields

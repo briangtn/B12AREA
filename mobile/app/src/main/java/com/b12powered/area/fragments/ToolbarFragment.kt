@@ -11,8 +11,9 @@ import android.view.View
 import android.view.LayoutInflater
 import android.widget.ImageButton
 import android.content.Intent
+import android.graphics.PorterDuff
+import androidx.core.content.ContextCompat
 import kotlinx.android.synthetic.main.fragment_toolbar.*
-
 import com.b12powered.area.activities.HomeActivity
 import com.b12powered.area.activities.SearchActivity
 import com.b12powered.area.activities.UserActivity

@@ -42,6 +42,7 @@ class ServiceUserFragment(private val serviceList: ArrayList<Service>, private v
         view.setOnClickListener {
             val intent = Intent(context, ServiceInformationActivity::class.java)
             intent.putExtra("serviceName", service.name)
+            intent.putExtra("displayName", service.displayName)
             startActivity(intent)
         }
     }
