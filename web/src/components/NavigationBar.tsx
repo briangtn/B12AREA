@@ -25,10 +25,12 @@ import ListItemIcon from "@material-ui/core/ListItemIcon";
 
 import AccountCircleIcon from '@material-ui/icons/AccountCircle';
 import ExitToAppIcon from '@material-ui/icons/ExitToApp';
+import SupervisorAccountIcon from '@material-ui/icons/SupervisorAccount';
 
 const cookies = new Cookies();
 
 interface Props {
+    api_url: string,
     classes: {
         title: string,
         root: string,
@@ -42,7 +44,8 @@ interface Props {
 }
 
 interface State {
-    anchorEl: any
+    anchorEl: any,
+    isAdmin: boolean
 }
 
 function mapDispatchToProps(dispatch: any) {
@@ -50,7 +53,7 @@ function mapDispatchToProps(dispatch: any) {
 }
 
 const mapStateToProps = (state: any) => {
-    return { token: state.token };
+    return { api_url: state.api_url, token: state.token };
 };
 
 const styles = (theme: Theme) => createStyles({
@@ -69,7 +72,8 @@ const styles = (theme: Theme) => createStyles({
 
 class NavigationBar extends Component <Props, State> {
     state: State = {
-        anchorEl: null
+        anchorEl: null,
+        isAdmin: false
     };
 
     handleMenu = (e: any) => {
@@ -88,10 +92,42 @@ class NavigationBar extends Component <Props, State> {
             cookies.set('token', '');
             this.props.setToken('');
             this.props.history.push('/');
+        } else if (key === "admin") {
+            this.props.history.push('/admin');
         }
 
         this.setState({ anchorEl: null });
     };
+
+    componentDidMount(): void {
+        const { api_url, token } = this.props;
+
+        if (token) {
+            fetch(`${api_url}/users/me`, {
+                headers: {'Authorization': `Bearer ${token}`}
+            })
+                .then(r => r.json())
+                .then((data) => {
+                    const { error } = data;
+
+                    if (error) {
+                        const { statusCode } = error;
+
+                        if (statusCode === 401) {
+                            cookies.set('token',  '');
+                            this.props.setToken('');
+                            this.props.history.push('/');
+                            return;
+                        }
+                    } else {
+                        const { role } = data;
+
+                        if (role.includes('admin'))
+                            this.setState({ isAdmin: true });
+                    }
+                });
+        }
+    }
 
     render() {
         const { classes, token } = this.props;
@@ -143,6 +179,17 @@ class NavigationBar extends Component <Props, State> {
                             </ListItemIcon>
                             <Translator sentence="profile" />
                         </MenuItem>
+                        {
+                            (this.state.isAdmin) ?
+                                <MenuItem id='admin' onClick={this.handleClose}>
+                                    <ListItemIcon>
+                                        <SupervisorAccountIcon />
+                                    </ListItemIcon>
+                                    <Translator sentence="goToAdmin" />
+                                </MenuItem>
+                                :
+                                <div />
+                        }
                         <Divider />
                         <MenuItem id='logout' onClick={this.handleClose}>
                             <ListItemIcon>
