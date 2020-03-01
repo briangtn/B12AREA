@@ -23,13 +23,15 @@ import kotlin.collections.ArrayList
  * This class set a clickable list of reaction, depending on action type
  *
  * @param listActionDetails Current action details
+ * @param displayName Current service name to display
  */
 class ServiceReactionInformationFragment(private val listActionDetails: Pair<String, ActionDetails>, private val displayName: String) : Fragment() {
 
-    private var _allAreasService : MutableList<Areas> = mutableListOf()
-    private lateinit var listView: ListView
-    private lateinit var area: Areas
-    private var numberReaction = 0
+
+    private var _allAreasService : MutableList<Areas> = mutableListOf() /*!< [_allAreasService] MutableList<Areas> -> contain all areas with a specific service selected */
+    private lateinit var listView: ListView /*!< [listView] ListView -> current listView of the activity */
+    private lateinit var area: Areas /*!< [area] Areas -> contain areaes information */
+    private var numberReaction = 0 /*!< [numberReaction] Int -> contain the number of reaction */
 
     companion object {
 

@@ -18,13 +18,13 @@ import kotlinx.android.synthetic.main.activity_service_information.*
  */
 class ServiceInformationActivity : AppCompatActivity() {
 
-    private lateinit var serviceName: String
-    private lateinit var displayName: String
-    private var currentActionSelected: Pair<String, ActionDetails>? = null
-    private var currentArea: Area? = null
-    private var serviceList: ArrayList<Service> = ArrayList()
-    private var _service: Service? = null
-    private var isAction: Boolean = true
+    private lateinit var serviceName: String /*!< [serviceName] String -> current service name */
+    private lateinit var displayName: String /*!< [displayName] String -> current displayed service name */
+    private var currentActionSelected: Pair<String, ActionDetails>? = null /*!< [currentActionSelected] Pair<String, ActionDetails> -> contain action information */
+    private var currentArea: Area? = null /*!< [currentArea] Area -> contain the current area selected */
+    private var serviceList: ArrayList<Service> = ArrayList() /*!< [serviceList] ArrayList<Service> -> contain all the service in a arrayList */
+    private var _service: Service? = null /*!< [_service] Service -> contain the current service selected */
+    private var isAction: Boolean = true /*!< [isAction] Boolean -> true if the areas contain actions, false otherwise */
 
     /**
      * Override method onCreate

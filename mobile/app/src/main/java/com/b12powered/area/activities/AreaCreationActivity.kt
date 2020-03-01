@@ -17,10 +17,10 @@ import com.b12powered.area.fragments.AddAreaFragment
  */
 class AreaCreationActivity : AppCompatActivity() {
 
-    private lateinit var serviceList: ArrayList<Service>
-    private lateinit var currentService: Service
-    private lateinit var service: Service
-    private lateinit var currentArea: Area
+    private lateinit var serviceList: ArrayList<Service> /*!< [serviceList] -> ArrayList contain all services */
+    private lateinit var currentService: Service /*!< [currentService] -> Service contain the current service used */
+    private lateinit var service: Service /*!< [service] Service -> contain the service to print in the next intent */
+    private lateinit var currentArea: Area /*!< [currentArea] -> Area contain the current area used */
 
     /**
      * Override method onCreate

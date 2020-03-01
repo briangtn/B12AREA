@@ -17,7 +17,6 @@ import com.b12powered.area.api.ApiClient
 import com.b12powered.area.fragments.SettingsFragment
 import kotlinx.android.synthetic.main.activity_register.*
 
-
 /**
  * The activity where the user can register to application
  *

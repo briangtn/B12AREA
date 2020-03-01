@@ -14,7 +14,6 @@ import com.b12powered.area.api.ApiClient
 import kotlinx.android.synthetic.main.fragment_settings.*
 import java.lang.IllegalStateException
 
-
 /**
  * Fragment class for api settings, used in both login and register view before any api call
  *
@@ -22,8 +21,7 @@ import java.lang.IllegalStateException
  */
 class SettingsFragment : DialogFragment() {
 
-
-    private lateinit var root: View
+    private lateinit var root: View /*!< [root] View -> the current view selected */
 
     /**
      * Override method onCreateView

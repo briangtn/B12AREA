@@ -20,13 +20,13 @@ import com.b12powered.area.api.ApiClient
 import com.bumptech.glide.Glide
 import kotlinx.android.synthetic.main.fragment_service.*
 
-
 /**
  * A fragment displaying clickable service in order to subscribe to it
  *
  * @param service The service to show
  */
 class ServiceFragment(private val service: Service) : Fragment() {
+
     companion object {
 
         /**
@@ -41,7 +41,7 @@ class ServiceFragment(private val service: Service) : Fragment() {
         }
     }
 
-    private var isFlipped = false
+    private var isFlipped = false /*!< [_isFlipped] Boolean -> true if the card is flipped, false otherwise */
 
     /**
      * Override method onCreateView
