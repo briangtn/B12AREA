@@ -167,7 +167,7 @@ export default class WorkerHelper {
                         reactionPreparedData: reactionPreparedData,
                         reactionType: reaction.serviceReaction
                     };
-                    this.workerQueue.add(`${reaction.serviceReaction}_${reaction.id}`, preparedData).catch(e => console.error(`Failed to enqueue job for action id ${params.actionId}, reaction id ${reaction.id}: ${e}`));
+                    this.workerQueue.add(preparedData).catch(e => console.error(`Failed to enqueue job for action id ${params.actionId}, reaction id ${reaction.id}: ${e}`));
                 } catch (e) {
                     console.error(`[ServiceResolve]Failed to enqueue job for action id ${params.actionId}: could not find reaction ${reactionName} in service ${serviceName}`);
                 }
