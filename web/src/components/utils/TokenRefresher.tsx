@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 
 import { connect } from 'react-redux';
 
-import { setToken } from "../actions/api.action";
+import { setToken } from "../../actions/api.action";
 
 import jwt_decode from 'jwt-decode';
 import Cookies from "universal-cookie";
@@ -51,6 +51,9 @@ class TokenRefresher extends Component<Props, State> {
     refreshToken = () => {
         const { token, api_url } = this.props;
 
+        if (cookies.get('token') !== token) {
+            this.props.setToken(cookies.get('token'));
+        }
         if (token === "undefined") {
             cookies.set('token', '');
             this.props.setToken('');

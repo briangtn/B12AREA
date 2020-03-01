@@ -11,8 +11,8 @@ import './App.css';
 
 import NavigationBar from "./components/NavigationBar";
 import AuthButton from "./components/AuthButton";
-import OrDivider from "./components/OrDivider";
-import Translator from "./components/Translator";
+import OrDivider from "./components/utils/OrDivider";
+import Translator from "./components/utils/Translator";
 import HomeCarousel from "./components/HomeCarousel";
 import Footer from "./components/Footer";
 
