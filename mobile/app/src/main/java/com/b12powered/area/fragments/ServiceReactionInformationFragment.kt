@@ -14,6 +14,7 @@ import androidx.fragment.app.Fragment
 import com.b12powered.area.*
 import com.b12powered.area.activities.ServiceInformationActivity
 import com.b12powered.area.api.ApiClient
+import kotlin.collections.ArrayList
 
 /**
  * The fragment where the user can see all reaction about a specific service type
@@ -22,7 +23,7 @@ import com.b12powered.area.api.ApiClient
  *
  * @param listActionDetails Current action details
  */
-class ServiceReactionInformationFragment(private val listActionDetails: Pair<String, ActionDetails>) : Fragment() {
+class ServiceReactionInformationFragment(private val listActionDetails: Pair<String, ActionDetails>, private val displayName: String) : Fragment() {
 
     private var _allAreasService : MutableList<Areas> = mutableListOf()
     private lateinit var listView: ListView
@@ -37,8 +38,8 @@ class ServiceReactionInformationFragment(private val listActionDetails: Pair<Str
          *
          * @return A new instance of [ServiceReactionInformationFragment]
          */
-        fun newInstance(listActionDetails: Pair<String, ActionDetails>): ServiceReactionInformationFragment {
-            return ServiceReactionInformationFragment(listActionDetails)
+        fun newInstance(listActionDetails: Pair<String, ActionDetails>, displayName: String): ServiceReactionInformationFragment {
+            return ServiceReactionInformationFragment(listActionDetails, displayName)
         }
     }
 
@@ -95,8 +96,8 @@ class ServiceReactionInformationFragment(private val listActionDetails: Pair<Str
                 if (areas !== null) {
                     areas.forEach { item ->
                         if (item.actions != null) {
-                            val actionName = item.actions.serviceAction.substringBefore(".")
-                            if (actionName == serviceName)
+                            val name = item.actions.serviceAction.substringBefore(".")
+                            if (name == serviceName)
                                 _allAreasService.add(item)
                         }
                     }
@@ -119,11 +120,11 @@ class ServiceReactionInformationFragment(private val listActionDetails: Pair<Str
     private fun printAreasReaction() {
         val listReactionDetails: ArrayList<Pair<String, ReactionDetails>> = ArrayList()
         listView = view!!.findViewById(R.id.list)
-        var reactionOption = ""
 
         _allAreasService.forEach { item ->
             if (item.actions.id == listActionDetails.second.id) {
                 item.reactions.forEach { reaction ->
+                    var reactionOption = ""
                     numberReaction++
                     if (reaction.options != null) {
                         for ((key, value) in reaction.options)
@@ -173,7 +174,7 @@ class ServiceReactionInformationFragment(private val listActionDetails: Pair<Str
             }
         }
         builder
-            .setTitle(serviceReactionName)
+            .setTitle(displayName)
             .setMessage(getString(R.string.delete_reaction))
             .setPositiveButton(getString(R.string.yes), dialogClickListener)
             .setNegativeButton(getString(R.string.no), dialogClickListener)

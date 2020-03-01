@@ -3,6 +3,7 @@ package com.b12powered.area.fragments
 import android.app.AlertDialog
 import android.content.DialogInterface
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -13,6 +14,8 @@ import androidx.fragment.app.Fragment
 import com.b12powered.area.*
 import com.b12powered.area.activities.ServiceInformationActivity
 import com.b12powered.area.api.ApiClient
+import java.util.*
+import kotlin.collections.ArrayList
 
 /**
  * The fragment where the user can select and see all actions in specific service type
@@ -21,7 +24,7 @@ import com.b12powered.area.api.ApiClient
  *
  * @param serviceName The current service clicked
  */
-class ServiceActionInformationFragment(private val serviceName: String) : Fragment() {
+class ServiceActionInformationFragment(private val serviceName: String, private val displayName: String) : Fragment() {
 
     private var _allAreasService : MutableList<Areas>? = mutableListOf()
     private lateinit var listView: ListView
@@ -35,8 +38,8 @@ class ServiceActionInformationFragment(private val serviceName: String) : Fragme
          *
          * @return A new instance of [ServiceActionInformationFragment]
          */
-        fun newInstance(serviceName: String): ServiceActionInformationFragment {
-            return ServiceActionInformationFragment(serviceName)
+        fun newInstance(serviceName: String, displayName: String): ServiceActionInformationFragment {
+            return ServiceActionInformationFragment(serviceName, displayName)
         }
     }
 
@@ -74,8 +77,8 @@ class ServiceActionInformationFragment(private val serviceName: String) : Fragme
                 if (areas !== null) {
                     areas.forEach { item ->
                         if (item.actions != null) {
-                            var actionName = item.actions.serviceAction.substringBefore(".")
-                            if (actionName == serviceName)
+                            val name = item.actions.serviceAction.substringBefore(".")
+                            if (name == serviceName)
                                 _allAreasService?.add(item)
                         }
                     }
@@ -165,7 +168,7 @@ class ServiceActionInformationFragment(private val serviceName: String) : Fragme
                 }
             }
             builder
-                .setTitle(serviceName)
+                .setTitle(displayName)
                 .setMessage(getString(R.string.what_you_want))
                 .setNeutralButton(getString(R.string.cancel), dialogClickListener)
                 .setNegativeButton(getString(R.string.delete_areas), dialogClickListener)
@@ -180,7 +183,7 @@ class ServiceActionInformationFragment(private val serviceName: String) : Fragme
                 }
             }
             builder
-                .setTitle(serviceName)
+                .setTitle(displayName)
                 .setMessage(getString(R.string.what_you_want).plus("\n") + getString(R.string.no_reaction))
                 .setPositiveButton(getString(R.string.delete_areas), dialogClickListener)
                 .setNegativeButton(getString(R.string.cancel), dialogClickListener)

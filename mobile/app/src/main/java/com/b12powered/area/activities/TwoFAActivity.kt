@@ -32,8 +32,6 @@ class TwoFAActivity : AppCompatActivity() {
 
         etAuthenticationCode.setOnKeyListener(View.OnKeyListener { _, keyCode, event ->
             if (keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_UP) {
-                val inputMethodManager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-                inputMethodManager.hideSoftInputFromWindow(currentFocus!!.windowToken, 0)
                 submitCode()
                 return@OnKeyListener true
             }
@@ -49,6 +47,9 @@ class TwoFAActivity : AppCompatActivity() {
      * Check code validity. Call [validate2fa] method if code is valid, reset input field if not
      */
     private fun submitCode() {
+        val inputMethodManager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        inputMethodManager.hideSoftInputFromWindow(currentFocus!!.windowToken, 0)
+
         val etAuthenticationCode = findViewById<EditText>(R.id.authentication_code)
 
         etAuthenticationCode.clearFocus()
