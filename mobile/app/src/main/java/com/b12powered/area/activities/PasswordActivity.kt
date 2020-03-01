@@ -11,6 +11,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
+import com.b12powered.area.BuildConfig
 import com.b12powered.area.R
 import com.b12powered.area.api.ApiClient
 
@@ -76,7 +77,7 @@ class PasswordActivity : AppCompatActivity() {
         return if (sharedPreferences.contains(getString(R.string.api_url_key))) {
             sharedPreferences.getString(getString(R.string.api_url_key), null)!!
         } else {
-            System.getenv("API_HOST")!!
+            BuildConfig.API_HOST
         }
 
     }

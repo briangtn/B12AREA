@@ -7,6 +7,7 @@ import android.widget.EditText
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
+import com.b12powered.area.BuildConfig
 import com.b12powered.area.R
 import com.b12powered.area.api.ApiClient
 import kotlinx.android.synthetic.main.activity_forgot_password.*
@@ -67,11 +68,11 @@ class ForgotPasswordActivity : AppCompatActivity() {
         val apiUrl = if (sharedPreferences.contains(getString(R.string.api_url_key))) {
             sharedPreferences.getString(getString(R.string.api_url_key), null)!!
         } else {
-            System.getenv("API_HOST")!!
+            BuildConfig.API_HOST
         }
 
         ApiClient(this)
-            .requestResetPassword(email, "https://" + System.getenv("HOST")!! + "/reset_password?api_url=$apiUrl") { success, message ->
+            .requestResetPassword(email, "https://" + BuildConfig.HOST + "/reset_password?api_url=$apiUrl") { success, message ->
                 if (success) {
                     val intent = Intent(this, RequestResetPasswordValidationActivity::class.java)
                     finish()
