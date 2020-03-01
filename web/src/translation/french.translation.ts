@@ -40,7 +40,9 @@ const french = {
     logOut: "Se déconnecter",
     profile: "Mon profil",
     emailValidatedButConnected: "Veuillez vous déconnecter pour valider votre email",
-    back: "Retour"
+    back: "Retour",
+    add: "Ajouter",
+    youAreAdmin: "Vous êtes administrateur"
 };
 
 export default french;

@@ -47,7 +47,7 @@ class InpersonateBar extends Component<Props, State> {
         cookies.set('admin_token', '');
         setAdminToken('');
 
-        window.location.reload();
+        window.location.href = `${window.location.protocol}//${window.location.host}/admin`;
     };
 
     render() {

@@ -180,12 +180,18 @@ class AddAreaStepper extends Component<Props, State> {
         const { name, type, required, description } = configSchema;
         let placeHolderString: any = null;
 
-        if (placeholder) {
+        if (placeholder && !configSchema.ignorePlaceholders) {
             placeHolderString = (
                 <React.Fragment>
                     <i><u>{`${name}:`}</u> {`${description}`}</i>
                     <p><b>Placeholders:</b></p>
                     {placeholder.map((holder: IPlaceHolder, index: number) => <p key={index}>{`{${holder.name}}: ${holder.description}`}</p>)}
+                </React.Fragment>
+            );
+        } else if (placeholder && configSchema.ignorePlaceholders) {
+            placeHolderString = (
+                <React.Fragment>
+                    <i><u>{`${name}:`}</u> {`${description}`}</i>
                 </React.Fragment>
             );
         }
@@ -510,7 +516,7 @@ class AddAreaStepper extends Component<Props, State> {
         const headers: any = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` };
 
         const reactionConfigSchema = this.formatConfigSchema(this.state.configSchemaReactions);
-        let returnArray = []
+        let returnArray = [];
         for (let reaction of reactionConfigSchema) {
             const reactionBody: { serviceReaction: string, options: any } = {
                 serviceReaction: `${reaction.serviceName}.R.${reaction.name}`,
@@ -571,6 +577,11 @@ class AddAreaStepper extends Component<Props, State> {
                         this.props.closeFunction();
                         if (this.props.needToRefresh)
                             window.location.reload();
+                    } else {
+                        fetch(`${api_url}/areas/${id}`, {
+                            method: 'DELETE',
+                            headers: {'Authorization': `Bearer ${token}`}
+                        }).then(r => r.json());
                     }
                 });
         });
@@ -661,7 +672,7 @@ class AddAreaStepper extends Component<Props, State> {
                             >
                                 {(this.props.language === "en") ? 'Back' : 'Retour'}
                             </Button>
-                            <Button variant="contained" color="primary" onClick={(activeStep === steps.length - 1) ? this.createAREA : this.handleNextStep}>
+                            <Button disabled={!this.state.areaName} variant="contained" color="primary" onClick={(activeStep === steps.length - 1) ? this.createAREA : this.handleNextStep}>
                                 {activeStep === steps.length - 1 ? ((this.props.language === 'en') ? 'Finish' : 'Valider') : ((this.props.language === 'en') ? 'Next' : 'Suivant')}
                             </Button>
                         </div>

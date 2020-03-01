@@ -90,6 +90,8 @@ class AddServices extends Component<Props, State> {
         const redirectURL = `${window.location.origin}/code_validator`;
         const payload = { redirectURL: redirectURL };
 
+        if (!selectedService)
+            return;
         fetch(`${api_url}/services/login/${selectedService}?redirectURL=${redirectURL}`, {
             method: 'POST',
             headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
@@ -152,7 +154,7 @@ class AddServices extends Component<Props, State> {
                         <Translator sentence="cancel" />
                     </Button>
                     <Button onClick={this.handleRegisterService} color="primary">
-                        <Translator sentence="save" />
+                        <Translator sentence="add" />
                     </Button>
                     </DialogActions>
                 </Dialog>

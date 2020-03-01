@@ -26,7 +26,7 @@ const english = {
     resetPassword: "Reset password",
     resetPasswordEmailSent: "To continue, please follow the steps in your email",
     resetPasswordConfirmation: "Your password has been reset, please connect.",
-    goToAdmin: "Administration panel",
+    goToAdmin: "Administration Panel",
     myServices: "My registered services",
     /**
      * Add services translation
@@ -40,7 +40,9 @@ const english = {
     logOut: "Log Out",
     profile: "My Profile",
     emailValidatedButConnected: "You are already connected, please log out to confirm your email",
-    back: "Back"
+    back: "Back",
+    add: "Add",
+    youAreAdmin: "You are admin"
 };
 
 export default english;

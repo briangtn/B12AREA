@@ -137,6 +137,19 @@ class Profile extends Component<Props, State> {
                     }}
                 >
                     <Typography variant="h2" className={classes.section} gutterBottom><b><Translator sentence="accountSettings" /></b></Typography>
+                    {
+                        (this.state.roles.includes('admin')) ?
+                            <div className={classes.section} style={{ textAlign: 'left' }}>
+                                <Typography variant="h4" gutterBottom><b><Translator sentence="youAreAdmin" /></b></Typography>
+                                <Link
+                                    to={{pathname: '/admin'}}
+                                >
+                                    <Button startIcon={<SupervisorAccountIcon />} style={{marginTop: '10px'}} id="getStarted" color="primary"><Translator sentence="goToAdmin" /></Button>
+                                </Link>
+                            </div>
+                            :
+                            <div />
+                    }
                     <div className={classes.section} style={{ textAlign: 'left' }}>
                         <Typography variant="h4" gutterBottom><b><Translator sentence="settingsAccountTitle" /></b></Typography>
                         <TextField
@@ -178,16 +191,6 @@ class Profile extends Component<Props, State> {
                             }
                         </Grid>
                     </div>
-                    {
-                        (this.state.roles.includes('admin')) ?
-                        <Link
-                            to={{pathname: '/admin'}}
-                        >
-                            <Button startIcon={<SupervisorAccountIcon />} style={{marginTop: '10px'}} id="getStarted" color="primary"><Translator sentence="goToAdmin" /></Button>
-                        </Link>
-                        :
-                        <div></div>
-                    }
                 </div>
             </div>
         );

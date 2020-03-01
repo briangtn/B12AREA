@@ -201,7 +201,7 @@ class ServiceDetails extends Component<Props, State> {
 
         let placeHolderComponent: any = null;
 
-        if (placeholders) {
+        if (placeholders && !configSchema.ignorePlaceholders) {
             placeHolderComponent = (
                 <React.Fragment>
                     <i><u>{`${name}:`}</u> {`${description}`}</i>
@@ -209,6 +209,12 @@ class ServiceDetails extends Component<Props, State> {
                     {placeholders.map((holder: IPlaceHolder, index: number) => <p key={index}>{`{${holder.name}}: ${holder.description}`}</p>)}
                 </React.Fragment>
             )
+        } else if (placeholders && configSchema.ignorePlaceholders) {
+            placeHolderComponent = (
+                <React.Fragment>
+                    <i><u>{`${name}:`}</u> {`${description}`}</i>
+                </React.Fragment>
+            );
         }
 
         if (type === "string" || type === "number") {
