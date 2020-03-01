@@ -29,12 +29,17 @@ export class AreaService {
         await WorkerHelper.RemovePullingJob(service, name, ctx);
     }
 
+
     validateConfigSchema(data: object, model: ConfigSchemaElement[]): OperationStatus {
         for (const modelElement of model) {
             const existInConfig = Object.keys(data).indexOf(modelElement.name) !== -1;
             const element = data[modelElement.name as keyof typeof data];
-            if (modelElement.required && (!existInConfig || !element)) {
-                return {success: false, error: `Missing ${modelElement.name} in config`};
+            if (modelElement.required) {
+                if (modelElement.type !== 'string' && (!existInConfig || element === undefined)) {
+                    return {success: false, error: `Missing ${modelElement.name} in config`};
+                } else if (modelElement.type === 'string' && (!existInConfig || !element)) {
+                    return {success: false, error: `Missing ${modelElement.name} in config`};
+                }
             }
             if (existInConfig && typeof element !== modelElement.type) {
                 return {success: false, error: `Invalid type for ${modelElement.name} (${typeof data[modelElement.name as keyof typeof data]} is not ${modelElement.type}`};
