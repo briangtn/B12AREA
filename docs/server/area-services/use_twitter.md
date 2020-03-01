@@ -12,7 +12,7 @@ You must check `Enable Sign in with Twitter`
 
 Then in redirect url's add:
 * `https://YOURAPIDOMAIN.COM/services/twitters/auth` (Only if you want to use twitter area service)
-* `https://YOURAPIDOMAIN.COM/auth-service/twitters/auth` (Only if you want to use twitter auth service)
+* `https://YOURAPIDOMAIN.COM/auth-service/twitter/auth` (Only if you want to use twitter auth service)
 
 You must also set a `Terms of Service URL` and a `Privacy policy URL`
 
@@ -25,7 +25,8 @@ Then you must go in `Permissions` tab and select `Read, write, and Direct Messag
 After that in `Access token & access token secret` click on `generate` button.
 Keep a copy of the `Access token` and `Access token secret`.
 
-**Now we gonna create subscriptions environments (This step is only for twitter area service)**
+
+**After this step the insctuctions was only for twitter area service**
 
 Now open the menu entitled with your twitter username and then select `Dev environments`
 
@@ -36,7 +37,7 @@ You must create an `Account Activity API` with as parameters
 
 And your app as linked application
 
-**Setup environment variables**
+## Setup environment variables
 
 Right now you have to setup environment variables for twitter.
 
