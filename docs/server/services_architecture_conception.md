@@ -131,14 +131,14 @@ static async createAction(userId: string, actionConfig: Object, ctx: Context): P
     // if OperationStatus.success, OperationStatus.option will be stored in db
 }
 
-    static async createActionFinished(actionID: string, userID: string, actionConfig: Object, ctx: Context): Promise<OperationStatus> {
-      // After the action was created in db
-      // the result should be reuturned in OperationStatus
-      // actionId is the id of the action that is beeing updated
-      // userId is the user performing the request
-      // actionConfig is the config given by the front end
-      // ctx is the loopback context
-    }
+static async createActionFinished(actionID: string, userID: string, actionConfig: Object, ctx: Context): Promise<OperationStatus> {
+  // After the action was created in db
+  // the result should be returned in OperationStatus
+  // actionId is the id of the action that is beeing updated
+  // userId is the user performing the request
+  // actionConfig is the config given by the front end
+  // ctx is the loopback context
+}
 
 
 static async updateAction(actionId: string, oldActionConfig: Object, newActionConfig: Object, ctx: Context): Promise<OperationStatus> {
@@ -149,6 +149,15 @@ static async updateAction(actionId: string, oldActionConfig: Object, newActionCo
     // newActionConfig is the new config submitted by the user
     // ctx is the loopback context
     // if OperationStatus.success, OperationStatus.option will be stored in db
+}
+
+static async updateActionFinished(actionID: string, userID: string, actionConfig: Object, ctx: Context): Promise<OperationStatus> {
+  // After the action was updated in db
+  // the result should be returned in OperationStatus
+  // actionId is the id of the action that is beeing updated
+  // userId is the user performing the request
+  // actionConfig is the config given by the front end
+  // ctx is the loopback context
 }
 
 static async deleteAction(actionId: string, actionConfig: Object, ctx: Context): Promise<OperationStatus> {
@@ -180,9 +189,10 @@ The function that 'trigger' the action (whether with a webhook or with pooling) 
     {
       "name": "tweet",
       "description": "A tweet id",
-      "type": "number",
-      "required": true,
-      "default": 123456 //not required
+      "type": "string",
+      "required": false,
+      "default": "123456", //not required, only if required is false
+      "ignorePlaceholders": true //not required, only if type is string
     }
   ]
 }
