@@ -37,7 +37,8 @@
       "description": "The body type of the new mail. Should be 'text' or 'html'",
       "type": "string",
       "required": false,
-      "default": "text"
+      "default": "text",
+      "ignorePlaceholders": true
     },
     {
       "name": "sendSaveToSentItem",
