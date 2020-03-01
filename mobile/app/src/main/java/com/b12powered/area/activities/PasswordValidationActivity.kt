@@ -4,7 +4,6 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.b12powered.area.R
-import com.b12powered.area.api.ApiClient
 import kotlinx.android.synthetic.main.activity_password_validation.*
 
 /**

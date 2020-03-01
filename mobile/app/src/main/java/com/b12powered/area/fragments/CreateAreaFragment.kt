@@ -10,7 +10,6 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.CheckBox
 import android.widget.EditText
 import android.widget.Toast
-import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
 import com.b12powered.area.AreaCreationStatus
 import com.b12powered.area.R
@@ -24,6 +23,7 @@ import kotlinx.android.synthetic.main.fragment_create_area.*
  * This class request the api for area creation, using the area's name entered by the user
  */
 class CreateAreaFragment : Fragment() {
+
     companion object {
 
         /**

@@ -24,6 +24,7 @@ import com.b12powered.area.activities.AreaCreationActivity
  * @param step The current step of the area creation
  */
 class SelectAreaFragment(private val service: Service, private val area: Area, private val step: AreaCreationStatus) : Fragment() {
+
     companion object {
 
         /**
@@ -40,7 +41,7 @@ class SelectAreaFragment(private val service: Service, private val area: Area, p
         }
     }
 
-    private lateinit var listView: ListView
+    private lateinit var listView: ListView /*!< [listView] ListView -> current listView of the activity */
 
     /**
      * Override method onCreateView

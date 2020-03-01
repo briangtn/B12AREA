@@ -2,7 +2,6 @@ package com.b12powered.area.api
 
 import android.content.Context
 import android.net.Uri
-import android.util.Log
 import androidx.core.net.toUri
 import com.android.volley.*
 import com.android.volley.toolbox.BasicNetwork

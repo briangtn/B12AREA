@@ -2,8 +2,6 @@ package com.b12powered.area
 
 import com.google.gson.Gson
 import com.google.gson.annotations.SerializedName
-import com.google.gson.internal.LinkedTreeMap
-import org.json.JSONObject
 
 interface JSONConvertable {
     fun toJSON(): String = Gson().toJson(this)

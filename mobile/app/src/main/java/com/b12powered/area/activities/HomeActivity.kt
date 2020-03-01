@@ -25,9 +25,9 @@ import kotlin.collections.ArrayList
  */
 class HomeActivity : AppCompatActivity() {
 
-    private lateinit var handler: Handler
-    private lateinit var currentUser: User
-    private var serviceList: ArrayList<Service> = ArrayList()
+    private lateinit var handler: Handler /*!< [handler] Handler -> used for refresh the current token of the user */
+    private lateinit var currentUser: User /*!< [currentUser] User -> contain the information about the current user connected */
+    private var serviceList: ArrayList<Service> = ArrayList() /*!< [serviceList] ArrayList<Service> -> contain all the service information */
 
     /**
      * Override method onCreate
@@ -119,7 +119,7 @@ class HomeActivity : AppCompatActivity() {
                                         supportFragmentManager.beginTransaction()
                                             .add(
                                                 R.id.list_layout,
-                                                ServiceUserFragment.newInstance(serviceList, service)
+                                                ServiceUserFragment.newInstance(service)
                                             )
                                             .commit()
                                         serviceList.add(service)

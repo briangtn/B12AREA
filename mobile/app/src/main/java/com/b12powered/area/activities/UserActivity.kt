@@ -22,8 +22,8 @@ import kotlinx.android.synthetic.main.activity_user.*
  */
 class UserActivity : AppCompatActivity() {
 
-    private var _faActivated: Boolean = false
-    private lateinit var _user: User
+    private var _faActivated: Boolean = false /*!< [_faActivated] Boolean -> true if 2fa activated false otherwise */
+    private lateinit var _user: User /*!< [_user] User -> contain information about the current user connected */
 
     /**
      * Override method onCreate
