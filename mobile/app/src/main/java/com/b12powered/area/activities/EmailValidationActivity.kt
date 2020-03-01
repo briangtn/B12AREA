@@ -61,7 +61,7 @@ class EmailValidationActivity : AppCompatActivity() {
         return if (sharedPreferences.contains(getString(R.string.api_url_key))) {
             sharedPreferences.getString(getString(R.string.api_url_key), null)!!
         } else {
-            System.getenv("API_HOST") ?: "https://dev.api.area.b12powered.com"
+            System.getenv("API_HOST")!!
         }
 
     }

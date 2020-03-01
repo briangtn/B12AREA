@@ -67,11 +67,11 @@ class ForgotPasswordActivity : AppCompatActivity() {
         val apiUrl = if (sharedPreferences.contains(getString(R.string.api_url_key))) {
             sharedPreferences.getString(getString(R.string.api_url_key), null)!!
         } else {
-            System.getenv("API_HOST") ?: "https://dev.api.area.b12powered.com"
+            System.getenv("API_HOST")!!
         }
 
         ApiClient(this)
-            .requestResetPassword(email, "https://" + (System.getenv("HOST") ?: "dev.area.b12powered.com") + "/reset_password?api_url=$apiUrl") { success, message ->
+            .requestResetPassword(email, "https://" + System.getenv("HOST")!! + "/reset_password?api_url=$apiUrl") { success, message ->
                 if (success) {
                     val intent = Intent(this, RequestResetPasswordValidationActivity::class.java)
                     finish()

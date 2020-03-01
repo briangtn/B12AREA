@@ -25,7 +25,12 @@ services:
       - server
 
   client_mobile:
-    build: ./mobile
+    build:
+      context: ./mobile
+      dockerfile: Dockerfile
+      args:
+        API_HOST: $API_HOST
+        HOST: $HOT
     volumes:
       - apk-vol:/data/apk
     env_file:

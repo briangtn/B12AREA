@@ -14,7 +14,7 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-        manifestPlaceholders = [HOST: System.getenv("HOST") ?: "dev.area.b12powered.com"]
+        manifestPlaceholders = [HOST: System.getenv("HOST")]
     }
     buildTypes {
         release {

@@ -248,7 +248,7 @@ sealed class ApiRoute(private var mainContext: Context) {
             return if (sharedPreferences.contains(mainContext.getString(R.string.api_url_key))) {
                     sharedPreferences.getString(mainContext.getString(R.string.api_url_key), null)!!
                 } else {
-                    System.getenv("API_HOST") ?: "https://dev.api.area.b12powered.com"
+                    System.getenv("API_HOST")!!
                 }
         }
 

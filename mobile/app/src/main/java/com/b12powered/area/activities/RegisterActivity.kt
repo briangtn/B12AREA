@@ -137,11 +137,11 @@ class RegisterActivity : AppCompatActivity() {
         val apiUrl = if (sharedPreferences.contains(getString(R.string.api_url_key))) {
             sharedPreferences.getString(getString(R.string.api_url_key), null)!!
         } else {
-            System.getenv("API_HOST") ?: "https://dev.api.area.b12powered.com"
+            System.getenv("API_HOST")!!
         }
 
         ApiClient(this)
-            .register(email, password, "https://" + (System.getenv("HOST") ?: "dev.area.b12powered.com") + "/email_validation?api_url=$apiUrl") { user, message ->
+            .register(email, password, "https://" + System.getenv("HOST")!! + "/email_validation?api_url=$apiUrl") { user, message ->
                 if (user != null) {
                     val intent = Intent(this, RegistrationValidationActivity::class.java)
                     finish()
