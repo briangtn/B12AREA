@@ -462,7 +462,21 @@ export class UserController {
         if (!currentUser) {
             throw new HttpErrors.NotFound('User not found')
         }
+        const services = currentUser.servicesList!;
 
+        for (const service of services) {
+            try {
+                const module = await import(`../area-services/${service}/controller`);
+                const controller = module.default;
+                if (!controller) {
+                    continue;
+                }
+                if (controller.logout) {
+                    await controller.logout(currentUser.id, this.ctx);
+                }
+            // eslint-disable-next-line no-empty
+            } catch(e) {}
+        }
         await this.userRepository.deleteById(id);
         return "OK";
     }

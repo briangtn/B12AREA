@@ -32,6 +32,10 @@ export default class TwitterServiceController {
         }
     }
 
+    static async logout(userID: string, ctx: Context) {
+        await TwitterHelper.unsubscribeWebhook(userID, ctx);
+    }
+
     static async login(params: LoginObject) {
         // eslint-disable-next-line @typescript-eslint/no-misused-promises,no-async-promise-executor
         return new Promise<string | null>(async (resolve, reject) => {
