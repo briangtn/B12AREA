@@ -109,31 +109,18 @@ export class AreaActionController {
         }
         if (!user)
             throw new HttpErrors.InternalServerError('Failed to resolve user');
+
+        const created = await this.areaRepository.action(id).create(action);
+
         let controller;
         try {
             controller = await this.resolveActionController(action.serviceAction);
         } catch (e) {
             throw new HttpErrors.BadRequest('Action not found');
         }
-        let result : OperationStatus;
-        try {
-            result = await controller.createAction(user.id!, action.options, this.ctx);
-        } catch (e) {
-            throw new HttpErrors.BadRequest('Failed to create action in service');
-        }
-        if (!result.success) {
-            throw new HttpErrors.BadRequest(result.error);
-        }
-        action.options = result.options;
-        action.data = {};
-        if (result.data)
-            action.data = result.data;
-
-        const created = await this.areaRepository.action(id).create(action);
-
         if (controller.createActionFinished) {
             try {
-                result = await controller.createActionFinished(created.id!, user.id!, action.options, this.ctx);
+                const result = await controller.createActionFinished(created.id!, user.id!, action.options, this.ctx);
                 if (!result.success)
                     throw new HttpErrors.BadRequest(result.error);
             } catch (e) {
@@ -175,27 +162,14 @@ export class AreaActionController {
         try {
             controller = await this.resolveActionController(area.action.serviceAction);
         } catch (e) {
-            // Dont put a NotFound error, the type of action is not found (not the entity)
             throw new HttpErrors.BadRequest('Action not found');
         }
-        let result : OperationStatus;
-        try {
-            result = await controller.updateAction(area.action.id!, area.action.options, action.options, this.ctx);
-        } catch (e) {
-            throw new HttpErrors.BadRequest('Failed to update action in service');
-        }
-        if (!result.success) {
-            throw new HttpErrors.BadRequest(result.error);
-        }
-        action.options = result.options;
-
         await this.areaRepository.action(id).patch(action, where);
 
         const updated = await this.areaRepository.action(id).get();
-
         if (controller.updateActionFinished) {
             try {
-                result = await controller.updateActionFinished(updated.id!, (await this.actionRepository.getActionOwnerID(updated.id!))!, action.options, this.ctx);
+                const result = await controller.updateActionFinished(updated.id!, (await this.actionRepository.getActionOwnerID(updated.id!))!, action.options, this.ctx);
                 if (!result.success)
                     throw new HttpErrors.BadRequest(result.error);
             } catch (e) {
@@ -224,22 +198,6 @@ export class AreaActionController {
 
         if (!area.action)
             throw new HttpErrors.BadRequest('Area does not have an action');
-
-        let controller;
-        try {
-            controller = await this.resolveActionController(area.action.serviceAction);
-        } catch (e) {
-            throw new HttpErrors.NotFound('Action not found');
-        }
-        let result : OperationStatus;
-        try {
-            result = await controller.deleteAction(area.action.id!, area.action.options, this.ctx);
-        } catch (e) {
-            throw new HttpErrors.BadRequest('Failed to update action in service');
-        }
-        if (!result.success) {
-            throw new HttpErrors.BadRequest(result.error);
-        }
 
         return this.areaRepository.action(id).delete(where);
     }

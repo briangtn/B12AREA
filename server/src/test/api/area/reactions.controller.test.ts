@@ -312,7 +312,7 @@ describe('/areas/{id}/reactions', () => {
         });
 
         const patchReaction = {
-            serviceReaction: "example.A.examplePatched"
+            options: {a: "OPTION"}
         } as Reaction;
 
         it('Should return 200 with the patched reaction', async () => {
@@ -324,8 +324,20 @@ describe('/areas/{id}/reactions', () => {
                 .expect(200);
             const body = res.body;
             expect(body).to.containDeep({id: reaction.id!.toString()});
-            expect(body).to.containDeep({serviceReaction: "example.A.examplePatched"});
+            expect(body).to.containDeep({options: {a: "OPTION"}});
             expect(body).to.containDeep({areaId: area.id!.toString()});
+            expect((await reactionRepo.count()).count).to.be.equal(1);
+        });
+
+        it ('Should return a 400 Bad Request when changing the serviceReaction', async () => {
+            expect((await reactionRepo.count()).count).to.be.equal(1);
+            await helper.client
+                .patch(`/areas/${area.id}/reaction/${reaction.id}`)
+                .set('Authorization', 'Bearer ' + users[0].token)
+                .send({
+                    serviceReaction: "example.R.examplePatched"
+                })
+                .expect(400);
             expect((await reactionRepo.count()).count).to.be.equal(1);
         });
 
