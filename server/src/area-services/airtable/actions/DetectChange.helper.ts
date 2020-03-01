@@ -1,7 +1,8 @@
 import {Context, inject} from "@loopback/context";
 import {OperationStatus} from "../../../services-interfaces";
 import {AreaService} from "../../../services";
-import {AirtableHelper} from "../Airtable.helper";
+import {AirtableHelper, DiffHandler} from "../Airtable.helper";
+import {Record} from "../interfaces";
 
 export enum AIRTABLE_PREFIX_ENUM {
     UPDATED = "updated",
@@ -10,8 +11,13 @@ export enum AIRTABLE_PREFIX_ENUM {
 }
 
 export default class DetectChangesHelper {
+    static readonly diffCheckers = new Map<string, DiffHandler>([
+        [AIRTABLE_PREFIX_ENUM.CREATED, DetectChangesHelper.diffCheckerCreated],
+        [AIRTABLE_PREFIX_ENUM.UPDATED, DetectChangesHelper.diffCheckerUpdated],
+        [AIRTABLE_PREFIX_ENUM.DELETED, DetectChangesHelper.diffCheckerDeleted]
+    ]);
 
-    private static getPrefix(type: AIRTABLE_PREFIX_ENUM) : string {
+    static getPrefix(type: AIRTABLE_PREFIX_ENUM) : string {
         return `${AirtableHelper.AIRTABLE_PULLING_PREFIX}_${type}`
     }
 
@@ -58,5 +64,17 @@ export default class DetectChangesHelper {
         } catch (e) {
             return { success: false, error: e };
         }
+    }
+
+    private static diffCheckerCreated(oldEntry: Record[], newEntry: Record[]) : Record[] {
+        return [];
+    }
+
+    private static diffCheckerUpdated(oldEntry: Record[], newEntry: Record[]) : Record[] {
+        return [];
+    }
+
+    private static diffCheckerDeleted(oldEntry: Record[], newEntry: Record[]) : Record[] {
+        return [];
     }
 }

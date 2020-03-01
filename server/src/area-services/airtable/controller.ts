@@ -4,6 +4,7 @@ import {Context} from "@loopback/context";
 import {ExchangeCodeGeneratorManager} from "../../services";
 import {UserRepository} from "../../repositories";
 import {AirtableHelper} from "./Airtable.helper";
+import DetectChangesHelper, {AIRTABLE_PREFIX_ENUM} from "./actions/DetectChange.helper";
 
 export default class ServiceController {
     static serviceName = 'airtable';
@@ -29,19 +30,19 @@ export default class ServiceController {
         return params.redirectUrl + '?code=' + codeParam;
     }
 
-    static async getConfig(): Promise<ServiceConfig> {
-        return config;
-    }
-
-    static async processPullingJob(data: PullingJobObject, ctx: Context): Promise<PullingData|null> {
+    static async processPullingJob(data: PullingJobObject, ctx: Context): Promise<PullingData | null> {
         try {
-            if (data.name.startsWith(AirtableHelper.AIRTABLE_PULLING_PREFRIX_FIELD_UPDATE)) {
-                return await AirtableHelper.processFieldUpdatePooling(data, ctx);
-            } else {
-                return null;
+            for (const prefix in AIRTABLE_PREFIX_ENUM) {
+                if (data.name.startsWith(DetectChangesHelper.getPrefix(prefix as AIRTABLE_PREFIX_ENUM)))
+                    return await AirtableHelper.processFieldUpdatePooling(data, ctx, DetectChangesHelper.diffCheckers.get(prefix as AIRTABLE_PREFIX_ENUM));
             }
         } catch (e) {
             return null;
         }
+        return null;
+    }
+
+    static async getConfig(): Promise<ServiceConfig> {
+        return config;
     }
 }
