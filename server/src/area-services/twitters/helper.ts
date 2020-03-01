@@ -181,7 +181,6 @@ export class TwitterHelper {
 
             if (!oauthObject)
                 return reject({error: 'User not found'});
-            console.log(oauthObject);
             request.post({
                 url: 'https://api.twitter.com/1.1/account_activity/all/develop/subscriptions.json',
                 oauth: oauthObject
