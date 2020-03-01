@@ -5,6 +5,9 @@ interface Props {}
 interface State {}
 
 class ClientAPK extends Component<Props, State> {
+    /**
+     * Start the download of the APK
+     */
     componentDidMount(): void {
         fetch('apk/area.apk')
         .then(response => {

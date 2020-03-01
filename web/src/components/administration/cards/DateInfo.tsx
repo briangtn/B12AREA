@@ -27,6 +27,9 @@ const styles = (theme: Theme) => createStyles({
     }
 });
 
+/**
+ * Card who displays the current day and hour
+ */
 class DateInfo extends Component<Props, State> {
     render() {
         const { classes } = this.props;

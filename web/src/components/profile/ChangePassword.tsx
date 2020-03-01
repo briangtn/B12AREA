@@ -37,14 +37,28 @@ const styles = (theme: Theme) => createStyles({
         marginTop: '20px'
     }
 });
+
+/**
+ * React component to handle the password
+ * change of the user
+ */
 class ChangePassword extends Component<Props, State> {
     state: State = {
         newPassword: '',
         newPasswordConfirmation: '',
         newPasswordDontMatch: false,
         validationMessage: ''
-    }
+    };
 
+    /**
+     * Function called when the user type inside one of
+     * the two TextField
+     *
+     * Verification made if the password and the confirm password
+     * are the same
+     *
+     * @param e event triggered, used to get the id and the value
+     */
     onChange: React.ChangeEventHandler<HTMLInputElement> = (e) => {
         const { id, value } = e.currentTarget;
         const { newPassword, newPasswordConfirmation } = this.state;
@@ -60,6 +74,12 @@ class ChangePassword extends Component<Props, State> {
         }
     };
 
+    /**
+     * Function called when the user press the button to change
+     * his password.
+     *
+     * @param e event triggered
+     */
     onSubmit = (e: React.FormEvent) => {
         const { api_url, token } = this.props;
         const { newPassword, newPasswordConfirmation } = this.state;
@@ -83,9 +103,15 @@ class ChangePassword extends Component<Props, State> {
         });
     };
 
+    /**
+     * Function called when the user press enter inside a
+     * TextField
+     *
+     * @param e event triggered
+     */
     keyPress = (e: any) => {
         if (e.keyCode === 13) {
-            const toClick: HTMLElement | null = document.getElementById('signin')
+            const toClick: HTMLElement | null = document.getElementById('signin');
 
             if (toClick)
                 toClick.click();

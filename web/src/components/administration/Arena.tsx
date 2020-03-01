@@ -4,9 +4,14 @@ interface Props {}
 
 interface State {}
 
+/**
+ * React component who opens a new window on ARENA
+ * if the environment variable exists.
+ */
 class Arena extends Component<Props, State> {
     componentDidMount() {
-        window.open(process.env.REACT_APP_ARENA_URL, '_blank');
+        if (process.env.REACT_APP_ARENA_URL)
+            window.open(process.env.REACT_APP_ARENA_URL, '_blank');
     }
 
     render() {

@@ -227,7 +227,7 @@ class AdministrationPanel extends Component<Props, State> {
                     <Divider />
                     <List>
                         {routes.map((route, index) => (
-                            <div>
+                            <div key={index}>
                                 {index === routes.length - 1 ? <Divider /> : ''}
                                 <ListItem button key={index} onClick={this.onClick.bind(this, index)}>
                                     <ListItemIcon>{route.icon}</ListItemIcon>

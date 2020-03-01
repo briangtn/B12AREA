@@ -98,13 +98,16 @@ const mapStateToProps = (state: any) => {
     return { normalToken: state.token, adminToken: state.adminToken };
 };
 
-
 const styles = (theme: Theme) => createStyles({
     table: {
         minWidth: 650,
     }
 });
 
+/**
+ * React component where the table of users and
+ * the detail of a specific user
+ */
 class Users extends Component<Props, State> {
     state: State = {
         users: [],
@@ -214,6 +217,7 @@ class Users extends Component<Props, State> {
             </div>
         );
     };
+
     /**
      * Function called when the admin press the unpersonate button
      *

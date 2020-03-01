@@ -79,6 +79,11 @@ class AddServices extends Component<Props, State> {
 
     // Handle the confirmation
 
+    /**
+     * Function called when the user register his service
+     *
+     * @param e event triggered
+     */
     handleRegisterService = (e: any) => {
         const { api_url, token } = this.props;
         const { selectedService } = this.state;

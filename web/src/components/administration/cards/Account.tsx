@@ -28,11 +28,17 @@ const styles = (theme: Theme) => createStyles({
     }
 });
 
+/**
+ * Account Card who displays the number of registered users
+ */
 class Account extends Component<Props, State> {
     state: State = {
         accountNumber: 0
     };
 
+    /**
+     * Fetch the number of registered users
+     */
     componentDidMount() {
         const { apiUrl, token } = this.props;
 
