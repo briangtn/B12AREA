@@ -3,7 +3,6 @@ package com.b12powered.area.activities
 import android.content.Intent
 import android.os.Bundle
 import android.widget.TextView
-import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import com.b12powered.area.*
 import com.b12powered.area.api.ApiClient
@@ -53,11 +52,6 @@ class AreaCreationActivity : AppCompatActivity() {
             .add(R.id.create_area_layout, CreateAreaFragment.newInstance())
             .commit()
 
-        onBackPressedDispatcher.addCallback(object : OnBackPressedCallback(true) {
-            override fun handleOnBackPressed() {
-                finishArea()
-            }
-        })
         if (jsonArea !== null) {
             currentArea = jsonArea.toObject()
             nextStep(currentArea, null, AreaCreationStatus.ReactionAdded)
@@ -120,8 +114,16 @@ class AreaCreationActivity : AppCompatActivity() {
      */
     fun finishArea() {
         val intent = Intent(this, ServiceInformationActivity::class.java)
-        intent.putExtra("serviceName", service.name)
-        intent.putExtra("displayName", service.displayName)
+        intent.putExtra("serviceName", if (::service.isInitialized) {
+            service.name
+        } else {
+            currentService.name
+        })
+        intent.putExtra("displayName", if (::service.isInitialized) {
+            service.displayName
+        } else {
+            currentService.displayName
+        })
         finish()
         startActivity(intent)
     }
@@ -139,7 +141,7 @@ class AreaCreationActivity : AppCompatActivity() {
      * Set current service, used by children fragments
      */
     fun setCurrentService(newService: Service) {
-        service = newService
+        service = currentService
         currentService = newService
     }
 }
