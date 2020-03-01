@@ -5,7 +5,7 @@ import {createStyles, Theme, withStyles} from "@material-ui/core";
 import { connect } from 'react-redux';
 
 import NavigationBar from "../NavigationBar";
-import Translator from "../Translator";
+import Translator from "../utils/Translator";
 import Grid from '@material-ui/core/Grid';
 
 // Expansion Panel Utils
@@ -45,7 +45,7 @@ import HtmlTooltip from "./HtmlTooltip";
 import { setToken } from "../../actions/api.action";
 import Cookies from "universal-cookie";
 import ArrowBackIosIcon from "@material-ui/icons/ArrowBackIos";
-import Alert from "../Alert";
+import Alert from "../utils/Alert";
 import Snackbar from "@material-ui/core/Snackbar";
 
 const cookies = new Cookies();

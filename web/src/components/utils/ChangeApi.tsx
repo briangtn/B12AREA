@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 
 import { withStyles, createStyles, Theme } from "@material-ui/core";
 
-import { changeApiUrl } from "../actions/api.action";
+import { changeApiUrl } from "../../actions/api.action";
 
 import TextField from "@material-ui/core/TextField";
 import Button from "@material-ui/core/Button";

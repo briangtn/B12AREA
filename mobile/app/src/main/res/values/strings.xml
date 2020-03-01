@@ -77,4 +77,6 @@
     <string name="already_visited">already_visited</string>
     <string name="home_title">My services</string>
     <string name="search_title">Discover</string>
+    <string name="area_enabled">Area enabled</string>
+    <string name="area_disabled">Area disabled</string>
 </resources>

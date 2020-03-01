@@ -2,8 +2,8 @@ import { Component } from 'react';
 
 import { connect } from 'react-redux';
 
-import french from "../translation/french.translation";
-import english from "../translation/english.translation";
+import french from "../../translation/french.translation";
+import english from "../../translation/english.translation";
 
 interface Props {
     language: string,

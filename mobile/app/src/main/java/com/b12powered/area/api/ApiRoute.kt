@@ -204,6 +204,22 @@ sealed class ApiRoute(private var mainContext: Context) {
     data class DeleteReaction(var areaId: String, var reactionId: String, var context: Context) : ApiRoute(context)
 
     /**
+     * Data class for [EnableArea] route
+     *
+     * @param areaId The area id
+     * @param context The context of the call
+     */
+    data class EnableArea(var areaId: String, var context: Context) : ApiRoute(context)
+
+    /**
+     * Data class for [DisableArea] route
+     *
+     * @param areaId The area id
+     * @param context The context of the call
+     */
+    data class DisableArea(var areaId: String, var context: Context) : ApiRoute(context)
+
+    /**
      * Timeout of the api call
      */
     val timeout: Int
@@ -271,6 +287,8 @@ sealed class ApiRoute(private var mainContext: Context) {
                 is AddReaction -> "areas/${areaId}/reactions"
                 is DeleteAction -> "areas/${areaId}/action"
                 is DeleteReaction -> "areas/${areaId}/reactions/${reactionId}"
+                is EnableArea -> "areas/enable/${areaId}"
+                is DisableArea -> "areas/disable/${areaId}"
             }}"
         }
 
@@ -302,6 +320,8 @@ sealed class ApiRoute(private var mainContext: Context) {
                 is AddReaction -> Request.Method.POST
                 is DeleteAction -> Request.Method.DELETE
                 is DeleteReaction -> Request.Method.DELETE
+                is EnableArea -> Request.Method.PATCH
+                is DisableArea -> Request.Method.PATCH
                 else -> Request.Method.GET
             }
         }
@@ -442,6 +462,12 @@ sealed class ApiRoute(private var mainContext: Context) {
                     hashMapOf(Pair("Authorization", "Bearer $token"))
                 }
                 is DeleteReaction -> {
+                    hashMapOf(Pair("Authorization", "Bearer $token"))
+                }
+                is EnableArea -> {
+                    hashMapOf(Pair("Authorization", "Bearer $token"))
+                }
+                is DisableArea -> {
                     hashMapOf(Pair("Authorization", "Bearer $token"))
                 }
                 else -> hashMapOf()

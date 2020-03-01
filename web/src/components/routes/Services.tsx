@@ -7,18 +7,18 @@ import Typography from "@material-ui/core/Typography";
 
 // Components
 
-import NavigationBar from "../components/NavigationBar";
-import AddServices from "../components/services/AddServices";
-import Translator from "../components/Translator";
-import Service from "../components/services/Service";
+import NavigationBar from "../NavigationBar";
+import AddServices from "../services/AddServices";
+import Translator from "../utils/Translator";
+import Service from "../services/Service";
 
-import { setServices } from "../actions/services.action";
+import { setServices } from "../../actions/services.action";
 
 // Interface
 
-import { IService } from '../interfaces/IService.interface';
-import IAbout from "../interfaces/IAbout.interface";
-import {setToken} from "../actions/api.action";
+import { IService } from '../../interfaces/IService.interface';
+import IAbout from "../../interfaces/IAbout.interface";
+import {setToken} from "../../actions/api.action";
 import Cookies from "universal-cookie";
 
 const cookies = new Cookies();

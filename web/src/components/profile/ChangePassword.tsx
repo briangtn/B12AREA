@@ -7,7 +7,7 @@ import { withStyles, createStyles, Theme } from "@material-ui/core";
 import TextField from "@material-ui/core/TextField";
 import Button from "@material-ui/core/Button";
 
-import Translator from "../Translator";
+import Translator from "../utils/Translator";
 
 interface Props {
     api_url: string,
