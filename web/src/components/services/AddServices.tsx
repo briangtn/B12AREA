@@ -90,6 +90,8 @@ class AddServices extends Component<Props, State> {
         const redirectURL = `${window.location.origin}/code_validator`;
         const payload = { redirectURL: redirectURL };
 
+        if (!selectedService)
+            return;
         fetch(`${api_url}/services/login/${selectedService}?redirectURL=${redirectURL}`, {
             method: 'POST',
             headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
