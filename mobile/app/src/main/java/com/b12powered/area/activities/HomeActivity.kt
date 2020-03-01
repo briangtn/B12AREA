@@ -119,7 +119,7 @@ class HomeActivity : AppCompatActivity() {
                                         supportFragmentManager.beginTransaction()
                                             .add(
                                                 R.id.list_layout,
-                                                ServiceUserFragment.newInstance(serviceList, service)
+                                                ServiceUserFragment.newInstance(service)
                                             )
                                             .commit()
                                         serviceList.add(service)
