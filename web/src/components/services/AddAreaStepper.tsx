@@ -571,6 +571,11 @@ class AddAreaStepper extends Component<Props, State> {
                         this.props.closeFunction();
                         if (this.props.needToRefresh)
                             window.location.reload();
+                    } else {
+                        fetch(`${api_url}/areas/${id}`, {
+                            method: 'DELETE',
+                            headers: {'Authorization': `Bearer ${token}`}
+                        }).then(r => r.json());
                     }
                 });
         });
@@ -661,7 +666,7 @@ class AddAreaStepper extends Component<Props, State> {
                             >
                                 {(this.props.language === "en") ? 'Back' : 'Retour'}
                             </Button>
-                            <Button variant="contained" color="primary" onClick={(activeStep === steps.length - 1) ? this.createAREA : this.handleNextStep}>
+                            <Button disabled={!this.state.areaName} variant="contained" color="primary" onClick={(activeStep === steps.length - 1) ? this.createAREA : this.handleNextStep}>
                                 {activeStep === steps.length - 1 ? ((this.props.language === 'en') ? 'Finish' : 'Valider') : ((this.props.language === 'en') ? 'Next' : 'Suivant')}
                             </Button>
                         </div>
