@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 
 import { connect } from 'react-redux';
 
-import { setToken } from "../actions/api.action";
+import { setToken } from "../../actions/api.action";
 
 import jwt_decode from 'jwt-decode';
 import Cookies from "universal-cookie";

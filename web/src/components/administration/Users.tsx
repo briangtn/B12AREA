@@ -15,7 +15,7 @@ import Typography from '@material-ui/core/Typography';
 
 import Button from '@material-ui/core/Button';
 
-import ChipRole from '../ChipRole';
+import ChipRole from '../utils/ChipRole';
 
 import DetailsIcon from '@material-ui/icons/Details';
 import ArrowBackIosIcon from '@material-ui/icons/ArrowBackIos';
@@ -36,7 +36,7 @@ import Select from '@material-ui/core/Select';
 
 import Grid from '@material-ui/core/Grid';
 
-import Alert from '../Alert';
+import Alert from '../utils/Alert';
 import {setAdminToken, setToken} from "../../actions/api.action";
 import Cookies from "universal-cookie";
 import TextField from "@material-ui/core/TextField";
