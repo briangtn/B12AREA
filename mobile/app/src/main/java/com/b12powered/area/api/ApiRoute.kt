@@ -136,6 +136,13 @@ sealed class ApiRoute(private var mainContext: Context) {
     data class LoginService(var service: String, var redirectUrl: String, var context: Context) : ApiRoute(context)
 
     /**
+     * Data class for [GetAreas] route
+     *
+     * @param context The context of the call
+     */
+    data class GetAreas(var context: Context) : ApiRoute(context)
+
+    /**
      * Data class for [RefreshToken] route
      *
      * @param context The context of the call
@@ -256,6 +263,7 @@ sealed class ApiRoute(private var mainContext: Context) {
                 is PatchUser -> "users/me"
                 is AboutJson -> "about.json"
                 is LoginService -> "services/login/${service}"
+                is GetAreas -> "areas"
                 is RefreshToken -> "users/refreshToken"
                 is CreateArea -> "areas"
                 is DeleteArea -> "areas/${areaId}"
@@ -263,7 +271,6 @@ sealed class ApiRoute(private var mainContext: Context) {
                 is AddReaction -> "areas/${areaId}/reactions"
                 is DeleteAction -> "areas/${areaId}/action"
                 is DeleteReaction -> "areas/${areaId}/reactions/${reactionId}"
-                else -> ""
             }}"
         }
 
@@ -330,7 +337,10 @@ sealed class ApiRoute(private var mainContext: Context) {
                     hashMapOf(Pair("token", token), Pair("password", password))
                 }
                 is PatchUser -> {
-                    hashMapOf(Pair("password", user.password), Pair("disable2FA", (!user.twoFactorAuthenticationEnabled)))
+                    if (user.password.isEmpty())
+                        hashMapOf<String, Any>(Pair("disable2FA", (!user.twoFactorAuthenticationEnabled)))
+                    else
+                        hashMapOf<String, Any>(Pair("password", user.password))
                 }
                 is CreateArea -> {
                     hashMapOf(Pair("name", name), Pair("enabled", enabled))
@@ -369,6 +379,9 @@ sealed class ApiRoute(private var mainContext: Context) {
                 is LoginService -> {
                     hashMapOf(Pair("redirectURL", redirectUrl))
                 }
+                is GetAreas -> {
+                    hashMapOf(Pair("filter", "%7B%22include%22%3A%20%5B%7B%22relation%22%3A%22action%22%7D%2C%7B%22relation%22%3A%22reactions%22%7D%5D%7D"))
+                }
                 else -> hashMapOf()
             }
         }
@@ -405,6 +418,9 @@ sealed class ApiRoute(private var mainContext: Context) {
                     hashMapOf(Pair("Authorization", "Bearer $token"))
                 }
                 is LoginService -> {
+                    hashMapOf(Pair("Authorization", "Bearer $token"))
+                }
+                is GetAreas -> {
                     hashMapOf(Pair("Authorization", "Bearer $token"))
                 }
                 is RefreshToken -> {

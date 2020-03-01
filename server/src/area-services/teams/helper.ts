@@ -219,7 +219,7 @@ export class TeamsHelper {
                 for (const chatMessage of data.value) {
                     if (new Date(chatMessage.createdDateTime) >= new Date(actionData.lastPulled)) {
                         if (actionOptions.mustMatch) {
-                            if (new RegExp(actionOptions.mustMatch).test(chatMessage.body.content)) {
+                            if (new RegExp(actionOptions.mustMatch, 'gs').test(chatMessage.body.content)) {
                                 diff.push(chatMessage);
                             }
                         } else {
