@@ -1,94 +1,73 @@
 import React, { Component } from 'react';
 
-import { withStyles, createStyles, Theme } from "@material-ui/core";
-
-import Card from '@material-ui/core/Card';
-import CardHeader from '@material-ui/core/CardHeader';
-import Avatar from '@material-ui/core/Avatar';
-import { red, green } from '@material-ui/core/colors';
-import Clock from "../utils/Clock";
-
-import PersonIcon from '@material-ui/icons/Person';
-import AccessTimeIcon from '@material-ui/icons/AccessTime';
-
 import Grid from "@material-ui/core/Grid";
-import Typography from "@material-ui/core/Typography";
-import CardContent from "@material-ui/core/CardContent";
+
+import DateInfo from "./cards/DateInfo";
+import IJob from "../../interfaces/IJob.interface";
+import ReactionQueue from "./cards/ReactionQueue";
+import PullingQueue from "./cards/PullingQueue";
+import DelayedQueue from "./cards/DelayedQueue";
 
 interface Props {
     apiUrl: string,
     token: string,
-    classes: {
-        root: string,
-        avatar: string
-    }
 }
 
 interface State {
-    accountNumber: number
+    jobs: { reactionQueue: IJob, pullingQueue: IJob, delayedQueue: IJob }
 }
 
-const styles = (theme: Theme) => createStyles({
-    root: {
-        maxWidth: 345,
-    },
-    avatar: {
-        backgroundColor: red[500],
-    },
-});
-
 class Summary extends Component<Props, State> {
+    private timerId: any = null;
+
     state: State = {
-        accountNumber: 0
+        jobs: {
+            reactionQueue: { waiting: 0, active: 0, completed: 0, failed: 0, delayed: 0 },
+            pullingQueue: { waiting: 0, active: 0, completed: 0, failed: 0, delayed: 0 },
+            delayedQueue: { waiting: 0, active: 0, completed: 0, failed: 0, delayed: 0 }
+        }
     };
 
-    componentDidMount() {
+    fetchJobStatus = () => {
         const { apiUrl, token } = this.props;
 
-        fetch(`${apiUrl}/users`, {
+        fetch(`${apiUrl}/admin/workers/jobs/status`, {
             headers: { 'Authorization': `Bearer ${token}` }
         })
-        .then(res => res.json())
-        .then((data) => {
-            this.setState({ accountNumber: data.length });
-        })
+            .then(res => res.json())
+            .then((data) => {
+                this.setState({ jobs: data });
+            })
+    };
+
+    componentDidMount(): void {
+        this.fetchJobStatus();
+        this.timerId = setInterval(() => {
+            this.fetchJobStatus();
+        },  5000);
+    }
+
+    componentWillUnmount(): void {
+        clearInterval(this.timerId);
     }
 
     render() {
-        const { classes } = this.props;
-        const currentDate: Date = new Date();
-        const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-        const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+        const { jobs } = this.state;
 
         return (
             <div>
                 <Grid container spacing={3}>
-                    <Grid item xs={4}>
-                        <Card className={classes.root}>
-                            <CardHeader
-                                avatar={
-                                    <Avatar aria-label="recipe" className={classes.avatar}>
-                                        <PersonIcon />
-                                    </Avatar>
-                                }
-                                title={`${this.state.accountNumber} accounts registered`}
-                            />
-                        </Card>
+                    <Grid item xs="auto">
+                        <DateInfo />
                     </Grid>
-                    <Grid item xs={4}>
-                        <Card className={classes.root}>
-                            <CardHeader
-                                avatar={
-                                    <Avatar aria-label="recipe" style={{backgroundColor: green[500]}}>
-                                        <AccessTimeIcon />
-                                    </Avatar>
-                                }
-                                title={`${days[currentDate.getDay()]} ${months[currentDate.getMonth()]} ${currentDate.getFullYear()}`}
-                            />
-                            <CardContent style={{ textAlign: 'center' }}>
-                                <Typography variant="h2" gutterBottom><Clock /></Typography>
-                            </CardContent>
-                        </Card>
+                    <Grid item xs="auto">
+                        <ReactionQueue info={jobs.reactionQueue} />
+                    </Grid>
+                    <Grid item xs="auto">
+                        <PullingQueue info={jobs.pullingQueue} />
+                    </Grid>
+                    <Grid item xs="auto">
+                        <DelayedQueue info={jobs.delayedQueue} />
                     </Grid>
                 </Grid>
             </div>
@@ -96,4 +75,4 @@ class Summary extends Component<Props, State> {
     }
 }
 
-export default withStyles(styles)(Summary);
+export default Summary;
