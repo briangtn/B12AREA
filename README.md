@@ -47,11 +47,9 @@ The WEB front uses the [web](./web) folder to be build.
 
 The Mobile front uses the [mobile](./mobile) folder to be build.
 
-## UML
-You can generate uml diagram from *.puml files by using the plantuml command.
-```shell script
-plantuml ./path/to/file.puml
-```
+## Example
+
+You can find a live version of this project on [https://area.b12powered.com](https://area.b12powered.com).
 
 # Authors
 
