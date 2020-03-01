@@ -1,0 +1,34 @@
+{
+  "displayName": "Field inserted",
+  "description": "This action is triggered when a field in base is inserted",
+  "configSchema": [
+    {
+      "name": "apiKey",
+      "description": "The User APIKEY",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "baseId",
+      "description": "The ID of the base into which the table you want to watch is",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "tableId",
+      "description": "The table of the base to watch",
+      "type": "string",
+      "required": true
+    }
+  ],
+  "placeholders": [
+    {
+      "name": "NbFields",
+      "description": "The number of fields affected"
+    },
+    {
+      "name": "Fields[i]",
+      "description": "The field at the index i"
+    }
+  ]
+}
