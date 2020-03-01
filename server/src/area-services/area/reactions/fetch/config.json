@@ -6,7 +6,8 @@
       "name": "method",
       "description": "The call method must be GET / POST / DELETE / PUT / PATCH",
       "type": "string",
-      "required": true
+      "required": true,
+      "ignorePlaceholders": true
     },
     {
       "name": "url",
