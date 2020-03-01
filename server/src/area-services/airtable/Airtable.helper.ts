@@ -3,23 +3,6 @@ import {Context} from "@loopback/context";
 import Airtable from 'airtable'
 import {BaseConfig, Record} from "./interfaces";
 import {ActionRepository} from "../../repositories";
-import {isDeepStrictEqual} from "util";
-
-function diffCheckerCreated(oldRecords: Record[], newRecords: Record[]) : Record[] {
-    const diff: Record[] = [];
-
-    for (const newRecord of newRecords) {
-        const oldVersion: Record | undefined = oldRecords.find((value: Record) => {
-            return value.id === newRecord.id;
-        });
-        if (oldVersion === undefined)
-            diff.push(newRecord);
-        else if (!isDeepStrictEqual(newRecord, oldVersion)) {
-            diff.push(newRecord);
-        }
-    }
-    return diff;
-}
 
 export type DiffHandler = (oldEntry: Record[], newEntry: Record[]) => Record[]
 
@@ -27,35 +10,28 @@ export class AirtableHelper {
     public static readonly serviceName = 'airtable';
     public static readonly AIRTABLE_PULLING_PREFIX = `${AirtableHelper.serviceName}_pulling`;
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    static createPlaceholderWithObject(name: string, object: any) : {name: string, value: string} {
+        const stringifiedObject = JSON.stringify(JSON.stringify(object));
+        const cleanedObject = stringifiedObject.substring(1, stringifiedObject.length-1);
+
+        return {
+            name: `${name}`,
+            value: cleanedObject
+        };
+    }
+
     static createFieldsPlaceholders(array: Record[], placeholderName: string): Array<{name: string, value: string}> {
         const ret: Array<{name: string, value: string}> = [];
 
         for (let i = 0; i < array.length; ++i) {
-            const placeholder = {name: `${placeholderName}[${i}]`, value: JSON.stringify(JSON.stringify(array[i]))};
-
-            placeholder.value = placeholder.value.substring(1, placeholder.value.length-1);
-            ret.push(placeholder);
+            ret.push(this.createPlaceholderWithObject(`${placeholderName}[${i}]`, array[i]));
         }
         ret.push({name: `Nb${placeholderName}`, value: `${ret.length}`});
         return ret;
     }
 
-    private static checkDiff(oldEntries: Record[], newEntries: Record[],) : Record[] {
-        const diff : Record[] = [];
-
-        const deletedUpdated = oldEntries.filter((entry) => !newEntries.includes(entry));
-        const createdUpdated = newEntries.filter((entry) => !oldEntries.includes(entry));
-        const deleted = deletedUpdated.filter((entry) => !createdUpdated.includes(entry));
-        const created = createdUpdated.filter((entry) => !deletedUpdated.includes(entry));
-        const updated = createdUpdated.filter((entry) => deletedUpdated.includes(entry));
-
-        console.log("Deleted", deleted);
-        console.log("Updated", updated);
-        console.log("Created", created);
-        return diff;
-    }
-
-    static async processFieldUpdatePooling(data: PullingJobObject, ctx: Context, diffChecker?: DiffHandler) : Promise<PullingData | null> {
+    static async processBaseUpdatePooling(data: PullingJobObject, ctx: Context, diffChecker?: DiffHandler) : Promise<PullingData | null> {
         if (diffChecker === undefined)
             throw new Error("Unexpected type of diffchecker");
         const actionRepository: ActionRepository = await ctx.get('repositories.ActionRepository');
@@ -77,7 +53,15 @@ export class AirtableHelper {
 
         if (diff.length !== 0) {
             console.log(diff);
-            const placeholders = this.createFieldsPlaceholders(diff, "Fields");
+            const fieldsPlaceholder = {
+                name: "Fields",
+                value: JSON.stringify(JSON.stringify(diff))
+            };
+            fieldsPlaceholder.value = fieldsPlaceholder.value.substring(1, fieldsPlaceholder.value.length-1);
+            const placeholders = [
+                ...this.createFieldsPlaceholders(diff, "Fields"),
+                AirtableHelper.createPlaceholderWithObject("Fields", diff)
+            ];
             console.debug("Placeholders", placeholders);
             await ActionFunction({
                 actionId: actionId,

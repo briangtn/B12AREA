@@ -15,16 +15,8 @@ export default class ReactionController {
             ...{entryToCreate: {}}
         };
 
-        console.log();
-        console.log();
-        console.log();
-        console.log();
         console.log(dataReplaced);
-        console.log();
-        console.log();
-        console.log();
         dataParsed.entryToCreate = JSON.parse(dataReplaced);
-        console.log(dataParsed.entryToCreate);
 
         new Airtable({apiKey: dataParsed.apiKey}).base(dataParsed.baseId)(dataParsed.tableId).create(dataParsed.entryToCreate)
             // eslint-disable-next-line @typescript-eslint/no-explicit-any

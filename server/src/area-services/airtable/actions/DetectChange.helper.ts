@@ -3,6 +3,7 @@ import {OperationStatus} from "../../../services-interfaces";
 import {AreaService} from "../../../services";
 import {AirtableHelper, DiffHandler} from "../Airtable.helper";
 import {Record} from "../interfaces";
+import {isDeepStrictEqual} from "util";
 
 export enum AIRTABLE_PREFIX_ENUM {
     UPDATED = "updated",
@@ -66,15 +67,42 @@ export default class DetectChangesHelper {
         }
     }
 
-    private static diffCheckerCreated(oldEntry: Record[], newEntry: Record[]) : Record[] {
-        return [];
+    private static diffCheckerCreated(oldEntries: Record[], newEntries: Record[]) : Record[] {
+        const diff: Record[] = [];
+
+        for (const newEntry of newEntries) {
+            const oldVersion: Record | undefined = oldEntries.find((value: Record) => {
+                return value.id === newEntry.id;
+            });
+            if (oldVersion === undefined)
+                diff.push(newEntry);
+        }
+        return diff;
     }
 
-    private static diffCheckerUpdated(oldEntry: Record[], newEntry: Record[]) : Record[] {
-        return [];
+    private static diffCheckerUpdated(oldEntries: Record[], newEntries: Record[]) : Record[] {
+        const diff: Record[] = [];
+
+        for (const newEntry of newEntries) {
+            const oldVersion: Record | undefined = oldEntries.find((value: Record) => {
+                return value.id === newEntry.id;
+            });
+            if (oldVersion !== undefined && !isDeepStrictEqual(newEntry, oldVersion))
+                diff.push(newEntry);
+        }
+        return diff;
     }
 
-    private static diffCheckerDeleted(oldEntry: Record[], newEntry: Record[]) : Record[] {
-        return [];
+    private static diffCheckerDeleted(oldEntries: Record[], newEntries: Record[]) : Record[] {
+        const diff: Record[] = [];
+
+        for (const oldEntry of oldEntries) {
+            const newVersion: Record | undefined = newEntries.find((value: Record) => {
+                return value.id === oldEntry.id;
+            });
+            if (newVersion === undefined)
+                diff.push(oldEntry);
+        }
+        return diff;
     }
 }

@@ -29,6 +29,10 @@
     {
       "name": "Fields[i]",
       "description": "The field at the index i"
+    },
+    {
+      "name": "Fields",
+      "description": "The array containing the affected fields"
     }
   ]
 }

@@ -35,7 +35,7 @@ export default class ServiceController {
             for (const prefixEnum in AIRTABLE_PREFIX_ENUM) {
                 const stringPrefix = (prefixEnum as AIRTABLE_PREFIX_ENUM).toLowerCase();
                 if (data.name.startsWith(DetectChangesHelper.getPrefix(stringPrefix as AIRTABLE_PREFIX_ENUM))) {
-                    return await AirtableHelper.processFieldUpdatePooling(data, ctx, DetectChangesHelper.diffCheckers.get(stringPrefix));
+                    return await AirtableHelper.processBaseUpdatePooling(data, ctx, DetectChangesHelper.diffCheckers.get(stringPrefix));
                 }
             }
         } catch (e) {
