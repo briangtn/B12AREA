@@ -332,7 +332,7 @@ describe('/areas/{id}/reactions', () => {
         it ('Should return a 400 Bad Request when changing the serviceReaction', async () => {
             expect((await reactionRepo.count()).count).to.be.equal(1);
             await helper.client
-                .patch(`/areas/${area.id}/reaction/${reaction.id}`)
+                .patch(`/areas/${area.id}/reactions/${reaction.id}`)
                 .set('Authorization', 'Bearer ' + users[0].token)
                 .send({
                     serviceReaction: "example.R.examplePatched"
