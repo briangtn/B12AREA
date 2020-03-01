@@ -30,6 +30,10 @@ class CodeValidation extends Component<Props, State> {
         displayedMessage: ''
     };
 
+    /**
+     * Fetch the data code as query parameter inside the URL
+     * then send to the API to finish OAuth
+     */
     componentDidMount() {
         const { api_url, token } = this.props;
         const codeToSend: string | null = Utilities.getQueryParameter(window.location.href, 'code');

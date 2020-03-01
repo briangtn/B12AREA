@@ -13,17 +13,16 @@ import com.b12powered.area.fragments.ToolbarFragment
 import com.b12powered.area.toObject
 import com.b12powered.area.R
 
-
 /**
  * The activity where every available service to which the user can subscribe
  */
 class SearchActivity : AppCompatActivity() {
 
     object GlobalVars {
-        var isPassed: Number = 0
+        var isPassed: Number = 0 /*!< GlobalVars [isPassed] Number ->  check if the user return to the homePage */
     }
 
-    private var haveService : Boolean = false
+    private var haveService : Boolean = false /*!< [haveService] Boolean -> true if the user have service to register, false otherwise */
 
     /**
      * Override method onCreate

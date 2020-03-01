@@ -11,9 +11,9 @@ import java.lang.Exception
  */
 class ApiResponse(response: String) {
 
-    var success: Boolean = false
-    var message: String = ""
-    var json: String = ""
+    var success: Boolean = false /*!< [success] Boolean -> true if request succeed false otherwise */
+    var message: String = "" /*!< [message] String -> get information about the request if request failed */
+    var json: String = "" /*!< [json] String -> contain the json response */
 
     init {
         try {

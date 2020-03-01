@@ -81,6 +81,9 @@ class Profile extends Component<Props, State> {
         roles: []
     };
 
+    /**
+     * Function that fetch the information about the current authenticated user
+     */
     componentDidMount(): void {
         const { api_url, token } = this.props;
 

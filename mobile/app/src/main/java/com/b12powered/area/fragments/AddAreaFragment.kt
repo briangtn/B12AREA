@@ -4,7 +4,6 @@ import android.app.AlertDialog
 import android.content.DialogInterface
 import android.os.Bundle
 import android.text.InputType
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -29,6 +28,7 @@ import kotlinx.android.synthetic.main.fragment_create_area.*
  * @param step The current step of the area creation
  */
 class AddAreaFragment(private val service: Service, private val area: Area, private val ar: ActionReaction, private val step: AreaCreationStatus) : Fragment() {
+
     companion object {
 
         /**
@@ -46,7 +46,7 @@ class AddAreaFragment(private val service: Service, private val area: Area, priv
         }
     }
 
-    private lateinit var listView: ListView
+    private lateinit var listView: ListView /*!< [listView] ListView -> current listView of the activity */
 
     /**
      * Override method onCreateView

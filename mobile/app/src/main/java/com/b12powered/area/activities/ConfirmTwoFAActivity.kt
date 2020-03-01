@@ -15,13 +15,13 @@ import com.b12powered.area.api.ApiClient
 import kotlinx.android.synthetic.main.activity_confirm_two_fa.*
 import kotlinx.android.synthetic.main.activity_two_fa.submit_button
 
-
 /**
  * The activity where the user enter their 2FA code
  *
  * This class request the 2FA code and make an api call to validate it
  */
 class ConfirmTwoFAActivity : AppCompatActivity() {
+
     /**
      * Override method onCreate
      *

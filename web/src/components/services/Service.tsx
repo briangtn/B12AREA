@@ -67,27 +67,50 @@ class Service extends Component<Props, State> {
         color: ''
     };
 
+    /**
+     * Fetch color from props, and put it in state
+     */
     componentDidMount(): void {
         const { info } = this.props;
 
         this.setState({ color: info.color });
     }
 
+    /**
+     * Handle the dialog open of the Add Area Stepper
+     *
+     * @param e event triggered
+     */
     handleDialogOpen = (e: any) => {
         this.setState({ addDialogOpened: true });
         e.stopPropagation();
     };
 
+    /**
+     * Handle the dialog close of the Add Area Stepper
+     *
+     * @param e event triggered
+     */
     handleDialogClose = (e: any) => {
         this.setState({ addDialogOpened: false });
     };
 
+    /**
+     * Function called when the user pressed the service card
+     *
+     * @param e event triggered
+     */
     handleClick = (e: any) => {
         const { info } = this.props;
 
         this.props.history.push({ pathname: '/services_detail', state: { info: info } });
     };
 
+    /**
+     * Function called when the user hover the service
+     *
+     * @param e event triggered
+     */
     hoverEffectEnter = (e: any) => {
         const { color } = this.state;
 
@@ -98,6 +121,11 @@ class Service extends Component<Props, State> {
         }
     };
 
+    /**
+     * Function called when the user unhover the service
+     *
+     * @param e event triggered
+     */
     hoverEffectExit = (e: any) => {
         const { color } = this.state;
 

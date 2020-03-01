@@ -3,7 +3,6 @@ package com.b12powered.area.fragments
 import android.app.AlertDialog
 import android.content.DialogInterface
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -14,7 +13,6 @@ import androidx.fragment.app.Fragment
 import com.b12powered.area.*
 import com.b12powered.area.activities.ServiceInformationActivity
 import com.b12powered.area.api.ApiClient
-import java.util.*
 import kotlin.collections.ArrayList
 
 /**
@@ -23,11 +21,12 @@ import kotlin.collections.ArrayList
  * This class set a clickable list of actions, depending on service
  *
  * @param serviceName The current service clicked
+ * @param displayName The current service name
  */
 class ServiceActionInformationFragment(private val serviceName: String, private val displayName: String) : Fragment() {
 
-    private var _allAreasService : MutableList<Areas>? = mutableListOf()
-    private lateinit var listView: ListView
+    private var _allAreasService : MutableList<Areas>? = mutableListOf() /*!< [_allAreasService] MutableList<Areas> -> contain all areas with a specific service selected */
+    private lateinit var listView: ListView /*!< [listView] ListView -> current listView of the activity */
 
     companion object {
 

@@ -366,6 +366,12 @@ class ServiceDetails extends Component<Props, State> {
         this.setState({  addAreaDialog: true });
     };
 
+    /**
+     * Function called when the user toggle the switch to disable/enable
+     * his AREA
+     *
+     * @param e
+     */
     toggleEnableDisableArea = (e: any) => {
         const { api_url, token } = this.props;
         const { value, checked } = e.target;
@@ -389,6 +395,9 @@ class ServiceDetails extends Component<Props, State> {
         this.setState({ areas: areas });
     };
 
+    /**
+     * Fetch the AREA registered to the selected service
+     */
     componentDidMount() {
         const { token, api_url } = this.props;
 

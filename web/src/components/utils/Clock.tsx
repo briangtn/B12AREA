@@ -24,7 +24,7 @@ class Clock extends Component<Props, State> {
     }
 
     componentWillUnmount(): void {
-
+        clearInterval(this.timerId);
     }
 
     render() {
