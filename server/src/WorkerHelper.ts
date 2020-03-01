@@ -1,4 +1,4 @@
-import Queue, {Job} from "bull";
+import Queue, {Job, JobCounts} from "bull";
 import {Context} from "@loopback/context";
 import {
     ActionRepository,
@@ -9,6 +9,12 @@ import {
 } from "./repositories";
 import {Action, Area, BullNameToIdMap, User} from "./models";
 import {DelayedJobObject, PullingJobObject, TriggerObject, WorkableObject} from "./services-interfaces";
+
+export interface JobInfosCount {
+    reactionQueue: JobCounts,
+    pullingQueue: JobCounts,
+    delayedQueue: JobCounts
+}
 
 export default class WorkerHelper {
 
@@ -159,7 +165,7 @@ export default class WorkerHelper {
                         reactionPreparedData: reactionPreparedData,
                         reactionType: reaction.serviceReaction
                     };
-                    this.workerQueue.add(preparedData).catch(e => console.error(`Failed to enqueue job for action id ${params.actionId}, reaction id ${reaction.id}: ${e}`));
+                    this.workerQueue.add(`${reaction.serviceReaction}_${reaction.id}`, preparedData).catch(e => console.error(`Failed to enqueue job for action id ${params.actionId}, reaction id ${reaction.id}: ${e}`));
                 } catch (e) {
                     console.error(`[ServiceResolve]Failed to enqueue job for action id ${params.actionId}: could not find reaction ${reactionName} in service ${serviceName}`);
                 }
@@ -285,5 +291,13 @@ export default class WorkerHelper {
             return this.RemovePullingJobById(existingJobId, ctx);
         }
         return null;
+    }
+
+    public static async GetJobInfosCount(): Promise<JobInfosCount> {
+        return {
+            reactionQueue: await this.workerQueue.getJobCounts(),
+            pullingQueue: await this.pullingQueue.getJobCounts(),
+            delayedQueue: await this.delayedJobQueue.getJobCounts()
+        }
     }
 }
