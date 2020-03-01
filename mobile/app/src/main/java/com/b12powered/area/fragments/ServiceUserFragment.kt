@@ -10,6 +10,7 @@ import androidx.fragment.app.Fragment
 import com.b12powered.area.R
 import com.b12powered.area.Service
 import com.b12powered.area.activities.AreaCreationActivity
+import com.b12powered.area.activities.ServiceInformationActivity
 import com.bumptech.glide.Glide
 import kotlinx.android.synthetic.main.fragment_service_user.*
 
@@ -39,9 +40,8 @@ class ServiceUserFragment(private val serviceList: ArrayList<Service>, private v
         view.setBackgroundColor(Color.parseColor(service.color))
         super.onViewCreated(view, savedInstanceState)
         view.setOnClickListener {
-            val intent = Intent(context, AreaCreationActivity::class.java)
-            intent.putExtra("serviceList", serviceList.map { service -> service.toJSON() } as ArrayList)
-            intent.putExtra("service", service.toJSON())
+            val intent = Intent(context, ServiceInformationActivity::class.java)
+            intent.putExtra("serviceName", service.name)
             startActivity(intent)
         }
     }

@@ -5,20 +5,25 @@ import android.net.Uri
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
-import com.b12powered.area.R
 import androidx.appcompat.app.AppCompatActivity
-import androidx.fragment.app.Fragment
 import com.b12powered.area.Status
 import com.b12powered.area.api.ApiClient
 import com.b12powered.area.fragments.ServiceFragment
 import com.b12powered.area.fragments.ToolbarFragment
 import com.b12powered.area.toObject
-import kotlinx.android.synthetic.main.activity_home.*
+import com.b12powered.area.R
+
 
 /**
  * The activity where every available service to which the user can subscribe
  */
 class SearchActivity : AppCompatActivity() {
+
+    object GlobalVars {
+        var isPassed: Number = 0
+    }
+
+    private var haveService : Boolean = false
 
     /**
      * Override method onCreate
@@ -59,13 +64,21 @@ class SearchActivity : AppCompatActivity() {
                 if (user !== null) {
                     ApiClient(this)
                         .aboutJson { about, msg ->
+                            haveService = false
                             if (about !== null) {
                                 about.server.services.forEach { service ->
                                     if (!user.services.contains(service.name)) {
+                                        haveService = true
                                         supportFragmentManager.beginTransaction()
                                             .add(R.id.list_layout, ServiceFragment.newInstance(service))
                                             .commit()
                                     }
+                                }
+                                if (!haveService && GlobalVars.isPassed == 0) {
+                                    GlobalVars.isPassed = 1
+                                    val intent = Intent(this, HomeActivity::class.java)
+                                    finish()
+                                    startActivity(intent)
                                 }
                             } else {
                                 Toast.makeText(
@@ -75,7 +88,6 @@ class SearchActivity : AppCompatActivity() {
                                 ).show()
                             }
                         }
-
                 } else {
                     Toast.makeText(
                         this,

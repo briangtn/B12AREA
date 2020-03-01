@@ -40,17 +40,6 @@ interface State {
     color: string
 }
 
-interface ServiceInfo {
-    name: string,
-    description: string,
-    icon: string,
-    color: string,
-    actions: any,
-    reactions: any,
-    token: string,
-    userId: string
-}
-
 const mapStateToProps = (state: any) => {
     return { api_url: state.api_url, token: state.token };
 };
@@ -142,7 +131,7 @@ class Service extends Component<Props, State> {
                             <img alt={info.name} className={classes.icon} src={info.icon} />
                         </Grid>
                         <Grid item xs={4}>
-                            <Typography className={classes.serviceName} variant="h6">{Utilities.capitalizeString(info.name)}</Typography>
+                            <Typography className={classes.serviceName} variant="h6">{ info.displayName }</Typography>
                         </Grid>
                         <Grid item xs={4}>
                             <IconButton onClick={this.handleDialogOpen} style={{float: 'right', zIndex: 100, position: 'relative'}} aria-label="settings" color={(Utilities.isLightColor(info.color)) ? 'primary' : 'secondary'}>
@@ -153,7 +142,7 @@ class Service extends Component<Props, State> {
                 </Box>
                 <Dialog open={this.state.addDialogOpened} onClose={this.handleDialogClose} aria-labelledby="form-dialog-title">
                     <DialogContent>
-                        <AddAreaStepper serviceName={info.name} actions={info.actions} reactions={info.reactions} closeFunction={this.handleDialogClose} />
+                        <AddAreaStepper serviceName={info.name} actions={info.actions} reactions={info.reactions} closeFunction={this.handleDialogClose} needToRefresh={false} history={this.props.history} />
                     </DialogContent>
                 </Dialog>
             </div>

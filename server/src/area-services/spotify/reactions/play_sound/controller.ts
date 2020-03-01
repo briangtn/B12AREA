@@ -24,7 +24,7 @@ export default class ReactionController {
         const id = applyPlaceholders(playSoundConfig.trackId, params.actionPlaceholders);
         const spotifyToken = (params.reactionPreparedData as {spotifyToken: string}).spotifyToken;
         try {
-            await axios.post(`${SPOTIFY_API_BASE_URL}/me/player/add-to-queue?uri=${id}`, {}, {
+            await axios.post(`${SPOTIFY_API_BASE_URL}/me/player/add-to-queue?uri=spotify:track:${id}`, {}, {
                 headers: {
                     Authorization: `Bearer ${spotifyToken}`
                 }

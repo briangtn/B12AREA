@@ -1,0 +1,78 @@
+{
+  "displayName": "New email",
+  "description": "Triggered when a new email is received in outlook. All the config schema are additive filters (AND).",
+  "configSchema": [
+    {
+      "name": "onlySender",
+      "description": "The sender email must match the given sender email to trigger the area. Should be an email address",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "onlyObjectMatch",
+      "description": "The email object must match the given regex to trigger the area. This enable the ObjectMatches[i] and ObjectMatchesGroups[i] placeholders",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "onlyBodyMatch",
+      "description": "The email body must match the given regex to trigger the area. This enable the BodyMatches[i] and BodyMatchesGroups[i] placeholders",
+      "type": "string",
+      "required": false
+    }
+  ],
+  "placeholders": [
+    {
+      "name": "EmailBody",
+      "description": "The complete email body."
+    },
+    {
+      "name": "EmailSender",
+      "description": "The sender of the email"
+    },
+    {
+      "name": "EmailObject",
+      "description": "The object of the email"
+    },
+    {
+      "name": "Words[i]",
+      "description": "The word at index i in the email body."
+    },
+    {
+      "name": "NbWords",
+      "description": "The number of words in the Words array"
+    },
+    {
+      "name": "ObjectMatches[i]",
+      "description": "The match at index i in the regex. /!\\ Can only be used if onlyObjectMatch was given"
+    },
+    {
+      "name": "NbObjectMatches",
+      "description": "The number of matches in the ObjectMatches array"
+    },
+    {
+      "name": "ObjectMatchesGroups[i]",
+      "description": "The match group at index i in the regex. /!\\ Can only be used if onlyObjectMatch was given"
+    },
+    {
+      "name": "NbObjectMatchesGroups",
+      "description": "The number of matches groups in the ObjectMatchesGroups array"
+    },
+    {
+      "name": "BodyMatches[i]",
+      "description": "The match at index i in the regex. /!\\ Can only be used if onlyBodyMatch was given"
+    },
+    {
+      "name": "NbBodyMatches",
+      "description": "The number of matches in the BodyMatches array"
+    },
+    {
+      "name": "BodyMatchesGroups[i]",
+      "description": "The match group at index i in the regex. /!\\ Can only be used if onlyBodyMatch was given"
+    },
+    {
+      "name": "NbBodyMatchesGroups",
+      "description": "The number of matches groups in the BodyMatchesGroups array"
+    }
+  ]
+}

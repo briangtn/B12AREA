@@ -1,0 +1,24 @@
+{
+  "displayName": "(Un)Follow",
+  "description": "Follow or unfollow someone",
+  "configSchema": [
+    {
+      "name": "name",
+      "description": "The @name of the user",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "follow",
+      "description": "If true -> follow else -> unfollow",
+      "type": "boolean",
+      "required": true
+    },
+    {
+      "name": "enableNotifications",
+      "description": "Enable notifications for the target user. (Ignored if follow is set to false)",
+      "type": "boolean",
+      "required": true
+    }
+  ]
+}

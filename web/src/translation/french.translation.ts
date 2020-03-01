@@ -39,7 +39,8 @@ const french = {
     addReactionsDescription: "Veuillez renseigner les informations, pour ajouter une nouvelle reaction à votre AREA",
     logOut: "Se déconnecter",
     profile: "Mon profil",
-    emailValidatedButConnected: "Veuillez vous déconnecter pour valider votre email"
+    emailValidatedButConnected: "Veuillez vous déconnecter pour valider votre email",
+    back: "Retour"
 };
 
 export default french;

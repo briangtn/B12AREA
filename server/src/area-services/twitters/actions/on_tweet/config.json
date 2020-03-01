@@ -1,0 +1,59 @@
+{
+  "displayName": "On new tweet",
+  "description": "Triggered when you post a new tweet.",
+  "configSchema": [
+    {
+      "name": "mustMatch",
+      "description": "The message must match the given regex to be counted as a trigger, using this variable enable the Matches[i] placeholder to be used",
+      "type": "string",
+      "required": false
+    }
+  ],
+  "placeholders": [
+    {
+      "name": "Id",
+      "description": "The id of the tweet"
+    },
+    {
+      "name": "Author",
+      "description": "The '@' of the author of the tweet (ex: @twitter)"
+    },
+    {
+      "name": "AuthorDisplayName",
+      "description": "The display name of the author of the tweet (ex: 'Twitter')"
+    },
+    {
+      "name": "AuthorId",
+      "description": "The id of the author of the direct message"
+    },
+    {
+      "name": "Message",
+      "description": "The author id of the tweet"
+    },
+    {
+      "name": "Words[i]",
+      "description": "The word at index i in the tweet."
+    },
+    {
+      "name": "NbWords",
+      "description": "The number of words in the Words array"
+    },
+    {
+      "name": "Matches[i]",
+      "description": "The match at index i in the regex. /!\\ Can only be used if mustMatch was given"
+    },
+    {
+      "name": "NbMatches",
+      "description": "The number of matches in the Matches array"
+    },
+    {
+      "name": "MatchesGroups[i]",
+      "description": "The match group at index i in the regex. /!\\ Can only be used if mustMatch was given"
+    },
+    {
+      "name": "NbMatchesGroups",
+      "description": "The number of matches groups in the MatchesGroupes array"
+    }
+
+  ]
+}

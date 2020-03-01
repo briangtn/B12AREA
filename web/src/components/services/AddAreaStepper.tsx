@@ -21,7 +21,16 @@ import Divider from '@material-ui/core/Divider';
 import Alert from '../Alert';
 import HtmlTooltip from "./HtmlTooltip";
 
-import { IAction, IReaction, IPlaceHolder } from "../../interfaces/IService.interface";
+import {IAction, IReaction, IPlaceHolder, IService} from "../../interfaces/IService.interface";
+import {setServices} from "../../actions/services.action";
+import {setToken} from "../../actions/api.action";
+import Cookies from "universal-cookie";
+
+const cookies = new Cookies();
+
+function mapDispatchToProps(dispatch: any) {
+    return { setServices: (token: object) => dispatch(setServices(token)), setToken: (token: object) => dispatch(setToken(token)) };
+}
 
 const mapStateToProps = (state: any) => {
     return { language: state.language, api_url: state.api_url, token: state.token, services: state.services };
@@ -40,7 +49,13 @@ interface Props {
     closeFunction: any,
     token: string,
     api_url: string,
-    serviceName: string
+    serviceName: string,
+    needToRefresh: boolean,
+    setServices: any,
+    setToken: any,
+    history: {
+        push: any
+    },
 }
 
 interface State {
@@ -89,12 +104,22 @@ class AddAreaStepper extends Component<Props, State> {
         alertSeverity: 'error'
     };
 
+    /**
+     * Handle next button clicked
+     *
+     * @param e event triggered
+     */
     handleNextStep = (e: any) => {
         const { activeStep } = this.state;
 
         this.setState({ activeStep: activeStep + 1 });
     };
 
+    /**
+     * Handle back button clicked
+     *
+     * @param e event triggered
+     */
     handleBackStep = (e: any) => {
         const { activeStep } = this.state;
 
@@ -122,6 +147,14 @@ class AddAreaStepper extends Component<Props, State> {
         this.setState({ selectedAction: e.target.value, configSchemaActions: configSchemaActions });
     };
 
+    /**
+     * Handle the change of a config schema
+     *
+     * @param argGroupName config schema key
+     * @param key key of  the current config schema
+     * @param e event trigger
+     * @param isAction boolean who checked if it's an action or a reaction
+     */
     configSchemaChange = (argGroupName: string, key: any, e: any, isAction: boolean) => {
         const configSchema: any = (isAction ? this.state.configSchemaActions : this.state.configSchemaReactions);
 
@@ -132,18 +165,29 @@ class AddAreaStepper extends Component<Props, State> {
         this.setState({ [key]: configSchema } as unknown as Pick<State, keyof State>);
     };
 
+    /**
+     * Display the config schema:
+     * Return different input type based on the current config schema
+     *
+     * @param argGroupName config schema key
+     * @param configSchema currrent config schema
+     * @param key key of the state
+     * @param isAction boolean who checked if it's an action or a reaction
+     * @param placeholder placeholders of the action
+     */
     displayConfigSchema = (argGroupName: string, configSchema: any, key: any, isAction: boolean, placeholder: IPlaceHolder[] | null = null) => {
         const { configSchemaActions, configSchemaReactions } = this.state;
-        const { name, type, required } = configSchema;
+        const { name, type, required, description } = configSchema;
         let placeHolderString: any = null;
 
         if (placeholder) {
-                placeHolderString = (
-                    <React.Fragment>
-                        <p><b>Placeholders:</b></p>
-                        {placeholder.map((holder: IPlaceHolder, index: number) => <p key={index}>{`{${holder.name}}: ${holder.description}`}</p>)}
-                    </React.Fragment>
-                );
+            placeHolderString = (
+                <React.Fragment>
+                    <i><u>{`${name}:`}</u> {`${description}`}</i>
+                    <p><b>Placeholders:</b></p>
+                    {placeholder.map((holder: IPlaceHolder, index: number) => <p key={index}>{`{${holder.name}}: ${holder.description}`}</p>)}
+                </React.Fragment>
+            );
         }
         if (type === "string" || type === "number") {
             if (placeholder) {
@@ -191,6 +235,9 @@ class AddAreaStepper extends Component<Props, State> {
         }
     };
 
+    /**
+     * Step of the name to configure an AREA
+     */
     nameStep = () => {
         return (
             <div>
@@ -208,6 +255,9 @@ class AddAreaStepper extends Component<Props, State> {
         );
     };
 
+    /**
+     * Step to configure an action
+     */
     actionStep = () => {
         const { selectedAction } = this.state;
         const { actions, classes } = this.props;
@@ -224,7 +274,7 @@ class AddAreaStepper extends Component<Props, State> {
                         autoWidth
                     >
                         {actions.map((elem: any) => (
-                            <MenuItem key={actions.indexOf(elem)} value={elem}>{`${elem.name} - ${elem.description}`}</MenuItem>
+                            <MenuItem key={actions.indexOf(elem)} value={elem}>{`${elem.displayName} - ${elem.description}`}</MenuItem>
                         ))}
                     </Select>
                 </FormControl>
@@ -241,6 +291,11 @@ class AddAreaStepper extends Component<Props, State> {
         );
     };
 
+    /**
+     * Function who handle the selection of a reaction
+     *
+     * @param e
+     */
     selectReaction = (e: any) => {
         const { configSchemaReactions } = this.state;
 
@@ -250,17 +305,38 @@ class AddAreaStepper extends Component<Props, State> {
                 configSchemaReactions[reaction.name]['serviceName'] = reaction.serviceName;
                 for (let configSchema of reaction.configSchema) {
                     if (configSchema.type === "string")
-                        configSchemaReactions[reaction.name][configSchema.name] = ''
+                        configSchemaReactions[reaction.name][configSchema.name] = '';
                     else if (configSchema.type === "boolean")
-                        configSchemaReactions[reaction.name][configSchema.name] = false
+                        configSchemaReactions[reaction.name][configSchema.name] = false;
                     else
-                        configSchemaReactions[reaction.name][configSchema.name] = 0
+                        configSchemaReactions[reaction.name][configSchema.name] = 0;
                 }
             }
         }
+
+        // Delete weird reactions
+        const keysToDelete: string[] = [];
+        for (let key of Object.keys(configSchemaReactions)) {
+            let exist: boolean = false;
+
+            for (let reaction of e.target.value) {
+                if (reaction.name === key)
+                    exist = true;
+            }
+
+            if (!exist)
+                keysToDelete.push(key);
+        }
+
+        for (let key of keysToDelete)
+            delete configSchemaReactions[key];
+
         this.setState({ chosenReactions: e.target.value, configSchemaReactions: configSchemaReactions });
     };
 
+    /**
+     * Reaction step in the adding of AREA
+     */
     reactionStep = () => {
         const { chosenReactions } = this.state;
         const { services, classes } = this.props;
@@ -283,7 +359,7 @@ class AddAreaStepper extends Component<Props, State> {
                         renderValue={(selected) => (
                             <div>
                                 {(selected as any[]).map((elem: any, index: number) => (
-                                    (index !== (selected as any[]).length - 1) ? `${elem.name}, ` : `${elem.name}`
+                                    (index !== (selected as any[]).length - 1) ? `${elem.displayName}, ` : `${elem.name}`
                                 ))}
                             </div>
                         )}
@@ -292,7 +368,7 @@ class AddAreaStepper extends Component<Props, State> {
                     >
                         {allRegisteredReactions.map((reaction: IReaction) => (
                             <MenuItem key={allRegisteredReactions.indexOf(reaction)} value={reaction as any}>
-                                { `${reaction.name} - ${reaction.description}` }
+                                { `${reaction.displayName} - ${reaction.description}` }
                             </MenuItem>
                         ))}
                     </Select>
@@ -320,6 +396,11 @@ class AddAreaStepper extends Component<Props, State> {
         );
     };
 
+    /**
+     * Function to format configSchema
+     *
+     * @param configSchema current config schema
+     */
     formatConfigSchema = (configSchema: any): any[] => {
         const formatted: any = [];
 
@@ -339,6 +420,9 @@ class AddAreaStepper extends Component<Props, State> {
         return formatted
     };
 
+    /**
+     * Step for the summary
+     */
     summaryStep = () => {
         const { selectedAction, configSchemaActions, configSchemaReactions } = this.state;
 
@@ -483,8 +567,11 @@ class AddAreaStepper extends Component<Props, State> {
                     if (action !== null) {
                         error = true;
                     }
-                    if (!error)
+                    if (!error) {
                         this.props.closeFunction();
+                        if (this.props.needToRefresh)
+                            window.location.reload();
+                    }
                 });
         });
     };
@@ -504,6 +591,53 @@ class AddAreaStepper extends Component<Props, State> {
     closeAlert = (e: any) => {
         this.setState({ alert: false });
     };
+
+    componentDidMount(): void {
+        const { token, api_url } = this.props;
+
+        if (!token) {
+            this.props.history.push('/');
+            return;
+        }
+
+        fetch(`${api_url}/about.json`)
+            .then(res => res.json())
+            .then((dataAbout) => {
+                fetch(`${api_url}/users/me`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                })
+                    .then((res) => res.json())
+                    .then((data) => {
+                        const { error } = data;
+
+                        if (error) {
+                            const { statusCode } = error;
+
+                            if (statusCode === 401) {
+                                cookies.set('token',  '');
+                                this.props.setToken('');
+                                this.props.history.push('/');
+                                return;
+                            }
+                        } else {
+                            const {servicesList} = data;
+                            const aboutServices = dataAbout['server']['services'];
+
+                            const registeredServices: IService[] = [];
+                            const availableServices: IService[] = [];
+
+                            for (let aboutService of aboutServices) {
+                                if (servicesList.includes(aboutService.name))
+                                    registeredServices.push(aboutService);
+                                else
+                                    availableServices.push(aboutService);
+                            }
+
+                            this.props.setServices(registeredServices);
+                        }
+                    })
+            })
+    }
 
     render() {
         const { activeStep, steps } = this.state;
@@ -543,4 +677,4 @@ class AddAreaStepper extends Component<Props, State> {
     }
 }
 
-export default connect(mapStateToProps)(withStyles(styles)(AddAreaStepper));
+export default connect(mapStateToProps, mapDispatchToProps)(withStyles(styles)(AddAreaStepper));

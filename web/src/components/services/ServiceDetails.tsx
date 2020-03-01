@@ -39,7 +39,16 @@ import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Switch from "@material-ui/core/Switch";
 import {IArea, IPlaceHolder} from "../../interfaces/IService.interface";
 
+import AddAreaStepper from "./AddAreaStepper";
 import HtmlTooltip from "./HtmlTooltip";
+
+import { setToken } from "../../actions/api.action";
+import Cookies from "universal-cookie";
+import ArrowBackIosIcon from "@material-ui/icons/ArrowBackIos";
+import Alert from "../Alert";
+import Snackbar from "@material-ui/core/Snackbar";
+
+const cookies = new Cookies();
 
 interface Props {
     token: string,
@@ -53,13 +62,15 @@ interface Props {
         heading: string,
         button: string,
         details: string,
-        formControl: string
+        formControl: string,
+        backButton: string
     },
     location: {
         state: {
             info: any
         }
-    }
+    },
+    setToken: any
 }
 
 interface State {
@@ -70,12 +81,19 @@ interface State {
     availableReactions: any,
     chosenArea: number,
     selectedReaction: any,
-    configSchemaReaction: any
+    configSchemaReaction: any,
+    addAreaDialog: boolean,
+    error: boolean,
+    errorMessage: string
 }
 
 const mapStateToProps = (state: any) => {
     return { api_url: state.api_url, token: state.token, services: state.services };
 };
+
+function mapDispatchToProps(dispatch: any) {
+    return { setToken: (token: object) => dispatch(setToken(token)) };
+}
 
 const styles = (theme: Theme) => createStyles({
     section: {
@@ -96,21 +114,36 @@ const styles = (theme: Theme) => createStyles({
         fullWidth: 0,
         display: "flex",
         wrap: "nowrap"
+    },
+    backButton: {
+        margin: theme.spacing(2),
     }
 });
 
 class ServiceDetails extends Component<Props, State> {
     state: State = {
         areas: [],
-        info: (this.props.location.state.info) ? this.props.location.state.info : {},
+        info: (this.props.location.state) ? this.props.location.state.info : {},
         dialogOpened: false,
         availableActions: [],
         availableReactions: [],
         chosenArea: 0,
         selectedReaction: 0,
-        configSchemaReaction: {}
+        configSchemaReaction: {},
+        addAreaDialog: false,
+        error: false,
+        errorMessage: ''
     };
 
+    backClicked = (e: any) => {
+        this.props.history.push('/services');
+    };
+
+    /**
+     * Function to handle the change of reaction
+     *
+     * @param e event triggered
+     */
     selectReactionChange = (e: any) => {
         let configSchemaReaction: any = {};
 
@@ -128,6 +161,11 @@ class ServiceDetails extends Component<Props, State> {
         this.setState({ selectedReaction: e.target.value, configSchemaReaction: configSchemaReaction });
     };
 
+    /**
+     * Change inside the config schema
+     *
+     * @param e event triggered
+     */
     configSchemaChange = (e: any) => {
         const { configSchemaReaction } = this.state;
 
@@ -138,12 +176,20 @@ class ServiceDetails extends Component<Props, State> {
         this.setState({configSchemaReaction: configSchemaReaction} as unknown as Pick<State, keyof State>);
     };
 
+    /**
+     * Display the config schema based on the action selected
+     *
+     * @param configSchema config schema of the reaction selected
+     */
     displayConfigSchema = (configSchema: any) => {
         const { areas, chosenArea, configSchemaReaction } = this.state;
-        const { name, type, required } = configSchema;
+        const { name, type, required, description } = configSchema;
         const currentArea: any = areas[chosenArea];
         let placeholders: IPlaceHolder[] | null = null;
+
         let currentActionInfos = this.state.availableActions.filter((available: any) => {
+            if (!currentArea.action)
+                return true;
             const splitted: string[] = currentArea.action.serviceAction.split('.');
 
             return available.name === splitted[splitted.length - 1];
@@ -158,6 +204,7 @@ class ServiceDetails extends Component<Props, State> {
         if (placeholders) {
             placeHolderComponent = (
                 <React.Fragment>
+                    <i><u>{`${name}:`}</u> {`${description}`}</i>
                     <p><b>Placeholders:</b></p>
                     {placeholders.map((holder: IPlaceHolder, index: number) => <p key={index}>{`{${holder.name}}: ${holder.description}`}</p>)}
                 </React.Fragment>
@@ -210,14 +257,29 @@ class ServiceDetails extends Component<Props, State> {
         }
     };
 
+    /**
+     * Close dialog of adding reactions
+     *
+     * @param e event triggered
+     */
     closeDialog = (e: any) => {
         this.setState({ dialogOpened: false, selectedReaction: {}, configSchemaReaction: {} });
     };
 
+    /**
+     * Open the dialog to add a new reaction
+     *
+     * @param e event triggered
+     */
     openDialog = (e:  any) => {
         this.setState({ dialogOpened: true, chosenArea: e.currentTarget.value });
     };
 
+    /**
+     * Function when the user submit his new reaction
+     *
+     * @param e event triggered
+     */
     saveReaction = (e: any) => {
         const { api_url, token } = this.props;
         const { configSchemaReaction } = this.state;
@@ -244,10 +306,21 @@ class ServiceDetails extends Component<Props, State> {
         })
             .then(res => res.json())
             .then((data) => {
-                window.location.reload();
+                const { error } = data;
+
+                if (error) {
+                    this.setState({ error: true, errorMessage: `${error.name}: ${error.message}`});
+                } else {
+                    window.location.reload();
+                }
             });
     };
 
+    /**
+     * Function called when the user click on the deletion of an area
+     *
+     * @param e
+     */
     deleteAREA = (e: any) => {
         const { api_url, token } = this.props;
         const { areas } = this.state;
@@ -265,6 +338,11 @@ class ServiceDetails extends Component<Props, State> {
         });
     };
 
+    /**
+     * Function called when the user wants to delete a reaction
+     *
+     * @param e
+     */
     deleteReaction = (e: any) => {
         const { api_url, token } = this.props;
         const areaId: string = e.currentTarget.value.split(';')[0];
@@ -280,56 +358,84 @@ class ServiceDetails extends Component<Props, State> {
             });
     };
 
+    addAreaDialogClose = (e: any) => {
+        this.setState({ addAreaDialog: false });
+    };
+
+    addAreaDialogOpen = (e: any) => {
+        this.setState({  addAreaDialog: true });
+    };
+
     componentDidMount() {
         const { token, api_url } = this.props;
-        const { info } = this.state;
 
         fetch(`${api_url}/areas?filter={"include": [{"relation":"action"},{"relation":"reactions"}]}`, {
             headers: {'Authorization': `Bearer ${token}`}
         })
             .then(res => res.json())
             .then((data) => {
-                const {info} = this.state;
+                const { error } = data;
 
-                const tmpAreaArray = data.filter((area: any) => (!area.action || !area.reactions) || (area.action.serviceAction.split('.')[0] === info.name));
-                this.setState({areas: tmpAreaArray});
-            });
+                if (error) {
+                    cookies.set('token',  '');
+                    this.props.setToken('');
+                    this.props.history.push('/');
+                    return;
+                } else {
+                    const {info} = this.state;
 
-        fetch(`${api_url}/about.json`)
-            .then(res => res.json())
-            .then((data) => {
-                const { services } = data.server;
-
-                fetch(`${api_url}/users/me`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                })
-                    .then(res => res.json())
-                    .then((data) => {
-                        const registeredServices = data.servicesList;
-
-                        const availableActions = services.filter((service: any) => service.name === info.name)[0].actions;
-                        const availableReactions = [];
-
-                        for (let service of services)
-                            if (registeredServices.includes(service.name)) {
-                                for (let reaction of service.reactions) {
-                                    reaction['serviceName'] = service.name;
-                                    availableReactions.push(reaction);
-                                }
-                            }
-
-                        this.setState({ availableActions: availableActions, availableReactions: availableReactions });
+                    const tmpAreaArray = data.filter((area: any) => {
+                        if (!area.action)
+                            return true;
+                        return (area.action.serviceAction.split('.')[0] === info.name)
                     });
-            })
+                    this.setState({areas: tmpAreaArray});
+
+                    fetch(`${api_url}/about.json`)
+                        .then(res => res.json())
+                        .then((data) => {
+                            const { services } = data.server;
+
+                            fetch(`${api_url}/users/me`, {
+                                headers: { 'Authorization': `Bearer ${token}` }
+                            })
+                                .then(res => res.json())
+                                .then((data) => {
+                                    const registeredServices = data.servicesList;
+
+                                    const availableActions = services.filter((service: any) => service.name === info.name)[0].actions;
+                                    const availableReactions = [];
+
+                                    for (let service of services)
+                                        if (registeredServices.includes(service.name)) {
+                                            for (let reaction of service.reactions) {
+                                                reaction['serviceName'] = service.name;
+                                                availableReactions.push(reaction);
+                                            }
+                                        }
+
+                                    this.setState({ availableActions: availableActions, availableReactions: availableReactions });
+                                });
+                        })
+                }
+            });
     }
 
     render() {
         const { classes } = this.props;
         const { areas, info } = this.state;
+        const infoFromProps = this.props.location.state.info;
 
         return (
             <div>
                 <NavigationBar history={this.props.history} />
+                <Button
+                    startIcon={<ArrowBackIosIcon />}
+                    className={classes.backButton}
+                    onClick={this.backClicked}
+                >
+                    <Translator sentence="back" />
+                </Button>
                 <div
                     style={{
                         position: 'absolute',
@@ -339,6 +445,9 @@ class ServiceDetails extends Component<Props, State> {
                     }}
                 >
                     <Typography variant="h3" className={classes.section} gutterBottom><b><Translator sentence="myActions" /> - { info.displayName }</b></Typography>
+                    <Button onClick={this.addAreaDialogOpen} style={{ marginBottom: '10px' }} variant="outlined" fullWidth>
+                        <AddIcon />
+                    </Button>
                     {areas.map((area: any, index: number) => (
                         <ExpansionPanel key={areas.indexOf(area)}>
                             <ExpansionPanelSummary
@@ -430,6 +539,7 @@ class ServiceDetails extends Component<Props, State> {
                             </ExpansionPanelActions>
                         </ExpansionPanel>
                     ))}
+                <div style={{ marginTop: '50px'}} />
                 </div>
                 <Dialog
                     open={this.state.dialogOpened}
@@ -452,7 +562,7 @@ class ServiceDetails extends Component<Props, State> {
                                 autoWidth
                             >
                                 {this.state.availableReactions.map((elem: any, index: number) => (
-                                    <MenuItem key={index} value={elem}>{`${elem.name} - ${elem.description}`}</MenuItem>
+                                    <MenuItem key={index} value={elem}>{`${elem.displayName} - ${elem.description}`}</MenuItem>
                                 ))}
                             </Select>
                         </FormControl>
@@ -479,10 +589,20 @@ class ServiceDetails extends Component<Props, State> {
                             <Translator sentence="save" />
                         </Button>
                     </DialogActions>
+                    <Snackbar open={this.state.error} autoHideDuration={6000} onClose={(e: any) => { this.setState({ error: true }) }}>
+                        <Alert onClose={(e: any) => { this.setState({ error: true }) }} severity={"error"}>
+                            { this.state.errorMessage }
+                        </Alert>
+                    </Snackbar>
+                </Dialog>
+                <Dialog open={this.state.addAreaDialog} onClose={this.addAreaDialogClose} aria-labelledby="form-dialog-title">
+                    <DialogContent>
+                        <AddAreaStepper history={this.props.history} serviceName={infoFromProps.name} actions={infoFromProps.actions} reactions={infoFromProps.reactions} closeFunction={this.addAreaDialogClose} needToRefresh={true} />
+                    </DialogContent>
                 </Dialog>
             </div>
         );
     }
 }
 
-export default withStyles(styles)(connect(mapStateToProps)(ServiceDetails));
+export default connect(mapStateToProps, mapDispatchToProps)(withStyles(styles)(ServiceDetails));

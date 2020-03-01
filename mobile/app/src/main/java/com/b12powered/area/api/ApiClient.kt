@@ -2,19 +2,19 @@ package com.b12powered.area.api
 
 import android.content.Context
 import android.net.Uri
-import android.util.Log
 import androidx.core.net.toUri
 import com.android.volley.*
 import com.android.volley.toolbox.BasicNetwork
 import com.android.volley.toolbox.DiskBasedCache
 import com.android.volley.toolbox.HurlStack
 import com.android.volley.toolbox.StringRequest
+import com.b12powered.area.*
+import com.google.gson.Gson
+import org.json.JSONArray
 import com.b12powered.area.About
 import com.b12powered.area.Area
 import com.b12powered.area.User
 import com.b12powered.area.toObject
-import com.google.gson.Gson
-import com.google.gson.JsonObject
 import org.json.JSONObject
 
 /**
@@ -325,6 +325,26 @@ class ApiClient(private val context: Context) {
                 completion.invoke(JSONObject(response.json).getString("url").toUri(), "success")
             } else {
                 completion.invoke(null, response.message)
+            }
+        }
+    }
+
+    /**
+     * Build a GetAreas request taking no parameter and perform it, then invoke [completion] with a Areas object
+     */
+    fun getAreas(completion: (areas: List<Areas>?, message: String) -> Unit) {
+        val route = ApiRoute.GetAreas(context)
+        this.performRequest(route) { success, response ->
+            if (success) {
+                val areas = ArrayList<Areas>()
+                val array = JSONArray(response.json)
+
+                for (i in  0 until array.length() - 1) {
+                    areas.add(array.get(i).toString().toObject())
+                }
+                completion.invoke(areas, "success")
+            } else {
+                completion.invoke(null, "")
             }
         }
     }
