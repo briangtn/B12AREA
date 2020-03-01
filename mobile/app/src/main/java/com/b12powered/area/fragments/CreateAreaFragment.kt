@@ -12,6 +12,7 @@ import android.widget.EditText
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.b12powered.area.AreaCreationStatus
+import androidx.activity.OnBackPressedCallback
 import com.b12powered.area.R
 import com.b12powered.area.activities.AreaCreationActivity
 import com.b12powered.area.api.ApiClient
@@ -52,7 +53,7 @@ class CreateAreaFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        requireActivity().onBackPressedDispatcher.addCallback(object : OnBackPressedCallback(true) {
+        requireActivity().onBackPressedDispatcher.addCallback(object : OnBackPressedCallback(true){
             override fun handleOnBackPressed() {
                 (activity!! as AreaCreationActivity).finishArea()
             }
