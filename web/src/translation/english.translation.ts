@@ -40,7 +40,8 @@ const english = {
     logOut: "Log Out",
     profile: "My Profile",
     emailValidatedButConnected: "You are already connected, please log out to confirm your email",
-    back: "Back"
+    back: "Back",
+    add: "Add"
 };
 
 export default english;

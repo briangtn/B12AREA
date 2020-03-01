@@ -154,7 +154,7 @@ class AddServices extends Component<Props, State> {
                         <Translator sentence="cancel" />
                     </Button>
                     <Button onClick={this.handleRegisterService} color="primary">
-                        <Translator sentence="save" />
+                        <Translator sentence="add" />
                     </Button>
                     </DialogActions>
                 </Dialog>
