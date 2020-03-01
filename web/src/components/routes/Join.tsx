@@ -4,9 +4,9 @@ import { connect } from "react-redux";
 
 import { withStyles, createStyles, Theme } from "@material-ui/core";
 
-import NavigationBar from "../components/NavigationBar";
-import OrDivider from "../components/OrDivider";
-import Translator from "../components/Translator";
+import NavigationBar from "../NavigationBar";
+import OrDivider from "../utils/OrDivider";
+import Translator from "../utils/Translator";
 
 import Typography from '@material-ui/core/Typography';
 import Grid from '@material-ui/core/Grid';
@@ -15,10 +15,10 @@ import TextField from '@material-ui/core/TextField';
 import Snackbar from '@material-ui/core/Snackbar';
 import MuiAlert from '@material-ui/lab/Alert';
 
-import GoogleIcon from "../components/icons/GoogleIcon";
+import GoogleIcon from "../icons/GoogleIcon";
 import TwitterIcon from '@material-ui/icons/Twitter';
 
-import AuthButton from "../components/AuthButton";
+import AuthButton from "../AuthButton";
 
 function Alert(props: any) {
     return <MuiAlert elevation={6} variant="filled" {...props} />;

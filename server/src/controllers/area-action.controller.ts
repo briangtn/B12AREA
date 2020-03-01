@@ -161,6 +161,7 @@ export class AreaActionController {
         try {
             controller = await this.resolveActionController(area.action.serviceAction);
         } catch (e) {
+            // Dont put a NotFound error, the type of action is not found (not the entity)
             throw new HttpErrors.BadRequest('Action not found');
         }
         await this.areaRepository.action(id).patch(action, where);

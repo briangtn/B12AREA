@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 
 import { withStyles, createStyles, Theme } from "@material-ui/core";
 
-import Translator from "../Translator";
+import Translator from "../utils/Translator";
 
 // Fab Utils
 

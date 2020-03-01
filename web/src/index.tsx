@@ -11,33 +11,33 @@ import * as serviceWorker from './serviceWorker';
 
 // Routes
 
-import ReadinessProbe from "./routes/ReadinessProbe";
-import ClientAPK from "./routes/ClientAPK";
+import ReadinessProbe from "./components/routes/ReadinessProbe";
+import ClientAPK from "./components/routes/ClientAPK";
 
-import Join from "./routes/Join";
-import Login from "./routes/Login";
-import ConfirmEmail from "./routes/ConfirmEmail";
-import Profile from "./routes/Profile";
-import CodeValidation from './routes/CodeValidation';
+import Join from "./components/routes/Join";
+import Login from "./components/routes/Login";
+import ConfirmEmail from "./components/routes/ConfirmEmail";
+import Profile from "./components/routes/Profile";
+import CodeValidation from './components/routes/CodeValidation';
 
 // Administration Routes
 
-import AdministrationPanel from "./routes/administration/AdministrationPanel";
+import AdministrationPanel from "./components/routes/administration/AdministrationPanel";
 
 // React Redux
 
 import { Provider } from 'react-redux';
 import rootStore from "./store/rootStore.store";
-import EmailValidation from "./routes/EmailValidation";
-import Services from "./routes/Services";
-import ForgotPassword from './routes/ForgotPassword';
-import ResetPassword from './routes/ResetPassword';
-import TokenRefresher from './components/TokenRefresher';
+import EmailValidation from "./components/routes/EmailValidation";
+import Services from "./components/routes/Services";
+import ForgotPassword from './components/routes/ForgotPassword';
+import ResetPassword from './components/routes/ResetPassword';
+import TokenRefresher from './components/utils/TokenRefresher';
 import ServiceDetails from './components/services/ServiceDetails';
 
-import EasterEgg from "./components/EasterEgg";
-import MobileWarner from "./components/MobileWarner";
-import InpersonateBar from "./components/InpersonateBar";
+import EasterEgg from "./components/utils/EasterEgg";
+import MobileWarner from "./components/utils/MobileWarner";
+import InpersonateBar from "./components/utils/InpersonateBar";
 
 interface Props {}
 

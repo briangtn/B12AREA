@@ -46,6 +46,8 @@ class Utilities {
         if (g > 255) g = 255;
         else if (g < 0) g = 0;
 
+        if (r <= 0)
+            return (usePound?"#00":"") + (g | (b << 8) | (r << 16)).toString(16);
         return (usePound?"#":"") + (g | (b << 8) | (r << 16)).toString(16);
     }
 }

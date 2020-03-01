@@ -4,25 +4,25 @@ import { connect } from 'react-redux';
 
 import { withStyles, createStyles, Theme, Button } from "@material-ui/core";
 
-import NavigationBar from "../components/NavigationBar";
+import NavigationBar from "../NavigationBar";
 import Typography from "@material-ui/core/Typography";
 import TextField from "@material-ui/core/TextField";
 
-import Translator from "../components/Translator";
+import Translator from "../utils/Translator";
 
-import TwoFactorAuthentication from "../components/profile/TwoFactorAuthentication";
-import ChangePassword from "../components/profile/ChangePassword";
-import GoogleIcon from "../components/icons/GoogleIcon";
+import TwoFactorAuthentication from "../profile/TwoFactorAuthentication";
+import ChangePassword from "../profile/ChangePassword";
+import GoogleIcon from "../icons/GoogleIcon";
 import TwitterIcon from '@material-ui/icons/Twitter';
 import SupervisorAccountIcon from '@material-ui/icons/SupervisorAccount';
 
 import Grid from '@material-ui/core/Grid';
 
-import AuthButton from "../components/AuthButton";
+import AuthButton from "../AuthButton";
 
 import { Link } from 'react-router-dom';
 
-import {setToken} from "../actions/api.action";
+import {setToken} from "../../actions/api.action";
 import Cookies from "universal-cookie";
 
 const cookies = new Cookies();

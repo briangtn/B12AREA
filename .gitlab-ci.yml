@@ -104,7 +104,7 @@ build-production-web-client:
       - master
   script:
     - docker login -u ${DOCKER_USER} -p ${DOCKER_PASSWORD}
-    - docker build --build-arg REACT_APP_API_URL="https://api.area.b12powered.com" -t ${DOCKER_REGISTRY_IMAGE_NAME_AREA_WEB_CLIENT}:${CI_COMMIT_SHORT_SHA} ./web
+    - docker build --build-arg REACT_APP_API_URL="https://api.area.b12powered.com" --build-arg REACT_APP_ARENA_URL="https://arena.area.b12powered.com" -t ${DOCKER_REGISTRY_IMAGE_NAME_AREA_WEB_CLIENT}:${CI_COMMIT_SHORT_SHA} ./web
     - docker tag ${DOCKER_REGISTRY_IMAGE_NAME_AREA_WEB_CLIENT}:${CI_COMMIT_SHORT_SHA} ${DOCKER_REGISTRY_IMAGE_NAME_AREA_WEB_CLIENT}:latest
     - docker push ${DOCKER_REGISTRY_IMAGE_NAME_AREA_WEB_CLIENT}:${CI_COMMIT_SHORT_SHA}
     - docker push ${DOCKER_REGISTRY_IMAGE_NAME_AREA_WEB_CLIENT}:latest
@@ -143,7 +143,7 @@ build-development-web-client:
       - develop
   script:
     - docker login -u ${DOCKER_USER} -p ${DOCKER_PASSWORD}
-    - docker build --build-arg REACT_APP_API_URL="https://dev.api.area.b12powered.com"  -t ${DEV_DOCKER_REGISTRY_IMAGE_NAME_AREA_WEB_CLIENT}:${CI_COMMIT_SHORT_SHA} ./web
+    - docker build --build-arg REACT_APP_API_URL="https://dev.api.area.b12powered.com" --build-arg REACT_APP_ARENA_URL="https://dev.arena.area.b12powered.com" -t ${DEV_DOCKER_REGISTRY_IMAGE_NAME_AREA_WEB_CLIENT}:${CI_COMMIT_SHORT_SHA} ./web
     - docker tag ${DEV_DOCKER_REGISTRY_IMAGE_NAME_AREA_WEB_CLIENT}:${CI_COMMIT_SHORT_SHA} ${DEV_DOCKER_REGISTRY_IMAGE_NAME_AREA_WEB_CLIENT}:latest
     - docker push ${DEV_DOCKER_REGISTRY_IMAGE_NAME_AREA_WEB_CLIENT}:${CI_COMMIT_SHORT_SHA}
     - docker push ${DEV_DOCKER_REGISTRY_IMAGE_NAME_AREA_WEB_CLIENT}:latest

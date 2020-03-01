@@ -2,12 +2,12 @@ import React, { Component } from 'react';
 
 import { connect } from 'react-redux';
 
-import NavigationBar from '../components/NavigationBar';
+import NavigationBar from '../NavigationBar';
 
 import Grid from "@material-ui/core/Grid";
 import Typography from "@material-ui/core/Typography";
 
-import Utilities from "../utils/Utilities";
+import Utilities from "../../utils/Utilities";
 
 interface Props {
     api_url: string,

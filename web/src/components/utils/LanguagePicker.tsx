@@ -4,7 +4,7 @@ import { connect } from "react-redux";
 
 import { withStyles, createStyles, Theme } from "@material-ui/core";
 
-import { switchLanguage } from "../actions/language.action";
+import { switchLanguage } from "../../actions/language.action";
 
 import MenuItem from '@material-ui/core/MenuItem';
 import FormControl from '@material-ui/core/FormControl';

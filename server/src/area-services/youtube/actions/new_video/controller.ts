@@ -1,5 +1,5 @@
 import {get, param, post, requestBody} from "@loopback/rest";
-import {ActionConfig, ActionFunction, OperationStatus} from '../../../../services-interfaces'
+import {ActionConfig, ActionFunction, extractActionReactionName, OperationStatus} from '../../../../services-interfaces'
 import config from './config.json';
 import {Context, inject} from "@loopback/context";
 import {
@@ -43,7 +43,7 @@ export default class ActionController {
             where: {
                 and: [
                     {
-                        serviceAction: `youtube.A.new_video`
+                        serviceAction: `youtube.A.${extractActionReactionName(__dirname)}`
                     },
                     {
                         "data.webHookUrl": `${YoutubeHelper.WEBHOOK_PREFIX}${webhookId}`
@@ -98,7 +98,7 @@ export default class ActionController {
     static async createAction(userId: string, actionConfig: Object, ctx: Context): Promise<OperationStatus> {
         const newVideoConfig: NewVideoConfig = actionConfig as NewVideoConfig;
 
-        return YoutubeHelper.createWebhook(this.getActionName(), newVideoConfig.channel, ctx).then((webhookUrl: string) => {
+        return YoutubeHelper.createWebhook(extractActionReactionName(__dirname), newVideoConfig.channel, ctx).then((webhookUrl: string) => {
             const data : NewVideoData = {
                 webHookUrl: webhookUrl
             };
@@ -136,11 +136,5 @@ export default class ActionController {
 
     static async getConfig(): Promise<ActionConfig> {
         return config as ActionConfig;
-    }
-
-    static getActionName(): string {
-        const folders = __dirname.split('/');
-
-        return folders[folders.length - 1];
     }
 }
