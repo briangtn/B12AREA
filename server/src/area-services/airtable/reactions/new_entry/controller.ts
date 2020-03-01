@@ -57,8 +57,6 @@ export default class ReactionController {
 
         if (newReactionOptions.data === "" || newReactionOptions.apiKey === "" || newReactionOptions.baseId === "" || newReactionOptions.tableId === "")
             return { success: false, error: 'Error in new options'};
-        if (oldReactionOptions.data === "" || oldReactionOptions.apiKey === "" || oldReactionOptions.baseId === "" || oldReactionOptions.tableId === "")
-            return { success: false, error: 'Error in old options'};
         return { success: true, options: newReactionOptions };
     }
 
