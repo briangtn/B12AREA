@@ -29,8 +29,8 @@ services:
       context: ./mobile
       dockerfile: Dockerfile
       args:
-        API_HOST: $API_HOST
-        HOST: $HOST
+        KOTLIN_API_HOST: $KOTLIN_API_HOST
+        KOTLIN_HOST: $KOTLIN_HOST
     volumes:
       - apk-vol:/data/apk
     env_file:
