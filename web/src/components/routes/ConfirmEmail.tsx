@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
-import NavigationBar from "../components/NavigationBar";
+import NavigationBar from "../NavigationBar";
 import Grid from "@material-ui/core/Grid";
-import Translator from "../components/Translator";
+import Translator from "../utils/Translator";
 import Typography from "@material-ui/core/Typography";
 
 interface Props {

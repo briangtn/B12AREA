@@ -70,10 +70,7 @@ class SearchActivity : AppCompatActivity() {
                                     if (!user.services.contains(service.name)) {
                                         haveService = true
                                         supportFragmentManager.beginTransaction()
-                                            .add(
-                                                R.id.search,
-                                                ServiceFragment.newInstance(service)
-                                            )
+                                            .add(R.id.list_layout, ServiceFragment.newInstance(service))
                                             .commit()
                                     }
                                 }

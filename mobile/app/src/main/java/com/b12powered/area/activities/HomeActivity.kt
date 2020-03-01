@@ -118,7 +118,7 @@ class HomeActivity : AppCompatActivity() {
                                     if (user.services.contains(service.name)) {
                                         supportFragmentManager.beginTransaction()
                                             .add(
-                                                R.id.home,
+                                                R.id.list_layout,
                                                 ServiceUserFragment.newInstance(serviceList, service)
                                             )
                                             .commit()

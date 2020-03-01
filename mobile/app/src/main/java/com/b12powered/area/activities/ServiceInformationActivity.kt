@@ -18,7 +18,8 @@ import kotlinx.android.synthetic.main.activity_service_information.*
  */
 class ServiceInformationActivity : AppCompatActivity() {
 
-    private var serviceName: String = ""
+    private lateinit var serviceName: String
+    private lateinit var displayName: String
     private var currentActionSelected: Pair<String, ActionDetails>? = null
     private var currentArea: Area? = null
     private var serviceList: ArrayList<Service> = ArrayList()
@@ -33,10 +34,11 @@ class ServiceInformationActivity : AppCompatActivity() {
         setContentView(R.layout.activity_service_information)
 
         serviceName = intent.getStringExtra("serviceName")!!
+        displayName = intent.getStringExtra("displayName")!!
 
         val etServiceName = findViewById<TextView>(R.id.service_name)
 
-        etServiceName.hint = serviceName
+        etServiceName.text = displayName
 
         getServiceInformation()
 
@@ -57,7 +59,7 @@ class ServiceInformationActivity : AppCompatActivity() {
                             areas.forEach { item ->
                                 if (item.actions != null) {
                                     if (item.actions.id == currentActionSelected?.second?.id) {
-                                        var area = Area(item.id, item.name, item.enabled, item.ownerId, item.data)
+                                        val area = Area(item.id, item.name, item.enabled, item.ownerId, item.data)
                                         currentArea = area
                                     }
                                 }
@@ -77,7 +79,7 @@ class ServiceInformationActivity : AppCompatActivity() {
         }
 
         supportFragmentManager.beginTransaction()
-            .add(R.id.create_action_list, ServiceActionInformationFragment.newInstance(serviceName))
+            .add(R.id.create_action_list, ServiceActionInformationFragment.newInstance(serviceName, displayName))
             .commit()
     }
 
@@ -128,7 +130,7 @@ class ServiceInformationActivity : AppCompatActivity() {
         isAction = false
         currentActionSelected = listActionDetails
         supportFragmentManager.beginTransaction()
-            .replace(R.id.create_action_list, ServiceReactionInformationFragment.newInstance(listActionDetails))
+            .replace(R.id.create_action_list, ServiceReactionInformationFragment.newInstance(listActionDetails, displayName))
             .commit()
     }
 
@@ -139,6 +141,7 @@ class ServiceInformationActivity : AppCompatActivity() {
         isAction = true
         intent = Intent(this, ServiceInformationActivity::class.java)
         intent.putExtra("serviceName", serviceName)
+        intent.putExtra("displayName", displayName)
         finish()
         startActivity(intent)
     }

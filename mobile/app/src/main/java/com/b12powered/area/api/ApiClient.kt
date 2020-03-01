@@ -2,6 +2,7 @@ package com.b12powered.area.api
 
 import android.content.Context
 import android.net.Uri
+import android.util.Log
 import androidx.core.net.toUri
 import com.android.volley.*
 import com.android.volley.toolbox.BasicNetwork
@@ -339,7 +340,7 @@ class ApiClient(private val context: Context) {
                 val areas = ArrayList<Areas>()
                 val array = JSONArray(response.json)
 
-                for (i in  0 until array.length() - 1) {
+                for (i in  0 until array.length()) {
                     areas.add(array.get(i).toString().toObject())
                 }
                 completion.invoke(areas, "success")
@@ -424,6 +425,26 @@ class ApiClient(private val context: Context) {
      */
     fun deleteReaction(areaId: String, reactionId: String, completion: (success: Boolean, message: String) -> Unit) {
         val route = ApiRoute.DeleteReaction(areaId, reactionId, context)
+        this.performRequest(route) { success, response ->
+            completion.invoke(success, response.message)
+        }
+    }
+
+    /**
+     * Build an enableArea request with [areaId] and perform it, then invoke [completion] with a boolean corresponding to the result of the call
+     */
+    fun enableArea(areaId: String, completion: (success: Boolean, message: String) -> Unit) {
+        val route = ApiRoute.EnableArea(areaId, context)
+        this.performRequest(route) { success, response ->
+            completion.invoke(success, response.message)
+        }
+    }
+
+    /**
+     * Build a disableArea request with [areaId] and perform it, then invoke [completion] with a boolean corresponding to the result of the call
+     */
+    fun disableArea(areaId: String, completion: (success: Boolean, message: String) -> Unit) {
+        val route = ApiRoute.DisableArea(areaId, context)
         this.performRequest(route) { success, response ->
             completion.invoke(success, response.message)
         }

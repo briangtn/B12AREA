@@ -3,7 +3,6 @@ package com.b12powered.area.activities
 import android.content.Intent
 import android.os.Bundle
 import android.widget.TextView
-import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import com.b12powered.area.*
@@ -20,6 +19,7 @@ import com.b12powered.area.fragments.AddAreaFragment
 class AreaCreationActivity : AppCompatActivity() {
 
     private lateinit var serviceList: ArrayList<Service>
+    private lateinit var currentService: Service
     private lateinit var service: Service
     private lateinit var currentArea: Area
 
@@ -41,12 +41,12 @@ class AreaCreationActivity : AppCompatActivity() {
             finish()
             startActivity(intent)
         }
-        service = jsonService!!.toObject()
+        currentService = jsonService!!.toObject()
         serviceList = jsonServiceList!!.map { service -> service.toObject<Service>() } as ArrayList<Service>
 
         val etServiceName = findViewById<TextView>(R.id.service_name)
 
-        etServiceName.text = service.displayName
+        etServiceName.text = currentService.displayName
 
 
         supportFragmentManager.beginTransaction()
@@ -55,9 +55,7 @@ class AreaCreationActivity : AppCompatActivity() {
 
         onBackPressedDispatcher.addCallback(object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
-                val intent = Intent(this@AreaCreationActivity, ServiceInformationActivity::class.java)
-                finish()
-                startActivity(intent)
+                finishArea()
             }
         })
         if (jsonArea !== null) {
@@ -80,14 +78,14 @@ class AreaCreationActivity : AppCompatActivity() {
                         .deleteArea(area.id) { _, _ -> }
                     CreateAreaFragment.newInstance()
                 }
-                is AreaCreationStatus.ActionSelected -> SelectAreaFragment.newInstance(service, area, AreaCreationStatus.AreaCreated)
+                is AreaCreationStatus.ActionSelected -> SelectAreaFragment.newInstance(currentService, area, AreaCreationStatus.AreaCreated)
                 is AreaCreationStatus.ActionAdded -> {
                     ApiClient(this)
                         .deleteAction(area.id) { _, _ -> }
-                    SelectAreaFragment.newInstance(service, area, AreaCreationStatus.AreaCreated)
+                    SelectAreaFragment.newInstance(currentService, area, AreaCreationStatus.AreaCreated)
                 }
-                is AreaCreationStatus.ReactionSelected -> SelectAreaFragment.newInstance(service, area, AreaCreationStatus.ActionAdded)
-                is AreaCreationStatus.AdditionalReactionSelected -> SelectAreaFragment.newInstance(service, area, AreaCreationStatus.AdditionalReactionAdded)
+                is AreaCreationStatus.ReactionSelected -> SelectAreaFragment.newInstance(currentService, area, AreaCreationStatus.ActionAdded)
+                is AreaCreationStatus.AdditionalReactionSelected -> SelectAreaFragment.newInstance(currentService, area, AreaCreationStatus.AdditionalReactionAdded)
                 else -> CreateAreaFragment.newInstance()
             })
             .commit()
@@ -107,12 +105,12 @@ class AreaCreationActivity : AppCompatActivity() {
                 AreaCreationStatus.AreaCreated,
                 AreaCreationStatus.ActionAdded,
                 AreaCreationStatus.ReactionAdded,
-                AreaCreationStatus.AdditionalReactionAdded -> SelectAreaFragment.newInstance(service, area, step)
+                AreaCreationStatus.AdditionalReactionAdded -> SelectAreaFragment.newInstance(currentService, area, step)
 
                 is
                 AreaCreationStatus.ActionSelected,
                 AreaCreationStatus.ReactionSelected,
-                AreaCreationStatus.AdditionalReactionSelected -> AddAreaFragment.newInstance(service, area, ar!!, step)
+                AreaCreationStatus.AdditionalReactionSelected -> AddAreaFragment.newInstance(currentService, area, ar!!, step)
             })
             .commit()
     }
@@ -121,7 +119,9 @@ class AreaCreationActivity : AppCompatActivity() {
      * End up the area creation and bring the user back to the HomePage
      */
     fun finishArea() {
-        val intent = Intent(this, HomeActivity::class.java)
+        val intent = Intent(this, ServiceInformationActivity::class.java)
+        intent.putExtra("serviceName", service.name)
+        intent.putExtra("displayName", service.displayName)
         finish()
         startActivity(intent)
     }
@@ -138,7 +138,8 @@ class AreaCreationActivity : AppCompatActivity() {
     /**
      * Set current service, used by children fragments
      */
-    fun setService(newService: Service) {
+    fun setCurrentService(newService: Service) {
         service = newService
+        currentService = newService
     }
 }

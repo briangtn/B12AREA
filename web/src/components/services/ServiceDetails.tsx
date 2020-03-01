@@ -5,7 +5,7 @@ import {createStyles, Theme, withStyles} from "@material-ui/core";
 import { connect } from 'react-redux';
 
 import NavigationBar from "../NavigationBar";
-import Translator from "../Translator";
+import Translator from "../utils/Translator";
 import Grid from '@material-ui/core/Grid';
 
 // Expansion Panel Utils
@@ -45,7 +45,7 @@ import HtmlTooltip from "./HtmlTooltip";
 import { setToken } from "../../actions/api.action";
 import Cookies from "universal-cookie";
 import ArrowBackIosIcon from "@material-ui/icons/ArrowBackIos";
-import Alert from "../Alert";
+import Alert from "../utils/Alert";
 import Snackbar from "@material-ui/core/Snackbar";
 
 const cookies = new Cookies();
@@ -366,6 +366,29 @@ class ServiceDetails extends Component<Props, State> {
         this.setState({  addAreaDialog: true });
     };
 
+    toggleEnableDisableArea = (e: any) => {
+        const { api_url, token } = this.props;
+        const { value, checked } = e.target;
+        const { areas } = this.state;
+
+        const headers = { 'Authorization': `Bearer ${token}` };
+        if (checked) {
+            fetch(`${api_url}/areas/enable/${areas[value].id}`, {
+                method: 'PATCH',
+                headers: headers
+            })
+                .then(res => res.json())
+        } else {
+            fetch(`${api_url}/areas/disable/${areas[value].id}`, {
+                method: 'PATCH',
+                headers: headers
+            })
+                .then(res => res.json())
+        }
+        areas[value].enabled = checked;
+        this.setState({ areas: areas });
+    };
+
     componentDidMount() {
         const { token, api_url } = this.props;
 
@@ -424,7 +447,6 @@ class ServiceDetails extends Component<Props, State> {
     render() {
         const { classes } = this.props;
         const { areas, info } = this.state;
-        const infoFromProps = this.props.location.state.info;
 
         return (
             <div>
@@ -461,9 +483,16 @@ class ServiceDetails extends Component<Props, State> {
                                 {
                                     (area.action) ?
                                         <div>
-                                            <Typography variant="h5" gutterBottom>
-                                                <b>Action</b>
-                                            </Typography>
+                                            <Grid container spacing={3}>
+                                                <Grid item xs={10}>
+                                                    <Typography variant="h5" gutterBottom>
+                                                        <b>Action</b>
+                                                    </Typography>
+                                                </Grid>
+                                                <Grid item xs={2}>
+                                                    <Switch checked={ area.enabled } onChange={this.toggleEnableDisableArea} value={index} />
+                                                </Grid>
+                                            </Grid>
                                             <Divider />
                                             <br />
                                             <Typography variant="h6" gutterBottom>
@@ -597,7 +626,7 @@ class ServiceDetails extends Component<Props, State> {
                 </Dialog>
                 <Dialog open={this.state.addAreaDialog} onClose={this.addAreaDialogClose} aria-labelledby="form-dialog-title">
                     <DialogContent>
-                        <AddAreaStepper history={this.props.history} serviceName={infoFromProps.name} actions={infoFromProps.actions} reactions={infoFromProps.reactions} closeFunction={this.addAreaDialogClose} needToRefresh={true} />
+                        <AddAreaStepper history={this.props.history} serviceName={info.name} actions={info.actions} reactions={info.reactions} closeFunction={this.addAreaDialogClose} needToRefresh={true} />
                     </DialogContent>
                 </Dialog>
             </div>

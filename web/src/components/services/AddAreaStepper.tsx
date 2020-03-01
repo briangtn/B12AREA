@@ -18,7 +18,7 @@ import TextField from "@material-ui/core/TextField";
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Switch from '@material-ui/core/Switch';
 import Divider from '@material-ui/core/Divider';
-import Alert from '../Alert';
+import Alert from '../utils/Alert';
 import HtmlTooltip from "./HtmlTooltip";
 
 import {IAction, IReaction, IPlaceHolder, IService} from "../../interfaces/IService.interface";

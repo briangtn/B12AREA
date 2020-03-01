@@ -6,6 +6,7 @@ import com.b12powered.area.R
 import com.b12powered.area.api.ApiClient
 import android.widget.Toast
 import android.content.Intent
+import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
@@ -156,6 +157,9 @@ class UserActivity : AppCompatActivity() {
      * Check change password parameters validity
      */
     private fun submitChangePassword() {
+        val inputMethodManager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        inputMethodManager.hideSoftInputFromWindow(currentFocus!!.windowToken, 0)
+
         val etNewPassword = findViewById<EditText>(R.id.user_new_password)
         val etConfirmNewPassword = findViewById<EditText>(R.id.user_new_password_confirm)
 
@@ -176,7 +180,14 @@ class UserActivity : AppCompatActivity() {
                 etConfirmNewPassword.error = getString(R.string.different_password)
             }
         }
-        if (newPassword.isNotEmpty() && newConfirmPassword.isNotEmpty() && newPassword.toString() == newConfirmPassword.toString()) {
+
+        val newPasswordValue = newPassword.toString()
+        val newConfirmPasswordValue = newConfirmPassword.toString()
+
+        newPassword.clear()
+        newConfirmPassword.clear()
+
+        if (newPasswordValue.isNotEmpty() && newConfirmPasswordValue.isNotEmpty() && newPasswordValue == newConfirmPasswordValue) {
             changePassword(newPassword.toString())
         }
     }
@@ -207,6 +218,11 @@ class UserActivity : AppCompatActivity() {
             .patchUser(newUser) { user, message ->
                 if (user != null) {
                     _user = user
+                    Toast.makeText(
+                        this,
+                        getString(R.string.success_new_password),
+                        Toast.LENGTH_SHORT
+                    ).show()
                 } else {
                     Toast.makeText(
                         this,

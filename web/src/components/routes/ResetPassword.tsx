@@ -4,21 +4,21 @@ import { connect } from "react-redux";
 
 import { withStyles, createStyles, Theme } from "@material-ui/core";
 
-import NavigationBar from "../components/NavigationBar";
+import NavigationBar from "../NavigationBar";
 
 import Grid from "@material-ui/core/Grid";
 import Typography from "@material-ui/core/Typography";
-import Translator from "../components/Translator";
+import Translator from "../utils/Translator";
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 
-import Alert from '../components/Alert';
+import Alert from '../utils/Alert';
 
 import Snackbar from "@material-ui/core/Snackbar";
 
-import { changeApiUrl } from "../actions/api.action";
+import { changeApiUrl } from "../../actions/api.action";
 
-import Utilities from '../utils/Utilities';
+import Utilities from '../../utils/Utilities';
 import Cookies from "universal-cookie";
 
 const cookies = new Cookies();

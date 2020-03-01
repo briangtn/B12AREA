@@ -1,167 +1,209 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".activities.UserActivity">
 
     <TextView
         android:id="@+id/parameter_account"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="10dp"
         android:layout_gravity="center_horizontal"
-        android:layout_marginTop="48dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:fontFamily="@font/roboto_bold"
+        android:text="@string/user_text"
+        android:textColor="@color/colorPrimary"
         android:textSize="35sp"
-        android:text="@string/user_text" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <View
         android:id="@+id/divider"
         android:layout_width="380dp"
         android:layout_height="1dp"
-        android:layout_marginTop="150dp"
         android:layout_gravity="center_horizontal"
-        android:background="@color/colorLightGrey"/>
+        android:layout_marginTop="16dp"
+        android:background="@color/colorLightGrey"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/parameter_account" />
 
     <TextView
         android:id="@+id/my_account"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="10dp"
-        android:layout_marginTop="155dp"
-        android:textStyle="bold"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:fontFamily="@font/roboto_bold"
+        android:text="@string/user_account"
+        android:textColor="@color/colorSecondary"
         android:textSize="30sp"
-        android:text="@string/user_account" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/divider" />
 
     <EditText
         android:id="@+id/email"
         android:layout_width="340dp"
         android:layout_height="44dp"
-        android:layout_marginStart="30dp"
-        android:layout_marginTop="210dp"
-        android:layout_marginEnd="99dp"
-        android:layout_marginBottom="500dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
         android:background="@drawable/edit_text_style"
         android:clickable="false"
         android:cursorVisible="false"
+        android:ems="10"
         android:focusable="false"
         android:focusableInTouchMode="false"
-        android:ems="10"
         android:fontFamily="@font/roboto_light"
         android:inputType="textEmailAddress"
-        android:textColor="@color/colorPrimary" />
+        android:padding="10dp"
+        android:textColor="@color/colorPrimary"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/my_account" />
 
     <TextView
         android:id="@+id/role_account"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="10dp"
         android:layout_gravity="center_horizontal"
-        android:layout_marginTop="260dp"
-        android:textSize="20sp" />
+        android:layout_marginTop="16dp"
+        android:textSize="20sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/email" />
 
     <View
         android:id="@+id/divider2"
         android:layout_width="380dp"
         android:layout_height="1dp"
-        android:layout_marginTop="295dp"
         android:layout_gravity="center_horizontal"
-        android:background="@color/colorLightGrey"/>
+        android:layout_marginTop="16dp"
+        android:background="@color/colorLightGrey"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/role_account" />
 
     <TextView
         android:id="@+id/change_password"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="10dp"
-        android:layout_marginTop="305dp"
-        android:textStyle="bold"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:fontFamily="@font/roboto_bold"
+        android:text="@string/user_change_password"
+        android:textColor="@color/colorSecondary"
         android:textSize="30sp"
-        android:text="@string/user_change_password" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/divider2" />
 
     <EditText
         android:id="@+id/user_new_password"
         android:layout_width="340dp"
         android:layout_height="44dp"
-        android:layout_marginStart="30dp"
-        android:layout_marginTop="360dp"
-        android:layout_marginEnd="99dp"
-        android:layout_marginBottom="500dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
         android:background="@drawable/edit_text_style"
         android:ems="10"
         android:fontFamily="@font/roboto_light"
         android:hint="@string/new_password"
         android:inputType="textPassword"
-        android:textColor="@color/colorPrimary" />
+        android:padding="10dp"
+        android:textColor="@color/colorPrimary"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/change_password" />
 
     <EditText
         android:id="@+id/user_new_password_confirm"
         android:layout_width="340dp"
         android:layout_height="44dp"
-        android:layout_marginStart="30dp"
-        android:layout_marginTop="405dp"
-        android:layout_marginEnd="99dp"
-        android:layout_marginBottom="500dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
         android:background="@drawable/edit_text_style"
         android:ems="10"
         android:fontFamily="@font/roboto_light"
         android:hint="@string/confirm_new_password"
         android:inputType="textPassword"
-        android:textColor="@color/colorPrimary" />
+        android:padding="10dp"
+        android:textColor="@color/colorPrimary"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/user_new_password" />
 
     <Button
         android:id="@+id/change_password_button"
         android:layout_width="250dp"
         android:layout_height="60dp"
-        android:layout_marginTop="465dp"
-        android:layout_marginHorizontal="20dp"
+        android:layout_marginTop="16dp"
         android:backgroundTint="@color/colorSecondary"
         android:fontFamily="@font/roboto_medium"
         android:text="@string/user_change_password"
-        android:textSize="16sp"/>
+        android:textSize="16sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.496"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/user_new_password_confirm" />
 
     <View
         android:id="@+id/divider3"
         android:layout_width="380dp"
         android:layout_height="1dp"
-        android:layout_marginTop="540dp"
         android:layout_gravity="center_horizontal"
-        android:background="@color/colorLightGrey"/>
+        android:layout_marginTop="16dp"
+        android:background="@color/colorLightGrey"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.483"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/change_password_button" />
 
     <TextView
         android:id="@+id/two_fa"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="10dp"
-        android:layout_marginTop="550dp"
-        android:textStyle="bold"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:fontFamily="@font/roboto_bold"
+        android:text="@string/double_authentication"
+        android:textColor="@color/colorSecondary"
         android:textSize="30sp"
-        android:text="@string/double_authentication" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/divider3" />
 
     <Button
         android:id="@+id/activate_two_fa_button"
         android:layout_width="300dp"
         android:layout_height="60dp"
-        android:layout_marginTop="590dp"
-        android:layout_marginHorizontal="20dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
         android:backgroundTint="@color/colorSecondary"
         android:fontFamily="@font/roboto_medium"
-        android:textSize="16sp" />
+        android:textSize="16sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/two_fa" />
 
     <TextView
         android:id="@+id/log_out"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="650dp"
         android:layout_gravity="center_horizontal"
-        android:fontFamily="@font/roboto_bold"
-        android:textSize="20dp"
+        android:layout_marginTop="16dp"
         android:clickable="true"
-        android:text="@string/log_out" />
+        android:fontFamily="@font/roboto_bold"
+        android:text="@string/log_out"
+        android:textColor="@color/colorPrimary"
+        android:textSize="20sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/activate_two_fa_button" />
 
     <fragment
         android:id="@+id/toolbar_fragment"
         class="com.b12powered.area.fragments.ToolbarFragment"
         android:layout_width="match_parent"
-        android:layout_height="50dp"/>
+        android:layout_height="70dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

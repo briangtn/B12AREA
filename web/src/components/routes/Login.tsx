@@ -5,18 +5,18 @@ import { connect } from 'react-redux';
 import { withStyles, createStyles, Theme } from "@material-ui/core";
 
 import { Link } from 'react-router-dom';
-import NavigationBar from "../components/NavigationBar";
-import OrDivider from "../components/OrDivider";
-import Translator from "../components/Translator";
+import NavigationBar from "../NavigationBar";
+import OrDivider from "../utils/OrDivider";
+import Translator from "../utils/Translator";
 
 import Typography from '@material-ui/core/Typography';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 
-import GoogleIcon from "../components/icons/GoogleIcon";
+import GoogleIcon from "../icons/GoogleIcon";
 import TwitterIcon from '@material-ui/icons/Twitter';
-import { setToken } from "../actions/api.action";
+import { setToken } from "../../actions/api.action";
 import MuiAlert from "@material-ui/lab/Alert/Alert";
 import Snackbar from "@material-ui/core/Snackbar";
 
@@ -25,7 +25,7 @@ import DialogContent from "@material-ui/core/DialogContent";
 import DialogActions from "@material-ui/core/DialogActions";
 import Dialog from "@material-ui/core/Dialog";
 
-import AuthButton from "../components/AuthButton";
+import AuthButton from "../AuthButton";
 
 const cookies = new Cookies();
 

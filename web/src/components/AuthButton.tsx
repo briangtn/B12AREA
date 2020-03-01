@@ -5,10 +5,10 @@ import { connect } from 'react-redux';
 import { withStyles, createStyles, Theme, Snackbar } from "@material-ui/core";
 
 import Button from '@material-ui/core/Button';
-import Translator from '../components/Translator';
+import Translator from './utils/Translator';
 import { setToken } from "../actions/api.action";
 
-import Alert from './Alert';
+import Alert from './utils/Alert';
 import Utilities from "../utils/Utilities";
 
 import Cookies from "universal-cookie";
