@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
+import com.b12powered.area.BuildConfig
 import com.b12powered.area.R
 import com.b12powered.area.api.ApiClient
 import kotlinx.android.synthetic.main.activity_register.*
@@ -59,7 +60,7 @@ class EmailValidationActivity : AppCompatActivity() {
         return if (sharedPreferences.contains(getString(R.string.api_url_key))) {
             sharedPreferences.getString(getString(R.string.api_url_key), null)!!
         } else {
-            System.getenv("API_HOST") ?: "https://dev.api.area.b12powered.com"
+            BuildConfig.API_HOST
         }
 
     }

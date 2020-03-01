@@ -14,12 +14,18 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-        manifestPlaceholders = [HOST: System.getenv("HOST") ?: "dev.area.b12powered.com"]
+        manifestPlaceholders = [HOST: System.getenv("KOTLIN_HOST")]
     }
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            buildConfigField "String", "API_HOST", "\"${System.getenv("KOTLIN_API_HOST")}\""
+            buildConfigField "String", "HOST", "\"${System.getenv("KOTLIN_HOST")}\""
+        }
+        debug {
+            buildConfigField "String", "API_HOST", "\"${System.getenv("KOTLIN_API_HOST")}\""
+            buildConfigField "String", "HOST", "\"${System.getenv("KOTLIN_HOST")}\""
         }
     }
 }

@@ -57,6 +57,8 @@ tests-mobile:
     - export ANDROID_HOME=/opt/android-sdk-linux
     - mkdir -p ${ANDROID_HOME} && cd ${ANDROID_HOME} && wget -q https://dl.google.com/android/repository/sdk-tools-linux-3859397.zip -O android_tools.zip && unzip android_tools.zip && rm android_tools.zip && cd -
     - export PATH=${PATH}:${ANDROID_HOME}/tools:${ANDROID_HOME}/tools/bin:${ANDROID_HOME}/platform-tools
+    - export KOTLIN_API_HOST=https://dev.api.area.b12powered.com
+    - export KOTLIN_HOST=dev.area.b12powered.com
     - yes | sdkmanager --licenses && echo willNotRun
     - cd mobile
     - ./gradlew test
@@ -72,7 +74,7 @@ tests-docker-compose:
     - pip install enum34==1.1.6 docker-compose
     - touch .env
     - echo -ne "AREA_JWT_SECRET_VALUE=verySecretEnv\n" >> .env
-    - echo -ne "DB_NAME=$DB_NAME\nDB_USER=$DB_USER\nDB_PASS=$DB_PASS\nDB_PORT=27017\n" >> .env
+    - echo -ne "DB_NAME=$DB_NAME\nDB_USER=$DB_USER\nDB_PASS=$DB_PASS\nDB_PORT=27017\nKOTLIN_API_HOST=https://dev.api.area.b12powered.com\nKOTLIN_HOST=dev.area.b12powered.com\n" >> .env
     - echo -ne "REDIS_PORT=6379\nREDIS_PASSWORD=$REDIS_PASSWORD\nBULL_QUEUE_NAME=$BULL_QUEUE_NAME\n" >> .env
     - cat .env
     - docker-compose build
@@ -117,7 +119,7 @@ build-production-apk-builder:
       - master
   script:
     - docker login -u ${DOCKER_USER} -p ${DOCKER_PASSWORD}
-    - docker build -t ${DOCKER_REGISTRY_IMAGE_NAME_AREA_APK_BUILDER}:${CI_COMMIT_SHORT_SHA} ./mobile
+    - docker build --build-arg KOTLIN_API_HOST="https://api.area.b12powered.com" --build-arg KOTLIN_HOST="area.b12powered.com" -t ${DOCKER_REGISTRY_IMAGE_NAME_AREA_APK_BUILDER}:${CI_COMMIT_SHORT_SHA} ./mobile
     - docker tag ${DOCKER_REGISTRY_IMAGE_NAME_AREA_APK_BUILDER}:${CI_COMMIT_SHORT_SHA} ${DOCKER_REGISTRY_IMAGE_NAME_AREA_APK_BUILDER}:latest
     - docker push ${DOCKER_REGISTRY_IMAGE_NAME_AREA_APK_BUILDER}:${CI_COMMIT_SHORT_SHA}
     - docker push ${DOCKER_REGISTRY_IMAGE_NAME_AREA_APK_BUILDER}:latest
@@ -155,7 +157,7 @@ build-development-apk-builder:
       - develop
   script:
     - docker login -u ${DOCKER_USER} -p ${DOCKER_PASSWORD}
-    - docker build -t ${DEV_DOCKER_REGISTRY_IMAGE_NAME_AREA_APK_BUILDER}:${CI_COMMIT_SHORT_SHA} ./mobile
+    - docker build --build-arg KOTLIN_API_HOST="https://dev.api.area.b12powered.com" --build-arg KOTLIN_HOST="dev.area.b12powered.com" -t ${DEV_DOCKER_REGISTRY_IMAGE_NAME_AREA_APK_BUILDER}:${CI_COMMIT_SHORT_SHA} ./mobile
     - docker tag ${DEV_DOCKER_REGISTRY_IMAGE_NAME_AREA_APK_BUILDER}:${CI_COMMIT_SHORT_SHA} ${DEV_DOCKER_REGISTRY_IMAGE_NAME_AREA_APK_BUILDER}:latest
     - docker push ${DEV_DOCKER_REGISTRY_IMAGE_NAME_AREA_APK_BUILDER}:${CI_COMMIT_SHORT_SHA}
     - docker push ${DEV_DOCKER_REGISTRY_IMAGE_NAME_AREA_APK_BUILDER}:latest

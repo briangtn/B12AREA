@@ -2,6 +2,7 @@ package com.b12powered.area.api
 
 import android.content.Context
 import com.android.volley.Request
+import com.b12powered.area.BuildConfig
 import com.b12powered.area.R
 import com.b12powered.area.User
 
@@ -248,7 +249,7 @@ sealed class ApiRoute(private var mainContext: Context) {
             return if (sharedPreferences.contains(mainContext.getString(R.string.api_url_key))) {
                     sharedPreferences.getString(mainContext.getString(R.string.api_url_key), null)!!
                 } else {
-                    System.getenv("API_HOST") ?: "https://dev.api.area.b12powered.com"
+                    BuildConfig.API_HOST
                 }
         }
 

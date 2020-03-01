@@ -23,7 +23,12 @@ services:
       - server
 
   client_mobile:
-    build: ./mobile
+    build:
+      context: ./mobile
+      dockerfile: Dockerfile
+      args:
+        KOTLIN_API_HOST: $KOTLIN_API_HOST
+        KOTLIN_HOST: $KOTLIN_HOST
     volumes:
       - apk-vol:/data/apk
     env_file:

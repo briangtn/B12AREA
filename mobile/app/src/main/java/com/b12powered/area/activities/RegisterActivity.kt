@@ -12,6 +12,7 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
+import com.b12powered.area.BuildConfig
 import com.b12powered.area.R
 import com.b12powered.area.api.ApiClient
 import com.b12powered.area.fragments.SettingsFragment
@@ -136,11 +137,11 @@ class RegisterActivity : AppCompatActivity() {
         val apiUrl = if (sharedPreferences.contains(getString(R.string.api_url_key))) {
             sharedPreferences.getString(getString(R.string.api_url_key), null)!!
         } else {
-            System.getenv("API_HOST") ?: "https://dev.api.area.b12powered.com"
+            BuildConfig.API_HOST
         }
 
         ApiClient(this)
-            .register(email, password, "https://" + (System.getenv("HOST") ?: "dev.area.b12powered.com") + "/email_validation?api_url=$apiUrl") { user, message ->
+            .register(email, password, "https://" + BuildConfig.HOST + "/email_validation?api_url=$apiUrl") { user, message ->
                 if (user != null) {
                     val intent = Intent(this, RegistrationValidationActivity::class.java)
                     finish()
