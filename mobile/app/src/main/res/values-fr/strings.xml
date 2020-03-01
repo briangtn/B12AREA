@@ -78,4 +78,6 @@
     <string name="already_visited">already_visited</string>
     <string name="home_title">Mes services</string>
     <string name="search_title">Découvrir</string>
+    <string name="area_enabled">Area activée</string>
+    <string name="area_disabled">Area désactivée</string>
 </resources>
