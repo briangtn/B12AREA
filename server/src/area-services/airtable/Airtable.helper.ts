@@ -52,7 +52,6 @@ export class AirtableHelper {
         const diff = diffChecker(oldRecords, newRecords);
 
         if (diff.length !== 0) {
-            console.log(diff);
             const fieldsPlaceholder = {
                 name: "Fields",
                 value: JSON.stringify(JSON.stringify(diff))
@@ -62,7 +61,6 @@ export class AirtableHelper {
                 ...this.createFieldsPlaceholders(diff, "Fields"),
                 AirtableHelper.createPlaceholderWithObject("Fields", diff)
             ];
-            console.debug("Placeholders", placeholders);
             await ActionFunction({
                 actionId: actionId,
                 placeholders: placeholders

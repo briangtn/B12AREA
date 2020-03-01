@@ -8,7 +8,7 @@ import {isDeepStrictEqual} from "util";
 export enum AIRTABLE_PREFIX_ENUM {
     UPDATED = "updated",
     CREATED = "created",
-    DELETED = "delete"
+    DELETED = "deleted"
 }
 
 export default class DetectChangesHelper {
@@ -96,6 +96,8 @@ export default class DetectChangesHelper {
     private static diffCheckerDeleted(oldEntries: Record[], newEntries: Record[]) : Record[] {
         const diff: Record[] = [];
 
+        if (oldEntries === undefined)
+            return [];
         for (const oldEntry of oldEntries) {
             const newVersion: Record | undefined = newEntries.find((value: Record) => {
                 return value.id === oldEntry.id;
