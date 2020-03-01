@@ -4,14 +4,14 @@ import { connect } from "react-redux";
 
 import { withStyles, createStyles, Theme } from "@material-ui/core";
 
-import NavigationBar from "../components/NavigationBar";
+import NavigationBar from "../NavigationBar";
 
 import Grid from "@material-ui/core/Grid";
 import Typography from "@material-ui/core/Typography";
-import Translator from "../components/Translator";
+import Translator from "../utils/Translator";
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
-import IError from "../interfaces/IError.interface";
+import IError from "../../interfaces/IError.interface";
 
 interface Props {
     history: {

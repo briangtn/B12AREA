@@ -428,4 +428,24 @@ class ApiClient(private val context: Context) {
             completion.invoke(success, response.message)
         }
     }
+
+    /**
+     * Build an enableArea request with [areaId] and perform it, then invoke [completion] with a boolean corresponding to the result of the call
+     */
+    fun enableArea(areaId: String, completion: (success: Boolean, message: String) -> Unit) {
+        val route = ApiRoute.EnableArea(areaId, context)
+        this.performRequest(route) { success, response ->
+            completion.invoke(success, response.message)
+        }
+    }
+
+    /**
+     * Build a disableArea request with [areaId] and perform it, then invoke [completion] with a boolean corresponding to the result of the call
+     */
+    fun disableArea(areaId: String, completion: (success: Boolean, message: String) -> Unit) {
+        val route = ApiRoute.DisableArea(areaId, context)
+        this.performRequest(route) { success, response ->
+            completion.invoke(success, response.message)
+        }
+    }
 }

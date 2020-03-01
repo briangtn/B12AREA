@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 
 import { connect } from 'react-redux';
-import {setAdminToken, setToken} from "../actions/api.action";
+import {setAdminToken, setToken} from "../../actions/api.action";
 import {createStyles, Theme, withStyles} from "@material-ui/core";
 import Cookies from "universal-cookie";
 import Typography from "@material-ui/core/Typography";

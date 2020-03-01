@@ -21,11 +21,11 @@ import HomeIcon from '@material-ui/icons/Home';
 import AccountCircleIcon from '@material-ui/icons/AccountCircle';
 import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 
-import Summary from "../../components/administration/Summary";
-import Users from "../../components/administration/Users";
-import Exit from "../../components/administration/Exit";
+import Summary from "../../administration/Summary";
+import Users from "../../administration/Users";
+import Exit from "../../administration/Exit";
 
-import { setToken } from "../../actions/api.action";
+import { setToken } from "../../../actions/api.action";
 import Cookies from "universal-cookie";
 
 const cookies = new Cookies();

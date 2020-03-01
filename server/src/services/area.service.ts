@@ -6,7 +6,8 @@ export interface ConfigSchemaElement {
     name: string,
     description: string,
     type: string,
-    required: boolean
+    required: boolean,
+    ignorePlaceholders?: boolean
 }
 
 @bind({tags: {namespace: "services", name: "area"}})
