@@ -47,10 +47,6 @@ class PasswordActivity : AppCompatActivity() {
 
         etPassword.setOnKeyListener(View.OnKeyListener { _, keyCode, event ->
             if (keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_UP) {
-                val inputMethodManager =
-                    getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-                inputMethodManager.hideSoftInputFromWindow(currentFocus!!.windowToken, 0)
-
                 submitValidationPassword(token)
                 return@OnKeyListener true
             }
@@ -89,6 +85,9 @@ class PasswordActivity : AppCompatActivity() {
      * Check password parameters validity. Call [changePassword] method if parameters are valid, reset input fields if they are not
      */
     private fun submitValidationPassword(token: String) {
+        val inputMethodManager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        inputMethodManager.hideSoftInputFromWindow(currentFocus!!.windowToken, 0)
+
         val etPassword = findViewById<EditText>(R.id.new_password)
         val etConfirmPassword = findViewById<EditText>(R.id.confirm_new_password)
 

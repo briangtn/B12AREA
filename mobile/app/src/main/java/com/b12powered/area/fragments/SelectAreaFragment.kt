@@ -114,7 +114,7 @@ class SelectAreaFragment(private val service: Service, private val area: Area, p
 
             if (step == AreaCreationStatus.ActionAdded) {
                 val serviceList = (activity as AreaCreationActivity).getServices()
-                (activity as AreaCreationActivity).setService(serviceList[serviceList.indexOfFirst { service ->
+                (activity as AreaCreationActivity).setCurrentService(serviceList[serviceList.indexOfFirst { service ->
                     service.displayName == arList[position].first
                 }])
             }

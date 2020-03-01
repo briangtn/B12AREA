@@ -45,10 +45,6 @@ class LoginActivity : AppCompatActivity() {
 
         etPassword.setOnKeyListener(View.OnKeyListener { _, keyCode, event ->
             if (keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_UP) {
-                val inputMethodManager =
-                    getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-                inputMethodManager.hideSoftInputFromWindow(currentFocus!!.windowToken, 0)
-
                 submitLogin()
                 return@OnKeyListener true
             }
@@ -65,6 +61,11 @@ class LoginActivity : AppCompatActivity() {
         }
 
         go_to_register_button.setOnClickListener {
+            val editor = sharedPreferences.edit()
+
+            editor.remove(getString(R.string.already_visited))
+            editor.apply()
+
             val intent = Intent(this, RegisterActivity::class.java)
             finish()
             startActivity(intent)
@@ -95,6 +96,9 @@ class LoginActivity : AppCompatActivity() {
      * Check login parameters validity. Call [login] method if parameters are valid, reset input fields if they are not
      */
     private fun submitLogin() {
+        val inputMethodManager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        inputMethodManager.hideSoftInputFromWindow(currentFocus!!.windowToken, 0)
+
         val etEmail = findViewById<EditText>(R.id.email)
         val etPassword = findViewById<EditText>(R.id.password)
 

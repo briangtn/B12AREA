@@ -11,8 +11,9 @@ import android.view.View
 import android.view.LayoutInflater
 import android.widget.ImageButton
 import android.content.Intent
+import android.graphics.PorterDuff
+import androidx.core.content.ContextCompat
 import kotlinx.android.synthetic.main.fragment_toolbar.*
-
 import com.b12powered.area.activities.HomeActivity
 import com.b12powered.area.activities.SearchActivity
 import com.b12powered.area.activities.UserActivity
@@ -58,14 +59,17 @@ class ToolbarFragment : Fragment() {
     private fun handlingClickEffect(searchBtnToolbar: ImageButton, userBtnToolbar: ImageButton, homeBtnToolbar: ImageButton) {
         when(currentActivity) {
             Activity.HOME -> {
+                homeBtnToolbar.setColorFilter(ContextCompat.getColor(context!!, R.color.colorSecondary), PorterDuff.Mode.SRC_IN)
                 buttonEffect(searchBtnToolbar)
                 buttonEffect(userBtnToolbar)
             }
             Activity.SEARCH -> {
+                searchBtnToolbar.setColorFilter(ContextCompat.getColor(context!!, R.color.colorSecondary), PorterDuff.Mode.SRC_IN)
                 buttonEffect(userBtnToolbar)
                 buttonEffect(homeBtnToolbar)
             }
             else -> {
+                userBtnToolbar.setColorFilter(ContextCompat.getColor(context!!, R.color.colorSecondary), PorterDuff.Mode.SRC_IN)
                 buttonEffect(searchBtnToolbar)
                 buttonEffect(homeBtnToolbar)
             }

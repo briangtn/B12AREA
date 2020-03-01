@@ -50,21 +50,6 @@ class CreateAreaFragment : Fragment() {
     }
 
     /**
-     * Override method onCreate
-     *
-     * Set a custom callback to the back button
-     */
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        requireActivity().onBackPressedDispatcher.addCallback(object : OnBackPressedCallback(true) {
-            override fun handleOnBackPressed() {
-                (activity!! as AreaCreationActivity).finishArea()
-            }
-        })
-    }
-
-    /**
      * Override method onViewCreated
      *
      * Set listeners to view's buttons and input fields
@@ -74,12 +59,8 @@ class CreateAreaFragment : Fragment() {
 
         val etCreateArea = view.findViewById<EditText>(R.id.area_name)
 
-        etCreateArea.setOnKeyListener(View.OnKeyListener { currentFocus, keyCode, event ->
+        etCreateArea.setOnKeyListener(View.OnKeyListener { _, keyCode, event ->
             if (keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_UP) {
-                val inputMethodManager =
-                    context!!.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-                inputMethodManager.hideSoftInputFromWindow(currentFocus.windowToken, 0)
-
                 submit()
                 return@OnKeyListener true
             }
@@ -96,6 +77,9 @@ class CreateAreaFragment : Fragment() {
      * Check if area's name is empty. Call [createArea] method if not, reset input field and set error if it is
      */
     private fun submit() {
+        val inputMethodManager = context!!.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        inputMethodManager.hideSoftInputFromWindow(activity!!.currentFocus!!.windowToken, 0)
+
         val etCreateArea = view!!.findViewById<EditText>(R.id.area_name)
         val cbAreaEnabled = view!!.findViewById<CheckBox>(R.id.checkBox)
 
