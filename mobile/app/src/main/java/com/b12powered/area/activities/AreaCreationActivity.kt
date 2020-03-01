@@ -120,8 +120,16 @@ class AreaCreationActivity : AppCompatActivity() {
      */
     fun finishArea() {
         val intent = Intent(this, ServiceInformationActivity::class.java)
-        intent.putExtra("serviceName", service.name)
-        intent.putExtra("displayName", service.displayName)
+        intent.putExtra("serviceName", if (::service.isInitialized) {
+            service.name
+        } else {
+            currentService.name
+        })
+        intent.putExtra("displayName", if (::service.isInitialized) {
+            service.displayName
+        } else {
+            currentService.displayName
+        })
         finish()
         startActivity(intent)
     }
