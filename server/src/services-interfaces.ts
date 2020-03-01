@@ -57,6 +57,14 @@ export async function ActionFunction(params: TriggerObject, ctx: Context) {
     await WorkerHelper.ActionFunction(params, ctx);
 }
 
+export function extractActionReactionName(folderPath: string) : string {
+    const folders = folderPath.split('/');
+
+    if (folders.length === 0)
+        return "";
+    return folders[folders.length - 1];
+}
+
 export function applyPlaceholders(element: string, placeholders: Array<{name: string, value: string}>): string {
     for (const placeholder of placeholders) {
         element = element.replace(`{${placeholder.name}}`, placeholder.value);

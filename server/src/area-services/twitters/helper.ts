@@ -9,6 +9,8 @@ import NewFollowerActionController from './actions/on_new_follower/controller';
 
 const CONSUMER_KEY = process.env.TWITTER_CONSUMER_KEY ? process.env.TWITTER_CONSUMER_KEY :  "";
 const CONSUMER_SECRET = process.env.TWITTER_CONSUMER_SECRET ? process.env.TWITTER_CONSUMER_SECRET :  "";
+const TOKEN = process.env.TWITTER_CONSUMER_SECRET ? process.env.TWITTER_TOKEN :  "";
+const TOKEN_SECRET = process.env.TWITTER_CONSUMER_SECRET ? process.env.TWITTER_TOKEN_SECRET :  "";
 const WEBHOOK_URL = process.env.API_URL + '/services/twitters/webhook';
 
 async function onTweet(twitterDatas: object, actionID: string, options: object, userID: string, event: EventSetting, ctx: Context) {
@@ -104,7 +106,10 @@ export class TwitterHelper {
                     // eslint-disable-next-line @typescript-eslint/camelcase
                     consumer_key: CONSUMER_KEY,
                     // eslint-disable-next-line @typescript-eslint/camelcase
-                    consumer_secret: CONSUMER_SECRET
+                    consumer_secret: CONSUMER_SECRET,
+                    token: TOKEN,
+                    // eslint-disable-next-line @typescript-eslint/camelcase
+                    token_secret: TOKEN_SECRET
                 },
                 headers: {
                     'Content-type': 'application/x-www-form-urlencoded'
@@ -151,7 +156,10 @@ export class TwitterHelper {
                     // eslint-disable-next-line @typescript-eslint/camelcase
                     consumer_key: CONSUMER_KEY,
                     // eslint-disable-next-line @typescript-eslint/camelcase
-                    consumer_secret: CONSUMER_SECRET
+                    consumer_secret: CONSUMER_SECRET,
+                    token: TOKEN,
+                    // eslint-disable-next-line @typescript-eslint/camelcase
+                    token_secret: TOKEN_SECRET
                 }
             }, (err, data, body) => {
                 if (err)

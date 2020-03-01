@@ -96,10 +96,13 @@ export class ActionRepository extends DefaultCrudRepository<Action,
         const actions = await this.getByWhereOrId(where, options);
         let result : OperationStatus = {success: true};
         for (const action of actions) {
+            if (data.serviceAction && data.serviceAction !== action.serviceAction)
+                throw new HttpErrors.BadRequest('Can\'t change the serviceAction of an action');
             let controller;
             try {
                 controller = await this.resolveActionController(action.serviceAction);
             } catch (e) {
+                // Dont put a NotFound error, the type of action is not found (not the entity)
                 throw new HttpErrors.BadRequest('Action not found');
             }
 
@@ -159,8 +162,7 @@ export class ActionRepository extends DefaultCrudRepository<Action,
             try {
                 result = await controller.deleteAction(action.id!, action.options, this.ctx);
             // eslint-disable-next-line no-empty
-            } catch (e) {
-            }
+            } catch (e) {}
             if (!result.success) {
                 throw new HttpErrors.BadRequest(result.error);
             }
@@ -205,6 +207,8 @@ export class ActionRepository extends DefaultCrudRepository<Action,
     create(entity: PartialAction | Action, options?: AnyObject): Promise<Action> {
         return this.beforeCreate(entity, options).then((operationStatus: OperationStatus) => {
             entity.options = operationStatus.options;
+            if (operationStatus.data)
+                entity.data = operationStatus.data;
             return super.create(entity, options);
         }).catch((err) => {
             throw err;

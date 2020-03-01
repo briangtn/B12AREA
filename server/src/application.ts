@@ -131,7 +131,10 @@ export class AreaApplication extends BootMixin(
                 dirs = [];
             for (const dirIndex in dirs) {
                 const dir = dirs[dirIndex];
-                import(baseDir + dir + '/controller').then(module => {
+                const controllerPath = baseDir + dir + '/controller';
+                if (!fs.existsSync(controllerPath + '.js'))
+                    continue;
+                import(controllerPath).then(module => {
                     @api({basePath: '/services/' + serviceName + '/actions/' + dir, paths: {}})
                     class AreaActions extends module.default {
 

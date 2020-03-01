@@ -20,13 +20,15 @@ import ListItemText from '@material-ui/core/ListItemText';
 import HomeIcon from '@material-ui/icons/Home';
 import AccountCircleIcon from '@material-ui/icons/AccountCircle';
 import ExitToAppIcon from '@material-ui/icons/ExitToApp';
+import SecurityIcon from '@material-ui/icons/Security';
 
-import Summary from "../../administration/Summary";
-import Users from "../../administration/Users";
-import Exit from "../../administration/Exit";
+import Summary from "../administration/Summary";
+import Users from "../administration/Users";
+import Exit from "../administration/Exit";
 
-import { setToken } from "../../../actions/api.action";
+import { setToken } from "../../actions/api.action";
 import Cookies from "universal-cookie";
+import Arena from "../administration/Arena";
 
 const cookies = new Cookies();
 
@@ -181,8 +183,11 @@ class AdministrationPanel extends Component<Props, State> {
         const routes: Route[] = [
             { name: 'Home', icon: <HomeIcon />, component: <Summary apiUrl={this.props.api_url} token={this.props.token} /> },
             { name: 'Users', icon: <AccountCircleIcon />, component: <Users apiUrl={this.props.api_url} history={this.props.history} token={this.props.token} /> },
-            { name: 'Exit', icon: <ExitToAppIcon />, component: <Exit history={this.props.history} />}
         ];
+
+        if (process.env.REACT_APP_ARENA_URL)
+            routes.push({ name: 'Arena', icon: <SecurityIcon />, component: <Arena /> });
+        routes.push({ name: 'Exit', icon: <ExitToAppIcon />, component: <Exit history={this.props.history} />});
 
         return (
             <div className={classes.root}>
@@ -222,10 +227,13 @@ class AdministrationPanel extends Component<Props, State> {
                     <Divider />
                     <List>
                         {routes.map((route, index) => (
-                            <ListItem button key={index} onClick={this.onClick.bind(this, index)}>
-                                <ListItemIcon>{route.icon}</ListItemIcon>
-                                <ListItemText primary={route.name} />
-                            </ListItem>
+                            <div>
+                                {index === routes.length - 1 ? <Divider /> : ''}
+                                <ListItem button key={index} onClick={this.onClick.bind(this, index)}>
+                                    <ListItemIcon>{route.icon}</ListItemIcon>
+                                    <ListItemText primary={route.name} />
+                                </ListItem>
+                            </div>
                         ))}
                     </List>
                 </Drawer>

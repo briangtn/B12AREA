@@ -49,6 +49,16 @@ class CreateAreaFragment : Fragment() {
         return inflater.inflate(R.layout.fragment_create_area, container, false)
     }
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        requireActivity().onBackPressedDispatcher.addCallback(object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                (activity!! as AreaCreationActivity).finishArea()
+            }
+        })
+    }
+
     /**
      * Override method onViewCreated
      *

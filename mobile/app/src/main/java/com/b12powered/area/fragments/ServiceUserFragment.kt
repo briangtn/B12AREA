@@ -23,6 +23,7 @@ import kotlinx.android.synthetic.main.fragment_service_user.*
 class ServiceUserFragment(private val service: Service) : Fragment() {
 
     companion object {
+
         /**
          * This method returna new instance of [ServiceUserFragment]
          *

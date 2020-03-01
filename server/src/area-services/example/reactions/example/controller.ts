@@ -18,21 +18,21 @@ export default class ReactionController {
 
     static async createReaction(userId: string, reactionConfig: Object, ctx: Context): Promise<OperationStatus> {
         // If successful
-        return { success: true, options: { thisShouldContains: "data to be stored" } };
+        return { success: true, options: reactionConfig };
         // If an error occurs
         // return { success: false, error: 'Error returned to front end', details: { backEndDebugDetails: "this is just an example details it is not required" } };
     }
 
     static async updateReaction(reactionId: string, oldReactionConfig: Object, newReactionConfig: Object, ctx: Context): Promise<OperationStatus> {
         // If successful
-        return { success: true, options: { thisShouldContains: "data to be stored" } };
+        return { success: true, options: newReactionConfig };
         // If an error occurs
         // return { success: false, error: 'Error returned to front end', details: { backEndDebugDetails: "this is just an example details it is not required" } };
     }
 
     static async deleteReaction(reactionId: string, reactionConfig: Object, ctx: Context): Promise<OperationStatus> {
         // If successful
-        return { success: true, options: { thisShouldContains: "data to be stored" } };
+        return { success: true, options: reactionConfig };
         // If an error occurs
         // return { success: false, error: 'Error returned to front end', details: { backEndDebugDetails: "this is just an example details it is not required" } };
     }
