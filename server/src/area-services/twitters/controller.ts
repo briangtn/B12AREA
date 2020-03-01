@@ -25,13 +25,10 @@ export default class TwitterServiceController {
     static async start(ctx: Context): Promise<void> {
 
         const currentWebhook = await TwitterHelper.getCurrentWebhook(ctx) as {id: string, url: string};
-        console.log("WHOOK", currentWebhook);
         if (currentWebhook && currentWebhook.url !== TwitterHelper.getWebhookUrl()) {
-            console.log("REFRESH", TwitterHelper.getWebhookUrl());
             await TwitterHelper.refreshWebhook(currentWebhook.id,  ctx);
         } else if (!currentWebhook) {
-            console.log("CREATE", TwitterHelper.getWebhookUrl());
-            console.log(await TwitterHelper.createWebhook(ctx));
+            await TwitterHelper.createWebhook(ctx);
         }
     }
 
@@ -126,7 +123,7 @@ export default class TwitterServiceController {
                                 accessTokenSecret: accessTokenSecret,
                                 twitterID: dataParsed.id_str
                             }, 'twitters');
-                            console.log(await TwitterHelper.subscribeWebhook(dataTyped.userID, this.ctx));
+                            await TwitterHelper.subscribeWebhook(dataTyped.userID, this.ctx);
                         } catch (e) {
                             const codeParam = await this.exchangeCodeGenerator.generate({
                                 error: 'Failed to store twitter token',

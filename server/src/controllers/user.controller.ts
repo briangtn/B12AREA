@@ -459,15 +459,12 @@ export class UserController {
     ) {
         const currentUser: User | undefined = await this.userRepository.findById(id);
 
-        console.log("Deleting...");
-
         if (!currentUser) {
             throw new HttpErrors.NotFound('User not found')
         }
         const services = currentUser.servicesList!;
 
         for (const service of services) {
-            console.log("Service delete");
             try {
                 const module = await import(`../area-services/${service}/controller`);
                 const controller = module.default;
