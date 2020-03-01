@@ -27,21 +27,21 @@ export default class ActionController {
 
     static async createAction(userId: string, actionConfig: Object, ctx: Context): Promise<OperationStatus> {
         // If successful
-        return { success: true, options: { thisShouldContains: "data to be stored" } };
+        return { success: true, options: actionConfig };
         // If an error occurs
         // return { success: false, error: 'Error returned to front end', details: { backEndDebugDetails: "this is just an example details it is not required" } };
     }
 
     static async updateAction(actionId: string, oldActionConfig: Object, newActionConfig: Object, ctx: Context): Promise<OperationStatus> {
         // If successful
-        return { success: true, options: { thisShouldContains: "data to be stored" } };
+        return { success: true, options: newActionConfig };
         // If an error occurs
         // return { success: false, error: 'Error returned to front end', details: { backEndDebugDetails: "this is just an example details it is not required" } };
     }
 
     static async deleteAction(actionId: string, actionConfig: Object, ctx: Context): Promise<OperationStatus> {
         // If successful
-        return { success: true, options: { thisShouldContains: "data to be stored" } };
+        return { success: true, options: actionConfig };
         // If an error occurs
         // return { success: false, error: 'Error returned to front end', details: { backEndDebugDetails: "this is just an example details it is not required" } };
     }

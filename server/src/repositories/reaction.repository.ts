@@ -74,6 +74,9 @@ export class ReactionRepository extends DefaultCrudRepository<Reaction,
         const reactions = await this.getByWhereOrId(where, options);
         let result : OperationStatus = {success: true};
         for (const reaction of reactions) {
+            if (data.serviceReaction && data.serviceReaction !== reaction.serviceReaction)
+                throw new HttpErrors.BadRequest('Can\'t change the serviceReaction of a reaction');
+
             let controller;
             try {
                 controller = await this.resolveReactionController(reaction.serviceReaction);
