@@ -51,6 +51,9 @@ class TokenRefresher extends Component<Props, State> {
     refreshToken = () => {
         const { token, api_url } = this.props;
 
+        if (cookies.get('token') !== token) {
+            this.props.setToken(cookies.get('token'));
+        }
         if (token === "undefined") {
             cookies.set('token', '');
             this.props.setToken('');
