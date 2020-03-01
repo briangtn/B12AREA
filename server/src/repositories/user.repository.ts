@@ -37,7 +37,8 @@ export class UserRepository extends DefaultCrudRepository<User,
     }
 
     async deleteById(id: typeof User.prototype.id, options?: AnyObject): Promise<void> {
-        await this.areas(id).delete();
+        const user = await this.findById(id);
+        await this.areas(user.email).delete();
         return super.deleteById(id, options);
     }
 
@@ -46,7 +47,7 @@ export class UserRepository extends DefaultCrudRepository<User,
             where: where
         }, options);
         for (const user of users) {
-            await this.areas(user.id).delete();
+            await this.areas(user.email).delete();
         }
         return super.deleteAll(where, options);
     }
