@@ -104,7 +104,6 @@ export default class ActionController {
         try {
             subscription = await OutlookHelper.registerNewMessageReceivedSubscription(`${API_URL}/services/outlook/actions/new_email/webhook`, tokens);
         } catch (e) {
-            console.log(e);
             return { success: false, error: 'Failed to create subscription', details: e };
         }
 
