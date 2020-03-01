@@ -15,7 +15,6 @@ export default class ReactionController {
             ...{entryToCreate: {}}
         };
 
-        console.log(dataReplaced);
         dataParsed.entryToCreate = JSON.parse(dataReplaced);
 
         new Airtable({apiKey: dataParsed.apiKey}).base(dataParsed.baseId)(dataParsed.tableId).create(dataParsed.entryToCreate)
