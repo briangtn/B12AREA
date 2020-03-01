@@ -7,9 +7,9 @@ ENV PATH ${PATH}:${ANDROID_HOME}/tools:${ANDROID_HOME}/tools/bin:${ANDROID_HOME}
 RUN yes | sdkmanager --licenses
 COPY . /mobile
 ARG KOTLIN_API_HOST="https://dev.api.area.b12powered.com"
-ENV API_HOST=$KOTLIN_API_HOST
+ENV KOTLIN_API_HOST=$KOTLIN_API_HOST
 ARG KOTLIN_HOST="dev.area.b12powered.com"
-ENV HOST=$KOTLIN_HOST
+ENV KOTLIN_HOST=$KOTLIN_HOST
 RUN ./gradlew build
 
 CMD cp /mobile/app/build/outputs/apk/debug/app-debug.apk /data/apk/area.apk

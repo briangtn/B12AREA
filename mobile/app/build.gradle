@@ -20,12 +20,12 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            buildConfigField "String", "API_HOST", "\"${System.getenv("API_HOST")}\""
-            buildConfigField "String", "HOST", "\"${System.getenv("HOST")}\""
+            buildConfigField "String", "API_HOST", "\"${System.getenv("KOTLIN_API_HOST")}\""
+            buildConfigField "String", "HOST", "\"${System.getenv("KOTLIN_HOST")}\""
         }
         debug {
-            buildConfigField "String", "API_HOST", "\"${System.getenv("API_HOST")}\""
-            buildConfigField "String", "HOST", "\"${System.getenv("HOST")}\""
+            buildConfigField "String", "API_HOST", "\"${System.getenv("KOTLIN_API_HOST")}\""
+            buildConfigField "String", "HOST", "\"${System.getenv("KOTLIN_HOST")}\""
         }
     }
 }
