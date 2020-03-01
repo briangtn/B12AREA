@@ -1,0 +1,6 @@
+{
+  "displayName": "Outlook",
+  "description": "An Outlook integration for the area project that enables you to detect incoming emails and send outgoing emails.",
+  "icon": "https://i.imgur.com/RNokpAH.png",
+  "color": "#0072c6"
+}

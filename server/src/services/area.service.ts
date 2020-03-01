@@ -45,7 +45,7 @@ export class AreaService {
     createWordsPlaceholders(data: string): Array<{name: string, value: string}> {
         const regex = '[^ \r\n\t]+';
         const ret: Array<{name: string, value: string}> = [];
-        const re = new RegExp(regex, 'g');
+        const re = new RegExp(regex, 'gs');
         const result = data.match(re);
         if (result === null) {
             return ret;
@@ -59,7 +59,7 @@ export class AreaService {
 
     createRegexPlaceholders(data: string, regex: string, placeholderName: string): Array<{name: string, value: string}> {
         const ret: Array<{name: string, value: string}> = [];
-        const re = new RegExp(regex, 'g');
+        const re = new RegExp(regex, 'gs');
         const result = data.match(re);
         const resGroups = re.exec(data);
         if (result === null || resGroups === null) {
