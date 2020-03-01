@@ -96,6 +96,8 @@ export default class WorkerHelper {
                 console.error(`[AreaResolveCheck]Failed to enqueue job for action id ${params.actionId}: could not resolve area linked to action`);
                 return;
             }
+            if (!area.enabled)
+                return;
             if (!area.reactions || area.reactions.length === 0) {
                 console.debug(`[AreaResolveCheck]Area id ${area.id!} has no reactions. Ignoring action ${params.actionId}`);
                 return;
