@@ -52,7 +52,6 @@ export default class ReactionController {
     }
 
     static async updateReaction(reactionId: string, oldReactionConfig: Object, newReactionConfig: Object, ctx: Context): Promise<OperationStatus> {
-        const oldReactionOptions : NewEntryConfig = oldReactionConfig as NewEntryConfig;
         const newReactionOptions : NewEntryConfig = newReactionConfig as NewEntryConfig;
 
         if (newReactionOptions.data === "" || newReactionOptions.apiKey === "" || newReactionOptions.baseId === "" || newReactionOptions.tableId === "")
