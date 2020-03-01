@@ -30,6 +30,9 @@ const styles = (theme: Theme) => createStyles({
     }
 });
 
+/**
+ * Card who displays the job delayed queue
+ */
 class DelayedQueue extends Component<Props, State> {
     render() {
         const { classes, info } = this.props;

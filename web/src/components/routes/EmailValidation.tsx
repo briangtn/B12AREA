@@ -42,6 +42,11 @@ class EmailValidation extends Component<Props, State> {
         displayedMessage: (this.props.token) ? 'emailValidatedButConnected' : 'emailValidated'
     };
 
+    /**
+     * Fetch the token and the API URL inside the query parameter of the URL
+     *  -   Set the new API URL for security
+     *  -   Save the token then make a PATCH request to validate the email
+     */
     componentDidMount(): void {
         if (this.props.token) {
             return;

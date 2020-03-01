@@ -17,6 +17,12 @@ interface State {
     jobs: { reactionQueue: IJob, pullingQueue: IJob, delayedQueue: IJob }
 }
 
+/**
+ * React components who includes the different cards inside
+ * the cards/ folder.
+ *
+ * Give information about jobs
+ */
 class Summary extends Component<Props, State> {
     private timerId: any = null;
 
@@ -28,6 +34,9 @@ class Summary extends Component<Props, State> {
         }
     };
 
+    /**
+     * Function where the jobs status are fetched
+     */
     fetchJobStatus = () => {
         const { apiUrl, token } = this.props;
 
@@ -40,6 +49,9 @@ class Summary extends Component<Props, State> {
             })
     };
 
+    /**
+     * Function where the interval is set
+     */
     componentDidMount(): void {
         this.fetchJobStatus();
         this.timerId = setInterval(() => {
@@ -47,6 +59,9 @@ class Summary extends Component<Props, State> {
         },  5000);
     }
 
+    /**
+     * Function where the interval is cleared
+     */
     componentWillUnmount(): void {
         clearInterval(this.timerId);
     }

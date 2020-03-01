@@ -8,6 +8,10 @@ interface Props {
 
 interface State {}
 
+/**
+ * React component that redirect to the:
+ *          - / route
+ */
 class Exit extends Component<Props, State> {
     componentDidMount() {
         this.props.history.push('/');

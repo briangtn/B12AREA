@@ -49,8 +49,11 @@ const styles = (theme: Theme) => createStyles({
 class ChangeApi extends Component<Props, State> {
     state: State = {
         apiUrl: ''
-    }
+    };
 
+    /**
+     * Function called when the user submit the new API URL
+     */
     onSubmit = () => {
         const { changeApiUrl } = this.props;
         const { apiUrl } = this.state;
@@ -61,15 +64,25 @@ class ChangeApi extends Component<Props, State> {
         this.props.reloadFunction(apiUrl);
     };
 
+    /**
+     * Function called when the user type inside the TextField
+     *
+     * @param e
+     */
     onChange: React.ChangeEventHandler<HTMLInputElement> = (e) => {
         const { id, value } = e.currentTarget;
 
         this.setState({[id]: value} as unknown as Pick<State, keyof State>);
     };
 
+    /**
+     * Function called when the user press the enter key
+     *
+     * @param e
+     */
     keyPress = (e: any) => {
         if (e.keyCode === 13) {
-            const toClick: HTMLElement | null = document.getElementById('changeApi')
+            const toClick: HTMLElement | null = document.getElementById('changeApi');
 
             if (toClick)
                 toClick.click();
