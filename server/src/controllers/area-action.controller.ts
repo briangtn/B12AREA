@@ -188,6 +188,8 @@ export class AreaActionController {
             throw new HttpErrors.BadRequest(result.error);
         }
         action.options = result.options;
+        if (result.data)
+            action.data = result.data;
 
         await this.areaRepository.action(id).patch(action, where);
 
