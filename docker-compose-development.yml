@@ -30,7 +30,7 @@ services:
       dockerfile: Dockerfile
       args:
         API_HOST: $API_HOST
-        HOST: $HOT
+        HOST: $HOST
     volumes:
       - apk-vol:/data/apk
     env_file:
