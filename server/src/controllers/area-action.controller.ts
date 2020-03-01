@@ -28,7 +28,6 @@ import {SecurityBindings, UserProfile} from "@loopback/security";
 import {NewActionInArea} from "./specs/area.specs";
 import {HttpErrors} from "@loopback/rest/dist";
 import {constants} from "http2";
-import {OperationStatus} from "../services-interfaces";
 
 @authenticate('jwt-all')
 @api({basePath: '/areas', paths: {}})
