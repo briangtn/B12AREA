@@ -8,7 +8,7 @@ RUN yes | sdkmanager --licenses
 COPY . /mobile
 ARG KOTLIN_API_HOST="https://dev.api.area.b12powered.com"
 ENV API_HOST=$KOTLIN_API_HOST
-ARG HOST="dev.area.b12powered.com"
+ARG KOTLIN_HOST="dev.area.b12powered.com"
 ENV HOST=$KOTLIN_HOST
 RUN ./gradlew build
 
