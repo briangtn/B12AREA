@@ -22,7 +22,7 @@ import CodeValidation from './components/routes/CodeValidation';
 
 // Administration Routes
 
-import AdministrationPanel from "./components/routes/administration/AdministrationPanel";
+import AdministrationPanel from "./components/routes/AdministrationPanel";
 
 // React Redux
 

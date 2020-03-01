@@ -136,7 +136,10 @@ class Services extends Component<Props, State> {
                 >
                     <Typography variant="h3" className={classes.section} gutterBottom><b><Translator sentence="myServices" /></b></Typography>
                     { services.map((elem: any) => (
-                        <Service key={services.indexOf(elem)} info={elem} history={this.props.history} />
+                        (elem.actions && elem.actions.length > 0) ?
+                            <Service key={services.indexOf(elem)} info={elem} history={this.props.history} />
+                            :
+                            <div key={services.indexOf(elem)} />
                     ))}
                 </div>
                 <AddServices availableServices={this.state.availableServices} />
