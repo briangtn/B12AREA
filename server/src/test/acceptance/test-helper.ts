@@ -99,7 +99,7 @@ export class TestHelper {
     }
 
     async createArea(user: User, areaName: string, enabled = true): Promise<Area> {
-        return this.userRepository.areas(user.id).create({
+        return this.userRepository.areas(user.email).create({
             name: areaName,
             enabled: enabled
         })
