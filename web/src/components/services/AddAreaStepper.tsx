@@ -180,12 +180,18 @@ class AddAreaStepper extends Component<Props, State> {
         const { name, type, required, description } = configSchema;
         let placeHolderString: any = null;
 
-        if (placeholder) {
+        if (placeholder && !configSchema.ignorePlaceholders) {
             placeHolderString = (
                 <React.Fragment>
                     <i><u>{`${name}:`}</u> {`${description}`}</i>
                     <p><b>Placeholders:</b></p>
                     {placeholder.map((holder: IPlaceHolder, index: number) => <p key={index}>{`{${holder.name}}: ${holder.description}`}</p>)}
+                </React.Fragment>
+            );
+        } else if (placeholder && configSchema.ignorePlaceholders) {
+            placeHolderString = (
+                <React.Fragment>
+                    <i><u>{`${name}:`}</u> {`${description}`}</i>
                 </React.Fragment>
             );
         }
@@ -510,7 +516,7 @@ class AddAreaStepper extends Component<Props, State> {
         const headers: any = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` };
 
         const reactionConfigSchema = this.formatConfigSchema(this.state.configSchemaReactions);
-        let returnArray = []
+        let returnArray = [];
         for (let reaction of reactionConfigSchema) {
             const reactionBody: { serviceReaction: string, options: any } = {
                 serviceReaction: `${reaction.serviceName}.R.${reaction.name}`,
