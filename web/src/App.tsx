@@ -143,7 +143,7 @@ class App extends Component<Props, State> {
 
                 for (let service of servicesArray) {
                     const tmpObject: {name: string, description: string, icon: string, color: string} = {
-                        name: service['name'],
+                        name: service['displayName'],
                         description: service['description'],
                         icon: service['icon'],
                         color: service['color']
