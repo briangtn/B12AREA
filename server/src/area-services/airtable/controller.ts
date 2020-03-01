@@ -32,7 +32,6 @@ export default class ServiceController {
 
     static async processPullingJob(data: PullingJobObject, ctx: Context): Promise<PullingData | null> {
         try {
-            console.log(data.name);
             for (const prefixEnum in AIRTABLE_PREFIX_ENUM) {
                 const stringPrefix = (prefixEnum as AIRTABLE_PREFIX_ENUM).toLowerCase();
                 if (data.name.startsWith(DetectChangesHelper.getPrefix(stringPrefix as AIRTABLE_PREFIX_ENUM))) {
