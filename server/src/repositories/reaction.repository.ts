@@ -6,7 +6,7 @@ import {
     OrClause,
     repository
 } from '@loopback/repository';
-import {Action, Area, Reaction, ReactionRelations, ReactionWithRelations} from '../models';
+import {Area, Reaction, ReactionRelations, ReactionWithRelations} from '../models';
 import {MongoDataSource} from '../datasources';
 import {Getter, inject} from '@loopback/core';
 import {AreaRepository} from "./area.repository";
