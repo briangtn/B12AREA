@@ -144,13 +144,10 @@ export default class TwitterServiceController {
 
     @post('/webhook')
     async whook(@requestBody({}) request: {for_user_id: string}) {
-        const users = await this.userRepository.find();
+        const users = await this.userRepository.find({where: {"services.twitters.twitterID": request.for_user_id}});
 
         for (const user of users) {
-            const twitterID = (user.services! as {twitters: {twitterID: string}}).twitters.twitterID;
-            if ('twitters' in user.services! && twitterID === request.for_user_id) {
-                await TwitterHelper.triggerActionEvent(request, user.email!, user.id!, this.ctx);
-            }
+            await TwitterHelper.triggerActionEvent(request, user.email!, user.id!, this.ctx);
         }
     }
 
