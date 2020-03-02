@@ -4,6 +4,7 @@ import {ActionConfig, ActionFunction, OperationStatus} from '../../../../service
 import {EventSetting, TwitterHelper} from '../../helper';
 import request from 'request';
 import {AreaService} from '../../../../services';
+import {UserRepository} from '../../../../repositories';
 
 interface NewDMTwitterData {
     type: string,
@@ -60,12 +61,28 @@ export default class NewDMActionController {
         const twitterDatas = baseData.direct_message_events;
         const oauthObject = await TwitterHelper.getOauthObject(userID, ctx);
         const areaService: AreaService = await ctx.get('services.area');
+        const userRepository: UserRepository = await ctx.get('repositories.UserRepository');
 
         if (!oauthObject)
             return;
         for (const event of twitterDatas) {
             if (event.type !== 'message_create')
                 continue;
+
+            const users = await userRepository.find({where: {
+                and: [
+                    {
+                        "services.twitters.twitterID": event.message_create.sender_id
+                    },
+                    {
+                        id: userID
+                    }
+                ]
+            }});
+
+            if (users && users.length > 0)
+                continue;
+
             request.get({
                 url: `https://api.twitter.com/1.1/users/lookup.json?user_id=${event.message_create.sender_id}`,
                 oauth: oauthObject
