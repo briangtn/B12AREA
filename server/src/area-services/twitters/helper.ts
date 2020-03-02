@@ -258,6 +258,8 @@ export class TwitterHelper {
         });
 
         for (const action of actions) {
+            if (!action.area)
+                continue;
             event.trigger(twitterData, action.id!, action.options!, userID, event, ctx).then().catch(e => {});
         }
     }
