@@ -1,6 +1,6 @@
 # AREA
-[![master status](http://git.b12powered.com/Eldriann/area/badges/master/pipeline.svg)](http://git.b12powered.com/Eldriann/area/commits/master)
-[![develop status](http://git.b12powered.com/Eldriann/area/badges/develop/pipeline.svg)](http://git.b12powered.com/Eldriann/area/commits/develop)
+[![master status](https://git.b12powered.com/Eldriann/area/badges/master/pipeline.svg)](http://git.b12powered.com/Eldriann/area/commits/master)
+[![develop status](https://git.b12powered.com/Eldriann/area/badges/develop/pipeline.svg)](http://git.b12powered.com/Eldriann/area/commits/develop)
 
 This is the repository of the area project.
 
