@@ -1,4 +1,5 @@
 const english = {
+    or: "Or",
     save: "Save",
     cancel: "Cancel",
     signin: "Sign in",
