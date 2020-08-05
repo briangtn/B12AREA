@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import Translator from "./Translator";
 
 import { withStyles, createStyles, Theme } from "@material-ui/core";
 
