@@ -80,7 +80,7 @@
     "googleapis": "^47.0.0",
     "jsonwebtoken": "^8.5.1",
     "loopback-connector-mongodb": "^4.2.0",
-    "nodemailer": "^6.4.2",
+    "nodemailer": "^6.4.16",
     "oauth": "^0.9.15",
     "sha256": "^0.2.0",
     "speakeasy": "^2.0.0",
