@@ -72,26 +72,26 @@ tests-mobile:
     - cd mobile
     - ./gradlew test
 
-tests-docker-compose:
-  stage: tests
-  image: "docker/compose"
-  only:
-    - merge_requests
-    - master
-    - develop
-  script:
-    - apk add --no-cache curl
-    - touch .env
-    - echo -ne "AREA_JWT_SECRET_VALUE=verySecretEnv\n" >> .env
-    - echo -ne "DB_NAME=$DB_NAME\nDB_USER=$DB_USER\nDB_PASS=$DB_PASS\nDB_PORT=27017\nKOTLIN_API_HOST=https://dev.api.area.b12powered.com\nKOTLIN_HOST=dev.area.b12powered.com\n" >> .env
-    - echo -ne "REDIS_PORT=6379\nREDIS_PASSWORD=$REDIS_PASSWORD\nBULL_QUEUE_NAME=$BULL_QUEUE_NAME\n" >> .env
-    - cat .env
-    - docker-compose build --parallel
-    - docker-compose up -d
-    - sleep 10
-    - "curl --GET --retry 10 --retry-delay 10 --write-out \"API code: %{http_code}\n\" 127.0.0.1:8080/readinessProbe"
-    - "curl --GET --retry 10 --retry-delay 10 --write-out \"WEB code: %{http_code}\n\" 127.0.0.1:8081/readinessProbe"
-    - "curl --GET --retry 10 --retry-delay 10 --write-out \"APK code: %{http_code}\nDownloaded %{size_download} bytes\n\" 127.0.0.1:8081/readinessProbe"
+#tests-docker-compose:
+#  stage: tests
+#  image: "docker/compose"
+#  only:
+#    - merge_requests
+#    - master
+#    - develop
+#  script:
+#    - apk add --no-cache curl
+#    - touch .env
+#    - echo -ne "AREA_JWT_SECRET_VALUE=verySecretEnv\n" >> .env
+#    - echo -ne "DB_NAME=$DB_NAME\nDB_USER=$DB_USER\nDB_PASS=$DB_PASS\nDB_PORT=27017\nKOTLIN_API_HOST=https://dev.api.area.b12powered.com\nKOTLIN_HOST=dev.area.b12powered.com\n" >> .env
+#    - echo -ne "REDIS_PORT=6379\nREDIS_PASSWORD=$REDIS_PASSWORD\nBULL_QUEUE_NAME=$BULL_QUEUE_NAME\n" >> .env
+#    - cat .env
+#    - docker-compose build --parallel
+#    - docker-compose up -d
+#    - sleep 10
+#    - "curl --GET --retry 10 --retry-delay 10 --write-out \"API code: %{http_code}\n\" 127.0.0.1:8080/readinessProbe"
+#    - "curl --GET --retry 10 --retry-delay 10 --write-out \"WEB code: %{http_code}\n\" 127.0.0.1:8081/readinessProbe"
+#    - "curl --GET --retry 10 --retry-delay 10 --write-out \"APK code: %{http_code}\nDownloaded %{size_download} bytes\n\" 127.0.0.1:8081/readinessProbe"
 
 # ------------------------------------------------------BUILD----------------------------------------------------------
 
