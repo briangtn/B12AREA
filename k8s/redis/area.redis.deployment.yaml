@@ -32,6 +32,9 @@ spec:
           volumeMounts:
             - mountPath: /data
               name: redisdata
+          resources:
+            limits:
+              memory: "1Gi"
       volumes:
         - name: redisdata
           persistentVolumeClaim:
