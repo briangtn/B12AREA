@@ -27,8 +27,6 @@ tests-api:
       - merge_requests
       - master
       - develop
-    changes:
-        - server
   script:
     - apk add --update nodejs npm
     - docker run --name db -p 27017:27017 -d mongo:4.0.14
@@ -44,8 +42,6 @@ tests-web:
       - merge_requests
       - master
       - develop
-    changes:
-        - web
   script:
     - apk add --update nodejs npm
     - cd web
@@ -60,8 +56,6 @@ tests-mobile:
       - merge_requests
       - master
       - develop
-    changes:
-        - mobile
   script:
     - export ANDROID_HOME=/opt/android-sdk-linux
     - mkdir -p ${ANDROID_HOME} && cd ${ANDROID_HOME} && wget -q https://dl.google.com/android/repository/sdk-tools-linux-3859397.zip -O android_tools.zip && unzip android_tools.zip && rm android_tools.zip && cd -
