@@ -71,6 +71,7 @@ tests-docker-compose:
     - master
     - develop
   script:
+    - apk add --no-cache curl
     - touch .env
     - echo -ne "AREA_JWT_SECRET_VALUE=verySecretEnv\n" >> .env
     - echo -ne "DB_NAME=$DB_NAME\nDB_USER=$DB_USER\nDB_PASS=$DB_PASS\nDB_PORT=27017\nKOTLIN_API_HOST=https://dev.api.area.b12powered.com\nKOTLIN_HOST=dev.area.b12powered.com\n" >> .env
