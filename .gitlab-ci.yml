@@ -89,9 +89,9 @@ tests-docker-compose:
     - docker-compose build --parallel
     - docker-compose up -d
     - sleep 10
-    - "curl --GET --verbose --output /dev/null --write-out \"API code: %{http_code}\n\" 127.0.0.1:8080/readinessProbe"
-    - "curl --GET --verbose --output /dev/null --write-out \"WEB code: %{http_code}\n\" 127.0.0.1:8081/readinessProbe"
-    - "curl --GET --verbose --output /dev/null --write-out \"APK code: %{http_code}\nDownloaded %{size_download} bytes\n\" 127.0.0.1:8081/readinessProbe"
+    - "curl --GET --retry 10 --retry-delay 10 --write-out \"API code: %{http_code}\n\" 127.0.0.1:8080/readinessProbe"
+    - "curl --GET --retry 10 --retry-delay 10 --write-out \"WEB code: %{http_code}\n\" 127.0.0.1:8081/readinessProbe"
+    - "curl --GET --retry 10 --retry-delay 10 --write-out \"APK code: %{http_code}\nDownloaded %{size_download} bytes\n\" 127.0.0.1:8081/readinessProbe"
 
 # ------------------------------------------------------BUILD----------------------------------------------------------
 
