@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import Translator from "./Translator";
 
 import { withStyles, createStyles, Theme } from "@material-ui/core";
 
@@ -45,7 +46,7 @@ class OrDivider extends Component<Props, State> {
 
         return (
             <div className={classes.dividerContainer}>
-                <hr className={classes.dividerLeft} /> or <hr className={classes.dividerRight} />
+                <hr className={classes.dividerLeft} /> <Translator sentence="or" /> <hr className={classes.dividerRight} />
             </div>
         );
     }

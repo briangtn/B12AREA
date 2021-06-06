@@ -76,7 +76,7 @@ const SPOTIFY_CLIENT_SECRET = process.env.SPOTIFY_CLIENT_SECRET ?? "";
 export class SpotifyHelper {
 
     static async refreshSpotifyUser(user: User, ctx: Context) {
-        return new Promise((resolveMain) => {
+        return new Promise<void>((resolveMain) => {
             new Promise<{spotify?: {token: string, expiresAt: number, refreshToken: string}}>((resolve, reject) => {
                 const services: {spotify?: {
                         token: string,

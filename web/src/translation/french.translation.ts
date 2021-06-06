@@ -1,4 +1,5 @@
 const french = {
+    or: "Ou",
     save: "Sauvegarder",
     cancel: "Annuler",
     signin: "Connexion",
