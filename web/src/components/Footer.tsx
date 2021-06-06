@@ -14,6 +14,7 @@ import Slide from '@material-ui/core/Slide';
 import ChangeApi from "./utils/ChangeApi";
 
 const Transition: any = React.forwardRef(function Transition(props, ref) {
+    //@ts-ignore
     return <Slide direction="up" ref={ref} {...props} />;
 });
 
