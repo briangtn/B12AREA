@@ -23,9 +23,12 @@ variables:
 tests-api:
   stage: tests
   only:
-    - merge_requests
-    - master
-    - develop
+    refs:
+      - merge_requests
+      - master
+      - develop
+    changes:
+        - server
   script:
     - apk add --update nodejs npm
     - docker run --name db -p 27017:27017 -d mongo:4.0.14
@@ -37,9 +40,12 @@ tests-api:
 tests-web:
   stage: tests
   only:
-    - merge_requests
-    - master
-    - develop
+    refs:
+      - merge_requests
+      - master
+      - develop
+    changes:
+        - web
   script:
     - apk add --update nodejs npm
     - cd web
@@ -50,9 +56,12 @@ tests-mobile:
   image: openjdk:8
   stage: tests
   only:
-    - merge_requests
-    - master
-    - develop
+    refs:
+      - merge_requests
+      - master
+      - develop
+    changes:
+        - mobile
   script:
     - export ANDROID_HOME=/opt/android-sdk-linux
     - mkdir -p ${ANDROID_HOME} && cd ${ANDROID_HOME} && wget -q https://dl.google.com/android/repository/sdk-tools-linux-3859397.zip -O android_tools.zip && unzip android_tools.zip && rm android_tools.zip && cd -
@@ -77,12 +86,12 @@ tests-docker-compose:
     - echo -ne "DB_NAME=$DB_NAME\nDB_USER=$DB_USER\nDB_PASS=$DB_PASS\nDB_PORT=27017\nKOTLIN_API_HOST=https://dev.api.area.b12powered.com\nKOTLIN_HOST=dev.area.b12powered.com\n" >> .env
     - echo -ne "REDIS_PORT=6379\nREDIS_PASSWORD=$REDIS_PASSWORD\nBULL_QUEUE_NAME=$BULL_QUEUE_NAME\n" >> .env
     - cat .env
-    - docker-compose build
+    - docker-compose build --parallel
     - docker-compose up -d
     - sleep 10
-    - "curl --GET --silent --output /dev/null --write-out \"API code: %{http_code}\n\" 127.0.0.1:8080/readinessProbe"
-    - "curl --GET --silent --output /dev/null --write-out \"WEB code: %{http_code}\n\" 127.0.0.1:8081/readinessProbe"
-    - "curl --GET --silent --output /dev/null --write-out \"APK code: %{http_code}\nDownloaded %{size_download} bytes\n\" 127.0.0.1:8081/readinessProbe"
+    - "curl --GET --verbose --output /dev/null --write-out \"API code: %{http_code}\n\" 127.0.0.1:8080/readinessProbe"
+    - "curl --GET --verbose --output /dev/null --write-out \"WEB code: %{http_code}\n\" 127.0.0.1:8081/readinessProbe"
+    - "curl --GET --verbose --output /dev/null --write-out \"APK code: %{http_code}\nDownloaded %{size_download} bytes\n\" 127.0.0.1:8081/readinessProbe"
 
 # ------------------------------------------------------BUILD----------------------------------------------------------
 
