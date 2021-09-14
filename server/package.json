@@ -72,7 +72,7 @@
     "airtable": "^0.8.1",
     "axios": "^0.19.2",
     "base-64": "^0.1.0",
-    "body-parser-xml": "^1.1.0",
+    "body-parser-xml": "^2.0.3",
     "bull": "^3.12.1",
     "dom-parser": "^0.1.6",
     "ejs": "^3.0.1",
